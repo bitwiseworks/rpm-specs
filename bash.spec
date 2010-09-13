@@ -55,12 +55,12 @@ incorporates useful features from the Korn shell (ksh) and the C shell
 
 %install
 rm -rf %{buildroot}
-mkdir -p %{buildroot}/bin
-mkdir -p %{buildroot}/usr/bin
+mkdir -p %{buildroot}/@unixroot/bin
+mkdir -p %{buildroot}%{_bindir}
 
-cp usr/bin/bash.exe %{buildroot}/usr/bin/bash.exe
-cp usr/bin/bash.exe %{buildroot}/bin/bash
-#cp usr/bin/bash.exe %{buildroot}/bin/sh
+cp usr/bin/bash.exe %{buildroot}/@unixroot/bin/bash
+cp usr/bin/bash.exe %{buildroot}%{_bindir}/bash.exe
+#cp usr/bin/bash.exe %{buildroot}%{_bindir}/sh
 
 #%post
 #if [ ! -f /etc/shells ]; then
@@ -98,7 +98,7 @@ rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root)
-/bin/bash
-/usr/bin/bash.exe
+/@unixroot/bin/bash
+%{_bindir}/bash.exe
 #/bin/bsh
 #%{_mandir}/man1/*
