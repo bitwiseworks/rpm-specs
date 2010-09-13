@@ -182,7 +182,7 @@ ln -s db-%{bdbver} db
 %endif
 
 # Official patches
-%patch001 -p1 -b .base
+%patch001 -p1 -b .base~
 
 %build
 %if %{without int_bdb}

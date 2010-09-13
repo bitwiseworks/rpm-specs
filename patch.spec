@@ -28,7 +28,7 @@ applications.
 %setup -q
 
 # Avoid os2 patch
-%patch1 -p1 -b .os2
+%patch1 -p1 -b .os2~
 
 %build
 CFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE"

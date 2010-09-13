@@ -44,7 +44,7 @@ Libraries for applications using the bzip2 compression format.
 # -D Do not delete the directory before unpacking.
 # -T Disable the automatic unpacking of the archives.
 %setup
-%patch0 -p1 -b .setmode
+%patch0 -p1 -b .setmode~
 
 %build
 

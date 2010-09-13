@@ -37,18 +37,18 @@ very commonly used data compression program.
 
 %prep
 %setup -q
-%patch0 -p1 -b .owl-tmp
-%patch1 -p1 -b .zforce
-%patch2 -p1 -b .stderr
-%patch3 -p1 -b .nixi
-%patch4 -p1 -b .rsync
-%patch5 -p1 -b .addsuffix
-%patch6 -p1 -b .4338
-%patch7 -p1 -b .4337
-%patch8 -p1 -b .4337l
-%patch11 -p1 -b .noemptysuffix
+%patch0 -p1 -b .owl-tmp~
+%patch1 -p1 -b .zforce~
+%patch2 -p1 -b .stderr~
+%patch3 -p1 -b .nixi~
+%patch4 -p1 -b .rsync~
+%patch5 -p1 -b .addsuffix~
+%patch6 -p1 -b .4338~
+%patch7 -p1 -b .4337~
+%patch8 -p1 -b .4337l~
+%patch11 -p1 -b .noemptysuffix~
 
-%patch100 -p1 -b .os2
+%patch100 -p1 -b .os2~
 
 %build
 export DEFS="NO_ASM"

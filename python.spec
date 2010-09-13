@@ -219,8 +219,8 @@ cp -a %{SOURCE5} .
 #
 # Apply patches:
 #
-%patch0 -p1 -b .os2
-%patch1 -p1 -b .os2knix
+%patch0 -p1 -b .os2~
+%patch1 -p1 -b .os2knix~
 
 mkdir Lib/plat-os2knix
 

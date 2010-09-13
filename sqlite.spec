@@ -92,7 +92,7 @@ This package contains the tcl modules for %{name}.
 
 %prep
 %setup -q -a1
-%patch1 -p1 -b .os2
+%patch1 -p1 -b .os2~
 
 %build
 #autoconf

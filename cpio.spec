@@ -32,7 +32,7 @@ Install cpio if you need a program to manage file archives.
 
 %prep
 %setup -q
-%patch1 -p1 -b .base
+%patch1 -p1 -b .base~
 #autoheader
 
 %build

@@ -68,7 +68,7 @@ at parse time or later once the document has been modified.
 
 %prep
 %setup -q
-%patch001 -p1 -b .base
+%patch001 -p1 -b .base~
 
 %build
 export CONFIG_SHELL="/bin/sh" ; \
