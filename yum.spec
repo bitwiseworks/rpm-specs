@@ -67,10 +67,12 @@ can notify you when they are available via email, syslog or dbus.
 %patch0 -p1
 
 %build
+export MAKESHELL="/bin/sh"
 make
 
 %install
 rm -rf $RPM_BUILD_ROOT
+export MAKESHELL="/bin/sh"
 make DESTDIR=$RPM_BUILD_ROOT install
 #install -m 644 %{SOURCE1} $RPM_BUILD_ROOT/%{_sysconfdir}/yum.conf
 #mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/yum/pluginconf.d $RPM_BUILD_ROOT/usr/lib/yum-plugins
@@ -88,10 +90,10 @@ rm -f $RPM_BUILD_ROOT/%{_mandir}/man*/yum-updatesd*
 rm -f $RPM_BUILD_ROOT/%{_datadir}/yum-cli/yumupd.py*
 
 # Ghost files:
-mkdir -p $RPM_BUILD_ROOT/var/lib/yum/history
-mkdir -p $RPM_BUILD_ROOT/var/lib/yum/plugins
-mkdir -p $RPM_BUILD_ROOT/var/lib/yum/yumdb
-touch $RPM_BUILD_ROOT/var/lib/yum/uuid
+mkdir -p $RPM_BUILD_ROOT/%{_var}/lib/yum/history
+mkdir -p $RPM_BUILD_ROOT/%{_var}/lib/yum/plugins
+mkdir -p $RPM_BUILD_ROOT/%{_var}/lib/yum/yumdb
+touch $RPM_BUILD_ROOT/%{_var}/lib/yum/uuid
 
 #%find_lang %name
 
@@ -116,16 +118,36 @@ rm -rf $RPM_BUILD_ROOT
 #%{python_sitelib}/yum
 #%{python_sitelib}/rpmUtils
 %{_libdir}/*
-%dir /var/cache/yum
-%dir /var/lib/yum
-%ghost /var/lib/yum/uuid
-%ghost /var/lib/yum/history
-%ghost /var/lib/yum/plugins
-%ghost /var/lib/yum/yumdb
+%dir %{_var}/cache/yum
+%dir %{_var}/lib/yum
+%ghost %{_var}/lib/yum/uuid
+%ghost %{_var}/lib/yum/history
+%ghost %{_var}/lib/yum/plugins
+%ghost %{_var}/lib/yum/yumdb
 %{_mandir}/man*/yum.*
 %{_mandir}/man*/yum-shell*
 # plugin stuff
 #%dir %{_sysconfdir}/yum/pluginconf.d 
 #%dir /usr/lib/yum-plugins
+%{_usr}/share/locale/ca/LC_MESSAGES/yum.mo
+%{_usr}/share/locale/cs/LC_MESSAGES/yum.mo
+%{_usr}/share/locale/da/LC_MESSAGES/yum.mo
+%{_usr}/share/locale/de/LC_MESSAGES/yum.mo
+%{_usr}/share/locale/es/LC_MESSAGES/yum.mo
+%{_usr}/share/locale/fi/LC_MESSAGES/yum.mo
+%{_usr}/share/locale/fr/LC_MESSAGES/yum.mo
+%{_usr}/share/locale/it/LC_MESSAGES/yum.mo
+%{_usr}/share/locale/ja/LC_MESSAGES/yum.mo
+%{_usr}/share/locale/ms/LC_MESSAGES/yum.mo
+%{_usr}/share/locale/nb/LC_MESSAGES/yum.mo
+%{_usr}/share/locale/pa/LC_MESSAGES/yum.mo
+%{_usr}/share/locale/pl/LC_MESSAGES/yum.mo
+%{_usr}/share/locale/pt/LC_MESSAGES/yum.mo
+%{_usr}/share/locale/pt_BR/LC_MESSAGES/yum.mo
+%{_usr}/share/locale/ru/LC_MESSAGES/yum.mo
+%{_usr}/share/locale/sr/LC_MESSAGES/yum.mo
+%{_usr}/share/locale/sr@latin/LC_MESSAGES/yum.mo
+%{_usr}/share/locale/sv/LC_MESSAGES/yum.mo
+%{_usr}/share/locale/zh_CN/LC_MESSAGES/yum.mo
 
 %changelog
