@@ -7,6 +7,7 @@ Release: 1
 License: GPLv2+
 Group: System Environment/Base
 Source0: http://yum.baseurl.org/download/3.2/%{name}-%{version}.tar.gz
+Source1: yum-os2.zip
 #Source1: yum.conf.fedora
 #Source2: yum-updatesd.conf.fedora
 
@@ -63,7 +64,7 @@ yum-updatesd provides a daemon which checks for available updates and
 can notify you when they are available via email, syslog or dbus. 
 
 %prep
-%setup -q
+%setup -q -a 1
 %patch0 -p1
 
 %build
@@ -95,6 +96,8 @@ mkdir -p $RPM_BUILD_ROOT/%{_var}/lib/yum/plugins
 mkdir -p $RPM_BUILD_ROOT/%{_var}/lib/yum/yumdb
 touch $RPM_BUILD_ROOT/%{_var}/lib/yum/uuid
 
+cp yum.exe $RPM_BUILD_ROOT/%{_bindir}
+
 #%find_lang %name
 
 %clean
@@ -115,6 +118,7 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_datadir}/yum-cli
 %{_datadir}/yum-cli/*
 %{_bindir}/yum
+%{_bindir}/yum.exe
 #%{python_sitelib}/yum
 #%{python_sitelib}/rpmUtils
 %{_libdir}/*
