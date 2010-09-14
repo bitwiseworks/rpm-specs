@@ -8,6 +8,7 @@ License: GPLv2+
 Group: Development/Tools
 URL: http://www.selenic.com/mercurial/
 Source0: http://www.selenic.com/mercurial/release/%{name}-%{version}.tar.gz
+Source1: mercurial-os2.zip
 
 Patch0: mercurial-%{version}-os2.diff
 
@@ -81,7 +82,7 @@ http://www.selenic.com/mercurial/wiki/index.cgi/UsingHgk for more
 documentation.
 
 %prep
-%setup -q
+%setup -q -a 1
 %patch0 -p1 -b .os2~
 
 %build
@@ -134,6 +135,9 @@ mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/mercurial/hgrc.d
 
 install contrib/mergetools.hgrc $RPM_BUILD_ROOT%{_sysconfdir}/mercurial/hgrc.d/mergetools.rc
 
+cp hg.exe $RPM_BUILD_ROOT/%{_bindir}
+
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -146,6 +150,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_sysconfdir}/bash_completion.d/mercurial.sh
 %{_datadir}/zsh/site-functions/_mercurial
 %{_bindir}/hg
+%{_bindir}/hg.exe
 %{_bindir}/hg-ssh
 %{_libdir}/*
 %dir %{_sysconfdir}/bash_completion.d/
