@@ -8,7 +8,7 @@ URL: http://pkgconfig.freedesktop.org
 Group: Development/Tools
 Source:  http://www.freedesktop.org/software/pkgconfig/releases/pkg-config-%{version}.tar.gz
 
-#BuildRequires: glib2-devel
+BuildRequires: glib2-devel
 BuildRequires: popt-devel
 
 # don't call out to glib-config, since our glib-config is a pkg-config wrapper
@@ -34,11 +34,13 @@ compiler and linker flags.
 
 %build
 CONFIG_SHELL="/bin/sh" ; export CONFIG_SHELL ; \
+LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp" ; export LDFLAGS ; \
+LIBS="-lurpo -lmmap -lpthread" ; export LIBS ; \
 %configure \
         --disable-shared \
         --with-installed-glib \
         --with-installed-popt \
-        --with-pc-path=%{_libdir}/pkgconfig:%{_datadir}/pkgconfig \
+        "--with-pc-path=%{_libdir}/pkgconfig;%{_datadir}/pkgconfig" \
         "--cache-file=%{_topdir}/cache/%{name}.cache"
 
 make %{?_smp_mflags}
