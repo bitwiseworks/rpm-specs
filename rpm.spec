@@ -63,7 +63,7 @@ Requires: rpm-libs
 #BuildRequires: gawk
 #BuildRequires: elfutils-devel%{_isa} >= 0.112
 #BuildRequires: elfutils-libelf-devel%{_isa}
-#BuildRequires: readline-devel%{_isa} zlib-devel%{_isa}
+BuildRequires: readline-devel%{_isa} zlib-devel%{_isa}
 #BuildRequires: nss-devel%{_isa}
 # The popt version here just documents an older known-good version
 BuildRequires: popt-devel%{_isa} >= 1.10.2

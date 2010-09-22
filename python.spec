@@ -76,6 +76,7 @@ Requires: %{name}-libs = %{version}-%{release}
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 #BuildRequires: readline-devel, openssl-devel, gmp-devel
+BuildRequires: readline-devel
 #BuildRequires: gdbm-devel, zlib-devel, expat-devel
 BuildRequires: ncurses-devel, zlib-devel
 #BuildRequires: libGL-devel tk tix gcc-c++ libX11-devel glibc-devel

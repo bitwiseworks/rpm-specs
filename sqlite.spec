@@ -24,8 +24,7 @@ Source1: http://www.sqlite.org/sqlite_docs_%{docver}.zip
 
 Patch1: sqlite-3.5.9-os2.diff
 
-#BuildRequires: ncurses-devel readline-devel glibc-devel
-BuildRequires: ncurses-devel
+BuildRequires: ncurses-devel readline-devel glibc-devel
 # libdl patch needs
 #BuildRequires: autoconf
 %if %{with tcl}
