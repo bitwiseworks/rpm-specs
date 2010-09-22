@@ -76,12 +76,12 @@ Requires: %{name}-libs = %{version}-%{release}
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 #BuildRequires: readline-devel, openssl-devel, gmp-devel
-#BuildRequires: ncurses-devel, gdbm-devel, zlib-devel, expat-devel
-BuildRequires: zlib-devel
+#BuildRequires: gdbm-devel, zlib-devel, expat-devel
+BuildRequires: ncurses-devel, zlib-devel
 #BuildRequires: libGL-devel tk tix gcc-c++ libX11-devel glibc-devel
-#BuildRequires: bzip2 tar findutils pkgconfig tcl-devel tk-devel
+#BuildRequires: tar findutils pkgconfig tcl-devel tk-devel
 BuildRequires: bzip2 pkgconfig
-#BuildRequires: tix-devel bzip2-devel sqlite-devel
+#BuildRequires: tix-devel
 BuildRequires: bzip2-devel sqlite-devel
 #BuildRequires: autoconf
 #BuildRequires: db4-devel >= 4.8
