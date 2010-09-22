@@ -412,7 +412,7 @@ rm -fr %{buildroot}
 #%{dynload_dir}/ossaudiodev.pyd
 %{dynload_dir}/parser.pyd
 %{dynload_dir}/pyexpat.pyd
-#%{dynload_dir}/readline.pyd
+%{dynload_dir}/readline.pyd
 %{dynload_dir}/resource.pyd
 %{dynload_dir}/select.pyd
 #%{dynload_dir}/spwd.pyd
