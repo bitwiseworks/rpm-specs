@@ -9,7 +9,7 @@
 %undefine with_static
 
 # upstream doesn't provide separate -docs sources for all minor releases
-%define basever 3.5.9
+%define basever 3.7.2
 %define docver %(echo %{basever}|sed -e "s/\\./_/g")
 
 Summary: Library that implements an embeddable SQL database engine
@@ -22,7 +22,7 @@ URL: http://www.sqlite.org/
 Source0: http://www.sqlite.org/sqlite-%{version}.tar.gz
 Source1: http://www.sqlite.org/sqlite_docs_%{docver}.zip
 
-Patch1: sqlite-3.5.9-os2.diff
+Patch1: sqlite-os2.diff
 
 BuildRequires: ncurses-devel readline-devel libc-devel
 # libdl patch needs
@@ -99,12 +99,12 @@ This package contains the tcl modules for %{name}.
 #export CFLAGS="$RPM_OPT_FLAGS -DSQLITE_ENABLE_COLUMN_METADATA=1 -DSQLITE_DISABLE_DIRSYNC=1 -DSQLITE_ENABLE_FTS3=3 -DSQLITE_ENABLE_RTREE=1 -Wall -fno-strict-aliasing"
 export CONFIG_SHELL="/bin/sh"
 export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+export LIBS="-lurpo -lmmap -lpthread"
 %configure %{!?with_tcl:--disable-tcl} \
     --enable-threadsafe \
     --enable-threads-override-locks \
     --enable-load-extension \
     %{?with_tcl:TCLLIBDIR=%{tcl_sitearch}/sqlite3} \
-    --disable-rpath \
     --disable-shared \
     "--cache-file=%{_topdir}/cache/%{name}.cache"
 
