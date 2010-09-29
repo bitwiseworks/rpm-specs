@@ -99,7 +99,7 @@ This package contains the tcl modules for %{name}.
 #export CFLAGS="$RPM_OPT_FLAGS -DSQLITE_ENABLE_COLUMN_METADATA=1 -DSQLITE_DISABLE_DIRSYNC=1 -DSQLITE_ENABLE_FTS3=3 -DSQLITE_ENABLE_RTREE=1 -Wall -fno-strict-aliasing"
 export CONFIG_SHELL="/bin/sh"
 export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
-export LIBS="-lurpo -lmmap -lpthread"
+export LIBS="-lurpo"
 %configure %{!?with_tcl:--disable-tcl} \
     --enable-threadsafe \
     --enable-threads-override-locks \

@@ -48,6 +48,7 @@ Requires: popt >= 1.10.2.1
 Requires: sqlite
 Requires: curl
 Requires: rpm-libs
+Requires: mmap pthread
 
 %if %{without int_bdb}
 #BuildRequires: db4-devel%{_isa}

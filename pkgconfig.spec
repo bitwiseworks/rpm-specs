@@ -35,7 +35,7 @@ compiler and linker flags.
 %build
 CONFIG_SHELL="/bin/sh" ; export CONFIG_SHELL ; \
 LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp" ; export LDFLAGS ; \
-LIBS="-lurpo -lmmap -lpthread" ; export LIBS ; \
+LIBS="-lurpo" ; export LIBS ; \
 %configure \
         --disable-shared \
         --with-installed-glib \

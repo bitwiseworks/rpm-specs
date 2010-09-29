@@ -73,6 +73,7 @@ Provides: python-uuid = 1.31
 
 # YD unix adds this automatically by parsing elf binaries
 Requires: %{name}-libs = %{version}-%{release}
+Requires: pthread
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 #BuildRequires: readline-devel, openssl-devel, gmp-devel
