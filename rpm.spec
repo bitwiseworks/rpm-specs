@@ -46,7 +46,7 @@ License: GPLv2+
 #%endif
 Requires: popt >= 1.10.2.1
 Requires: sqlite
-#Requires: curl
+Requires: curl
 Requires: rpm-libs
 
 %if %{without int_bdb}
