@@ -10,7 +10,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildRequires: python python-devel zlib-devel pkgconfig
 URL: http://xmlsoft.org/
 
-Patch1: %{name}-%{version}-os2.diff
+Patch1: libxml2-os2.diff
 
 %description
 This library allows to manipulate XML files. It includes support 
@@ -68,7 +68,7 @@ at parse time or later once the document has been modified.
 
 %prep
 %setup -q
-%patch001 -p1 -b .base~
+%patch001 -p1 -b .os2~
 
 %build
 export CONFIG_SHELL="/bin/sh" ; \
@@ -79,7 +79,8 @@ export LIBS="-lurpo -lmmap -lpthread" ; \
     --enable-shared --disable-static \
     "--cache-file=%{_topdir}/cache/%{name}.cache"
 
-make %{_smp_mflags}
+make %{?smp_mflags}
+
 gzip -9 ChangeLog
 
 %install
