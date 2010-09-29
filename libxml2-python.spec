@@ -15,6 +15,8 @@ Prefix: %{_prefix}
 Vendor: Daniel Veillard <veillard@redhat.com>
 Url: http://xmlsoft.org/python.html
 
+Patch1: libxml2-os2.diff
+
 BuildRequires:  libxml2-devel python-devel 
 #BuildRequires:  python-xml
 BuildRoot: %{_tmppath}/libxml2-%{version}-%{release}-buildroot
@@ -35,6 +37,7 @@ either at parse time or later once the document has been modified.
 
 %prep
 %setup -q -n libxml2-%{unmangled_version}
+%patch001 -p1 -b .os2~
 
 %build
 cd python
