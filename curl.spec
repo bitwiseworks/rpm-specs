@@ -21,6 +21,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 #BuildRequires: openldap-devel
 #BuildRequires: openssh-clients
 #BuildRequires: openssh-server
+BuildRequires: openssl-devel
 BuildRequires: pkgconfig
 #BuildRequires: stunnel
 
@@ -47,6 +48,7 @@ Group: Development/Libraries
 # libssh2 ABI has been changed since libssh2-1.0
 # this forces update of libssh2 before update of libcurl
 #Requires: libssh2 >= 1.2
+Requires: openssl
 
 %description -n libcurl
 This package provides a way for applications to use FTP, HTTP, Gopher and
@@ -97,7 +99,7 @@ export LIBS="-lurpo -lmmap -lpthread" ; \
     --with-gssapi=%{_prefix}/kerberos \
     --without-libidn \
     --without-libssh2 \
-    --without-ssl --without-nss \
+    --with-ssl --without-nss \
     --enable-shared --disable-static \
     "--cache-file=%{_topdir}/cache/%{name}.cache"
 
@@ -130,7 +132,7 @@ install -d $RPM_BUILD_ROOT/%{_datadir}/aclocal
 install -m 644 docs/libcurl/libcurl.m4 $RPM_BUILD_ROOT/%{_datadir}/aclocal
 
 install -m 755 lib/curl7.dll $RPM_BUILD_ROOT/%{_libdir}
-install -m 755 lib/.libs/curl.lib $RPM_BUILD_ROOT/%{_libdir}
+#install -m 755 lib/.libs/curl.lib $RPM_BUILD_ROOT/%{_libdir}
 install -m 755 lib/.libs/curl_s.a $RPM_BUILD_ROOT/%{_libdir}
 
 #%define _curlbuild_h curlbuild-32.h
@@ -165,7 +167,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/curl-config*
 %{_includedir}/curl
 %{_libdir}/*.a
-%{_libdir}/*.lib
+#%{_libdir}/*.lib
 %{_libdir}/pkgconfig/*.pc
 %{_mandir}/man1/curl-config.1*
 %{_mandir}/man3/*
