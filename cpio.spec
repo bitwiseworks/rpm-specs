@@ -9,7 +9,7 @@ URL: http://www.gnu.org/software/cpio/
 Source: ftp://ftp.gnu.org/gnu/cpio/cpio-%{version}.tar.gz
 Source1: cpio.1
 
-Patch1: cpio-2.11-base.diff
+Patch1: cpio-os2.diff
 
 #Requires(post): /sbin/install-info
 #Requires(preun): /sbin/install-info
@@ -32,12 +32,14 @@ Install cpio if you need a program to manage file archives.
 
 %prep
 %setup -q
-%patch1 -p1 -b .base~
+%patch1 -p1 -b .os2~
 #autoheader
 
 %build
 
-CFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -pedantic -fno-strict-aliasing -Wall" \
+export CFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -pedantic -fno-strict-aliasing -Wall" ; \
+export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp" ; \
+export LIBS="-lurpo" ; \
 %configure --with-rmt="%{_sysconfdir}/rmt" \
         "--cache-file=%{_topdir}/cache/%{name}.cache"
 
@@ -53,6 +55,8 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 rm -f $RPM_BUILD_ROOT%{_mandir}/man1/*.1*
 install -c -p -m 0644 %{SOURCE1} ${RPM_BUILD_ROOT}%{_mandir}/man1
 
+rm -f $RPM_BUILD_ROOT%{_usr}/lib/charset.alias
+
 #%find_lang %{name}
 
 %clean
@@ -63,17 +67,17 @@ rm -rf ${RPM_BUILD_ROOT}
 #make check
 
 
-%post
-if [ -f %{_infodir}/cpio.info.gz ]; then
-	/sbin/install-info %{_infodir}/cpio.info.gz %{_infodir}/dir || :
-fi
+#%post
+#if [ -f %{_infodir}/cpio.info.gz ]; then
+#	/sbin/install-info %{_infodir}/cpio.info.gz %{_infodir}/dir || :
+#fi
 
-%preun
-if [ $1 = 0 ]; then
-	if [ -f %{_infodir}/cpio.info.gz ]; then
-		/sbin/install-info --delete %{_infodir}/cpio.info.gz %{_infodir}/dir || :
-	fi
-fi
+#%preun
+#if [ $1 = 0 ]; then
+#	if [ -f %{_infodir}/cpio.info.gz ]; then
+#		/sbin/install-info --delete %{_infodir}/cpio.info.gz %{_infodir}/dir || :
+#	fi
+#fi
 
 %files
 # -f %{name}.lang
@@ -82,27 +86,6 @@ fi
 %{_bindir}/*
 %{_mandir}/man*/*
 %{_infodir}/*.info*
-%{_usr}/lib/charset.alias
-%{_usr}/share/locale/da/LC_MESSAGES/cpio.mo
-%{_usr}/share/locale/de/LC_MESSAGES/cpio.mo
-%{_usr}/share/locale/es/LC_MESSAGES/cpio.mo
-%{_usr}/share/locale/fi/LC_MESSAGES/cpio.mo
-%{_usr}/share/locale/fr/LC_MESSAGES/cpio.mo
-%{_usr}/share/locale/ga/LC_MESSAGES/cpio.mo
-%{_usr}/share/locale/gl/LC_MESSAGES/cpio.mo
-%{_usr}/share/locale/hu/LC_MESSAGES/cpio.mo
-%{_usr}/share/locale/id/LC_MESSAGES/cpio.mo
-%{_usr}/share/locale/ko/LC_MESSAGES/cpio.mo
-%{_usr}/share/locale/nl/LC_MESSAGES/cpio.mo
-%{_usr}/share/locale/pl/LC_MESSAGES/cpio.mo
-%{_usr}/share/locale/pt_BR/LC_MESSAGES/cpio.mo
-%{_usr}/share/locale/ro/LC_MESSAGES/cpio.mo
-%{_usr}/share/locale/ru/LC_MESSAGES/cpio.mo
-%{_usr}/share/locale/sv/LC_MESSAGES/cpio.mo
-%{_usr}/share/locale/tr/LC_MESSAGES/cpio.mo
-%{_usr}/share/locale/uk/LC_MESSAGES/cpio.mo
-%{_usr}/share/locale/vi/LC_MESSAGES/cpio.mo
-%{_usr}/share/locale/zh_CN/LC_MESSAGES/cpio.mo
-%{_usr}/share/locale/zh_TW/LC_MESSAGES/cpio.mo
+%{_usr}/share/locale/*
 
 %changelog
