@@ -33,7 +33,7 @@ Source1: db-%{bdbver}.tar.gz
 %endif
 Source2: %{name}-%{srcver}-os2-src2.tar
 
-Patch1: %{name}-%{srcver}-os2.diff
+Patch1: %{name}-os2.diff
 
 # Partially GPL/LGPL dual-licensed and some bits with BSD
 # SourceLicense: (GPLv2+ and LGPLv2+ with exceptions) and BSD 
