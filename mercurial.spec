@@ -10,7 +10,7 @@ URL: http://www.selenic.com/mercurial/
 Source0: http://www.selenic.com/mercurial/release/%{name}-%{version}.tar.gz
 Source1: mercurial-os2.zip
 
-Patch0: mercurial-%{version}-os2.diff
+Patch0: mercurial-os2.diff
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildRequires: python python-devel
@@ -145,7 +145,7 @@ rm -rf $RPM_BUILD_ROOT
 # -f %{name}-base.files
 %defattr(-,root,root,-)
 %doc CONTRIBUTORS COPYING doc/README doc/hg*.txt doc/hg*.html *.cgi contrib/*.fcgi
-#%doc %attr(644,root,root) %{_mandir}/man?/hg*.gz
+%doc %attr(644,root,root) %{_mandir}/man?/hg*
 %doc %attr(644,root,root) contrib/*.svg contrib/sample.hgrc
 %{_sysconfdir}/bash_completion.d/mercurial.sh
 %{_datadir}/zsh/site-functions/_mercurial
