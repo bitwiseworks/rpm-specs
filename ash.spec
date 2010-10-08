@@ -64,7 +64,7 @@ mkdir -p %{buildroot}%{_mandir}/man1
 cp bin/ash.exe %{buildroot}/@unixroot/bin/sh
 cp bin/ash.exe %{buildroot}%{_bindir}/sh.exe
 
-cp bin/ash.exe %{buildroot}/@unixroot/bin/env
+cp bin/env.exe %{buildroot}/@unixroot/bin/env
 cp bin/env.exe %{buildroot}%{_bindir}/env
 
 cp usr/man/man1/ash.1.gz %{buildroot}%{_mandir}/man1/ash.1.gz
