@@ -100,6 +100,7 @@ sslarch=OS2-KNIX
 # usable on all platforms.  The Configure script already knows to use -fPIC and
 # RPM_OPT_FLAGS, so we can skip specifiying them here.
 export MAKESHELL="/bin/sh" ; \
+export CFLAGS="${CFLAGS:-%optflags}" ; \
 ./Configure \
 	--prefix=%{_usr} --openssldir=%{_sysconfdir}/pki/tls ${sslflags} \
 	zlib enable-camellia enable-seed enable-tlsext enable-rfc3779 \
