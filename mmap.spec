@@ -6,6 +6,8 @@ License: unknown
 Group: Development/Libraries
 Source: mmap-%{version}-os2.zip
 
+Requires: libc >= 0.6.3
+
 %description
 A memory mapped files emulation library.
 

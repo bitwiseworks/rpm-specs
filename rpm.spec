@@ -50,6 +50,8 @@ Requires: curl
 Requires: rpm-libs
 Requires: mmap pthread
 
+Requires: libc >= 0.6.3
+
 %if %{without int_bdb}
 #BuildRequires: db4-devel%{_isa}
 %endif

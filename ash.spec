@@ -16,6 +16,8 @@ Source: ash.zip
 #Buildroot: %{_tmppath}/%{name}-%{version}-root
 #Conflicts: mkinitrd <= 1.7
 
+Requires: libc >= 0.6.3
+
 %description
 A shell is a basic system program that interprets keyboard and mouse
 commands. The ash shell is a clone of Berkeley's Bourne shell
