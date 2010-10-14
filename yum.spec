@@ -17,7 +17,7 @@ URL: http://yum.baseurl.org/
 
 BuildArch: noarch
 BuildRequires: python
-#BuildRequires: gettext
+BuildRequires: gettext
 #BuildRequires: intltool
 
 Conflicts: pirut < 1.1.4

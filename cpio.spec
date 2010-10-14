@@ -14,7 +14,9 @@ Patch1: cpio-os2.diff
 #Requires(post): /sbin/install-info
 #Requires(preun): /sbin/install-info
 #BuildRequires: texinfo, autoconf, gettext, rmt
+BuildRequires: gettext
 Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+Requires: gettext-libs
 
 %description
 GNU cpio copies files into or out of a cpio or tar archive.  Archives
@@ -39,7 +41,7 @@ Install cpio if you need a program to manage file archives.
 
 export CFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -pedantic -fno-strict-aliasing -Wall" ; \
 export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp" ; \
-export LIBS="-lurpo" ; \
+export LIBS="-lintl -lurpo" ; \
 %configure --with-rmt="%{_sysconfdir}/rmt" \
         "--cache-file=%{_topdir}/cache/%{name}.cache"
 

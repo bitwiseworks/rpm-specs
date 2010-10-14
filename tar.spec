@@ -12,9 +12,12 @@ Patch1: tar-os2.diff
 
 #Requires: info
 #BuildRequires: autoconf automake gzip texinfo gettext libacl-devel gawk rsh
+BuildRequires: gettext
 Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 #Requires(post): /sbin/install-info
 #Requires(preun): /sbin/install-info
+
+Requires: gettext-libs
 
 %description
 The GNU tar program saves many files together in one archive and can
@@ -36,7 +39,7 @@ the rmt package.
 
 %build
 export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
-export LIBS="-lurpo"
+export LIBS="-lintl -lurpo"
 %configure \
     "--cache-file=%{_topdir}/cache/%{name}.cache"
 make %{?_smp_mflags}

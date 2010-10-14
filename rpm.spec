@@ -71,7 +71,7 @@ BuildRequires: readline-devel%{_isa} zlib-devel%{_isa}
 # The popt version here just documents an older known-good version
 BuildRequires: popt-devel%{_isa} >= 1.10.2
 BuildRequires: file-devel%{_isa}
-#BuildRequires: gettext-devel%{_isa}
+BuildRequires: gettext-devel%{_isa}
 #BuildRequires: libselinux-devel%{_isa}
 BuildRequires: ncurses-devel%{_isa}
 BuildRequires: bzip2-devel%{_isa} >= 0.9.0c-2
