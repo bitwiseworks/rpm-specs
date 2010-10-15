@@ -135,7 +135,7 @@ rm -f $RPM_BUILD_ROOT/%{_libdir}/*.a
 %endif
 
 # YD install dll
-install -D -m0755 sqlite3.dll $RPM_BUILD_ROOT/%{_libdir}/
+install -D -m0755 sqlit3.dll $RPM_BUILD_ROOT/%{_libdir}/
 install -D -m0755 .libs/sqlite3.a $RPM_BUILD_ROOT/%{_libdir}/
 install -D -m0755 .libs/sqlite3_s.a $RPM_BUILD_ROOT/%{_libdir}/
 install -D -m0755 .libs/sqlite3.lib $RPM_BUILD_ROOT/%{_libdir}/
