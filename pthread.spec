@@ -1,6 +1,6 @@
 Summary: A posix pthread emulation for OS/2-eComStation
 Name: pthread
-Version: 20100929
+Version: 20101015
 Release: 1
 License: unknown
 Group: Development/Libraries
