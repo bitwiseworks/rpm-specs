@@ -200,7 +200,7 @@ ln -s db-%{bdbver} db
 # setup, use the old-fashioned way for now only defining minimal paths.
 CONFIG_SHELL="/bin/sh" ; export CONFIG_SHELL ; \
 LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp" ; export LDFLAGS ; \
-LIBS="-lurpo -lmmap -lpthread" ; export LIBS ; \
+LIBS="-lintl -lurpo -lmmap" ; export LIBS ; \
 %configure \
     --enable-shared --disable-static --without-lua \
     %{!?with_int_bdb: --with-external-db} \
@@ -240,6 +240,8 @@ install -D -m0755 rpmio/.libs/rpmio.dll $RPM_BUILD_ROOT/%{_libdir}/
 install -D -m0755 rpmio/.libs/rpmio.a $RPM_BUILD_ROOT/%{_libdir}/
 install -D -m0755 rpmio/.libs/rpmio_s.a $RPM_BUILD_ROOT/%{_libdir}/
 install -D -m0755 rpmio/.libs/rpmio.lib $RPM_BUILD_ROOT/%{_libdir}/
+
+rexx2exe scripts/wps-object.cmd $RPM_BUILD_ROOT/%{_libdir}/rpm/wps-object.exe
 
 # Save list of packages through cron
 mkdir -p ${RPM_BUILD_ROOT}%{_sysconfdir}/cron.daily
@@ -344,6 +346,7 @@ rm -rf $RPM_BUILD_ROOT
 %{rpmhome}/tgpg
 
 %{rpmhome}/platform
+%{rpmhome}/wps-object.exe
 
 %files libs
 %defattr(-,root,root)
