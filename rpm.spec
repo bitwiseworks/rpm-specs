@@ -49,6 +49,7 @@ Requires: sqlite
 Requires: curl
 Requires: rpm-libs
 Requires: mmap pthread
+Requires: cpio
 
 Requires: libc >= 0.6.3
 
