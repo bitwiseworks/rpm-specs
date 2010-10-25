@@ -138,6 +138,10 @@ export LIBS="-lurpo" ; \
     --enable-shared --disable-static \
     "--cache-file=%{_topdir}/cache/%{name}.cache"
 
+cd gettext-tools/gnulib-lib
+make fcntl.h
+cd ../..
+
 make %{?_smp_mflags} %{?with_java:GCJFLAGS="-findirect-dispatch"}
 
 
