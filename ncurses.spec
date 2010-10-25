@@ -112,12 +112,16 @@ which will use ncurses.
 
 #export PKG_CONFIG_LIBDIR=%{_libdir}/pkgconfig
 
+export AWK="awk" ; \
+export CC="gcc" ; \
+export CXX="gcc" ; \
 export AR_OPTS="cru" ; \
 export CONFIG_SHELL="/bin/sh" ; \
 export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp" ; \
 export LIBS="-lurpo -lmmap -lpthread" ; \
 %configure \
     --with-shared --without-normal --without-debug \
+    --without-cxx-binding \
     --without-ada --with-ospeed=unsigned \
     --enable-hard-tabs --enable-xmc-glitch --enable-colorfgbg \
     --with-default-terminfo-dir=/@unixroot/usr/share/terminfo \
