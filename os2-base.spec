@@ -7,6 +7,7 @@ Release: 0
 License: free
 
 Requires: cube
+Requires: os2-release
 
 Provides: ansicall
 Provides: asiacol

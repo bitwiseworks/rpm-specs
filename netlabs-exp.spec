@@ -15,7 +15,7 @@ Netlabs Experimental Repository.
 Use with caution, packages on this repository are not considered stable versions.
 
 %prep
-%setup 
+%setup -q -c
 
 %build
 # nothing to do
