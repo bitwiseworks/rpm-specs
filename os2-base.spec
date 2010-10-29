@@ -1,10 +1,12 @@
 
 Summary: OS/2 - eComStation 2.0 base
 Name: os2-base
-Version: 0
+Version: 0.0.0
 Release: 0
 
 License: free
+
+Requires: cube
 
 Provides: ansicall
 Provides: asiacol
@@ -254,3 +256,14 @@ Virtual package for OS/2 base shared libraries packaging.
 
 %files
 # no files in a virtual package
+
+%post
+%cube {ADDSTRING "%UNIXROOT%\usr\bin;" IN "SET PATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys c:\config.sys.yum > NUL
+%cube {ADDSTRING "%UNIXROOT%\usr\lib;" IN "LIBPATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
+%cube {DELLINE "SET UNIXROOT="} c:\config.sys > NUL
+%cube {ADDLINE "SET UNIXROOT=%UNIXROOT%"} c:\config.sys > NUL
+
+%postun
+%cube {DELSTRING "%UNIXROOT%\usr\bin;" IN "SET PATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
+%cube {DELSTRING "%UNIXROOT%\usr\lib;" IN "LIBPATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
+%cube {DELLINE "SET UNIXROOT="} c:\config.sys > NUL
