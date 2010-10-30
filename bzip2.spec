@@ -1,14 +1,13 @@
-%define library_version 1.0.5
 
 Summary: A file compression utility
 Name: bzip2
-Version: 1.0.5
+Version: 1.0.6
 Release: 1
 License: BSD
 Group: Applications/File
 URL: http://www.bzip.org/
 Source: http://www.bzip.org/%{version}/bzip2-%{version}.tar.gz
-Patch0: bzip2-1.0.5-setmode.diff
+Patch0: bzip2-os2.diff
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %description
@@ -44,12 +43,13 @@ Libraries for applications using the bzip2 compression format.
 # -D Do not delete the directory before unpacking.
 # -T Disable the automatic unpacking of the archives.
 %setup
-%patch0 -p1 -b .setmode~
+%patch0 -p1 -b .os2~
 
 %build
 
 make CC="%{__cc}" AR="%{__ar}" RANLIB="%{__ranlib}" \
 	CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64" \
+	LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zexe -Zargs-wild -Zargs-resp" \
 	%{?_smp_mflags} all
 
 %install
