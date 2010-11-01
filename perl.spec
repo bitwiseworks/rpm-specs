@@ -41,13 +41,13 @@ system to handle Perl scripts.
 
 %install
 rm -rf %{buildroot}
-mkdir -p %{buildroot}/usr/bin
+mkdir -p %{buildroot}%{_bindir}
 
-cp usr/bin/perl %{buildroot}/usr/bin
+cp usr/bin/perl %{buildroot}%{_bindir}
 
 %clean
 rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root)
-/usr/bin/perl
+%{_bindir}/perl
