@@ -2,7 +2,7 @@
 Summary: A file compression utility
 Name: bzip2
 Version: 1.0.6
-Release: 1
+Release: 2
 License: BSD
 Group: Applications/File
 URL: http://www.bzip.org/
@@ -47,9 +47,14 @@ Libraries for applications using the bzip2 compression format.
 
 %build
 
+make -f Makefile-libbz2_so CC="%{__cc}" AR="%{__ar}" RANLIB="%{__ranlib}" \
+	CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64 -fpic -fPIC" \
+	LDFLAGS="-g -Zbin-files -Zhigh-mem -Zdll -Zomf -Zargs-wild -Zargs-resp" \
+	%{?_smp_mflags} dll
+
 make CC="%{__cc}" AR="%{__ar}" RANLIB="%{__ranlib}" \
 	CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64" \
-	LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zexe -Zargs-wild -Zargs-resp" \
+	LDFLAGS="-g -Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp" \
 	%{?_smp_mflags} all
 
 %install
@@ -70,7 +75,7 @@ cp bzip2.exe $RPM_BUILD_ROOT%{_bindir}/bunzip2.exe
 cp bzip2.exe $RPM_BUILD_ROOT%{_bindir}/bzcat.exe
 ln -s bzdiff $RPM_BUILD_ROOT%{_bindir}/bzcmp
 ln -s bzmore $RPM_BUILD_ROOT%{_bindir}/bzless
-#ln -s libbz2.so.%{library_version} $RPM_BUILD_ROOT/%{_lib}/libbz2.so.1
+cp bz2.dll $RPM_BUILD_ROOT/%{_libdir}
 #ln -s ../../%{_lib}/libbz2.so.1 $RPM_BUILD_ROOT/%{_libdir}/libbz2.so
 ln -s bzip2.1 $RPM_BUILD_ROOT%{_mandir}/man1/bzip2recover.1
 ln -s bzip2.1 $RPM_BUILD_ROOT%{_mandir}/man1/bunzip2.1
@@ -95,12 +100,12 @@ rm -rf ${RPM_BUILD_ROOT}
 %files libs
 %defattr(-,root,root,-)
 %doc LICENSE
-#/%{_lib}/*so.*
+%{_libdir}/*.dll
 
 %files devel
 %defattr(-,root,root,-)
 %doc manual.html manual.pdf
 %{_includedir}/*
-/%{_libdir}/*.a
+%{_libdir}/*.a
 
 %changelog
