@@ -1,3 +1,5 @@
+#disable lxlite strip
+%define __os_install_post	%{nil}
 
 Summary: EMX runtime
 Name: emxrt
