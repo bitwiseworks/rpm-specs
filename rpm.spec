@@ -199,6 +199,7 @@ ln -s db-%{bdbver} db
 
 # Using configure macro has some unwanted side-effects on rpm platform
 # setup, use the old-fashioned way for now only defining minimal paths.
+RPM_MKDIR="/@unixroot/bin/mkdir.exe" ; export RPM_MKDIR ; \
 CONFIG_SHELL="/bin/sh" ; export CONFIG_SHELL ; \
 LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp" ; export LDFLAGS ; \
 LIBS="-lintl -lurpo -lmmap" ; export LIBS ; \
