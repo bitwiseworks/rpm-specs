@@ -11,7 +11,7 @@ Source1: yum-os2.zip
 #Source1: yum.conf.fedora
 #Source2: yum-updatesd.conf.fedora
 
-Patch0: yum-3.2.27-os2.diff
+Patch0: yum-os2.diff
 
 URL: http://yum.baseurl.org/
 
@@ -133,25 +133,6 @@ rm -rf $RPM_BUILD_ROOT
 # plugin stuff
 #%dir %{_sysconfdir}/yum/pluginconf.d 
 #%dir /usr/lib/yum-plugins
-%{_usr}/share/locale/ca/LC_MESSAGES/yum.mo
-%{_usr}/share/locale/cs/LC_MESSAGES/yum.mo
-%{_usr}/share/locale/da/LC_MESSAGES/yum.mo
-%{_usr}/share/locale/de/LC_MESSAGES/yum.mo
-%{_usr}/share/locale/es/LC_MESSAGES/yum.mo
-%{_usr}/share/locale/fi/LC_MESSAGES/yum.mo
-%{_usr}/share/locale/fr/LC_MESSAGES/yum.mo
-%{_usr}/share/locale/it/LC_MESSAGES/yum.mo
-%{_usr}/share/locale/ja/LC_MESSAGES/yum.mo
-%{_usr}/share/locale/ms/LC_MESSAGES/yum.mo
-%{_usr}/share/locale/nb/LC_MESSAGES/yum.mo
-%{_usr}/share/locale/pa/LC_MESSAGES/yum.mo
-%{_usr}/share/locale/pl/LC_MESSAGES/yum.mo
-%{_usr}/share/locale/pt/LC_MESSAGES/yum.mo
-%{_usr}/share/locale/pt_BR/LC_MESSAGES/yum.mo
-%{_usr}/share/locale/ru/LC_MESSAGES/yum.mo
-%{_usr}/share/locale/sr/LC_MESSAGES/yum.mo
-%{_usr}/share/locale/sr@latin/LC_MESSAGES/yum.mo
-%{_usr}/share/locale/sv/LC_MESSAGES/yum.mo
-%{_usr}/share/locale/zh_CN/LC_MESSAGES/yum.mo
+%{_usr}/share/locale/*
 
 %changelog
