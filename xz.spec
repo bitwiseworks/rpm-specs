@@ -20,7 +20,7 @@
 Name:           xz
 Summary:        A Program for Compressing Files
 Version:        4.999.9beta
-Release:        1
+Release:        2
 Group:          Productivity/Archiving/Compression
 License:        LGPLv2.1+
 Url:            http://tukaani.org/lzma/
@@ -28,7 +28,7 @@ Url:            http://tukaani.org/lzma/
 Source:         %{name}-4.999.9beta.tar.bz2
 #Source2:        baselibs.conf
 
-Patch0:         %{name}-4.999.9beta-os2.diff
+Patch0:         %{name}-os2.diff
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 BuildRequires:  pkgconfig
