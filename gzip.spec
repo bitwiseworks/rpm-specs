@@ -1,7 +1,7 @@
 Summary: The GNU data compression program
 Name: gzip
 Version: 1.4
-Release: 1%{?dist}
+Release: 2%{?dist}
 # info pages are under GFDL license
 License: GPLv3+ and GFDL
 Group: Applications/File
@@ -20,7 +20,7 @@ Patch8: gzip-1.3.5-cve-2006-4337_len.patch
 # http://thread.gmane.org/gmane.comp.gnu.gzip.bugs/378
 Patch11: gzip-1.3.13-noemptysuffix.patch
 
-Patch100: gzip-1.4-os2.diff
+Patch100: gzip-os2.diff
 
 URL: http://www.gzip.org/
 #Requires: /sbin/install-info
@@ -51,10 +51,13 @@ very commonly used data compression program.
 %patch100 -p1 -b .os2~
 
 %build
+export MAKESHELL=/bin/sh
+export CONFIG_SHELL=/bin/sh
 export DEFS="NO_ASM"
 export CPPFLAGS="-DHAVE_LSTAT"
 export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zexe -Zargs-wild -Zargs-resp"
 %configure \
+        --bindir=/@unixroot/bin \
         "--cache-file=%{_topdir}/cache/%{name}.cache"
 
 make %{?smp_mflags}
@@ -62,18 +65,18 @@ make %{?smp_mflags}
 
 %install
 rm -rf ${RPM_BUILD_ROOT}
-##makeinstall  bindir=${RPM_BUILD_ROOT}/usr/bin
-make DESTDIR=${RPM_BUILD_ROOT} install
+%makeinstall  bindir=${RPM_BUILD_ROOT}/@unixroot/bin
+mkdir -p ${RPM_BUILD_ROOT}%{_bindir}
+#make DESTDIR=${RPM_BUILD_ROOT} install
 
-rm ${RPM_BUILD_ROOT}%{_libdir}/charset.alias
+#rm ${RPM_BUILD_ROOT}%{_libdir}/charset.alias
 
-#mkdir -p ${RPM_BUILD_ROOT}%{_bindir}
-cp ${RPM_BUILD_ROOT}%{_bindir}/gzip.exe ${RPM_BUILD_ROOT}%{_bindir}/gunzip.exe
-cp ${RPM_BUILD_ROOT}%{_bindir}/gzip.exe ${RPM_BUILD_ROOT}%{_bindir}/uncomress.exe
+#cp ${RPM_BUILD_ROOT}%{_bindir}/gzip.exe ${RPM_BUILD_ROOT}%{_bindir}/gunzip.exe
+#cp ${RPM_BUILD_ROOT}%{_bindir}/gzip.exe ${RPM_BUILD_ROOT}%{_bindir}/uncomress.exe
 
-#for i in  zcmp zegrep zforce zless znew gzexe zdiff zfgrep zgrep zmore ; do
-#    mv ${RPM_BUILD_ROOT}/bin/$i ${RPM_BUILD_ROOT}%{_bindir}/$i
-#done
+for i in  zcmp zegrep zforce zless znew gzexe zdiff zfgrep zgrep zmore ; do
+    mv ${RPM_BUILD_ROOT}/@unixroot/bin/$i ${RPM_BUILD_ROOT}%{_bindir}/$i
+done
 
 gzip -9nf ${RPM_BUILD_ROOT}%{_infodir}/gzip.info*
 
@@ -100,7 +103,7 @@ rm -rf ${RPM_BUILD_ROOT}
 %files
 %defattr(-,root,root)
 %doc NEWS README AUTHORS ChangeLog THANKS TODO
-#/bin/*
+/@unixroot/bin/*
 %{_bindir}/*
 %{_mandir}/*/*
 %{_infodir}/gzip.info*

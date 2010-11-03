@@ -2,7 +2,7 @@ Summary: A GNU file archiving program
 Name: tar
 Epoch: 2
 Version: 1.23
-Release: 1
+Release: 2
 License: GPLv3+
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/tar/
@@ -38,17 +38,19 @@ the rmt package.
 #autoreconf
 
 %build
+export CONFIG_SHELL="/bin/sh"
 export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 export LIBS="-lintl -lurpo"
 %configure \
+    --bindir=/@unixroot/bin --libexecdir=/@unixroot/sbin \
     "--cache-file=%{_topdir}/cache/%{name}.cache"
 make %{?_smp_mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT
-make DESTDIR=$RPM_BUILD_ROOT install
+make DESTDIR=$RPM_BUILD_ROOT bindir=/@unixroot/bin libexecdir=/@unixroot/sbin install
 
-ln -s tar.exe ${RPM_BUILD_ROOT}%{_bindir}/gtar.exe
+ln -s tar.exe ${RPM_BUILD_ROOT}/@unixroot/bin/gtar.exe
 rm -f $RPM_BUILD_ROOT/%{_infodir}/dir
 mkdir -p ${RPM_BUILD_ROOT}%{_mandir}/man1
 #install -c -p -m 0644 %{SOURCE2} ${RPM_BUILD_ROOT}%{_mandir}/man1
@@ -83,7 +85,7 @@ rm -rf ${RPM_BUILD_ROOT}
 # -f %{name}.lang
 %defattr(-,root,root)
 %doc AUTHORS ChangeLog ChangeLog.1 COPYING NEWS README THANKS TODO
-%{_bindir}/*
+/@unixroot/bin/*
 %{_mandir}/man*/*
 %{_infodir}/tar.info*
 %{_usr}/share/locale/*

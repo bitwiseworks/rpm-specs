@@ -4,7 +4,7 @@
 Summary: The GNU Bourne Again shell
 Name: bash
 Version: %{baseversion}%{patchleveltag}
-Release: 1
+Release: 2
 License: BSD
 Group: System Environment/Shells
 Source: bash.zip
@@ -56,11 +56,9 @@ incorporates useful features from the Korn shell (ksh) and the C shell
 %install
 rm -rf %{buildroot}
 mkdir -p %{buildroot}/@unixroot/bin
-mkdir -p %{buildroot}%{_bindir}
 
-cp usr/bin/bash.exe %{buildroot}/@unixroot/bin/bash
-cp usr/bin/bash.exe %{buildroot}%{_bindir}/bash.exe
-#cp usr/bin/bash.exe %{buildroot}%{_bindir}/sh
+cp usr/bin/bash.exe %{buildroot}/@unixroot/bin/bash.exe
+ln -s bash.exe %{buildroot}/@unixroot/bin/bash
 
 #%post
 #if [ ! -f /etc/shells ]; then
@@ -99,6 +97,6 @@ rm -rf %{buildroot}
 %files
 %defattr(-,root,root)
 /@unixroot/bin/bash
-%{_bindir}/bash.exe
+/@unixroot/bin/bash.exe
 #/bin/bsh
 #%{_mandir}/man1/*

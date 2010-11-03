@@ -259,12 +259,12 @@ Virtual package for OS/2 base shared libraries packaging.
 # no files in a virtual package
 
 %post
-%cube {ADDSTRING "%UNIXROOT%\usr\bin;" IN "SET PATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys c:\config.sys.yum > NUL
+%cube {ADDSTRING "%UNIXROOT%\usr\sbin;%UNIXROOT%\usr\bin;%UNIXROOT%\sbin;%UNIXROOT%\bin;" IN "SET PATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys c:\config.sys.yum > NUL
 %cube {ADDSTRING "%UNIXROOT%\usr\lib;" IN "LIBPATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
 %cube {DELLINE "SET UNIXROOT="} c:\config.sys > NUL
 %cube {ADDLINE "SET UNIXROOT=%UNIXROOT%"} c:\config.sys > NUL
 
 %postun
-%cube {DELSTRING "%UNIXROOT%\usr\bin;" IN "SET PATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
+%cube {DELSTRING "%UNIXROOT%\usr\sbin;%UNIXROOT%\usr\bin;%UNIXROOT%\sbin;%UNIXROOT%\bin;" IN "SET PATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
 %cube {DELSTRING "%UNIXROOT%\usr\lib;" IN "LIBPATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
 %cube {DELLINE "SET UNIXROOT="} c:\config.sys > NUL
