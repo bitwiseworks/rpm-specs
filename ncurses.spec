@@ -155,7 +155,7 @@ make DESTDIR=$RPM_BUILD_ROOT install
 
 mv "$RPM_BUILD_ROOT%{_bindir}/*.dll" $RPM_BUILD_ROOT/%{_libdir}
 
-mkdir -p $RPM_BUILD_ROOT%{rootdatadir}/terminfo
+#mkdir -p $RPM_BUILD_ROOT%{rootdatadir}/terminfo
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/terminfo
 
 # move few basic terminfo entries to /lib
@@ -247,7 +247,7 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/terminfo
 # -f terms.base
 %defattr(-,root,root)
 %dir %{_sysconfdir}/terminfo
-%dir %{rootdatadir}/terminfo
+#%dir %{rootdatadir}/terminfo
 %{_datadir}/tabset
 %{_datadir}/terminfo
 
