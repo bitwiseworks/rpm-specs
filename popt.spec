@@ -4,7 +4,7 @@
 Summary:	C library for parsing command line parameters
 Name:		%{name}
 Version:	%{version}
-Release:	1
+Release:	2
 Epoch:		1
 License:	MIT
 Group:		System/Libraries
@@ -12,7 +12,10 @@ Url:		http://rpm5.org/files/popt/
 Source0:	http://rpm5.org/files/popt/%{name}-%{version}.tar.gz
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
 
-Requires: popt-libs
+Patch0: popt-os2.diff
+
+Requires: popt-libs = %{epoch}:%{version}-%{release}
+Requires: popt-data = %{epoch}:%{version}-%{release}
 
 %description
 Popt is a C library for parsing command line parameters. Popt was
@@ -51,9 +54,11 @@ This package contains popt data files like locales.
 
 %prep
 %setup -q
+%patch0 -p1 -b .os2~
 
 %build
 CONFIG_SHELL="/bin/sh" ; export CONFIG_SHELL ; \
+LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp" ; export LDFLAGS ; \
 %configure --disable-rpath \
     --disable-shared --enable-static \
         "--cache-file=%{_topdir}/cache/%{name}.cache"
@@ -63,6 +68,7 @@ make %{?_smp_mflags}
 %install
 rm -rf %{buildroot}
 make DESTDIR=${RPM_BUILD_ROOT} install
+cp popt.dll $RPM_BUILD_ROOT/%{_libdir}
 #%find_lang %name
 
 %clean
@@ -75,50 +81,20 @@ rm -rf %{buildroot}
 %files libs
 %defattr(-,root,root)
 %doc README
-#/%{_lib}/lib%{name}.so.%{lib_major}*
+%{_libdir}/*.dll
 
 %files devel
 %defattr(-,root,root)
 %{_includedir}/%{name}.h
 %{_libdir}/%{name}*a
 %{_libdir}/lib%{name}*a
-#/%{_lib}/lib%{name}.so
+#%{_libdir}/*.dll
 %{_mandir}/man3/popt.*
 
 %files data
 # -f %{name}.lang
 %defattr(-,root,root)
-%{_usr}/share/locale/cs/LC_MESSAGES/popt.mo
-%{_usr}/share/locale/da/LC_MESSAGES/popt.mo
-%{_usr}/share/locale/de/LC_MESSAGES/popt.mo
-%{_usr}/share/locale/eo/LC_MESSAGES/popt.mo
-%{_usr}/share/locale/es/LC_MESSAGES/popt.mo
-%{_usr}/share/locale/fi/LC_MESSAGES/popt.mo
-%{_usr}/share/locale/fr/LC_MESSAGES/popt.mo
-%{_usr}/share/locale/ga/LC_MESSAGES/popt.mo
-%{_usr}/share/locale/gl/LC_MESSAGES/popt.mo
-%{_usr}/share/locale/hu/LC_MESSAGES/popt.mo
-%{_usr}/share/locale/id/LC_MESSAGES/popt.mo
-%{_usr}/share/locale/is/LC_MESSAGES/popt.mo
-%{_usr}/share/locale/it/LC_MESSAGES/popt.mo
-%{_usr}/share/locale/ja/LC_MESSAGES/popt.mo
-%{_usr}/share/locale/ko/LC_MESSAGES/popt.mo
-%{_usr}/share/locale/nb/LC_MESSAGES/popt.mo
-%{_usr}/share/locale/nl/LC_MESSAGES/popt.mo
-%{_usr}/share/locale/pl/LC_MESSAGES/popt.mo
-%{_usr}/share/locale/pt/LC_MESSAGES/popt.mo
-%{_usr}/share/locale/ro/LC_MESSAGES/popt.mo
-%{_usr}/share/locale/ru/LC_MESSAGES/popt.mo
-%{_usr}/share/locale/sk/LC_MESSAGES/popt.mo
-%{_usr}/share/locale/sl/LC_MESSAGES/popt.mo
-%{_usr}/share/locale/sv/LC_MESSAGES/popt.mo
-%{_usr}/share/locale/th/LC_MESSAGES/popt.mo
-%{_usr}/share/locale/tr/LC_MESSAGES/popt.mo
-%{_usr}/share/locale/uk/LC_MESSAGES/popt.mo
-%{_usr}/share/locale/vi/LC_MESSAGES/popt.mo
-%{_usr}/share/locale/wa/LC_MESSAGES/popt.mo
-%{_usr}/share/locale/zh_CN/LC_MESSAGES/popt.mo
-%{_usr}/share/locale/zh_TW/LC_MESSAGES/popt.mo
+%{_datadir}/locale/*
 
 
 %changelog
