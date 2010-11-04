@@ -39,7 +39,7 @@ Patch1: %{name}-os2.diff
 # SourceLicense: (GPLv2+ and LGPLv2+ with exceptions) and BSD 
 License: GPLv2+
 
-#Requires: coreutils
+Requires: coreutils
 #%if %{without int_bdb}
 ## db recovery tools, rpmdb_util symlinks
 #Requires: db4-utils
