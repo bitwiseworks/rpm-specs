@@ -25,7 +25,7 @@ Patch0: gettext-os2.diff
 %if %{with jar}
 #BuildRequires: %{_bindir}/fastjar
 # require zip and unzip for brp-java-repack-jars
-#BuildRequires: zip, unzip
+BuildRequires: zip, unzip
 %endif
 %endif
 # need expat for xgettext on glade
