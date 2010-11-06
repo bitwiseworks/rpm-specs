@@ -11,6 +11,7 @@ Patch0: unzip-os2.diff
 URL: http://www.info-zip.org/UnZip.html
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:  bzip2-devel
+Requires:  bzip2
 
 %description
 The unzip utility is used to list, test, or extract files from a zip
