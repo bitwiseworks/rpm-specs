@@ -24,7 +24,7 @@
 Summary: The RPM package management system
 Name: rpm
 Version: %{rpmver}
-Release: 1
+Release: 2
 Group: System Environment/Base
 Url: http://www.rpm.org/
 Source0: http://rpm.org/releases/rpm-4.8.x/%{name}-%{srcver}.tar.bz2
@@ -50,6 +50,7 @@ Requires: curl
 Requires: rpm-libs
 Requires: mmap pthread
 Requires: cpio
+Requires: cube
 
 Requires: libc >= 0.6.3
 
@@ -134,7 +135,7 @@ Requires: rpm = %{version}-%{release}
 #Requires: elfutils >= 0.128 binutils
 #Requires: findutils sed grep gawk diffutils
 Requires: file patch >= 2.5
-#Requires: unzip xz
+Requires: unzip xz
 Requires: gzip bzip2 cpio
 Requires: pkgconfig >= 1:0.24
 #Conflicts: ocaml-runtime < 3.11.1-7
@@ -243,8 +244,6 @@ install -D -m0755 rpmio/.libs/rpmio.a $RPM_BUILD_ROOT/%{_libdir}/
 install -D -m0755 rpmio/.libs/rpmio_s.a $RPM_BUILD_ROOT/%{_libdir}/
 install -D -m0755 rpmio/.libs/rpmio.lib $RPM_BUILD_ROOT/%{_libdir}/
 
-rexx2exe scripts/wps-object.cmd $RPM_BUILD_ROOT/%{_libdir}/rpm/wps-object.exe
-
 # Save list of packages through cron
 mkdir -p ${RPM_BUILD_ROOT}%{_sysconfdir}/cron.daily
 install -m 755 scripts/rpm.daily ${RPM_BUILD_ROOT}%{_sysconfdir}/cron.daily/rpm
@@ -348,7 +347,6 @@ rm -rf $RPM_BUILD_ROOT
 %{rpmhome}/tgpg
 
 %{rpmhome}/platform
-%{rpmhome}/wps-object.exe
 
 %files libs
 %defattr(-,root,root)
