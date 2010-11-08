@@ -4,7 +4,7 @@
 Summary: REXX procedure used to modify a CONFIG.SYS-like ASCII file
 Name: cube
 Version: 2.6
-Release: 1
+Release: 2
 License: none
 URL: http://www3.sympatico.ca/gjarviseng/cube/
 
@@ -21,7 +21,9 @@ CUBE is a REXX procedure used to modify a CONFIG.SYS-like ASCII file (the Target
 %install
 rm -rf %{buildroot}
 mkdir -p $RPM_BUILD_ROOT/%{_bindir}
-rexx2exe cube.cmd $RPM_BUILD_ROOT/%{_bindir}/cube.exe
+mkdir -p $RPM_BUILD_ROOT/%{_libdir}/rpm
+rexx2exe cube.cmd $RPM_BUILD_ROOT/%{_bindir}/cube.exe /K:0
+rexx2exe wps-object.cmd $RPM_BUILD_ROOT/%{_libdir}/rpm/wps-object.exe /K:0
 
 %clean
 rm -rf %{buildroot}
@@ -29,3 +31,4 @@ rm -rf %{buildroot}
 %files
 %defattr(-,root,root)
 %{_bindir}/cube.exe
+%{_libdir}/rpm/wps-object.exe
