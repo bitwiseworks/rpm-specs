@@ -139,7 +139,7 @@ done
 mv $RPM_BUILD_ROOT%_bindir/chroot.exe $RPM_BUILD_ROOT%_sbindir/chroot.exe
 
 # {env,cut,readlink} were previously moved from /usr/bin to /bin and linked into
-#for i in env.exe cut.exe readlink.exe; do ln -sf ../../bin/$i $RPM_BUILD_ROOT/usr/bin/$i; done
+for i in env cut readlink; do ln -sf ../../bin/$i.exe $RPM_BUILD_ROOT/@unixroot/usr/bin/$i; done
 
 #mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/profile.d
 #install -p -c -m644 %SOURCE101 $RPM_BUILD_ROOT%{_sysconfdir}/DIR_COLORS
