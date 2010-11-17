@@ -3,13 +3,17 @@
 Summary: Various compilers (C, C++, Objective-C, Java, ...)
 Name: gcc
 Version: %{gcc_version}
-Release: 1
+Release: 2
+
 # libgcc, libgfortran, libmudflap, libgomp, libstdc++ and crtstuff have
 # GCC Runtime Exception.
 License: GPLv3+ and GPLv3+ with exceptions and GPLv2+ with exceptions
 Group: Development/Languages
-Source0: gcc-%{version}.zip
 URL: http://gcc.gnu.org
+
+Source0: gcc-%{version}-os2-20100712.zip
+Source1: gpl.zip
+Source2: gcc-ssp.zip
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-root-%(%{__id_u} -n)
 
@@ -31,12 +35,28 @@ This package contains GCC shared support library which is needed
 e.g. for exception handling support.
 
 %prep
-%setup -q -n gcc-%{version}
+%setup -q -c -a 1 -a 2
 
 %install
 rm -rf $RPM_BUILD_ROOT
 mkdir -p %{buildroot}%{_usr}
-cp -r "*" %{buildroot}%{_usr}
+cp -r usr/local444/* %{buildroot}%{_usr}/
+
+mkdir -p %{buildroot}/%_docdir/%{name}-%{version}
+cp COPYING %{buildroot}%_docdir/%{name}-%{version}/
+cp COPYING.LGPL %{buildroot}%_docdir/%{name}-%{version}/
+
+cp ssp* %{buildroot}%{_libdir}
+rm %{buildroot}%{_libdir}/ssp*.lib
+rm %{buildroot}%{_libdir}/ssp*.dll
+
+mv %{buildroot}%{_usr}/gcc444.cmd $RPM_BUILD_ROOT%_docdir/%{name}-%{version}/
+mv %{buildroot}%{_usr}/readme.os2 $RPM_BUILD_ROOT%_docdir/%{name}-%{version}/
+mv %{buildroot}%{_usr}/stdio.diff $RPM_BUILD_ROOT%_docdir/%{name}-%{version}/
+
+ln -s /@unixroot/usr/libexec/gcc/i386-pc-os2-emx/4.4.4/cc1.exe %{buildroot}/@unixroot/usr/bin/cc1.exe
+ln -s /@unixroot/usr/libexec/gcc/i386-pc-os2-emx/4.4.4/cc1plus.exe %{buildroot}/@unixroot/usr/bin/cc1plus.exe
+
 
 %clean
 rm -rf %{buildroot}
@@ -45,6 +65,7 @@ rm -rf %{buildroot}
 %defattr(-,root,root,-)
 %{_usr}/bin
 %{_usr}/include
+%{_usr}/info
 %{_libdir}/*.*a
 %{_libdir}/*.spec
 %{_libdir}/gcc/*
