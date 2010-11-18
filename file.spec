@@ -5,12 +5,13 @@
 Summary: A utility for determining file types
 Name: file
 Version: 5.04
-Release: 1
+Release: 2
 License: BSD
 Group: Applications/File
 Source0: ftp://ftp.astron.com/pub/file/file-%{version}.tar.gz
 URL: http://www.darwinsys.com/file/
-Patch0: file-5.04-base.patch
+
+Patch0: file-os2.diff
 
 Requires: file-libs = %{version}-%{release}
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -51,7 +52,7 @@ the libmagic library.
 %package -n python-magic
 Summary: Python bindings for the libmagic API
 Group:   Development/Libraries
-#BuildRequires: python-devel
+BuildRequires: python-devel
 Requires: %{name} = %{version}-%{release}
 
 %description -n python-magic
@@ -70,17 +71,23 @@ touch -r doc/libmagic.man doc/libmagic.man_
 mv doc/libmagic.man_ doc/libmagic.man
 
 %build
-CFLAGS="%{optflags} -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE" \
-%configure --enable-fsect-man5 --disable-rpath \
+export CONFIG_SHELL="/bin/sh"
+export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+export LIBS="-lurpo -lmmap"
+export CFLAGS="%{optflags} -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE"
+%configure \
+        --enable-fsect-man5 --disable-rpath \
+        --disable-shared --disable-static \
         "--cache-file=%{_topdir}/cache/%{name}.cache"
 
 # remove hardcoded library paths from local libtool
-sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
-sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
-export LD_LIBRARY_PATH=%{_builddir}/%{name}-%{version}/src/.libs
+#sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
+#sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
+#export LD_LIBRARY_PATH=%{_builddir}/%{name}-%{version}/src/.libs
 make %{?_smp_mflags}
-#cd python
-#CFLAGS="%{optflags}" %{__python} setup.py build
+
+cd python
+CFLAGS="%{optflags}" %{__python} setup.py build
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -98,9 +105,12 @@ ln -s misc/magic ${RPM_BUILD_ROOT}%{_datadir}/magic
 #ln -s file/magic.mime ${RPM_BUILD_ROOT}%{_datadir}/magic.mime
 ln -s ../magic ${RPM_BUILD_ROOT}%{_datadir}/file/magic
 
-#cd python
-#%{__python} setup.py install -O1 --skip-build --root ${RPM_BUILD_ROOT}
-#%{__install} -d ${RPM_BUILD_ROOT}%{_datadir}/%{name}
+cp src/magic.dll ${RPM_BUILD_ROOT}%{_libdir}
+cp src/.libs/magic_s.a ${RPM_BUILD_ROOT}%{_libdir}
+
+cd python
+%{__python} setup.py install -O1 --skip-build --root ${RPM_BUILD_ROOT}
+%{__install} -d ${RPM_BUILD_ROOT}%{_datadir}/%{name}
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -117,7 +127,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files libs
 %defattr(-,root,root,-)
-#%{_libdir}/*so.*
+%{_libdir}/*.dll
 %{_datadir}/magic*
 %{_mandir}/man5/*
 %{_datadir}/file
@@ -125,20 +135,18 @@ rm -rf $RPM_BUILD_ROOT
 
 %files devel
 %defattr(-,root,root,-)
-#%{_libdir}/*.so
+%{_libdir}/*.dll
+%{_libdir}/magic.a
 %{_includedir}/magic.h
 %{_mandir}/man3/*
 
 %files static
 %defattr(-,root,root,-)
-%{_libdir}/*.a
+%{_libdir}/*_s.a
 
-#%files -n python-magic
-#%defattr(-, root, root, -)
-#%doc python/README COPYING python/example.py
-#%{python_sitearch}/magic.so
-#%if 0%{?fedora} >= 9 || 0%{?rhel} >= 6
-#%{python_sitearch}/*egg-info
-#%endif
+%files -n python-magic
+%defattr(-, root, root, -)
+%doc python/README COPYING python/example.py
+%{_libdir}/python*/*
 
 %changelog
