@@ -1,7 +1,7 @@
 Summary: The GNU data compression program
 Name: gzip
 Version: 1.4
-Release: 2%{?dist}
+Release: 3%{?dist}
 # info pages are under GFDL license
 License: GPLv3+ and GFDL
 Group: Applications/File
@@ -69,7 +69,7 @@ rm -rf ${RPM_BUILD_ROOT}
 mkdir -p ${RPM_BUILD_ROOT}%{_bindir}
 #make DESTDIR=${RPM_BUILD_ROOT} install
 
-#rm ${RPM_BUILD_ROOT}%{_libdir}/charset.alias
+rm ${RPM_BUILD_ROOT}%{_libdir}/charset.alias
 
 #cp ${RPM_BUILD_ROOT}%{_bindir}/gzip.exe ${RPM_BUILD_ROOT}%{_bindir}/gunzip.exe
 #cp ${RPM_BUILD_ROOT}%{_bindir}/gzip.exe ${RPM_BUILD_ROOT}%{_bindir}/uncomress.exe

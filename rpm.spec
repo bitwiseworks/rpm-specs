@@ -24,7 +24,7 @@
 Summary: The RPM package management system
 Name: rpm
 Version: %{rpmver}
-Release: 3
+Release: 4%{?dist}
 Group: System Environment/Base
 Url: http://www.rpm.org/
 Source0: http://rpm.org/releases/rpm-4.8.x/%{name}-%{srcver}.tar.bz2
@@ -204,6 +204,7 @@ RPM_MKDIR="/@unixroot/bin/mkdir.exe" ; export RPM_MKDIR ; \
 CONFIG_SHELL="/bin/sh" ; export CONFIG_SHELL ; \
 LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp" ; export LDFLAGS ; \
 LIBS="-lintl -lurpo -lmmap" ; export LIBS ; \
+CFLAGS="%{optflags} -I/@unixroot/usr/include/nss3 -I/@unixroot/usr/include/nspr4" ; \
 %configure \
     --enable-shared --disable-static --without-lua \
     %{!?with_int_bdb: --with-external-db} \

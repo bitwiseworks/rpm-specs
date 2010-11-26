@@ -3,7 +3,7 @@
 Name:           glib2
 %define _name glib
 Version:        2.25.15
-Release:        1
+Release:        2%{?dist}
 License:        LGPLv2.1+
 Summary:        A Library with Convenient Functions Written in C
 Url:            http://www.gtk.org/
@@ -289,14 +289,15 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/gtk-doc/html/gio
 %{_datadir}/gtk-doc/html/glib
 %{_datadir}/gtk-doc/html/gobject
-%{_datadir}/gdb/auto-load/%{_libdir}/*-gdb.py
+#%{_datadir}/gdb/auto-load/%{_libdir}/*-gdb.py
+%{_datadir}/gdb/auto-load/*
 # Own these directories to not depend on gtk-doc while building:
 %dir %{_datadir}/gtk-doc
 %dir %{_datadir}/gtk-doc/html
 # Own these directories to not depend on gdb
 %dir %{_datadir}/gdb
 %dir %{_datadir}/gdb/auto-load
-%dir %{_datadir}/gdb/auto-load/%{_prefix}
-%dir %{_datadir}/gdb/auto-load/%{_prefix}/%{_lib}
+#%dir %{_datadir}/gdb/auto-load/%{_prefix}
+#%dir %{_datadir}/gdb/auto-load/%{_prefix}/%{_lib}
 
 %changelog

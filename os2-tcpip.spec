@@ -2,7 +2,7 @@
 Summary: OS/2 - eComStation 2.0 TCP/IP
 Name: os2-tcpip
 Version: 0.0.0
-Release: 0
+Release: 1%{?dist}
 
 License: free
 

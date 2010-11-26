@@ -2,7 +2,7 @@
 Summary: Ncurses support utilities
 Name: ncurses
 Version: 5.7
-Release: 1
+Release: 2%{?dist}
 License: MIT
 Group: System Environment/Base
 URL: http://invisible-island.net/ncurses/ncurses.html

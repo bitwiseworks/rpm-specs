@@ -1,12 +1,11 @@
 %define name urlgrabber
 %define version 3.1.0
 %define unmangled_version 3.1.0
-%define release 1
 
 Summary: A high-level cross-protocol url-grabber
 Name: %{name}
 Version: %{version}
-Release: %{release}
+Release: 2%{?dist}
 Source0: %{name}-%{unmangled_version}.tar.gz
 License: LGPL
 Group: Development/Libraries

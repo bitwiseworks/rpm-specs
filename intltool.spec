@@ -4,7 +4,7 @@
 Name: intltool
 Summary: Utility for internationalizing various kinds of data files
 Version: 0.41.1
-Release: 1
+Release: 2%{?dist}
 License: GPLv2 with exceptions
 Group: Development/Tools
 Source: http://edge.launchpad.net/intltool/trunk/0.41.0/+download/intltool-%{version}.tar.gz

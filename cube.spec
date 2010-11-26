@@ -4,7 +4,7 @@
 Summary: REXX procedure used to modify a CONFIG.SYS-like ASCII file
 Name: cube
 Version: 2.6
-Release: 2
+Release: 3%{?dist}
 License: none
 URL: http://www3.sympatico.ca/gjarviseng/cube/
 

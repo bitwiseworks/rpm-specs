@@ -2,7 +2,7 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.11
-Release: 1
+Release: 2%{?dist}
 License: GPLv3+
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/

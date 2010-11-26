@@ -2,7 +2,7 @@
 Summary: Netlabs Experimental Repository
 Name: netlabs-exp
 Version: 0.0.0
-Release: 1
+Release: 2%{?dist}
 
 License: free
 

@@ -2,7 +2,7 @@
 Summary: OS/2 - eComStation 2.0 MPTS
 Name: os2-mpts
 Version: 0.0.0
-Release: 0
+Release: 1%{?dist}
 
 License: free
 

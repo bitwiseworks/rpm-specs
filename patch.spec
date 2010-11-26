@@ -1,7 +1,7 @@
 Summary: Utility for modifying/upgrading files
 Name: patch
 Version: 2.6.1
-Release: 1
+Release: 1%{?dist}
 License: GPLv2+
 URL: http://www.gnu.org/software/patch/patch.html
 Group: Development/Tools
@@ -31,6 +31,7 @@ applications.
 %patch1 -p1 -b .os2~
 
 %build
+CONFIG_SHELL="/bin/sh"; export CONFIG_SHELL
 CFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE"
 %ifarch sparcv9
 CFLAGS=`echo $CFLAGS|sed -e 's|-fstack-protector||g'`

@@ -1,7 +1,7 @@
 Summary: A smaller version of the Bourne shell (sh).
 Name: ash
 Version: 0.0.0
-Release: 3
+Release: 4%{?dist}
 License: BSD
 Group: System Environment/Shells
 Source: ash.zip

@@ -1,12 +1,11 @@
 %define name libxml2-python
 %define version 2.7.7
 %define unmangled_version 2.7.7
-%define release 1
 
 Summary: libxml2 package
 Name: %{name}
 Version: %{version}
-Release: %{release}
+Release: 2%{?dist}
 Source: libxml2-%{version}.tar.gz
 #Source1: %{name}-%{unmangled_version}.tar.gz
 License: MIT Licence
