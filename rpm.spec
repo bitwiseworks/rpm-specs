@@ -24,7 +24,7 @@
 Summary: The RPM package management system
 Name: rpm
 Version: %{rpmver}
-Release: 4%{?dist}
+Release: 5%{?dist}
 Group: System Environment/Base
 Url: http://www.rpm.org/
 Source0: http://rpm.org/releases/rpm-4.8.x/%{name}-%{srcver}.tar.bz2
@@ -47,7 +47,7 @@ Requires: coreutils
 Requires: popt >= 1.10.2.1
 Requires: sqlite
 Requires: curl
-Requires: rpm-libs
+Requires: rpm-libs = %{version}-%{release}
 Requires: mmap pthread
 Requires: cpio
 Requires: cube
