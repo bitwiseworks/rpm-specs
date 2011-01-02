@@ -10,7 +10,7 @@
 Summary: The Berkeley DB database library (version 4) for C
 Name: db4
 Version: 4.8.30
-Release: 1%{?dist}
+Release: 2%{?dist}
 Source0: http://download.oracle.com/berkeley-db/db-%{version}.tar.gz
 
 Patch0: db-os2.diff
@@ -21,7 +21,7 @@ Group: System Environment/Libraries
 # unversioned obsoletes are OK here as these BDB versions never occur again
 Obsoletes: db1, db2, db3
 
-Requires: mmap >= 20110101
+Requires: mmap >= 20110102
 
 #BuildRequires: perl, libtool, ed, util-linux-ng
 BuildRequires: tcl-devel >= 8.5.2-3
@@ -154,7 +154,7 @@ fixup_href() {
 
 set +x
 # Fix all of the HTML files.
-#fixup_href `find . -name "*.html"`
+fixup_href `find . -name "*.html"`
 set -x
 
 #cd dist
