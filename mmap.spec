@@ -1,7 +1,7 @@
 Summary: A memory mapped emulation for OS/2-eComStation
 Name: mmap
-Version: 20110101
-Release: 3%{?dist}
+Version: 20110102
+Release: 4%{?dist}
 License: unknown
 Group: Development/Libraries
 Source: mmap-%{version}-os2.zip
