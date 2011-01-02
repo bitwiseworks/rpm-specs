@@ -4,7 +4,7 @@
 Summary: EMX runtime
 Name: emxrt
 Version: 0.9d
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: free software
 Group: Development/Languages
 Source0: emxrt.zip
@@ -13,6 +13,12 @@ Source0: emxrt.zip
 The emx runtime is an environment for 32-bit programs under OS/2 2.x, OS/2 3.x
  (OS/2, in short), MS-DOS, and PC-DOS (DOS, in short) on machines with a 
 386 CPU (or one of its successors). 
+
+%package devel
+Summary: EMX runtime dev tools
+
+%description devel
+EMX runtime dev tools and dos runtime.
 
 %prep
 %setup -q -c
@@ -34,6 +40,11 @@ rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root,-)
-%{_usr}/*
+%{_libdir}/*
+%{_datadir}/*
+
+%files devel
+%defattr(-,root,root,-)
+%{_usr}/bin/*
 
 %changelog
