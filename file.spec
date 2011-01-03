@@ -5,7 +5,7 @@
 Summary: A utility for determining file types
 Name: file
 Version: 5.04
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: BSD
 Group: Applications/File
 Source0: ftp://ftp.astron.com/pub/file/file-%{version}.tar.gz
@@ -14,6 +14,8 @@ URL: http://www.darwinsys.com/file/
 Patch0: file-os2.diff
 
 Requires: file-libs = %{version}-%{release}
+Requires: mmap >= 20110103
+
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: zlib-devel
 
