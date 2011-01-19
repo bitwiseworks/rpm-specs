@@ -24,7 +24,7 @@
 Summary: The RPM package management system
 Name: rpm
 Version: %{rpmver}
-Release: 5%{?dist}
+Release: 6%{?dist}
 Group: System Environment/Base
 Url: http://www.rpm.org/
 Source0: http://rpm.org/releases/rpm-4.8.x/%{name}-%{srcver}.tar.bz2
@@ -40,22 +40,23 @@ Patch1: %{name}-os2.diff
 License: GPLv2+
 
 Requires: coreutils
-#%if %{without int_bdb}
-## db recovery tools, rpmdb_util symlinks
-#Requires: db4-utils
-#%endif
+%if %{without int_bdb}
+# db recovery tools, rpmdb_util symlinks
+Requires: db4-utils
+%endif
 Requires: popt >= 1.10.2.1
 Requires: sqlite
 Requires: curl
 Requires: rpm-libs = %{version}-%{release}
-Requires: mmap pthread
+Requires: pthread
 Requires: cpio
 Requires: cube
 
 Requires: libc >= 0.6.3
+Requires: mmap >= 20110104
 
 %if %{without int_bdb}
-#BuildRequires: db4-devel%{_isa}
+BuildRequires: db4-devel%{_isa}
 %endif
 
 %if %{with check}
@@ -69,7 +70,7 @@ Requires: libc >= 0.6.3
 #BuildRequires: elfutils-devel%{_isa} >= 0.112
 #BuildRequires: elfutils-libelf-devel%{_isa}
 BuildRequires: readline-devel%{_isa} zlib-devel%{_isa}
-#BuildRequires: nss-devel%{_isa}
+BuildRequires: nss-devel%{_isa}
 # The popt version here just documents an older known-good version
 BuildRequires: popt-devel%{_isa} >= 1.10.2
 BuildRequires: file-devel%{_isa}
@@ -82,7 +83,7 @@ BuildRequires: python-devel%{_isa} >= 2.6
 #BuildRequires: libcap-devel%{_isa}
 #BuildRequires: libacl-devel%{_isa}
 %if ! %{without xz}
-#BuildRequires: xz-devel%{_isa} >= 4.999.8
+BuildRequires: xz-devel%{_isa} >= 4.999.8
 %endif
 %if %{with sqlite}
 BuildRequires: sqlite-devel%{_isa}
