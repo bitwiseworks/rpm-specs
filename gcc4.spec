@@ -3,7 +3,7 @@
 Summary: Various compilers (C, C++, Objective-C, Java, ...)
 Name: gcc
 Version: %{gcc_version}
-Release: 3%{?dist}
+Release: 4%{?dist}
 
 # libgcc, libgfortran, libmudflap, libgomp, libstdc++ and crtstuff have
 # GCC Runtime Exception.
@@ -11,9 +11,9 @@ License: GPLv3+ and GPLv3+ with exceptions and GPLv2+ with exceptions
 Group: Development/Languages
 URL: http://gcc.gnu.org
 
-Source0: gcc-%{version}-os2-20100712.zip
+Source0: gcc-%{version}-os2-20101229.zip
 Source1: gpl.zip
-Source2: gcc-ssp.zip
+#Source2: gcc-ssp.zip
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-root-%(%{__id_u} -n)
 
@@ -35,7 +35,7 @@ This package contains GCC shared support library which is needed
 e.g. for exception handling support.
 
 %prep
-%setup -q -c -a 1 -a 2
+%setup -q -c -a 1
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -46,9 +46,9 @@ mkdir -p %{buildroot}/%_docdir/%{name}-%{version}
 cp COPYING %{buildroot}%_docdir/%{name}-%{version}/
 cp COPYING.LGPL %{buildroot}%_docdir/%{name}-%{version}/
 
-cp ssp* %{buildroot}%{_libdir}
-rm %{buildroot}%{_libdir}/ssp*.lib
-rm %{buildroot}%{_libdir}/ssp*.dll
+#cp ssp* %{buildroot}%{_libdir}
+#rm %{buildroot}%{_libdir}/ssp*.lib
+#rm %{buildroot}%{_libdir}/ssp*.dll
 
 mv %{buildroot}%{_usr}/gcc444.cmd $RPM_BUILD_ROOT%_docdir/%{name}-%{version}/
 mv %{buildroot}%{_usr}/readme.os2 $RPM_BUILD_ROOT%_docdir/%{name}-%{version}/
@@ -67,6 +67,7 @@ rm -rf %{buildroot}
 %{_usr}/include
 %{_usr}/info
 %{_libdir}/*.*a
+%{_libdir}/ssp.dll
 %{_libdir}/*.spec
 %{_libdir}/gcc/*
 %{_usr}/libexec
