@@ -11,6 +11,11 @@ Source1:        %{name}-os2.zip
 
 Buildroot:      %{_tmppath}/%{name}-%{version}-%{release}-root
 
+BuildRequires:  sqlite-devel
+BuildRequires:  openssl-devel
+BuildRequires:  libspf2-devel
+BuildRequires:  perl
+
 Patch1: 	hermes-os2.diff
 
 %description
