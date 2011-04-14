@@ -1,7 +1,10 @@
+#disable lxlite strip
+%define __os_install_post	%{nil}
+
 Summary: Exceptq creates a debugging report.
 Name: exceptq
 Version: 7.1
-Release: 0%{?dist}
+Release: 1%{?dist}
 License: custom
 Group: Development/Libraries
 Source: exceptq71.zip
