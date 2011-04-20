@@ -69,6 +69,7 @@ can notify you when they are available via email, syslog or dbus.
 
 %build
 export MAKESHELL="/bin/sh"
+export PERL_SH_DIR="/bin"
 make
 
 %install
