@@ -51,6 +51,7 @@ Requires: rpm-libs = %{version}-%{release}
 Requires: pthread
 Requires: cpio
 Requires: cube
+Requires: tar
 
 Requires: libc >= 0.6.3
 Requires: mmap >= 20110104
