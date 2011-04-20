@@ -38,7 +38,7 @@ CFLAGS=`echo $CFLAGS|sed -e 's|-fstack-protector||g'`
 %endif
 LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zexe -Zargs-wild -Zargs-resp"; export LDFLAGS
 %configure \
-        "--cache-file=%{_topdir}/cache/%{name}.cache"
+    "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
 
 make %{?smp_mflags}
 

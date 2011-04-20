@@ -91,7 +91,7 @@ export LIBS="-lintl -lurpo"
            --enable-largefile \
            --enable-install-program=su.exe,hostname.exe,arch \
            --with-tty-group \
-           "--cache-file=%{_topdir}/cache/%{name}.cache" \
+           "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache" \
            DEFAULT_POSIX2_VERSION=200112 alternative=199209 || :
 
 # Regenerate manpages

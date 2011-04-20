@@ -77,7 +77,7 @@ export LIBS="-lurpo -lmmap -lpthread" ; \
 %configure \
     --without-python \
     --enable-shared --disable-static \
-    "--cache-file=%{_topdir}/cache/%{name}.cache"
+    "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
 
 make %{?smp_mflags}
 

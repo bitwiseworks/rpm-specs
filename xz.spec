@@ -91,7 +91,7 @@ export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 export LIBS="-lurpo -lmmap -lpthread"
 %configure \
     --enable-shared --disable-static \
-    "--cache-file=%{_topdir}/cache/%{name}.cache"
+    "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
 
 make %{?_smp_mflags}
 

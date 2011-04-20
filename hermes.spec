@@ -35,7 +35,7 @@ export LIBS="-lurpo -lmmap -lpthread" ; \
     --disable-dependency-tracking \
     --enable-spf --with-logger-module=file \
     --enable-shared --disable-static \
-    "--cache-file=%{_topdir}/cache/%{name}.cache"
+    "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
 
 %__make %{?_smp_mflags}
 

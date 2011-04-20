@@ -58,7 +58,7 @@ export CPPFLAGS="-DHAVE_LSTAT"
 export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zexe -Zargs-wild -Zargs-resp"
 %configure \
         --bindir=/@unixroot/bin \
-        "--cache-file=%{_topdir}/cache/%{name}.cache"
+        "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
 
 make %{?smp_mflags}
 #make gzip.info

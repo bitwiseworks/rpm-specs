@@ -153,7 +153,7 @@ export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp" ; \
 export LIBS="-lurpo -lmmap -lpthread" ; \
 %configure \
     --enable-shared --disable-static \
-    "--cache-file=%{_topdir}/cache/%{name}.cache"
+    "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
 
 # Kill bogus RPATHs
 %{__sed} -i 's|^sys_lib_dlsearch_path_spec="/lib /usr/lib|sys_lib_dlsearch_path_spec="/%{_lib} %{_libdir}|' libtool

@@ -80,7 +80,7 @@ export CFLAGS="%{optflags} -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOU
 %configure \
         --enable-fsect-man5 --disable-rpath \
         --disable-shared --disable-static \
-        "--cache-file=%{_topdir}/cache/%{name}.cache"
+        "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
 
 # remove hardcoded library paths from local libtool
 #sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool

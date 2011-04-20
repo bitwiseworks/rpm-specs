@@ -129,7 +129,7 @@ export LIBS="-lurpo -lmmap -lpthread" ; \
     --enable-pc-files \
     --with-termlib=tinfo \
     --with-chtype=long \
-    "--cache-file=%{_topdir}/cache/%{name}.cache"
+    "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
 
 make %{_smp_mflags}
 

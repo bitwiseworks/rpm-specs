@@ -43,7 +43,7 @@ export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 export LIBS="-lintl -lurpo"
 %configure \
     --bindir=/@unixroot/bin --libexecdir=/@unixroot/sbin \
-    "--cache-file=%{_topdir}/cache/%{name}.cache"
+    "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
 make %{?_smp_mflags}
 
 %install

@@ -211,7 +211,7 @@ CFLAGS="%{optflags} -I/@unixroot/usr/include/nss3 -I/@unixroot/usr/include/nspr4
     %{!?with_int_bdb: --with-external-db} \
     %{?with_sqlite: --enable-sqlite3} \
     --enable-python \
-    "--cache-file=%{_topdir}/cache/%{name}.cache"
+    "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
 
 make %{?_smp_mflags}
 

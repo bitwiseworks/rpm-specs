@@ -86,7 +86,7 @@ export LIBS="-lurpo"
 %endif
     --disable-shared --enable-static \
     --enable-load --enable-dll-unloading \
-    "--cache-file=%{_topdir}/cache/%{name}.cache"
+    "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
 
 make %{?_smp_mflags} TCL_LIBRARY=%{_datadir}/%{name}%{majorver}
 

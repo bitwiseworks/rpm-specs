@@ -45,7 +45,7 @@ export CONFIG_SHELL="/bin/sh"
 export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp" ; \
 %configure \
     --enable-shared --disable-static \
-    "--cache-file=%{_topdir}/cache/%{name}.cache"
+    "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
 
 make %{?_smp_mflags}
 

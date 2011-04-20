@@ -230,7 +230,7 @@ export LIBS="-lurpo -lmmap -lpthread"
     --disable-check \
     --disable-llvm \
     --enable-shared --disable-static \
-    "--cache-file=%{_topdir}/cache/%{name}.cache"
+    "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
 
 # TODO: check periodically that CLAMAVUSER is used for freshclam only
 

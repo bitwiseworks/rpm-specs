@@ -31,7 +31,7 @@ them in the po files.
 
 %build
 %configure \
-        "--cache-file=%{_topdir}/cache/%{name}.cache"
+        "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
 
 make
 

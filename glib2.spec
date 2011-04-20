@@ -162,7 +162,7 @@ LIBS="-lurpo -lmmap -lpthread"
 export LIBS
 %configure \
         --enable-shared --disable-static \
-        "--cache-file=%{_topdir}/cache/%{name}.cache"
+        "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
 
 make OPT="$CFLAGS" %{?_smp_mflags}
 

@@ -136,7 +136,7 @@ export LIBS="-lurpo" ; \
     --disable-git \
     --disable-rpath \
     --enable-shared --disable-static \
-    "--cache-file=%{_topdir}/cache/%{name}.cache"
+    "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
 
 cd gettext-tools/gnulib-lib
 make fcntl.h

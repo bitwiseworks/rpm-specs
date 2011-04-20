@@ -106,7 +106,7 @@ export LIBS="-lurpo"
     --enable-load-extension \
     %{?with_tcl:TCLLIBDIR=%{tcl_sitearch}/sqlite3} \
     --disable-shared \
-    "--cache-file=%{_topdir}/cache/%{name}.cache"
+    "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
 
 # rpath removal
 #sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool

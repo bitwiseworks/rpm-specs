@@ -63,7 +63,7 @@ CONFIG_SHELL="/bin/sh" ; export CONFIG_SHELL ; \
 LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp" ; export LDFLAGS ; \
 %configure \
     --disable-shared \
-    "--cache-file=%{_topdir}/cache/%{name}.cache"
+    "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
 
 make %{?_smp_mflags}
 

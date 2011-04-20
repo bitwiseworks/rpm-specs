@@ -33,7 +33,7 @@ Install m4 if you need a macro processor.
 export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 export LIBS="-lintl -lurpo"
 %configure \
-        "--cache-file=%{_topdir}/cache/%{name}.cache"
+        "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
 
 make %{?_smp_mflags}
 

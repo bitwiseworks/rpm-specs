@@ -187,7 +187,7 @@ ln -sf ../configure .
 %else
 		--disable-java \
 %endif
-    "--cache-file=%{_topdir}/cache/%{name}.cache" \
+    "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache" \
 		# --enable-diagnostic \
 		# --enable-debug --enable-debug_rop --enable-debug_wop \
 

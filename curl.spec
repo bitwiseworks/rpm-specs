@@ -101,7 +101,7 @@ export LIBS="-lurpo -lmmap -lpthread" ; \
     --without-libssh2 \
     --with-ssl --without-nss \
     --enable-shared --disable-static \
-    "--cache-file=%{_topdir}/cache/%{name}.cache"
+    "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
 
 # uncomment to turn off optimizations
 # find -name Makefile | xargs sed -i 's/-O2/-O0/'

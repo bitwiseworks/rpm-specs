@@ -241,7 +241,7 @@ BASECFLAGS="-O2 -g -march=i386 -mtune=i686"
 export BASECFLAGS
 %configure \
         --enable-shared --disable-static \
-        "--cache-file=%{_topdir}/cache/%{name}.cache"
+        "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
 
 make OPT="$CFLAGS" %{?_smp_mflags}
 
