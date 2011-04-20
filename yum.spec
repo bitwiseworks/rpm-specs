@@ -18,7 +18,7 @@ URL: http://yum.baseurl.org/
 BuildArch: noarch
 BuildRequires: python
 BuildRequires: gettext
-#BuildRequires: intltool
+BuildRequires: intltool
 
 Conflicts: pirut < 1.1.4
 Requires: python >= 2.4, rpm-python, rpm >= 0:4.4.2
@@ -75,6 +75,7 @@ make
 %install
 rm -rf $RPM_BUILD_ROOT
 export MAKESHELL="/bin/sh"
+export PERL_SH_DIR="/bin"
 make DESTDIR=$RPM_BUILD_ROOT install
 #install -m 644 %{SOURCE1} $RPM_BUILD_ROOT/%{_sysconfdir}/yum.conf
 #mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/yum/pluginconf.d $RPM_BUILD_ROOT/usr/lib/yum-plugins
