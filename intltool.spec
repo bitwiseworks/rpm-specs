@@ -4,7 +4,7 @@
 Name: intltool
 Summary: Utility for internationalizing various kinds of data files
 Version: 0.41.1
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv2 with exceptions
 Group: Development/Tools
 Source: http://edge.launchpad.net/intltool/trunk/0.41.0/+download/intltool-%{version}.tar.gz
@@ -21,6 +21,8 @@ Provides: xml-i18n-tools = 0.11
 #BuildRequires: perl(XML::Parser)
 BuildRequires: gettext
 
+Patch1: 	intltool-os2.diff
+
 %description
 This tool automatically extracts translatable strings from oaf, glade,
 bonobo ui, nautilus theme, .desktop, and other data files and puts
@@ -28,8 +30,10 @@ them in the po files.
 
 %prep
 %setup -q
+%patch001 -p1 -b .os2~
 
 %build
+export CONFIG_SHELL="/bin/sh" ; \
 %configure \
         "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
 
