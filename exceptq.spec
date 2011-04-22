@@ -4,7 +4,7 @@
 Summary: Exceptq creates a debugging report.
 Name: exceptq
 Version: 7.1
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: custom
 Group: Development/Libraries
 Source: exceptq71.zip
