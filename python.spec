@@ -83,11 +83,11 @@ BuildRequires: readline-devel, openssl-devel
 BuildRequires: ncurses-devel, zlib-devel
 #BuildRequires: libGL-devel tk tix gcc-c++ libX11-devel glibc-devel
 #BuildRequires: tar findutils pkgconfig tcl-devel tk-devel
-BuildRequires: bzip2 pkgconfig
+BuildRequires: bzip2 pkgconfig tcl-devel
 #BuildRequires: tix-devel
 BuildRequires: bzip2-devel sqlite-devel
 #BuildRequires: autoconf
-#BuildRequires: db4-devel >= 4.8
+BuildRequires: db4-devel >= 4.8
 #BuildRequires: libffi-devel
 %if 0%{?with_valgrind}
 BuildRequires: valgrind-devel
@@ -237,8 +237,6 @@ LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 export LDFLAGS
 LIBS="-lssl -lcrypto -lurpo -lmmap -lpthread"
 export LIBS
-BASECFLAGS="-O2 -g -march=i386 -mtune=i686"
-export BASECFLAGS
 %configure \
         --enable-shared --disable-static \
         "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
