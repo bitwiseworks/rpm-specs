@@ -15,7 +15,7 @@
 Summary: Library that implements an embeddable SQL database engine
 Name: sqlite
 Version: %{basever}
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: Public Domain
 Group: Applications/Databases
 URL: http://www.sqlite.org/
