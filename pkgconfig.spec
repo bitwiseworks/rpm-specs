@@ -1,7 +1,7 @@
 Summary: A tool for determining compilation options
 Name: pkgconfig
 Version: 0.25
-Release: 3%{?dist}
+Release: 4%{?dist}
 Epoch: 1
 License: GPLv2+
 URL: http://pkgconfig.freedesktop.org

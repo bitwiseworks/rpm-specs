@@ -2,7 +2,7 @@
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.96.4
-Release:        2%{?dist}
+Release:        3%{?dist}
 
 License:	proprietary
 Group:		Applications/File

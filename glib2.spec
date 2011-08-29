@@ -3,7 +3,7 @@
 Name:           glib2
 %define _name glib
 Version:        2.25.15
-Release:        2%{?dist}
+Release:        3%{?dist}
 License:        LGPLv2.1+
 Summary:        A Library with Convenient Functions Written in C
 Url:            http://www.gtk.org/

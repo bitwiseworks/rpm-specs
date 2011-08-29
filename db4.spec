@@ -1,5 +1,6 @@
 # the set of arches on which libgcj provides gcj and libgcj-javac-placeholder.sh
-%define java_arches __%{ix86} alpha ia64 ppc sparc sparcv9 x86_64 s390 s390x
+#%define java_arches __%{ix86} alpha ia64 ppc sparc sparcv9 x86_64 s390 s390x
+%define java_arches 0
 %define __soversion 4.8
 %define __dllversion 48
 
@@ -10,7 +11,7 @@
 Summary: The Berkeley DB database library (version 4) for C
 Name: db4
 Version: 4.8.30
-Release: 3%{?dist}
+Release: 4%{?dist}
 Source0: http://download.oracle.com/berkeley-db/db-%{version}.tar.gz
 
 Patch0: db-os2.diff
@@ -238,6 +239,9 @@ rm -f ${RPM_BUILD_ROOT}%{_libdir}/libdb_cxx.a
 #  ln -sf libdb_cxx-%{__soversion}.so $RPM_BUILD_ROOT/%{_libdir}/libdb_cxx.so
 #fi
 
+# add symlink without version number
+ln -s libdb-%{__soversion}.a $RPM_BUILD_ROOT/%{_libdir}/libdb.a
+
 # Move the header files to a subdirectory, in case we're deploying on a
 # system with multiple versions of DB installed.
 mkdir -p ${RPM_BUILD_ROOT}%{_includedir}/db4
@@ -310,6 +314,7 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_libdir}/db*.dll
 #%{_libdir}/libdb_cxx.so
 %{_libdir}/libdb-%{__soversion}.a
+%{_libdir}/libdb.a
 %dir %{_includedir}/%{name}
 %{_includedir}/%{name}/db.h
 #%{_includedir}/%{name}/db_185.h

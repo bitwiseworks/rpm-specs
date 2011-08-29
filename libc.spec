@@ -4,11 +4,13 @@ License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Standard Shared Libraries
 Group:          System/Libraries
 Version:        0.6.3
-Release:        3%{?dist}
+Release:        4%{?dist}
 Url:            http://svn.netlabs.org/libc
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 Source:         libc-%{version}.zip
+
+Source1:         libc-os2.zip
 
 %description
 kLIBC is a C runtime library in which the coder is exploring The Single Unix 
@@ -31,7 +33,7 @@ library.
 
 
 %prep
-%setup -q -n libc-%{version}
+%setup -q -n libc-%{version} -a 1
 
 %install
 rm -rf $RPM_BUILD_ROOT

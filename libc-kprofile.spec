@@ -4,11 +4,11 @@ License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Standard Shared Libraries
 Group:          System/Libraries
 Version:        0.6.3
-Release:        3%{?dist}
+Release:        4%{?dist}
 Url:            http://svn.netlabs.org/libc
 
-Provides: klibdbg
-Provides: kprofile
+Provides: klibdbg.dll
+Provides: kprofile.dll
 
 %description
 kLIBC is a C runtime library in which the coder is exploring The Single Unix 

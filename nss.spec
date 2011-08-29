@@ -6,7 +6,7 @@
 Summary:          Network Security Services
 Name:             nss
 Version:          3.12.8
-Release:          1%{?dist}
+Release:          2%{?dist}
 License:          MPLv1.1 or GPLv2+ or LGPLv2+
 URL:              http://www.mozilla.org/projects/security/pki/nss/
 Group:            System Environment/Libraries
@@ -201,6 +201,9 @@ Header and Library files for doing development with Network Security Services.
 cp mozilla/security/nss/lib/util/nssutil.def mozilla/security/nss/lib/util/nssuti.def
 cp mozilla/security/nss/lib/softoken/softokn.def mozilla/security/nss/lib/softoken/softok.def
 
+cp mozilla/security/nss/cmd/shlibsign/sign.cmd mozilla/security/nss/cmd/shlibsign/sign.cmd.0
+sed '#\n#\r\n#g' < mozilla/security/nss/cmd/shlibsign/sign.cmd.0 > mozilla/security/nss/cmd/shlibsign/sign.cmd
+
 %build
 
 #ecs compatibility
@@ -249,9 +252,14 @@ export USE_64
 # private exports from util. The install section will ensure not
 # to override nss-util and nss-softoken headers already installed.
 #     
-make -C ./mozilla/security/coreconf %{?_smp_mflags}
-make -C ./mozilla/security/dbm %{?_smp_mflags}
-make -C ./mozilla/security/nss %{?_smp_mflags}
+
+# yd smp build not safe
+make -C ./mozilla/security/coreconf
+# %{?_smp_mflags}
+make -C ./mozilla/security/dbm
+# %{?_smp_mflags}
+make -C ./mozilla/security/nss
+# %{?_smp_mflags}
 
 %install
 

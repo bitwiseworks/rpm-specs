@@ -1,6 +1,6 @@
 Name:           check
 Version:        0.9.8
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        A unit test framework for C
 Source0:        http://downloads.sourceforge.net/check/%{name}-%{version}.tar.gz
 Patch0:         check-os2.diff

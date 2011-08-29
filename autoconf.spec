@@ -1,7 +1,7 @@
 Summary:    A GNU tool for automatically configuring source code
 Name:       autoconf
 Version:    2.65
-Release:    2%{?dist}
+Release:    3%{?dist}
 License:    GPLv2+ and GFDL
 Group:      Development/Tools
 Source:     http://ftp.gnu.org/gnu/autoconf/autoconf-%{version}.tar.xz
@@ -57,6 +57,7 @@ their use.
 
 %build
 export CONFIG_SHELL="/bin/sh"
+export PERL="/@unixroot/usr/bin/perl.exe" 
 %configure \
     "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
 # not parallel safe

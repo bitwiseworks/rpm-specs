@@ -20,7 +20,7 @@
 Name:           xz
 Summary:        A Program for Compressing Files
 Version:        4.999.9beta
-Release:        3%{?dist}
+Release:        4%{?dist}
 Group:          Productivity/Archiving/Compression
 License:        LGPLv2.1+
 Url:            http://tukaani.org/lzma/
@@ -107,9 +107,9 @@ make install DESTDIR=$RPM_BUILD_ROOT
 cp src/liblzma/*.dll $RPM_BUILD_ROOT%{_libdir}
 cp src/liblzma/.libs/*.lib $RPM_BUILD_ROOT%{_libdir}
 # fix exe installation
-cp src/lzmainfo/.libs/*.exe $RPM_BUILD_ROOT%{_bindir}
-cp src/xz/.libs/*.exe $RPM_BUILD_ROOT%{_bindir}
-cp src/xzdec/.libs/*.exe $RPM_BUILD_ROOT%{_bindir}
+cp src/lzmainfo/*.exe $RPM_BUILD_ROOT%{_bindir}
+cp src/xz/*.exe $RPM_BUILD_ROOT%{_bindir}
+cp src/xzdec/*.exe $RPM_BUILD_ROOT%{_bindir}
 
 %clean
 rm -fr $RPM_BUILD_ROOT

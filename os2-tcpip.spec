@@ -2,43 +2,43 @@
 Summary: OS/2 - eComStation 2.0 TCP/IP
 Name: os2-tcpip
 Version: 0.0.0
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 License: free
 
-Provides: adv
-Provides: advacct
-Provides: advcomm
-Provides: advcust
-Provides: advdial
-Provides: advreg
-Provides: advuser
-Provides: ansi
-Provides: cfg2api
-Provides: cfg2natv
-Provides: cnbnfs2
-Provides: dumb
-Provides: fapidll
-Provides: ftpapi
-Provides: ftpwps
-Provides: librsvp
-Provides: lpr32
+Provides: adv.dll
+Provides: advacct.dll
+Provides: advcomm.dll
+Provides: advcust.dll
+Provides: advdial.dll
+Provides: advreg.dll
+Provides: advuser.dll
+Provides: ansi.dll
+Provides: cfg2api.dll
+Provides: cfg2natv.dll
+Provides: cnbnfs2.dll
+Provides: dumb.dll
+Provides: fapidll.dll
+Provides: ftpapi.dll
+Provides: ftpwps.dll
+Provides: librsvp.dll
+Provides: lpr32.dll
 Provides: lprpdrvr.pdr
-Provides: lprportd
-Provides: rpc32dll
-Provides: rpcdll
-Provides: rxftp
-Provides: rxsock
-Provides: sendmail
-Provides: tc41mth
-Provides: tcpoocs
-Provides: tcpoocsj
-Provides: tcpoocsx
-Provides: tcpunx
-Provides: tnls16
-Provides: unzip
-Provides: vt100
-Provides: wptelnet
+Provides: lprportd.dll
+Provides: rpc32dll.dll
+Provides: rpcdll.dll
+Provides: rxftp.dll
+Provides: rxsock.dll
+Provides: sendmail.dll
+Provides: tc41mth.dll
+Provides: tcpoocs.dll
+Provides: tcpoocsj.dll
+Provides: tcpoocsx.dll
+Provides: tcpunx.dll
+Provides: tnls16.dll
+Provides: unzip.dll
+Provides: vt100.dll
+Provides: wptelnet.dll
 
 %description
 Virtual package for OS/2 TCP/IP packaging.

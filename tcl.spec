@@ -7,7 +7,7 @@
 Summary: Tool Command Language, pronounced tickle
 Name: tcl
 Version: %{vers}
-Release: 1%{?dist}
+Release: 2%{?dist}
 Epoch: 1
 License: TCL
 Group: Development/Languages

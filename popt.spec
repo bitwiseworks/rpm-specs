@@ -4,7 +4,7 @@
 Summary:	C library for parsing command line parameters
 Name:		%{name}
 Version:	%{version}
-Release:        3%{?dist}
+Release:        4%{?dist}
 Epoch:		1
 License:	MIT
 Group:		System/Libraries

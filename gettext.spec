@@ -6,7 +6,7 @@
 Summary: GNU libraries and utilities for producing multi-lingual messages
 Name: gettext
 Version: 0.18.1.1
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv3+ and LGPLv2+
 Group: Development/Tools
 URL: http://www.gnu.org/software/gettext/

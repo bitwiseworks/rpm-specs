@@ -4,7 +4,7 @@
 Summary: EMX runtime
 Name: emxrt
 Version: 0.9d
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: free software
 Group: Development/Languages
 Source0: emxrt.zip

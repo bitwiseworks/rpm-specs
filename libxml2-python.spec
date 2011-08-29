@@ -5,7 +5,7 @@
 Summary: libxml2 package
 Name: %{name}
 Version: %{version}
-Release: 2%{?dist}
+Release: 3%{?dist}
 Source: libxml2-%{version}.tar.gz
 #Source1: %{name}-%{unmangled_version}.tar.gz
 License: MIT Licence

@@ -21,7 +21,7 @@
 Summary: A general purpose cryptography library with TLS implementation
 Name: openssl
 Version: 1.0.0a
-Release: 2%{?dist}
+Release: 3%{?dist}
 
 Source: openssl-%{version}.tar.gz
 
