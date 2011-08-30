@@ -228,8 +228,10 @@ install -m 755 scripts/brp-strip.os2 ${RPM_BUILD_ROOT}%{rpmhome}
 mv ${RPM_BUILD_ROOT}/@unixroot/bin/rpm.exe ${RPM_BUILD_ROOT}%{_bindir}/rpm.exe
 
 # YD remove paths from macros
-sed -i 's#f:/#/@unixroot/#gi' ${RPM_BUILD_ROOT}%{rpmhome}/macros
-sed -i 's#d:/#/@bootroot/#gi' ${RPM_BUILD_ROOT}%{rpmhome}/macros
+sed -i 's#.:/usr/#/@unixroot/usr/#gi' ${RPM_BUILD_ROOT}%{rpmhome}/macros
+sed -i 's#.:/bin/#/@unixroot/bin/#gi' ${RPM_BUILD_ROOT}%{rpmhome}/macros
+sed -i 's#.:/tcpip/bin/#/@bootroot/tcpip/bin/#gi' ${RPM_BUILD_ROOT}%{rpmhome}/macros
+sed -i 's#.:/bin/tool/##gi' ${RPM_BUILD_ROOT}%{rpmhome}/macros
 
 # YD install dll
 install -D -m0755 build/.libs/rpmbuild.dll $RPM_BUILD_ROOT/%{_libdir}/
