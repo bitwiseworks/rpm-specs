@@ -201,8 +201,8 @@ Header and Library files for doing development with Network Security Services.
 cp mozilla/security/nss/lib/util/nssutil.def mozilla/security/nss/lib/util/nssuti.def
 cp mozilla/security/nss/lib/softoken/softokn.def mozilla/security/nss/lib/softoken/softok.def
 
-cp mozilla/security/nss/cmd/shlibsign/sign.cmd mozilla/security/nss/cmd/shlibsign/sign.cmd.0
-sed '#\n#\r\n#g' < mozilla/security/nss/cmd/shlibsign/sign.cmd.0 > mozilla/security/nss/cmd/shlibsign/sign.cmd
+# yd convert LF to CRLF in cmd files
+sed -i '#\n#\r\n#g' mozilla/security/nss/cmd/shlibsign/sign.cmd
 
 %build
 
