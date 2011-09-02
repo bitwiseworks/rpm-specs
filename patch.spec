@@ -1,7 +1,7 @@
 Summary: Utility for modifying/upgrading files
 Name: patch
 Version: 2.6.1
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv2+
 URL: http://www.gnu.org/software/patch/patch.html
 Group: Development/Tools

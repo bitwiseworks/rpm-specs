@@ -1,7 +1,7 @@
 Summary:        An anti-spam SMTP proxy
 Name:           hermes
 Version:        1.6
-Release:        3%{?dist}
+Release:        4%{?dist}
 License:        GPL
 Group:          System Environment/Daemons
 Packager:       Veit Wahlich <cru@zodia.de>

@@ -3,7 +3,7 @@
 
 # Each change to the spec requires a bump to version/release of both library and perlmod
 %global library_version 1.2.9
-%global library_release 0%{?dist}
+%global library_release 1%{?dist}
 %global perlmod_version 0.01
 %global perlmod_release 0%{?dist}
 
