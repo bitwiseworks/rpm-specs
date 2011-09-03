@@ -51,7 +51,6 @@ Requires: rpm-libs = %{version}-%{release}
 Requires: pthread
 Requires: cpio
 Requires: cube
-Requires: tar
 
 Requires: libc >= 0.6.3
 Requires: mmap >= 20110104
@@ -140,6 +139,7 @@ Requires: file patch >= 2.5
 Requires: unzip xz
 Requires: gzip bzip2 cpio
 Requires: pkgconfig >= 1:0.24
+Requires: tar
 #Conflicts: ocaml-runtime < 3.11.1-7
 
 %description build
