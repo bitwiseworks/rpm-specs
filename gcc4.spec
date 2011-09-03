@@ -3,7 +3,7 @@
 Summary: Various compilers (C, C++, Objective-C, Java, ...)
 Name: gcc
 Version: %{gcc_version}
-Release: 5%{?dist}
+Release: 6%{?dist}
 
 # libgcc, libgfortran, libmudflap, libgomp, libstdc++ and crtstuff have
 # GCC Runtime Exception.
@@ -33,6 +33,14 @@ Autoreq: false
 %description -n libgcc444
 This package contains GCC shared support library which is needed
 e.g. for exception handling support.
+
+%package stack-protector
+Summary: GCC stack protector shared library
+Group: System Environment/Libraries
+
+%description stack-protector
+This package contains GCC shared library which is needed
+for stack protector.
 
 %prep
 %setup -q -c -a 1
@@ -67,13 +75,15 @@ rm -rf %{buildroot}
 %{_usr}/include
 %{_usr}/info
 %{_libdir}/*.*a
-%{_libdir}/ssp.dll
 %{_libdir}/*.spec
 %{_libdir}/gcc/*
 %{_usr}/libexec
 %{_usr}/man
 %{_usr}/share
 
+%files stack-protector
+%defattr(-,root,root,-)
+%{_libdir}/ssp.dll
 
 %files -n libgcc444
 %defattr(-,root,root,-)
