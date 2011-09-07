@@ -337,6 +337,14 @@ rm -fr %{buildroot}
 #%postun libs -p /sbin/ldconfig
 
 
+%post
+if [ "$1" = 1 ] ; then
+#execute only on first install
+%cube {DELLINE "SET PYTHONPATH="} c:\config.sys > NUL
+%cube {DELLINE "SET PYTHONHOME="} c:\config.sys > NUL
+fi
+
+
 %files
 %defattr(-, root, root, -)
 %doc LICENSE README
