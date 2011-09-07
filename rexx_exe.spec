@@ -1,7 +1,7 @@
 Summary: Wrap REXX scrips into OS/2 PM or VIO executables
 Name: rexx_exe
 Version: 2006.04.10
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: None
 Group: System Environment/Shells
 Source: rexx_exe.zip
