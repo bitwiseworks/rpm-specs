@@ -135,6 +135,12 @@ fi
 %defattr(-,root,root,-)
 %{_libdir}/ssp.dll
 
+%files wlink
+%doc gcc-wlink.txt
+
+%files wrc
+%doc gcc-wrc.txt
+
 %files -n libgcc444
 %defattr(-,root,root,-)
 %{_libdir}/gcc444.dll
