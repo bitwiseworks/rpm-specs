@@ -82,6 +82,7 @@ API and internal documentation for neon library.
 %build
 export CONFIG_SHELL="/bin/sh" 
 export LIBS="-lurpo -lpthread"
+export NEON_LIBS="-lintl"
 #%{__libtoolize} --install
 #%{__aclocal} -I macros
 %{__autoconf}
