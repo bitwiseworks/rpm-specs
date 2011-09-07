@@ -59,9 +59,10 @@ library (gettext headers).
 rm -rf $RPM_BUILD_ROOT
 mkdir -p %{buildroot}%{_usr}
 cp -r "*" %{buildroot}%{_usr}
-mkdir -p %{buildroot}%{_datadir}/doc/libc-0.6.3
-mv %{buildroot}%{_usr}/doc/gcc-3.3.5 %{buildroot}%{_datadir}/doc/libc-0.6.3
-#mv %{buildroot}%{_datadir}/doc/gcc-3.3.5 libc-0.6.3
+
+rm -r %{buildroot}%{_usr}/doc/gcc-3.3.5/*
+
+rexx2vio bin/dllar.cmd $RPM_BUILD_ROOT%{_bindir}/dllar.exe
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -69,7 +70,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root)
-%doc %{_datadir}/doc/*
+%doc doc/gcc-3.3.5/*
 /%{_libdir}/libc06*.dll
 
 %files devel
