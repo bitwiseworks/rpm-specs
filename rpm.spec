@@ -24,7 +24,7 @@
 Summary: The RPM package management system
 Name: rpm
 Version: %{rpmver}
-Release: 8%{?dist}
+Release: 9%{?dist}
 Group: System Environment/Base
 Url: http://www.rpm.org/
 Source0: http://rpm.org/releases/rpm-4.8.x/%{name}-%{srcver}.tar.bz2
@@ -52,8 +52,7 @@ Requires: pthread
 Requires: cpio
 Requires: cube
 
-Requires: libc >= 0.6.3
-Requires: mmap >= 20110104
+BuildRequires: rexx_exe
 
 %if %{without int_bdb}
 BuildRequires: db4-devel%{_isa}
@@ -396,6 +395,9 @@ rm -rf $RPM_BUILD_ROOT
 %{rpmhome}/desktop-file.prov
 %{rpmhome}/fontconfig.prov
 #%{rpmhome}/postscriptdriver.prov
+
+%{rpmhome}/wps-object.exe
+%{rpmhome}/warpin-conflicts.exe
 
 %{rpmhome}/macros.perl
 %{rpmhome}/macros.python
