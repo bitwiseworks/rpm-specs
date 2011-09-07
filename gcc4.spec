@@ -3,7 +3,7 @@
 Summary: Various compilers (C, C++, Objective-C, Java, ...)
 Name: gcc
 Version: %{gcc_version}
-Release: 6%{?dist}
+Release: 7%{?dist}
 
 # libgcc, libgfortran, libmudflap, libgomp, libstdc++ and crtstuff have
 # GCC Runtime Exception.
@@ -42,6 +42,24 @@ Group: System Environment/Libraries
 This package contains GCC shared library which is needed
 for stack protector.
 
+%package wlink
+Summary: GCC configuration changes for Watcom linker support.
+Group: Development/Languages
+Requires: watcom-wlink-hll
+
+%description wlink
+This package triggers the required config.sys settings to allow use of Watcom
+Linker instead of ld.
+
+%package wrc
+Summary: GCC configuration changes for Watcom resource compiler support.
+Group: Development/Languages
+Requires: watcom-wrc
+
+%description wrc
+This package triggers the required config.sys settings to allow use of Watcom
+resource compiler instead of IBM one.
+
 %prep
 %setup -q -c -a 1
 
@@ -68,6 +86,38 @@ ln -s /@unixroot/usr/libexec/gcc/i386-pc-os2-emx/4.4.4/cc1plus.exe %{buildroot}/
 
 %clean
 rm -rf %{buildroot}
+
+%post wrc
+if [ "$1" = 1 ] ; then
+#execute only on first install
+%cube {DELLINE "SET EMXOMFLD_RC="} c:\config.sys > NUL
+%cube {DELLINE "SET EMXOMFLD_RC_TYPE="} c:\config.sys > NUL
+%cube {ADDLINE "SET EMXOMFLD_RC=wrc.exe"} c:\config.sys > NUL
+%cube {ADDLINE "SET EMXOMFLD_RC_TYPE=WRC"} c:\config.sys > NUL
+fi
+
+%postun wrc
+if [ "$1" = 0 ] ; then
+#execute only on last uninstall
+%cube {DELLINE "SET EMXOMFLD_RC="} c:\config.sys > NUL
+%cube {DELLINE "SET EMXOMFLD_RC_TYPE="} c:\config.sys > NUL
+fi
+
+%post wlink
+if [ "$1" = 1 ] ; then
+#execute only on first install
+%cube {DELLINE "SET EMXOMFLD_LINKER="} c:\config.sys > NUL
+%cube {DELLINE "SET EMXOMFLD_TYPE="} c:\config.sys > NUL
+%cube {ADDLINE "SET EMXOMFLD_LINKER=wl.exe"} c:\config.sys > NUL
+%cube {ADDLINE "SET EMXOMFLD_TYPE=WLINK"} c:\config.sys > NUL
+fi
+
+%postun wlink
+if [ "$1" = 0 ] ; then
+#execute only on last uninstall
+%cube {DELLINE "SET EMXOMFLD_LINKER="} c:\config.sys > NUL
+%cube {DELLINE "SET EMXOMFLD_TYPE="} c:\config.sys > NUL
+fi
 
 %files
 %defattr(-,root,root,-)
