@@ -49,4 +49,5 @@ rm -rf %{buildroot}
 
 
 %changelog
-20110908 use a temporary name for resource files, fixes smp builds.
+* Thu Sep 08 2011 yd
+- use a temporary name for resource files, fixes smp builds.
