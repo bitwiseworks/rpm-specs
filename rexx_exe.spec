@@ -1,7 +1,7 @@
 Summary: Wrap REXX scrips into OS/2 PM or VIO executables
 Name: rexx_exe
 Version: 2006.04.10
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: None
 Group: System Environment/Shells
 Source: rexx_exe.zip
@@ -46,3 +46,7 @@ rm -rf %{buildroot}
 %{_bindir}/*.exe
 %doc doc/rexx_exe.txt
 %doc doc/autor.txt
+
+
+%changelog
+20110908 use a temporary name for resource files, fixes smp builds.
