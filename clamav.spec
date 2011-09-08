@@ -1,17 +1,20 @@
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.96.4
-Release:        3%{?dist}
+Version:	0.97.2
+Release:        4%{?dist}
 
 License:	proprietary
 Group:		Applications/File
 URL:		http://www.clamav.net
 Source0:	http://download.sourceforge.net/sourceforge/clamav/%name-%version%{?snapshot}.tar.gz
+Source1:	clamd.ico
+Source2:	ClamAV_ReadMe.txt
 
 Patch1:		clamav-os2.diff
 
 BuildRoot:	%_tmppath/%name-%version-%release-root
+
 Requires:	clamav-lib = %version-%release
 Requires:	data(clamav)
 
@@ -196,6 +199,10 @@ The SysV initscripts for clamav-scanner.
 %prep
 %setup -q -n %{name}-%{version}
 
+sed -e 's!_VERSION_!%version!g;' \
+    -e 's!_BUILD_!%release!g;' \
+    %{SOURCE2} > ReadMe.txt
+
 %patch1 -p1 -b .os2~
 
 #sed -ri \
@@ -245,6 +252,13 @@ rm -rf "$RPM_BUILD_ROOT" _doc*
 make DESTDIR="$RPM_BUILD_ROOT" install
 
 cp libclamav/clamav.dll $RPM_BUILD_ROOT%{_libdir}
+cp %{SOURCE1} $RPM_BUILD_ROOT%{_sbindir}
+
+#LogFile must be readable to submit stats
+sed -i 's!#LogFileUnlock yes!LogFileUnlock yes!g;' \
+    $RPM_BUILD_ROOT%{_sysconfdir}/clamd.conf
+
+
 rm $RPM_BUILD_ROOT%{_mandir}/man8/clamav-milter.8
 
 #install -d -m755 \
@@ -318,11 +332,47 @@ rm -f	${RPM_BUILD_ROOT}%_libdir/clamunrar*
 %clean
 rm -rf "$RPM_BUILD_ROOT"
 
+%post
+%wps_object_create_begin
+CLAMAV_README:WPShadow|Readme 1st|<CLAMAV_FOLDER>|SHADOWID=((%_defaultdocdir/%name-%version/ReadMe.txt))
+%wps_object_create_end
+
+%postun
+%wps_object_delete_all
+
+# -lib is installed first/uninstalled last, create folder here
+%post lib
+%wps_object_create_begin -n %{name}-lib
+CLAMAV_FOLDER:WPFolder|ClamAV %version|<WP_DESKTOP>|TITLE=ClamAV %version;
+%wps_object_create_end
+
+%postun lib
+%wps_object_delete_all -n %{name}-lib
+
+%post server
+%wps_object_create_begin -n %{name}-server
+CLAMAV_CLAMD:WPProgram|ClamAV daemon|<CLAMAV_FOLDER>|EXENAME=((%_sbindir/clamd.exe));STARTUPDIR=((%_sbindir));ICONFILE=((%_sbindir/clamd.ico));TITLE=ClamAV daemon;
+CLAMAV_CLAMD_CONF:WPShadow|clamd.conf|<CLAMAV_FOLDER>|SHADOWID=((%_sysconfdir/clamd.conf))
+%wps_object_create_end
+
+%postun server
+%wps_object_delete_all -n %{name}-server
+
+%post update
+%wps_object_create_begin -n %{name}-update
+CLAMAV_FRESHCLAM:WPProgram|Freshclam|<CLAMAV_FOLDER>|EXENAME=((%_bindir/freshclam.exe));STARTUPDIR=((%_bindir));TITLE=Freshclam;NOAUTOCLOSE=YES;
+CLAMAV_FRESHCLAM_CONF:WPShadow|freshclam.conf|<CLAMAV_FOLDER>|SHADOWID=((%_sysconfdir/freshclam.conf))
+%wps_object_create_end
+
+%postun update
+%wps_object_delete_all -n %{name}-update
+
 ## ------------------------------------------------------------
 
 %files
 %defattr(-,root,root,-)
 %doc AUTHORS BUGS COPYING ChangeLog FAQ NEWS README UPGRADE
+%doc ReadMe.txt
 %doc docs/*.pdf
 %_bindir/*
 %_mandir/man[15]/*
