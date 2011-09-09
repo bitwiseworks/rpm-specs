@@ -3,7 +3,7 @@
 Summary: Various compilers (C, C++, Objective-C, Java, ...)
 Name: gcc
 Version: %{gcc_version}
-Release: 3%{?dist}
+Release: 4%{?dist}
 # libgcc, libgfortran, libmudflap, libgomp, libstdc++ and crtstuff have
 # GCC Runtime Exception.
 License: GPLv3+ and GPLv3+ with exceptions and GPLv2+ with exceptions
@@ -35,7 +35,7 @@ e.g. for exception handling support.
 %install
 rm -rf $RPM_BUILD_ROOT
 mkdir -p %{buildroot}%{_usr}
-cp -r "*" %{buildroot}%{_usr}
+cp -p -r "*" %{buildroot}%{_usr}
 
 %clean
 rm -rf %{buildroot}

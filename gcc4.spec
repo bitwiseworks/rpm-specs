@@ -3,7 +3,7 @@
 Summary: Various compilers (C, C++, Objective-C, Java, ...)
 Name: gcc
 Version: %{gcc_version}
-Release: 8%{?dist}
+Release: 9%{?dist}
 
 # libgcc, libgfortran, libmudflap, libgomp, libstdc++ and crtstuff have
 # GCC Runtime Exception.
@@ -66,11 +66,11 @@ resource compiler instead of IBM one.
 %install
 rm -rf $RPM_BUILD_ROOT
 mkdir -p %{buildroot}%{_usr}
-cp -r usr/local444/* %{buildroot}%{_usr}/
+cp -p -r usr/local444/* %{buildroot}%{_usr}/
 
 mkdir -p %{buildroot}/%_docdir/%{name}-%{version}
-cp COPYING %{buildroot}%_docdir/%{name}-%{version}/
-cp COPYING.LGPL %{buildroot}%_docdir/%{name}-%{version}/
+cp -p COPYING %{buildroot}%_docdir/%{name}-%{version}/
+cp -p COPYING.LGPL %{buildroot}%_docdir/%{name}-%{version}/
 
 #cp ssp* %{buildroot}%{_libdir}
 #rm %{buildroot}%{_libdir}/ssp*.lib

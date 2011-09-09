@@ -4,7 +4,7 @@ License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Standard Shared Libraries
 Group:          System/Libraries
 Version:        0.6.3
-Release:        6%{?dist}
+Release:        7%{?dist}
 Url:            http://svn.netlabs.org/libc
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -58,7 +58,7 @@ library (gettext headers).
 %install
 rm -rf $RPM_BUILD_ROOT
 mkdir -p %{buildroot}%{_usr}
-cp -r "*" %{buildroot}%{_usr}
+cp -p -r "*" %{buildroot}%{_usr}
 
 rm -r %{buildroot}%{_usr}/doc/gcc-3.3.5/*
 

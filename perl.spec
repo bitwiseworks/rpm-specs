@@ -4,7 +4,7 @@
 
 Name:           perl
 Version:        %{perl_version}
-Release:        2%{?dist}
+Release:        3%{?dist}
 Epoch:          %{perl_epoch}
 Summary:        The Perl programming language
 Group:          Development/Languages
@@ -43,7 +43,7 @@ system to handle Perl scripts.
 rm -rf %{buildroot}
 mkdir -p %{buildroot}%{_bindir}
 
-cp usr/bin/perl %{buildroot}%{_bindir}
+cp -p usr/bin/perl %{buildroot}%{_bindir}
 
 %clean
 rm -rf %{buildroot}

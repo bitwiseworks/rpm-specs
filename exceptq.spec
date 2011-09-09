@@ -4,7 +4,7 @@
 Summary: Exceptq creates a debugging report.
 Name: exceptq
 Version: 7.1
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: custom
 Group: Development/Libraries
 Source: exceptq71.zip
@@ -52,13 +52,13 @@ mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_libdir}
 mkdir -p %{buildroot}%{_includedir}
 
-cp distorm.* %{buildroot}%{_libdir}
-cp exceptq.* %{buildroot}%{_libdir}
+cp -p distorm.* %{buildroot}%{_libdir}
+cp -p exceptq.* %{buildroot}%{_libdir}
 
-cp exceptq71-dev/mapxqs.* %{buildroot}%{_bindir}
-cp exceptq71-dev/demangl.dll %{buildroot}%{_libdir}
-cp %{SOURCE1} %{buildroot}%{_includedir}
-cp exceptq71-dev/exceptq.lib %{buildroot}%{_libdir}
+cp -p exceptq71-dev/mapxqs.* %{buildroot}%{_bindir}
+cp -p exceptq71-dev/demangl.dll %{buildroot}%{_libdir}
+cp -p %{SOURCE1} %{buildroot}%{_includedir}
+cp -p exceptq71-dev/exceptq.lib %{buildroot}%{_libdir}
 
 %clean
 rm -rf %{buildroot}

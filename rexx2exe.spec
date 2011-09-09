@@ -1,7 +1,7 @@
 Summary: Free rexx "compiler" (generates .EXE from .CMD)
 Name: rexx2exe
 Version: 99.349
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: None
 Group: System Environment/Shells
 Source: rexx2exe.zip
@@ -25,7 +25,7 @@ the generated code can be quite small.
 %install
 rm -rf %{buildroot}
 mkdir -p %{buildroot}/%{_bindir}
-cp rexx2exe.exe %{buildroot}/%{_bindir}
+cp -p rexx2exe.exe %{buildroot}/%{_bindir}
 
 
 %clean

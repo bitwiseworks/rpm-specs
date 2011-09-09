@@ -2,7 +2,7 @@
 Summary: Netlabs Experimental Repository
 Name: netlabs-exp
 Version: 0.0.0
-Release: 2%{?dist}
+Release: 3%{?dist}
 
 License: free
 
@@ -22,7 +22,7 @@ Use with caution, packages on this repository are not considered stable versions
 
 %install
 mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/yum/repos.d
-cp netlabs-exp.repo $RPM_BUILD_ROOT/%{_sysconfdir}/yum/repos.d/
+cp -p netlabs-exp.repo $RPM_BUILD_ROOT/%{_sysconfdir}/yum/repos.d/
 
 %clean
 rm -rf $RPM_BUILD_ROOT

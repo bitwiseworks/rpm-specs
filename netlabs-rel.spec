@@ -2,7 +2,7 @@
 Summary: Netlabs Stable Repository
 Name: netlabs-rel
 Version: 0.0.0
-Release: 2%{?dist}
+Release: 3%{?dist}
 
 License: free
 
@@ -22,7 +22,7 @@ Use with caution, packages on this repository are not considered stable versions
 
 %install
 mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/yum/repos.d
-cp netlabs-rel.repo $RPM_BUILD_ROOT/%{_sysconfdir}/yum/repos.d/
+cp -p netlabs-rel.repo $RPM_BUILD_ROOT/%{_sysconfdir}/yum/repos.d/
 
 %clean
 rm -rf $RPM_BUILD_ROOT

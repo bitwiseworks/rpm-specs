@@ -1,7 +1,7 @@
 Summary: Watcom Compiler tools for gcc
 Name: watcom
 Version: 1.6
-Release: 1
+Release: 2
 License: none
 
 Group: Development/Languages
@@ -29,8 +29,8 @@ Watcom Compiler resource compiler.
 %install
 rm -rf %{buildroot}
 mkdir -p $RPM_BUILD_ROOT/%{_bindir}
-cp wrc.exe $RPM_BUILD_ROOT%{_bindir}
-cp wl.exe $RPM_BUILD_ROOT%{_bindir}
+cp -p wrc.exe $RPM_BUILD_ROOT%{_bindir}
+cp -p wl.exe $RPM_BUILD_ROOT%{_bindir}
 
 %clean
 rm -rf %{buildroot}

@@ -1,7 +1,7 @@
 Summary: Wrap REXX scrips into OS/2 PM or VIO executables
 Name: rexx_exe
 Version: 2006.04.10
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: None
 Group: System Environment/Shells
 Source: rexx_exe.zip
@@ -31,10 +31,10 @@ Features of this implementation:
 %install
 rm -rf %{buildroot}
 mkdir -p %{buildroot}/%{_bindir}
-cp exe/rexx_pm.exe %{buildroot}/%{_bindir}
-cp exe/rexx_vio.exe %{buildroot}/%{_bindir}
-cp exe/rexx2pm.exe %{buildroot}/%{_bindir}
-cp exe/rexx2vio.exe %{buildroot}/%{_bindir}
+cp -p exe/rexx_pm.exe %{buildroot}/%{_bindir}
+cp -p exe/rexx_vio.exe %{buildroot}/%{_bindir}
+cp -p exe/rexx2pm.exe %{buildroot}/%{_bindir}
+cp -p exe/rexx2vio.exe %{buildroot}/%{_bindir}
 
 
 %clean

@@ -4,7 +4,7 @@
 Summary: EMX runtime
 Name: emxrt
 Version: 0.9d
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: free software
 Group: Development/Languages
 Source0: emxrt.zip
@@ -30,10 +30,10 @@ mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_libdir}
 mkdir -p %{buildroot}%{_defaultdocdir}/emxrt
 
-cp emx/bin/* %{buildroot}%{_bindir}
-cp emx/book/* %{buildroot}%{_defaultdocdir}/emxrt
-cp emx/doc/* %{buildroot}%{_defaultdocdir}/emxrt
-cp emx/dll/* %{buildroot}%{_libdir}
+cp -p emx/bin/* %{buildroot}%{_bindir}
+cp -p emx/book/* %{buildroot}%{_defaultdocdir}/emxrt
+cp -p emx/doc/* %{buildroot}%{_defaultdocdir}/emxrt
+cp -p emx/dll/* %{buildroot}%{_libdir}
 
 %clean
 rm -rf %{buildroot}
