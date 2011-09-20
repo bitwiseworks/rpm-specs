@@ -97,7 +97,8 @@ This is a dummy package which brings in all subpackages.
 %package daemon
 Summary:        Git protocol dæmon
 Group:          Development/Tools
-Requires:       git = %{version}-%{release}, xinetd
+Requires:       git = %{version}-%{release}
+#Requires:       xinetd
 %description daemon
 The git dæmon for supporting git:// access to git repositories
 
