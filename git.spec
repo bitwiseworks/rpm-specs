@@ -9,7 +9,7 @@
 
 Name:           git
 Version:        1.7.6.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Fast Version Control System
 License:        GPLv2
 Group:          Development/Tools
