@@ -1,7 +1,7 @@
 Summary: A posix pthread emulation for OS/2-eComStation
 Name: pthread
-Version: 20110826
-Release: 6%{?dist}
+Version: 20110922
+Release: 7%{?dist}
 License: unknown
 Group: Development/Libraries
 Source: pthread-%{version}-os2.zip
@@ -62,3 +62,7 @@ rm -rf %{buildroot}
 %files legacy
 %defattr(-,root,root)
 %{_libdir}/pthread.dll
+
+%changelog
+* Thu Sep 22 2011 yd
+- enable high memory access for library, otherwise every app using it is forced to use low memory (see git).
