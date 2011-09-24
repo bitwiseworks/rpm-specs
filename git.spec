@@ -9,7 +9,7 @@
 
 Name:           git
 Version:        1.7.6.1
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Fast Version Control System
 License:        GPLv2
 Group:          Development/Tools
@@ -451,3 +451,12 @@ rm -rf %{buildroot}
 # No files for you!
 
 %changelog
+* Sat Sep 24 2011 yd
+- symlink script files to exe, so execvp can find them.
+- ignore CR while reading CRLF terminated text files.
+
+* Tue Sep 20 2011 yd
+- disable broken_path_fix macro.
+
+* Mon Sep 19 2011 yd
+- use bigger stack for threads; use socketpair instead of pipes.
