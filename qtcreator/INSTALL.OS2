@@ -1,0 +1,97 @@
+This is part of the ZIP distribution of Qt Creator for OS/2.
+
+This package contains the Qt Creator application and its documentation.
+
+This file contains installation instructions for this package. For more
+information about Qt Creator for OS/2, please visit the project page at
+
+  http://github.com/dmik/qt-creator-os2/wiki
+
+
+
+BEFORE YOU BEGIN
+
+Please note that it is recommended to install Qt Creator from the RPM
+repositories. This will allow you to always have an up-to-date version of
+Qt Creator installed on your machine including all its requirements. If you
+have RPM already installed and need the Qt runtime for an application that
+is also in RPM repositories, simply type the following on the command line:
+
+  yum install qtcreator qtcreator-doc
+
+All the required Qt libraries will be installed automatically.
+
+Note though that the GCC compiler will not be installed automatically in
+this case (because the version contained in the RPM repositories has some
+limitations). You will need to install it manually as desribed below and
+make sure it can be found in PATH when Qt Creator is started.
+
+To get more information about installing RPM, please visit
+
+  http://svn.netlabs.org/rpm
+
+
+
+REQUIREMENTS
+
+  - A OS/2 Warp 4 Fixpack 16+, OS/2 Warp 4.5 or eComStation operating system.
+
+  - LIBC library version 0.6.3:
+
+    ftp://ftp.netlabs.org/pub/libc/libc-0_6_3-csd3.wpi
+
+  - GCC 4 Core Libraries:
+
+    ftp://ftp.netlabs.org/pub/gcc/gcc4core.wpi
+
+  - GCC compiler version 4.4.2 for OS/2, patched OpenWatcom linker and
+    GNU Make 3.81beta1 or above. The GCC compiler must be set up to use the
+    OpenWatcom linker for linking.
+
+    If you do not have a working GCC environment with the above requirements, it
+    is recommended to download a ready-to-use GCC 4.2.2 distribution from here:
+
+      ftp://ftp.netlabs.org/pub/qt4/gcc-4_4_2-complete-20091205.zip
+
+    This distribution includes all tools necessary to compile and build the Qt
+    library from the source code. Just follow the installation instructions
+    contained in the README file inside this ZIP archive to set up the GCC
+    environment.
+
+
+
+INSTALLATION
+
+  1. Make sure you do not have a previous version of Qt Creator installed from
+     either a ZIP, or RPM distribution. Uninstall it if necessary.
+
+  2. Unzip the contents of this archive to a directory of your choice,
+     e.g. "C:\QtCreator".
+
+  3. Start Qt Creator by launching "C:\QtCreator\bin\qtcreator.exe".
+
+
+
+CREDITS
+
+Dmitriy Kuminov (development)
+Rudi Ihle (development)
+Silvan Scherrer (management)
+
+netlabs.org (hosting & support)
+
+Nokia Corporation (original Qt Creator)
+
+We also want to THANK all individuals and organizations who made the donations
+to this project and helped to make it happen. Please visit
+
+  http://qt.netlabs.org/en/site/index.xml
+
+to get the full list of sponsors and to find information on how you can support
+the project.
+
+
+Qt is a trademark of Nokia Corporation and/or its subsidiary(-ies).
+OS/2 and OS/2 Warp are trademarks of the IBM Corporation and/or its subsidiary(-ies).
+eComStation is a trademark of Serenity Systems International and/or its subsidiary(-ies).
+Etc.
