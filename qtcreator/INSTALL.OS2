@@ -49,7 +49,7 @@ REQUIREMENTS
     OpenWatcom linker for linking.
 
     If you do not have a working GCC environment with the above requirements, it
-    is recommended to download a ready-to-use GCC 4.2.2 distribution from here:
+    is recommended to download a ready-to-use GCC 4.4.2 distribution from here:
 
       ftp://ftp.netlabs.org/pub/qt4/gcc-4_4_2-complete-20091205.zip
 
