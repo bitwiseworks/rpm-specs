@@ -3,7 +3,7 @@
 Summary: Various compilers (C, C++, Objective-C, Java, ...)
 Name: gcc
 Version: %{gcc_version}
-Release: 4%{?dist}
+Release: 5%{?dist}
 # libgcc, libgfortran, libmudflap, libgomp, libstdc++ and crtstuff have
 # GCC Runtime Exception.
 License: GPLv3+ and GPLv3+ with exceptions and GPLv2+ with exceptions
@@ -30,15 +30,25 @@ This package contains GCC shared support library which is needed
 e.g. for exception handling support.
 
 %prep
-%setup -q -n gcc-%{version}
+%setup -q -c
+
 
 %install
 rm -rf $RPM_BUILD_ROOT
-mkdir -p %{buildroot}%{_usr}
-cp -p -r "*" %{buildroot}%{_usr}
+mkdir -p %{buildroot}%{_bindir}
+mkdir -p %{buildroot}%{_includedir}
+mkdir -p %{buildroot}%{_libdir}
+mkdir -p %{buildroot}%{_usr}/man
+mkdir -p %{buildroot}%{_usr}/share
+cp -p -r "usr/bin/*" %{buildroot}%{_bindir}
+cp -p -r "usr/include/*" %{buildroot}%{_includedir}
+cp -p -r "usr/lib/*" %{buildroot}%{_libdir}
+cp -p -r "usr/man/*" %{buildroot}%{_usr}/man
+cp -p -r "usr/share/*" %{buildroot}%{_usr}/share
 
 %clean
 rm -rf %{buildroot}
+
 
 %files
 %defattr(-,root,root,-)
@@ -53,6 +63,9 @@ rm -rf %{buildroot}
 %files -n libgcc335
 %defattr(-,root,root,-)
 %{_libdir}/gcc335.dll
-%doc %{_datadir}/doc/*
+%doc usr/doc/gcc-3.3.5/*
+
 
 %changelog
+* Tue Sep 04 2011 yd
+- update to csd4
