@@ -9,7 +9,7 @@
 
 Name:           git
 Version:        1.7.6.1
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        Fast Version Control System
 License:        GPLv2
 Group:          Development/Tools
@@ -453,6 +453,7 @@ rm -rf %{buildroot}
 %changelog
 * Wed Sep 28 2011 yd
 - fixed build patches.
+- fixed expat support.
 
 * Sat Sep 24 2011 yd
 - symlink script files to exe, so execvp can find them.
