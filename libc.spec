@@ -4,7 +4,7 @@ License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Standard Shared Libraries
 Group:          System/Libraries
 Version:        0.6.4
-Release:        8%{?dist}
+Release:        9%{?dist}
 Url:            http://svn.netlabs.org/libc
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -107,5 +107,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/libintl.h
 
 %changelog
+* Wed Sep 05 2011 yd
+- removed binutils
+
 * Tue Sep 04 2011 yd
 - update to csd4
