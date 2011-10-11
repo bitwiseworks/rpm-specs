@@ -1,13 +1,12 @@
 Summary: A posix pthread emulation for OS/2-eComStation
 Name: pthread
-Version: 20110922
-Release: 7%{?dist}
+Version: 20111011
+Release: 8%{?dist}
 License: unknown
 Group: Development/Libraries
 Source: pthread-%{version}-os2.zip
 Source1: pthread-legacy-os2.zip
 
-Requires: libc >= 0.6.3
 
 %description
 A posix pthread emulation library.
@@ -64,5 +63,10 @@ rm -rf %{buildroot}
 %{_libdir}/pthread.dll
 
 %changelog
+* Thu Oct 11 2011 yd
+- exception record must be on stack
+- always uninstall record from running thread
+- use new LibLoadExceptq to enable exceptq only if main app loads it. Code by Rich Walsh.
+
 * Thu Sep 22 2011 yd
 - enable high memory access for library, otherwise every app using it is forced to use low memory (see git).
