@@ -3,7 +3,7 @@
 Summary: Various compilers (C, C++, Objective-C, Java, ...)
 Name: gcc
 Version: %{gcc_version}
-Release: 9%{?dist}
+Release: 10%{?dist}
 
 # libgcc, libgfortran, libmudflap, libgomp, libstdc++ and crtstuff have
 # GCC Runtime Exception.
@@ -20,6 +20,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-root-%(%{__id_u} -n)
 Obsoletes: gcc < %{gcc_version}
 Requires: libgcc444 = %{gcc_version}
 Requires: libc-devel >= 0.6.3
+Requires: binutils
 
 %description
 The gcc package contains the GNU Compiler Collection version 4.4.
@@ -80,9 +81,11 @@ mv %{buildroot}%{_usr}/gcc444.cmd $RPM_BUILD_ROOT%_docdir/%{name}-%{version}/
 mv %{buildroot}%{_usr}/readme.os2 $RPM_BUILD_ROOT%_docdir/%{name}-%{version}/
 mv %{buildroot}%{_usr}/stdio.diff $RPM_BUILD_ROOT%_docdir/%{name}-%{version}/
 
-ln -s /@unixroot/usr/libexec/gcc/i386-pc-os2-emx/4.4.4/cc1.exe %{buildroot}/@unixroot/usr/bin/cc1.exe
-ln -s /@unixroot/usr/libexec/gcc/i386-pc-os2-emx/4.4.4/cc1plus.exe %{buildroot}/@unixroot/usr/bin/cc1plus.exe
+ln -s /@unixroot/usr/libexec/gcc/i386-pc-os2-emx/4.4.4/cc1.exe %{buildroot}%{_bindir}/cc1.exe
+ln -s /@unixroot/usr/libexec/gcc/i386-pc-os2-emx/4.4.4/cc1plus.exe %{buildroot}%{_bindir}/cc1plus.exe
 
+#yd fix attributes for executables
+chmod 0755 %{buildroot}%{_bindir}/*.exe
 
 %clean
 rm -rf %{buildroot}

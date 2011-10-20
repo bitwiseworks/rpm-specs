@@ -3,7 +3,7 @@
 Summary: Various compilers (C, C++, Objective-C, Java, ...)
 Name: gcc
 Version: %{gcc_version}
-Release: 5%{?dist}
+Release: 6%{?dist}
 # libgcc, libgfortran, libmudflap, libgomp, libstdc++ and crtstuff have
 # GCC Runtime Exception.
 License: GPLv3+ and GPLv3+ with exceptions and GPLv2+ with exceptions
@@ -13,8 +13,9 @@ URL: http://gcc.gnu.org
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-root-%(%{__id_u} -n)
 
-Requires: libgcc = %{gcc_version}
+Requires: libgcc335 = %{gcc_version}
 Requires: libc-devel >= 0.6.3
+Requires: binutils
 
 %description
 The gcc package contains the GNU Compiler Collection version 4.4.
