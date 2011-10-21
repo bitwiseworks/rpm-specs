@@ -4,7 +4,7 @@ License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Standard Shared Libraries
 Group:          System/Libraries
 Version:        0.6.4
-Release:        10%{?dist}
+Release:        11%{?dist}
 Url:            http://svn.netlabs.org/libc
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -68,6 +68,7 @@ mkdir -p %{buildroot}%{_usr}/info
 cp -p -r "usr/bin/*" %{buildroot}%{_bindir}
 cp -p -r "usr/include/*" %{buildroot}%{_includedir}
 cp -p -r "include/*" %{buildroot}%{_includedir}
+cp -p -r "emxomf.exe" %{buildroot}%{_bindir}
 cp -p -r "usr/lib/*" %{buildroot}%{_libdir}
 cp -p -r "usr/man/*" %{buildroot}%{_usr}/i386-pc-os2-elf
 cp -p -r "usr/man/*" %{buildroot}%{_usr}/i386-pc-os2-emx
@@ -108,6 +109,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/libintl.h
 
 %changelog
+* Thu Oct 20 2011 yd
+- included emxomf.exe by dmik to workaround gcc/wlink bugs.
+
 * Wed Oct 12 2011 yd
 - fixed mmap include
 
