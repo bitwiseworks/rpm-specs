@@ -1,7 +1,7 @@
 Summary: A memory mapped emulation for OS/2-eComStation
 Name: mmap
-Version: 20110111
-Release: 7%{?dist}
+Version: 20111102
+Release: 8%{?dist}
 License: unknown
 Group: Development/Libraries
 Source: mmap-%{version}-os2.zip
@@ -16,16 +16,20 @@ A memory mapped files emulation library.
 
 
 %build
+export KCFLAGS="%{optflags}"
+kmk -C src
+kmk -C src install
+kmk -C src build
 
 %install
 rm -rf %{buildroot}
 mkdir -p %{buildroot}%{_libdir}
 mkdir -p %{buildroot}%{_includedir}
 
-cp bin/mmap.dll %{buildroot}%{_libdir}
-cp lib/mmap_dll.a %{buildroot}%{_libdir}/mmap.a
-cp lib/mmap_s.lib %{buildroot}%{_libdir}
-cp lib/mmap_g.lib %{buildroot}%{_libdir}
+cp mmap.dll %{buildroot}%{_libdir}
+cp mmap_dll.a %{buildroot}%{_libdir}/mmap.a
+cp mmap_s.lib %{buildroot}%{_libdir}
+cp mmap_g.lib %{buildroot}%{_libdir}
 
 %clean
 rm -rf %{buildroot}
@@ -33,3 +37,9 @@ rm -rf %{buildroot}
 %files
 %defattr(-,root,root)
 %{_libdir}/*
+
+%changelog
+* Wed Nov 02 2011 yd
+- added -Zdll to build system
+- improved build system
+- included wpstk source code

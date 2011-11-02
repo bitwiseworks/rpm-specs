@@ -1,7 +1,7 @@
 Summary: A posix pthread emulation for OS/2-eComStation
 Name: pthread
-Version: 20111011
-Release: 8%{?dist}
+Version: 20111102
+Release: 9%{?dist}
 License: unknown
 Group: Development/Libraries
 Source: pthread-%{version}-os2.zip
@@ -32,6 +32,7 @@ The previous posix pthread emulation library.
 %build
 export KCFLAGS="%{optflags}"
 kmk -C src
+kmk -C src install
 kmk -C src build
 
 %install
@@ -63,6 +64,10 @@ rm -rf %{buildroot}
 %{_libdir}/pthread.dll
 
 %changelog
+* Wed Nov 02 2011 yd
+- added -Zdll to build system
+- improved build system
+
 * Thu Oct 11 2011 yd
 - exception record must be on stack
 - always uninstall record from running thread
