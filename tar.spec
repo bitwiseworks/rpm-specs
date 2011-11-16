@@ -2,7 +2,7 @@ Summary: A GNU file archiving program
 Name: tar
 Epoch: 2
 Version: 1.23
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: GPLv3+
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/tar/
@@ -42,15 +42,17 @@ export CONFIG_SHELL="/bin/sh"
 export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 export LIBS="-lintl -lurpo"
 %configure \
-    --bindir=/@unixroot/bin --libexecdir=/@unixroot/sbin \
     "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
 make %{?_smp_mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT
-make DESTDIR=$RPM_BUILD_ROOT bindir=/@unixroot/bin libexecdir=/@unixroot/sbin install
+make DESTDIR=$RPM_BUILD_ROOT install
 
-ln -s tar.exe ${RPM_BUILD_ROOT}/@unixroot/bin/gtar.exe
+mkdir -p ${RPM_BUILD_ROOT}/@unixroot/bin
+ln -s %{_bindir}/tar.exe ${RPM_BUILD_ROOT}/@unixroot/bin/tar
+ln -s %{_bindir}/tar.exe ${RPM_BUILD_ROOT}/@unixroot/bin/tar.exe
+ln -s %{_bindir}/tar.exe ${RPM_BUILD_ROOT}/@unixroot/bin/gtar.exe
 rm -f $RPM_BUILD_ROOT/%{_infodir}/dir
 mkdir -p ${RPM_BUILD_ROOT}%{_mandir}/man1
 #install -c -p -m 0644 %{SOURCE2} ${RPM_BUILD_ROOT}%{_mandir}/man1
@@ -86,8 +88,11 @@ rm -rf ${RPM_BUILD_ROOT}
 %defattr(-,root,root)
 %doc AUTHORS ChangeLog ChangeLog.1 COPYING NEWS README THANKS TODO
 /@unixroot/bin/*
+%{_bindir}/*
 %{_mandir}/man*/*
 %{_infodir}/tar.info*
 %{_usr}/share/locale/*
 
 %changelog
+* Wed Nov 16 2011 yd
+- keep all executables to /usr/bin and place symlinks in /bin
