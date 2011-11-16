@@ -1,7 +1,7 @@
 Summary: A smaller version of the Bourne shell (sh).
 Name: ash
 Version: 0.0.0
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: BSD
 Group: System Environment/Shells
 Source: ash.zip
@@ -63,8 +63,8 @@ mkdir -p %{buildroot}/@unixroot/bin
 mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_mandir}/man1
 
-cp -p bin/ash.exe %{buildroot}/@unixroot/bin/sh.exe
-ln -s sh.exe %{buildroot}/@unixroot/bin/sh
+cp -p bin/ash.exe %{buildroot}%{_bindir}/sh.exe
+ln -s %{_bindir}/sh.exe %{buildroot}/@unixroot/bin/sh
 
 cp -p usr/man/man1/ash.1.gz %{buildroot}%{_mandir}/man1/ash.1.gz
 
@@ -109,6 +109,10 @@ rm -rf %{buildroot}
 %files
 %defattr(-,root,root)
 /@unixroot/bin/sh
-/@unixroot/bin/sh.exe
+%{_bindir}/sh.exe
 #/bin/bsh
 %{_mandir}/man1/*
+
+%changelog
+* Wed Nov 16 2011 yd
+- keep all executables to /usr/bin and place symlinks in /bin
