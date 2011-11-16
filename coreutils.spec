@@ -3,7 +3,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.6
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -126,20 +126,20 @@ bzip2 -9f ChangeLog
 
 # let be compatible with old fileutils, sh-utils and textutils packages :
 mkdir -p $RPM_BUILD_ROOT/@unixroot/bin
-mkdir -p $RPM_BUILD_ROOT/@unixroot/sbin
+#mkdir -p $RPM_BUILD_ROOT/@unixroot/sbin
 mkdir -p $RPM_BUILD_ROOT%{_bindir}
 mkdir -p $RPM_BUILD_ROOT%{_sbindir}
 %{?!nopam:mkdir -p $RPM_BUILD_ROOT%_sysconfdir/pam.d}
 for f in basename cat chgrp chmod chown cp cut date dd df echo env false link ln ls mkdir mknod mktemp mv nice pwd readlink rm rmdir sleep sort stty sync touch true uname unlink
 do
-    mv $RPM_BUILD_ROOT%_bindir/$f.exe $RPM_BUILD_ROOT/@unixroot/bin/$f.exe
+    ln -s /@unixroot/usr/bin/$f.exe $RPM_BUILD_ROOT/@unixroot/bin/$f
 done
 
 # chroot was in /usr/sbin :
 mv $RPM_BUILD_ROOT%_bindir/chroot.exe $RPM_BUILD_ROOT%_sbindir/chroot.exe
 
 # {env,cut,readlink} were previously moved from /usr/bin to /bin and linked into
-for i in env cut readlink; do ln -sf ../../bin/$i.exe $RPM_BUILD_ROOT/@unixroot/usr/bin/$i; done
+#for i in env cut readlink; do ln -sf ../../bin/$i.exe $RPM_BUILD_ROOT/@unixroot/usr/bin/$i; done
 
 #mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/profile.d
 #install -p -c -m644 %SOURCE101 $RPM_BUILD_ROOT%{_sysconfdir}/DIR_COLORS
@@ -148,8 +148,12 @@ for i in env cut readlink; do ln -sf ../../bin/$i.exe $RPM_BUILD_ROOT/@unixroot/
 #install -p -c -m644 %SOURCE105 $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/colorls.sh
 #install -p -c -m644 %SOURCE106 $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/colorls.csh
 
+# yd rename dir.exe to dir-unix.exe and place a symlink for script compatibility
+mv $RPM_BUILD_ROOT%_bindir/dir.exe $RPM_BUILD_ROOT%_bindir/dir-unix.exe
+ln -s /@unixroot/usr/bin/dir-unix.exe $RPM_BUILD_ROOT%_bindir/dir
+
 # su
-install -m 4755 src/su.exe $RPM_BUILD_ROOT/@unixroot/bin
+install -m 4755 src/su.exe $RPM_BUILD_ROOT/@unixroot/usr/bin
 #install -m 755 src/runuser $RPM_BUILD_ROOT/sbin
 # do not ship runuser in /usr/bin/runuser
 #rm -rf $RPM_BUILD_ROOT/usr/bin/runuser
@@ -220,7 +224,7 @@ rm -rf $RPM_BUILD_ROOT
 #%{?!nopam:%config(noreplace) %{_sysconfdir}/pam.d/runuser}
 #%{?!nopam:%config(noreplace) %{_sysconfdir}/pam.d/runuser-l}
 %doc COPYING ABOUT-NLS ChangeLog.bz2 NEWS README THANKS TODO old/*
-/@unixroot/bin/*.exe
+/@unixroot/bin/*
 %_bindir/*
 %_infodir/coreutils*
 #%_mandir/man*/*
@@ -233,3 +237,6 @@ rm -rf $RPM_BUILD_ROOT
 #%{_libdir}/coreutils
 
 %changelog
+* Wed Nov 16 2011 yd
+- rename dir.exe to dir-unix.exe and add symlink
+- keep all executables to /usr/bin and place symlinks in /bin
