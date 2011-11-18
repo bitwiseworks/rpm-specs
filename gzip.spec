@@ -1,7 +1,7 @@
 Summary: The GNU data compression program
 Name: gzip
 Version: 1.4
-Release: 4%{?dist}
+Release: 5%{?dist}
 # info pages are under GFDL license
 License: GPLv3+ and GFDL
 Group: Applications/File
@@ -57,7 +57,6 @@ export DEFS="NO_ASM"
 export CPPFLAGS="-DHAVE_LSTAT"
 export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zexe -Zargs-wild -Zargs-resp"
 %configure \
-        --bindir=/@unixroot/bin \
         "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
 
 make %{?smp_mflags}
@@ -65,18 +64,27 @@ make %{?smp_mflags}
 
 %install
 rm -rf ${RPM_BUILD_ROOT}
-%makeinstall  bindir=${RPM_BUILD_ROOT}/@unixroot/bin
+%makeinstall
+mkdir -p ${RPM_BUILD_ROOT}/@unixroot/bin
 mkdir -p ${RPM_BUILD_ROOT}%{_bindir}
 #make DESTDIR=${RPM_BUILD_ROOT} install
 
-#rm ${RPM_BUILD_ROOT}%{_libdir}/charset.alias
+rm ${RPM_BUILD_ROOT}%{_libdir}/charset.alias
 
-#cp ${RPM_BUILD_ROOT}%{_bindir}/gzip.exe ${RPM_BUILD_ROOT}%{_bindir}/gunzip.exe
-#cp ${RPM_BUILD_ROOT}%{_bindir}/gzip.exe ${RPM_BUILD_ROOT}%{_bindir}/uncomress.exe
+rm ${RPM_BUILD_ROOT}%{_bindir}/gunzip
+rm ${RPM_BUILD_ROOT}%{_bindir}/uncompress
+cp -p ${RPM_BUILD_ROOT}%{_bindir}/gzip.exe ${RPM_BUILD_ROOT}%{_bindir}/gunzip.exe
+cp -p ${RPM_BUILD_ROOT}%{_bindir}/gzip.exe ${RPM_BUILD_ROOT}%{_bindir}/uncompress.exe
 
-for i in  zcmp zegrep zforce zless znew gzexe zdiff zfgrep zgrep zmore ; do
-    mv ${RPM_BUILD_ROOT}/@unixroot/bin/$i ${RPM_BUILD_ROOT}%{_bindir}/$i
-done
+#for i in  zcmp zegrep zforce zless znew gzexe zdiff zfgrep zgrep zmore ; do
+#    mv ${RPM_BUILD_ROOT}/@unixroot/bin/$i ${RPM_BUILD_ROOT}%{_bindir}/$i
+#done
+
+# yd place a symlink for script compatibility
+ln -s /@unixroot/usr/bin/uncompress.exe $RPM_BUILD_ROOT/@unixroot/bin/uncompress
+ln -s /@unixroot/usr/bin/zcat $RPM_BUILD_ROOT/@unixroot/bin/zcat
+ln -s /@unixroot/usr/bin/gunzip.exe $RPM_BUILD_ROOT/@unixroot/bin/gunzip
+ln -s /@unixroot/usr/bin/gzip.exe $RPM_BUILD_ROOT/@unixroot/bin/gzip
 
 gzip -9nf ${RPM_BUILD_ROOT}%{_infodir}/gzip.info*
 
@@ -109,3 +117,5 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_infodir}/gzip.info*
 
 %changelog
+* Fri Nov 18 2011 yd
+- keep all executables to /usr/bin and place symlinks in /bin
