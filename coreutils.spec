@@ -3,7 +3,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.6
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -139,7 +139,7 @@ done
 mv $RPM_BUILD_ROOT%_bindir/chroot.exe $RPM_BUILD_ROOT%_sbindir/chroot.exe
 
 # {env,cut,readlink} were previously moved from /usr/bin to /bin and linked into
-#for i in env cut readlink; do ln -sf ../../bin/$i.exe $RPM_BUILD_ROOT/@unixroot/usr/bin/$i; done
+for i in env cut readlink; do ln -sf /@unixroot/usr/bin/$i.exe $RPM_BUILD_ROOT/@unixroot/usr/bin/$i; done
 
 #mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/profile.d
 #install -p -c -m644 %SOURCE101 $RPM_BUILD_ROOT%{_sysconfdir}/DIR_COLORS
@@ -237,6 +237,9 @@ rm -rf $RPM_BUILD_ROOT
 #%{_libdir}/coreutils
 
 %changelog
+* Fri Nov 18 2011 yd
+- restored env symlink and others (python wants them).
+
 * Wed Nov 16 2011 yd
 - rename dir.exe to dir-unix.exe and add symlink
 - keep all executables to /usr/bin and place symlinks in /bin
