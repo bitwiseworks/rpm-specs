@@ -3,13 +3,14 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.6
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 Source0: ftp://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
+Source1: coreutils-chown-os2.c
 
 Patch1: coreutils-os2.diff
 
@@ -66,6 +67,8 @@ the old GNU fileutils, sh-utils, and textutils packages.
 
 %patch1 -p1 -b .os2~
 
+cp %{SOURCE1} lib/chown-os2.c
+
 #chmod a+x tests/misc/sort-mb-tests
 
 #fix typos/mistakes in localized documentation(#439410, #440056)
@@ -75,7 +78,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 
 %build
 
-export CONFIG_SHELL="/bin/sh"
+export CONFIG_SHELL="/@unixroot/usr/bin/sh"
 export CFLAGS="$RPM_OPT_FLAGS -fno-strict-aliasing"
 export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf"
 export LIBS="-lintl -lurpo"
@@ -237,6 +240,9 @@ rm -rf $RPM_BUILD_ROOT
 #%{_libdir}/coreutils
 
 %changelog
+* Sun Nov 20 2011 yd
+- fixed chown/chgrp, wildcard expansion for ls/touch.
+
 * Fri Nov 18 2011 yd
 - restored env symlink and others (python wants them).
 
