@@ -24,7 +24,7 @@
 Summary: The RPM package management system
 Name: rpm
 Version: %{rpmver}
-Release: 12%{?dist}
+Release: 13%{?dist}
 Group: System Environment/Base
 Url: http://www.rpm.org/
 Source0: http://rpm.org/releases/rpm-4.8.x/%{name}-%{srcver}.tar.bz2
@@ -205,7 +205,7 @@ ln -s db-%{bdbver} db
 # Using configure macro has some unwanted side-effects on rpm platform
 # setup, use the old-fashioned way for now only defining minimal paths.
 RPM_MKDIR="/@unixroot/usr/bin/mkdir.exe" ; export RPM_MKDIR ; \
-CONFIG_SHELL="/bin/sh" ; export CONFIG_SHELL ; \
+CONFIG_SHELL="/@unixroot/usr/bin/sh" ; export CONFIG_SHELL ; \
 LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp" ; export LDFLAGS ; \
 LIBS="-lintl -lurpo -lmmap" ; export LIBS ; \
 CFLAGS="%{optflags} -I/@unixroot/usr/include/nss3 -I/@unixroot/usr/include/nspr4" ; \
@@ -458,5 +458,8 @@ rm -rf $RPM_BUILD_ROOT
 #%doc doc/librpm/html/*
 
 %changelog
+* Sun Nov 20 2011 yd
+- use shell in /usr/bin.
+
 * Fri Nov 18 2011 yd
 - keep all executables to /usr/bin and place symlinks in /bin
