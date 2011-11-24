@@ -2,7 +2,7 @@
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.97.2
-Release:        4%{?dist}
+Release:        5%{?dist}
 
 License:	proprietary
 Group:		Applications/File
@@ -224,7 +224,7 @@ sed -e 's!_VERSION_!%version!g;' \
 
 %build
 # YD use sh for libtool, bash fails!
-export CONFIG_SHELL="/bin/sh"
+export CONFIG_SHELL="/@unixroot/usr/bin/sh"
 export CFLAGS="$RPM_OPT_FLAGS -Wall -W -Wmissing-prototypes -Wmissing-declarations"
 export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 export LIBS="-lurpo -lmmap -lpthread"
@@ -232,6 +232,7 @@ export LIBS="-lurpo -lmmap -lpthread"
     --disable-milter \
     --disable-rpath \
     --with-dbdir=/@unixroot/var/lib/clamav \
+    --with-zlib=/@unixroot/usr \
     --enable-languages=c --disable-ltdl-install --disable-fdpassing \
     --disable-clamav \
     --disable-check \
@@ -247,7 +248,7 @@ make %{?_smp_mflags}
 ## ------------------------------------------------------------
 
 %install
-export CONFIG_SHELL="/bin/sh"
+export CONFIG_SHELL="/@unixroot/usr/bin/sh"
 rm -rf "$RPM_BUILD_ROOT" _doc*
 make DESTDIR="$RPM_BUILD_ROOT" install
 
@@ -464,3 +465,5 @@ CLAMAV_FRESHCLAM_CONF:WPShadow|freshclam.conf|<CLAMAV_FOLDER>|SHADOWID=((%_sysco
 
 
 %changelog
+* Thu Nov 24 2011 yd
+- fixed missing mmap check in build
