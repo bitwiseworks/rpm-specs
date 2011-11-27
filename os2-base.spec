@@ -2,7 +2,7 @@
 Summary: OS/2 - eComStation 2.0 base
 Name: os2-base
 Version: 0.0.0
-Release: 3%{?dist}
+Release: 4%{?dist}
 
 License: free
 
@@ -261,7 +261,7 @@ Virtual package for OS/2 base shared libraries packaging.
 %post
 if [ "$1" = 1 ] ; then
 #execute only on first install
-%cube {ADDSTRING "%UNIXROOT%\usr\sbin;%UNIXROOT%\usr\bin;%UNIXROOT%\sbin;%UNIXROOT%\bin;" IN "SET PATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys c:\config.sys.yum > NUL
+%cube {ADDSTRING "%UNIXROOT%\usr\sbin;%UNIXROOT%\usr\bin;" IN "SET PATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys c:\config.sys.yum > NUL
 %cube {ADDSTRING "%UNIXROOT%\usr\lib;" IN "LIBPATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
 %cube {DELLINE "SET UNIXROOT="} c:\config.sys > NUL
 %cube {ADDLINE "SET UNIXROOT=%UNIXROOT%"} c:\config.sys > NUL
@@ -270,7 +270,7 @@ fi
 %postun
 if [ "$1" = 0 ] ; then
 #execute only on last uninstall
-%cube {DELSTRING "%UNIXROOT%\usr\sbin;%UNIXROOT%\usr\bin;%UNIXROOT%\sbin;%UNIXROOT%\bin;" IN "SET PATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
+%cube {DELSTRING "%UNIXROOT%\usr\sbin;%UNIXROOT%\usr\bin;" IN "SET PATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
 %cube {DELSTRING "%UNIXROOT%\usr\lib;" IN "LIBPATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
 %cube {DELLINE "SET UNIXROOT="} c:\config.sys > NUL
 fi
