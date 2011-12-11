@@ -9,7 +9,7 @@
 
 Name:           git
 Version:        1.7.6.1
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        Fast Version Control System
 License:        GPLv2
 Group:          Development/Tools
@@ -256,8 +256,8 @@ EOF
 chmod +x %{__perl_requires}
 
 %build
-export MAKESHELL=/bin/sh
-export CONFIG_SHELL=/bin/sh
+export MAKESHELL=/@unixroot/usr/bin/sh
+export CONFIG_SHELL=/@unixroot/usr/bin/sh
 export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zexe -Zargs-wild -Zargs-resp"
 export LIBS="-lurpo"
 %configure \
@@ -274,7 +274,7 @@ make -C contrib/emacs
 sed -i '/^#!bash/,+1 d' contrib/completion/git-completion.bash
 
 %install
-export MAKESHELL=/bin/sh
+export MAKESHELL=/@unixroot/usr/bin/sh
 rm -rf %{buildroot}
 make %{?_smp_mflags} INSTALLDIRS=vendor install %{!?_without_docs: install-doc}
 
@@ -451,6 +451,9 @@ rm -rf %{buildroot}
 # No files for you!
 
 %changelog
+* Sun Nov 27 2011 yd
+- use /@unixroot/usr/bin shell.
+
 * Wed Sep 28 2011 yd
 - fixed build patches.
 - fixed expat support.
