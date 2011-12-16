@@ -82,10 +82,9 @@ export PATH="$script_dir/gcc${PATH:+;$PATH}"
 export BEGINLIBPATH="$script_dir/gcc${BEGINLIBPATH:+;$BEGINLIBPATH}"
 
 export CONFIG_SHELL=/@unixroot/usr/bin/sh.exe;
-export AR=ar;
 export AWK=awk;
-export CFLAGS="-g -O2 -DEMX -DOS2"
-export CXXFLAGS="-g -O2 -DEMX -DOS2"
+export CFLAGS="$RPM_OPT_FLAGS -DEMX -DOS2"
+export CXXFLAGS="$RPM_OPT_FLAGS -DEMX -DOS2"
 export LDFLAGS="-g -Zexe -Zomf -Zmap -Zargs-wild -Zhigh-mem"
 export LANG="";
 ../configure --prefix=%{_prefix} \
