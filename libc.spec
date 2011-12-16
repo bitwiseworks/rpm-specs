@@ -4,7 +4,7 @@ License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Standard Shared Libraries
 Group:          System/Libraries
 Version:        0.6.4
-Release:        11%{?dist}
+Release:        12%{?dist}
 Url:            http://svn.netlabs.org/libc
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -109,6 +109,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/libintl.h
 
 %changelog
+* Fri Dec 16 2011 yd
+- restored stdarg.h/cdefs.h from original libc distribution.
+
 * Thu Oct 20 2011 yd
 - included emxomf.exe by dmik to workaround gcc/wlink bugs.
 
