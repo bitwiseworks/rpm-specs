@@ -65,15 +65,15 @@ mkdir -p %{buildroot}%{_usr}/i386-pc-os2-emx
 mkdir -p %{buildroot}%{_usr}/man
 mkdir -p %{buildroot}%{_usr}/info
 
-cp -p -r "usr/bin/*" %{buildroot}%{_bindir}
-cp -p -r "usr/include/*" %{buildroot}%{_includedir}
-cp -p -r "include/*" %{buildroot}%{_includedir}
-cp -p -r "emxomf.exe" %{buildroot}%{_bindir}
-cp -p -r "usr/lib/*" %{buildroot}%{_libdir}
-cp -p -r "usr/man/*" %{buildroot}%{_usr}/i386-pc-os2-elf
-cp -p -r "usr/man/*" %{buildroot}%{_usr}/i386-pc-os2-emx
-cp -p -r "usr/man/*" %{buildroot}%{_usr}/man
-cp -p -r "usr/man/*" %{buildroot}%{_usr}/info
+cp -p -r usr/bin/* %{buildroot}%{_bindir}
+cp -p -r usr/include/* %{buildroot}%{_includedir}
+cp -p -r include/* %{buildroot}%{_includedir}
+cp -p -r emxomf.exe %{buildroot}%{_bindir}
+cp -p -r usr/lib/* %{buildroot}%{_libdir}
+cp -p -r usr/man/* %{buildroot}%{_usr}/i386-pc-os2-elf
+cp -p -r usr/man/* %{buildroot}%{_usr}/i386-pc-os2-emx
+cp -p -r usr/man/* %{buildroot}%{_usr}/man
+cp -p -r usr/man/* %{buildroot}%{_usr}/info
 
 rexx2vio $RPM_BUILD_ROOT%{_bindir}/dllar.cmd $RPM_BUILD_ROOT%{_bindir}/dllar.exe
 
