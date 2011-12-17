@@ -9,7 +9,7 @@
 
 Name:           git
 Version:        1.7.6.1
-Release:        6%{?dist}
+Release:        7%{?dist}
 Summary:        Fast Version Control System
 License:        GPLv2
 Group:          Development/Tools
@@ -451,6 +451,9 @@ rm -rf %{buildroot}
 # No files for you!
 
 %changelog
+* Sat Dec 17 2011 yd
+- rebuild due to gcc 4.4.6 bug.
+
 * Sun Nov 27 2011 yd
 - use /@unixroot/usr/bin shell.
 
