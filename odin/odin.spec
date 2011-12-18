@@ -8,7 +8,7 @@
 %define ver_minor   7
 %define ver_patch   1
 
-%define rpm_release 1
+%define rpm_release 3
 
 Name:       odin
 Vendor:     netlabs.org
@@ -123,7 +123,6 @@ CFGSYS_CHANGED=y
 %if "%{odin_bindir}" != "%{_bindir}"
 export ODIN_BINDIR_D="$(echo %{odin_bindir} | sed -re 's,/@unixroot,'$UNIXROOT',g' -e 's,/,\\,g')"
 %cube {ADDSTRING ";%ODIN_BINDIR_D%" IN "SET PATH=" (FIRST AFTER} %{os2_config_sys} >nul
-CFGSYS_CHANGED=y
 %endif
 if [ -n "$CFGSYS_CHANGED" ]; then
     echo; echo "NOTE:"
@@ -142,25 +141,38 @@ WINDOWS=$ODIN_WINDOWSDIR_D
 # mkdir -p fails on /@unixroot, replace it with the real value
 mkdir -p "$(echo %{odin_windowsdir} | sed -re 's,/@unixroot,'$UNIXROOT',g')"
 (cd "%{odin_systemdir}/"; "%{odin_systemdir}"/odininst.exe)
+ODIN_SYSTEMDIR_D="$(echo %{odin_systemdir} | sed -re 's,/@unixroot,'$UNIXROOT',g' -e 's,/,\\,g')"
+rexxtry.cmd 1>nul 2>nul <<EOF
+call rxfuncadd SysIni, rexxutil, SysIni
+call SysIni 'USER', 'KLIBC', 'OdinPath', '$ODIN_SYSTEMDIR_D'||'00'x
+exit
+EOF
 
 %postun -n lib%{name}
 
-CFGSYS_CHANGED=
-%if "%{odin_bindir}" != "%{_bindir}"
-export ODIN_BINDIR_D="$(echo %{odin_bindir} | sed -re 's,/@unixroot,'$UNIXROOT',g' -e 's,/,\\,g')"
-%cube {DELSTRING ";%ODIN_BINDIR_D%" IN "SET PATH=" (FIRST} %{os2_config_sys} >nul
-CFGSYS_CHANGED=y
-%endif
-%if "%{odin_systemdir}" != "%{_libdir}"
-export ODIN_SYSTEMDIR_D="$(echo %{odin_systemdir} | sed -re 's,/@unixroot,'$UNIXROOT',g' -e 's,/,\\,g')"
-%cube {DELSTRING ";%ODIN_SYSTEMDIR_D%" IN "LIBPATH=" (FIRST} %{os2_config_sys} >nul
-CFGSYS_CHANGED=y
-%endif
-if [ -n "$CFGSYS_CHANGED" ]; then
-    echo; echo "NOTE:"
-    echo; echo "The file '%{os2_config_sys}' has been changed. You need to reboot your"
-    echo "computer in order to activate these changes."
-    echo
+if [ "$1" -eq 0 ]; then # (upon removal)
+    rexxtry.cmd 1>nul 2>nul <<EOF
+call rxfuncadd SysIni, rexxutil, SysIni
+call SysIni 'USER', 'KLIBC', 'OdinPath', 'DELETE:'
+exit
+EOF
+
+    CFGSYS_CHANGED=
+    %if "%{odin_bindir}" != "%{_bindir}"
+    export ODIN_BINDIR_D="$(echo %{odin_bindir} | sed -re 's,/@unixroot,'$UNIXROOT',g' -e 's,/,\\,g')"
+    %cube {DELSTRING ";%ODIN_BINDIR_D%" IN "SET PATH=" (FIRST} %{os2_config_sys} >nul
+    CFGSYS_CHANGED=y
+    %endif
+    %if "%{odin_systemdir}" != "%{_libdir}"
+    export ODIN_SYSTEMDIR_D="$(echo %{odin_systemdir} | sed -re 's,/@unixroot,'$UNIXROOT',g' -e 's,/,\\,g')"
+    %cube {DELSTRING ";%ODIN_SYSTEMDIR_D%" IN "LIBPATH=" (FIRST} %{os2_config_sys} >nul
+    %endif
+    if [ -n "$CFGSYS_CHANGED" ]; then
+        echo; echo "NOTE:"
+        echo; echo "The file '%{os2_config_sys}' has been changed. You need to reboot your"
+        echo "computer in order to activate these changes."
+        echo
+    fi
 fi
 
 #------------------------------------------------------------------------------
@@ -269,12 +281,14 @@ echo "computer in order to activate these changes."
 echo
 
 %postun win32k
-export ODIN_SYSTEMDIR_D="$(echo %{odin_systemdir} | sed -re 's,/@unixroot,'$UNIXROOT',g' -e 's,/,\\,g')"
-%cube {DELLINE "DEVICE=%ODIN_SYSTEMDIR_D%\win32k.sys"} %{os2_config_sys} >nul
-echo; echo "NOTE:"
-echo; echo "The file '%{os2_config_sys}' has been changed. You need to reboot your"
-echo "computer in order to activate these changes."
-echo
+if [ "$1" -eq 0 ]; then # (upon removal)
+    export ODIN_SYSTEMDIR_D="$(echo %{odin_systemdir} | sed -re 's,/@unixroot,'$UNIXROOT',g' -e 's,/,\\,g')"
+    %cube {DELLINE "DEVICE=%ODIN_SYSTEMDIR_D%\win32k.sys"} %{os2_config_sys} >nul
+    echo; echo "NOTE:"
+    echo; echo "The file '%{os2_config_sys}' has been changed. You need to reboot your"
+    echo "computer in order to activate these changes."
+    echo
+fi
 
 #------------------------------------------------------------------------------
 %package doc
@@ -296,6 +310,9 @@ This package contains Odin user's manual.
 %doc %{pkg_docdir}/odinuser.inf
 
 %post doc
+if [ "$1" -ge 1 ]; then # (upon update)
+    %wps_object_delete_all -n %{name}-doc
+fi
 %wps_object_create_begin -n %{name}-doc
 %{pkg_wps_folder_create}
 %{pkg_wps_base}_README:WPProgram|Read Me|%{pkg_wps_folder_id}|%{pkg_wps_view_txt %{pkg_docdir}/Readme.txt}
@@ -306,7 +323,9 @@ This package contains Odin user's manual.
 %wps_object_create_end
 
 %postun doc
-%wps_object_delete_all -n %{name}-doc
+if [ "$1" -eq 0 ]; then # (upon removal)
+    %wps_object_delete_all -n %{name}-doc
+fi
 
 #------------------------------------------------------------------------------
 %prep
@@ -340,11 +359,10 @@ mkdir -p %{buildroot}%{odin_windowsdir}/
 
 mkdir -p %{buildroot}%{odin_systemdir}/
 cp -dp system32/*.dll %{buildroot}%{odin_systemdir}/
-cp -dp system32/*.exe %{buildroot}%{odin_systemdir}/
 cp -dp system32/win32k.sys %{buildroot}%{odin_systemdir}/
 
 mkdir -p %{buildroot}%{odin_bindir}/
-cp system32/*.exe %{buildroot}%{odin_bindir}/
+cp -dp system32/*.exe %{buildroot}%{odin_bindir}/
 
 # these are internal tools that should not be in PATH
 mv %{buildroot}%{odin_bindir}/odininst.exe %{buildroot}%{odin_systemdir}/
@@ -361,6 +379,14 @@ rm -rf %{buildroot}
 
 #------------------------------------------------------------------------------
 %changelog
+
+* Mon Oct 03 2011 Dmitriy Kuminov <coding/dmik.org> - 0.7.1-3
+- Remove executables from "libodin" (they are provided by "odin-exe-tools").
+
+* Sun Oct 02 2011 Dmitriy Kuminov <coding/dmik.org> - 0.7.1-2
+- Add "KLIBC\OdinPath" to OS2.INI needed for some applications.
+- Fix unexpected deletion of WPS objects when updating the "odin-doc" package
+  ("yum reinstall odin-doc" is still requred after updating to this version).
 
 * Fri Sep 30 2011 Dmitriy Kuminov <coding/dmik.org> - 0.7.1-1
 - New release 0.7.1. See %{pkg_docdir}/ChangeLog for more information.
