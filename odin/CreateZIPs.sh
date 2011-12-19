@@ -40,7 +40,14 @@ cp_prg_file()
 
     local fbase=${1%.*}
     run cp -Rdp "$1" "$out_base/$2"
-    run cp -Rdp "$fbase.sym" "$fbase.map" "$out_base_sym/$2"
+    # don't copy .map, it's not in the right place of the build tree any more
+#    run cp -Rdp "$fbase.sym" "$fbase.map" "$out_base_sym/$2"
+    run cp -Rdp "$fbase.sym" "$out_base_sym/$2"
+
+    # lxlite it in release mode
+    if [ -z "$debug" ]; then
+        lxlite /B- "$out_base/$2${1##*/}"
+    fi
 }
 
 cmd_cleanup()
@@ -57,14 +64,17 @@ cmd_create()
     local name_base_sym
     local build_base
 
-    if [ -z "$1" ]; then
+    local debug
+    [ -n "$1" ] && debug="yes"
+
+    if [ -z "$debug" ]; then
         name_base="odin-$ver_dots"
         name_base_sym="odin-$ver_dots-debuginfo"
-        build_base="$odin_root/bin/release"
+        build_base="$odin_root-build/os2.x86/release"
     else
         name_base="odin-$ver_dots-debug"
         name_base_sym="odin-$ver_dots-debug-debuginfo"
-        build_base="$odin_root/bin/debug"
+        build_base="$odin_root-build/os2.x86/debug"
     fi
 
     local out_base="$out_dir/$name_base"
@@ -81,20 +91,20 @@ cmd_create()
     run cp -Rdp "$odin_root/bin/wgss50.sym" "$out_base_sym/system32/"
 
     # DLLs
-    cp_prg_file "$build_base/*.dll"         "system32/"
+    cp_prg_file "$build_base/stage/bin/*.dll"           "system32/"
 
     # executables
-    cp_prg_file "$build_base/odininst.exe"  "system32/"
-    cp_prg_file "$build_base/pe.exe"        "system32/"
-    cp_prg_file "$build_base/pec.exe"       "system32/"
-    cp_prg_file "$build_base/regsvr32.exe"  "system32/"
-    cp_prg_file "$build_base/xx2lx.exe"     "system32/"
+    cp_prg_file "$build_base/stage/bin/odininst.exe"    "system32/"
+    cp_prg_file "$build_base/stage/bin/pe.exe"          "system32/"
+    cp_prg_file "$build_base/stage/bin//pec.exe"        "system32/"
+    cp_prg_file "$build_base/stage/bin/regsvr32.exe"    "system32/"
+    cp_prg_file "$build_base/stage/bin/xx2lx.exe"       "system32/"
 
     # Win32k
-    cp_prg_file "$build_base/win32k.sys"    "system32/"
-    run cp -Rdp "$build_base/win32k.ddp"    "$out_base/system32/"
-    cp_prg_file "$build_base/win32kCC.exe"  "system32/"
-    cp_prg_file "$build_base/kRx.exe"       "system32/"
+#    cp_prg_file "$build_base/win32k.sys"    "system32/"
+#    run cp -Rdp "$build_base/win32k.ddp"    "$out_base/system32/"
+#    cp_prg_file "$build_base/win32kCC.exe"  "system32/"
+#    cp_prg_file "$build_base/kRx.exe"       "system32/"
 
     # docs
     run cp -Rdp \
@@ -129,10 +139,16 @@ cmd_help()
     echo \
 "
 Usage:
-  $0 release    Create release ZIPs.
-  $0 debug      Create debug ZIPs.
-  $0 all        Do 'release' and 'debug' together.
-  $0 cleanup    Remove what is created by the above commands (except ZIPs).
+  $0 <command> <odin_root>
+
+<command> is one of:
+  release   Create release ZIPs.
+  debug     Create debug ZIPs.
+  all       Do 'release' and 'debug' together.
+  cleanup   Remove what is created by the above commands (except ZIPs).
+
+<odin_root> is the full path to the Odin source tree. Note that the build
+tree is expected to be found in the <odin_root>-build directory.
 "
 }
 
@@ -147,7 +163,8 @@ start_dir=$(pwd)
 
 # Get Odin version number
 
-odin_root="$script_dir/../.."
+odin_root="$2"
+[ -n "$2" ] || { cmd_help; exit 0; }
 
 odinbuild_h="$odin_root/include/odinbuild.h"
 
@@ -174,6 +191,7 @@ case $1 in
     "release") cmd_create;;
     "debug") cmd_create "debug";;
     "all") cmd_create; cmd_create "debug";;
+    *) cmd_help;;
 esac
 
 # end of story

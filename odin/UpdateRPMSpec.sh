@@ -120,6 +120,18 @@ cmd_update()
     echo "ALL DONE."
 }
 
+cmd_help()
+{
+    echo \
+"
+Usage:
+  $0 update <odin_root>     Update the \"$spec_file\" file.
+
+<odin_root> is the full path to the Odin source tree. Note that the build
+tree is expected to be found in the <odin_root>-build directory.
+"
+}
+
 #
 # Main
 #
@@ -136,7 +148,8 @@ start_dir=$(pwd)
 
 # Get Odin version number
 
-odin_root="$script_dir/../.."
+odin_root="$2"
+[ -n "$2" ] || { cmd_help; exit 0; }
 
 odinbuild_h="$odin_root/include/odinbuild.h"
 
@@ -157,18 +170,10 @@ ver_dots="$ver_major.$ver_minor.$ver_build"
 
 # Parse arguments
 
-cmd_help()
-{
-    echo \
-"
-Usage:
-  $0 update     Update the \"$spec_file\" file.
-"
-}
-
 case $1 in
     "--help" | "-?" | "-h" | "") cmd_help;;
     "update") cmd_update;;
+    *) cmd_help;;
 esac
 
 # end of story
