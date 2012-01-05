@@ -4,7 +4,7 @@
 Summary: Various compilers (C, C++, Objective-C, Java, ...)
 Name: gcc
 Version: %{gcc_version}
-Release: 11%{?dist}
+Release: 12%{?dist}
 
 # libgcc, libgfortran, libmudflap, libgomp, libstdc++ and crtstuff have
 # GCC Runtime Exception.
@@ -12,10 +12,8 @@ License: GPLv3+ and GPLv3+ with exceptions and GPLv2+ with exceptions
 Group: Development/Languages
 URL: http://gcc.gnu.org
 
-Source0: gcc-os2.zip
+Source0: gcc-os2-20111223.tar.bz2
 Patch0: gcc-os2.diff
-#Source1: gpl.zip
-#Source2: gcc-ssp.zip
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-root-%(%{__id_u} -n)
 
@@ -69,7 +67,6 @@ resource compiler instead of IBM one.
 
 %prep
 %setup -q -c
-# -a 1
 %patch0 -p1 -b .os2~
 
 %build
@@ -160,8 +157,8 @@ rm %{buildroot}%{_libdir}/*.la
 
 #mv %{buildroot}%{_usr}/readme.os2 $RPM_BUILD_ROOT%_docdir/%{name}-%{version}/
 
-ln -s /@unixroot/usr/libexec/gcc/i386-pc-os2-emx/%{version}/cc1.exe %{buildroot}%{_bindir}/cc1.exe
-ln -s /@unixroot/usr/libexec/gcc/i386-pc-os2-emx/%{version}/cc1plus.exe %{buildroot}%{_bindir}/cc1plus.exe
+ln -s ./cc1.exe %{buildroot}%{_libexecdir}/gcc/i386-pc-os2-emx/%{version}/cc1
+ln -s ./cc1plus.exe %{buildroot}%{_libexecdir}/gcc/i386-pc-os2-emx/%{version}/cc1plus
 
 #yd fix attributes for executables
 chmod 0755 %{buildroot}%{_bindir}/*.exe
@@ -233,5 +230,10 @@ fi
 #%doc %{_datadir}/doc/*
 
 %changelog
+* Fri Dec 23 2011 yd
+- fixed spawn internal error report.
+- fixed handling of big command lines (fixes OOo building).
+- fixed Optlink calls.
+
 * Fri Dec 9 2011 yd
 - updated source code to 4.4.6, github tree
