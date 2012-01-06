@@ -1,7 +1,7 @@
 Summary: The GNU macro processor
 Name: m4
-Version: 1.4.15
-Release: 3%{?dist}
+Version: 1.4.16
+Release: 4%{?dist}
 License: GPLv3+
 Group: Applications/Text
 Source: http://ftp.gnu.org/gnu/m4/m4-%{version}.tar.xz
@@ -32,7 +32,8 @@ Install m4 if you need a macro processor.
 # YD do not use -Zbin-files
 export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 export LIBS="-lintl -lurpo"
-export CONFIG_SHELL="/bin/sh"
+export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
+export MAKESHELL="/@unixroot/usr/bin/sh.exe"
 %configure \
         "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
 
@@ -71,3 +72,5 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/charset.alias
 rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Fri Jan 06 2012 yd
+- update trunk to 1.4.16
