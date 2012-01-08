@@ -6,7 +6,7 @@
 Summary: A GNU stream text editor
 Name: sed
 Version: 4.2.1
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Group: Applications/Text
 URL: http://sed.sourceforge.net/
@@ -17,8 +17,6 @@ Patch1: sed-4.2.1-makecheck.patch
 Patch2: sed-os2.patch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: libc-devel
-Requires(post): /sbin/install-info
-Requires(preun): /sbin/install-info
 
 %description
 The sed (Stream EDitor) editor is a stream or batch (non-interactive)
@@ -71,5 +69,8 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_datadir}/locale/*
 
 %changelog
-* Sat Jan 0 2012 yd
+* Sun Jan 08 2012 yd
+- fixed requirements.
+
+* Sat Jan 07 2012 yd
 - initial unixroot build.
