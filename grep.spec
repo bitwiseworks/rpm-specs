@@ -1,9 +1,7 @@
-#%define _bindir /bin
-
 Summary: Pattern matching utilities
 Name: grep
 Version: 2.10
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Group: Applications/Text
 Source: ftp://ftp.gnu.org/pub/gnu/grep/grep-%{version}.tar.xz
@@ -64,3 +62,4 @@ rm -rf ${RPM_BUILD_ROOT}
 %changelog
 * Sun Jan 08 2012 yd
 - initial unixroot build.
+- fixed bindir value.
