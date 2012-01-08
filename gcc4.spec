@@ -4,7 +4,7 @@
 Summary: Various compilers (C, C++, Objective-C, Java, ...)
 Name: gcc
 Version: %{gcc_version}
-Release: 12%{?dist}
+Release: 13%{?dist}
 
 # libgcc, libgfortran, libmudflap, libgomp, libstdc++ and crtstuff have
 # GCC Runtime Exception.
@@ -46,6 +46,20 @@ Group: System Environment/Libraries
 %description stack-protector
 This package contains GCC shared library which is needed
 for stack protector.
+
+%package stdc++-shared-library
+Summary: GNU Standard C++ Library v3
+Group: System Environment/Libraries
+
+%description stdc++-shared-library
+This package contains GNU Standard C++ Library v3 shared library.
+
+%package supc++-shared-library
+Summary: GNU Standard C++ Library v3 subset
+Group: System Environment/Libraries
+
+%description supc++-shared-library
+This package contains GNU Standard C++ Library v3 subset shared library.
 
 %package wlink
 Summary: GCC configuration changes for Watcom linker support.
@@ -206,8 +220,7 @@ fi
 %{_libdir}/*.*a
 %{_libdir}/*.lib
 %{_libdir}/*.dll
-%exclude %{_libdir}/ssp.dll
-%exclude %{_libdir}/gcc*.dll
+%exclude %{_libdir}/*.dll
 %{_libdir}/*.spec
 %{_libdir}/gcc/*
 %{_usr}/libexec
@@ -217,6 +230,14 @@ fi
 %files stack-protector
 %defattr(-,root,root,-)
 %{_libdir}/ssp.dll
+
+%files stdc++-shared-library
+%defattr(-,root,root,-)
+%{_libdir}/stdcpp.dll
+
+%files supc++-shared-library
+%defattr(-,root,root,-)
+%{_libdir}/supcpp.dll
 
 %files wlink
 %doc gcc-wlink.txt
@@ -230,6 +251,9 @@ fi
 #%doc %{_datadir}/doc/*
 
 %changelog
+* Sun Jan 08 2012 yd
+- moved dlls out from main package.
+
 * Fri Dec 23 2011 yd
 - fixed spawn internal error report.
 - fixed handling of big command lines (fixes OOo building).
