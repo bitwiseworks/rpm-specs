@@ -1,7 +1,7 @@
 Summary: Utility for modifying/upgrading files
 Name: patch
 Version: 2.6.1
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv2+
 URL: http://www.gnu.org/software/patch/patch.html
 Group: Development/Tools
@@ -26,24 +26,17 @@ applications.
 
 %prep
 %setup -q
-
-# Avoid os2 patch
+# apply os2 patch
 %patch1 -p1 -b .os2~
 
 %build
-CONFIG_SHELL="/bin/sh"; export CONFIG_SHELL
-CFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE"
-%ifarch sparcv9
-CFLAGS=`echo $CFLAGS|sed -e 's|-fstack-protector||g'`
-%endif
-LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zexe -Zargs-wild -Zargs-resp"; export LDFLAGS
+export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
+export CFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE"
+export LDFLAGS="-Zhigh-mem -Zomf -Zexe -Zargs-wild -Zargs-resp"
 %configure \
     "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
 
 make %{?smp_mflags}
-
-#%check
-#make check
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -59,3 +52,5 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/*
 
 %changelog
+* Mon Jan 09 2012 yd
+- fixed binary/text access.
