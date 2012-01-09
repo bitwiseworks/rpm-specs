@@ -1,7 +1,7 @@
 Summary: A GNU collection of diff utilities
 Name: diffutils
 Version: 3.2
-Release: 1%{?dist}
+Release: 2%{?dist}
 Group: Applications/Text
 URL: http://www.gnu.org/software/diffutils/diffutils.html
 Source: ftp://ftp.gnu.org/gnu/diffutils/diffutils-%{version}.tar.xz
@@ -36,7 +36,7 @@ Install diffutils if you need to compare text files.
 
 %build
 export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
-export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 export LIBS="-lurpo -lmmap"
 %configure \
    "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
@@ -73,5 +73,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/locale/*
 
 %changelog
+* Mon Jan 09 2012 yd
+- do not build with -Zbin-files flag.
+
 * Sun Jan 08 2012 yd
 - initial unixroot build.
