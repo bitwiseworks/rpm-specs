@@ -11,7 +11,7 @@
 Summary: The Berkeley DB database library (version 4) for C
 Name: db4
 Version: 4.8.30
-Release: 4%{?dist}
+Release: 5%{?dist}
 Source0: http://download.oracle.com/berkeley-db/db-%{version}.tar.gz
 
 Patch0: db-os2.diff
@@ -164,8 +164,8 @@ set -x
 mkdir dist/os2
 
 %build
-export CONFIG_SHELL="/bin/sh"
-export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp" 
+export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
+export LDFLAGS="-Zexe -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp" 
 export LIBS="-lurpo -lmmap -lpthread" 
 export CFLAGS="$RPM_OPT_FLAGS -fno-strict-aliasing"
 
@@ -178,10 +178,10 @@ ln -sf ../configure .
 	# XXX --enable-diagnostic should be disabled for production (but is
 	# useful).
 	# XXX --enable-debug_{r,w}op should be disabled for production.
-	%configure -C \
+%configure -C \
     --enable-tcl --with-tcl=/@unixroot/usr/lib \
     --disable-shared --enable-static \
-    --disable-cxx \
+    --enable-cxx \
     --disable-java \
 %ifarch %{java_arches}
 		--enable-java \
@@ -217,6 +217,7 @@ mkdir -p ${RPM_BUILD_ROOT}%{_libdir}
 %makeinstall -C dist/os2
 
 cp dist/os2/libdb-%{__soversion}_s.a ${RPM_BUILD_ROOT}%{_libdir}
+cp dist/os2/libdb_cxx-%{__soversion}_s.a ${RPM_BUILD_ROOT}%{_libdir}
 
 # XXX Nuke non-versioned archives and symlinks
 rm -f ${RPM_BUILD_ROOT}%{_libdir}/libdb.a
@@ -241,6 +242,7 @@ rm -f ${RPM_BUILD_ROOT}%{_libdir}/libdb_cxx.a
 
 # add symlink without version number
 ln -s libdb-%{__soversion}.a $RPM_BUILD_ROOT/%{_libdir}/libdb.a
+ln -s libcxx-%{__soversion}.a $RPM_BUILD_ROOT/%{_libdir}/libdb_cxx.a
 
 # Move the header files to a subdirectory, in case we're deploying on a
 # system with multiple versions of DB installed.
@@ -271,26 +273,14 @@ rm -f ${RPM_BUILD_ROOT}%{_libdir}/*.la
 %clean
 rm -rf ${RPM_BUILD_ROOT}
 
-#%post -p /sbin/ldconfig
-
-#%postun -p /sbin/ldconfig
-
-#%post -p /sbin/ldconfig tcl
-
-#%postun -p /sbin/ldconfig tcl
-
-#%post -p /sbin/ldconfig java
-
-#%postun -p /sbin/ldconfig java
-
 %files
 %defattr(-,root,root)
 %doc LICENSE README
 %{_libdir}/db%{__dllversion}.dll
 
-#%files cxx
-#%defattr(-,root,root)
-#%{_libdir}/libdb_cxx-%{__soversion}.so
+%files cxx
+%defattr(-,root,root)
+%{_libdir}/db%{__dllversion}cxx.dll
 
 %files utils
 %defattr(-,root,root)
@@ -309,12 +299,13 @@ rm -rf ${RPM_BUILD_ROOT}
 
 %files devel
 %defattr(-,root,root)
-#%doc	docs/*
-#%doc	examples_c examples_cxx
+%doc	docs/*
+%doc	examples_c examples_cxx
 %{_libdir}/db*.dll
-#%{_libdir}/libdb_cxx.so
 %{_libdir}/libdb-%{__soversion}.a
 %{_libdir}/libdb.a
+%{_libdir}/libdb_cxx-%{__soversion}.a
+%{_libdir}/libdb_cxx.a
 %dir %{_includedir}/%{name}
 %{_includedir}/%{name}/db.h
 #%{_includedir}/%{name}/db_185.h
@@ -326,7 +317,7 @@ rm -rf ${RPM_BUILD_ROOT}
 %files devel-static
 %defattr(-,root,root)
 %{_libdir}/libdb-%{__soversion}_s.a
-#%{_libdir}/libdb_cxx-%{__soversion}.a
+%{_libdir}/libdb_cxx-%{__soversion}_s.a
 #%{_libdir}/libdb_tcl-%{__soversion}.a
 %ifarch %{java_arches}
 %{_libdir}/libdb_java-%{__soversion}.a
@@ -346,3 +337,7 @@ rm -rf ${RPM_BUILD_ROOT}
 #%endif
 
 %changelog
+* Mon Jan 09 2012 yd
+- build also c++ dll.
+- include docs in developer package.
+
