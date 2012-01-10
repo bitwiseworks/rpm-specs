@@ -4,7 +4,7 @@
 Summary: Various compilers (C, C++, Objective-C, Java, ...)
 Name: gcc
 Version: %{gcc_version}
-Release: 14%{?dist}
+Release: 15%{?dist}
 
 # libgcc, libgfortran, libmudflap, libgomp, libstdc++ and crtstuff have
 # GCC Runtime Exception.
@@ -25,7 +25,7 @@ BuildRequires: gmp-devel >= 4.1.2-8, mpfr-devel >= 2.2.1
 Requires: libgcc446 = %{gcc_version}
 Requires: libc-devel >= 0.6.3
 Requires: binutils
-Requires: stack-protector, stdc++-shared-library, supc++-shared-library
+Requires: gcc-stack-protector, gcc-stdc++-shared-library, gcc-supc++-shared-library
 
 %description
 The gcc package contains the GNU Compiler Collection version 4.4.
