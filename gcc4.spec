@@ -25,7 +25,7 @@ BuildRequires: gmp-devel >= 4.1.2-8, mpfr-devel >= 2.2.1
 Requires: libgcc446 = %{gcc_version}
 Requires: libc-devel >= 0.6.3
 Requires: binutils
-Requires: gcc-stack-protector, gcc-stdc++-shared-library, gcc-supc++-shared-library
+Requires: libssp, libstdc++, libsupc++
 
 %description
 The gcc package contains the GNU Compiler Collection version 4.4.
@@ -40,26 +40,26 @@ Autoreq: false
 This package contains GCC shared support library which is needed
 e.g. for exception handling support.
 
-%package stack-protector
+%package -n libssp
 Summary: GCC stack protector shared library
 Group: System Environment/Libraries
 
-%description stack-protector
+%description -n libssp
 This package contains GCC shared library which is needed
 for stack protector.
 
-%package stdc++-shared-library
+%package -n libstdc++
 Summary: GNU Standard C++ Library v3
 Group: System Environment/Libraries
 
-%description stdc++-shared-library
+%description -n libstdc++
 This package contains GNU Standard C++ Library v3 shared library.
 
-%package supc++-shared-library
+%package -n libsupc++
 Summary: GNU Standard C++ Library v3 subset
 Group: System Environment/Libraries
 
-%description supc++-shared-library
+%description -n libsupc++
 This package contains GNU Standard C++ Library v3 subset shared library.
 
 %package wlink
@@ -228,15 +228,15 @@ fi
 %{_usr}/man
 %{_usr}/share
 
-%files stack-protector
+%files -n libssp
 %defattr(-,root,root,-)
 %{_libdir}/ssp.dll
 
-%files stdc++-shared-library
+%files -n libstdc++
 %defattr(-,root,root,-)
 %{_libdir}/stdcpp.dll
 
-%files supc++-shared-library
+%files -n libsupc++
 %defattr(-,root,root,-)
 %{_libdir}/supcpp.dll
 
@@ -252,6 +252,9 @@ fi
 #%doc %{_datadir}/doc/*
 
 %changelog
+* Wed Jan 11 2012 yd
+- use more conventionional names for shared libraries packages.
+
 * Mon Jan 09 2012 yd
 - install also dlls with main package.
 
