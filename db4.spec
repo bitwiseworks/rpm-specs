@@ -11,7 +11,7 @@
 Summary: The Berkeley DB database library (version 4) for C
 Name: db4
 Version: 4.8.30
-Release: 5%{?dist}
+Release: 6%{?dist}
 Source0: http://download.oracle.com/berkeley-db/db-%{version}.tar.gz
 
 Patch0: db-os2.diff
@@ -118,8 +118,10 @@ Berkeley DB.
 
 %prep
 %setup -q -n db-%{version}
-
 %patch0 -p1 -b .os2~
+
+# avoid hpfs386 unpacking issues (see http://svn.netlabs.org/libc/ticket/230)
+chmod +w LICENSE README
 
 # Remove tags files which we don't need.
 find . -name tags | xargs rm -f
@@ -270,6 +272,10 @@ rm -rf ${RPM_BUILD_ROOT}%{_prefix}/docs
 # remove unneeded .la files (#225675)
 rm -f ${RPM_BUILD_ROOT}%{_libdir}/*.la
 
+# avoid hpfs386 unpacking issues (see http://svn.netlabs.org/libc/ticket/230)
+chmod +w ${RPM_BUILD_ROOT}%{_bindir}/*.exe
+chmod +w ${RPM_BUILD_ROOT}%{_libdir}/*.dll
+
 %clean
 rm -rf ${RPM_BUILD_ROOT}
 
@@ -337,6 +343,9 @@ rm -rf ${RPM_BUILD_ROOT}
 #%endif
 
 %changelog
+* Wed Jan 11 2012 yd
+- avoid hpfs386 unpacking issues.
+
 * Mon Jan 09 2012 yd
 - build also c++ dll.
 - include docs in developer package.
