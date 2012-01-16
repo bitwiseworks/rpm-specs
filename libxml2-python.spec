@@ -5,7 +5,7 @@
 Summary: libxml2 package
 Name: %{name}
 Version: %{version}
-Release: 3%{?dist}
+Release: 4%{?dist}
 Source: libxml2-%{version}.tar.gz
 #Source1: %{name}-%{unmangled_version}.tar.gz
 License: MIT Licence
@@ -51,3 +51,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -f python/INSTALLED_FILES
 %defattr(-,root,root)
+
+%changelog
+* Mon Jan 16 2012 yd
+- rebuild with libc 0.6.4 runtime.
