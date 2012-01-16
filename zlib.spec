@@ -1,7 +1,7 @@
 Summary: The zlib compression and decompression library.
 Name: zlib
 Version: 1.2.5
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: BSD
 Group: System Environment/Libraries
 URL: http://www.zlib.net
@@ -36,6 +36,7 @@ develop programs that use the zlib compression and decompression library.
 
 %build
 # first build and test static zlib
+export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
 export TEST_LDFLAGS="-Zomf"
 CFLAGS="%optflags" \
 ./configure --prefix=/@unixroot/usr --static
@@ -92,3 +93,5 @@ install -p -m644 README \
 #%docdir/*.bz2
 
 %changelog
+* Mon Jan 16 2012 yd
+- rebuild with libc 0.6.4 runtime.
