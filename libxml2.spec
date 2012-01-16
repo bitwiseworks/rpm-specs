@@ -71,7 +71,7 @@ at parse time or later once the document has been modified.
 %patch001 -p1 -b .os2~
 
 %build
-export CONFIG_SHELL="/bin/sh" ; \
+export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
 export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp" ; \
 export LIBS="-lurpo -lmmap -lpthread" ; \
 %configure \

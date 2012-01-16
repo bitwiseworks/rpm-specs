@@ -231,12 +231,9 @@ mkdir Lib/plat-os2knix
 find -name "*~" |xargs rm -f
 
 %build
-CONFIG_SHELL=/bin/sh
-export CONFIG_SHELL
-LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
-export LDFLAGS
-LIBS="-lssl -lcrypto -lurpo -lmmap -lpthread"
-export LIBS
+export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
+export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+export LIBS="-lssl -lcrypto -lurpo -lmmap -lpthread"
 %configure \
         --enable-shared --disable-static \
         "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
