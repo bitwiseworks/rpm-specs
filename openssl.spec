@@ -21,13 +21,12 @@
 Summary: A general purpose cryptography library with TLS implementation
 Name: openssl
 Version: 1.0.0a
-Release: 3%{?dist}
+Release: 4%{?dist}
 
 Source: openssl-%{version}.tar.gz
 
 # Build changes
 Patch0: openssl-os2.diff
-Patch1: openssl-os2-engines.diff
 
 License: OpenSSL
 Group: System Environment/Libraries
@@ -80,9 +79,7 @@ from other formats to the formats used by the OpenSSL toolkit.
 
 %prep
 %setup -q -n %{name}-%{version}
-
 %patch0 -p1 -b .os2~
-%patch1 -p1 -b .os2engines~
 
 # Modify the various perl scripts to reference perl in the right location.
 perl util/perlpath.pl `dirname %{__perl}`
@@ -99,7 +96,8 @@ sslarch=OS2-KNIX
 # Configure the build tree.  Override OpenSSL defaults with known-good defaults
 # usable on all platforms.  The Configure script already knows to use -fPIC and
 # RPM_OPT_FLAGS, so we can skip specifiying them here.
-export MAKESHELL="/bin/sh" ; \
+export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
+export MAKESHELL="/@unixroot/usr/bin/sh.exe"
 export CFLAGS="${CFLAGS:-%optflags}" ; \
 ./Configure \
 	--prefix=%{_usr} --openssldir=%{_sysconfdir}/pki/tls ${sslflags} \
@@ -153,8 +151,9 @@ make rehash
 #%{nil}
 
 %install
-export MAKESHELL="/bin/sh" 
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
+
+export MAKESHELL="/@unixroot/usr/bin/sh.exe"
 
 # Install OpenSSL.
 install -d $RPM_BUILD_ROOT%{_bindir}
@@ -311,3 +310,5 @@ rm -rf $RPM_BUILD_ROOT/%{_libdir}/fipscanister.*
 #%postun -p /sbin/ldconfig
 
 %changelog
+* Mon Jan 16 2012 yd
+- rebuild with libc 0.6.4 runtime.

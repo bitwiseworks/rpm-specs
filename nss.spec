@@ -6,7 +6,7 @@
 Summary:          Network Security Services
 Name:             nss
 Version:          3.12.8
-Release:          2%{?dist}
+Release:          3%{?dist}
 License:          MPLv1.1 or GPLv2+ or LGPLv2+
 URL:              http://www.mozilla.org/projects/security/pki/nss/
 Group:            System Environment/Libraries
@@ -209,7 +209,7 @@ sed -i '#\n#\r\n#g' mozilla/security/nss/cmd/shlibsign/sign.cmd
 #ecs compatibility
 PROGRAMS=
 export PROGRAMS
-export MAKESHELL="/bin/sh"
+export MAKESHELL="/@unixroot/usr/bin/sh.exe"
 
 #FREEBL_NO_DEPEND=1
 #export FREEBL_NO_DEPEND
@@ -644,3 +644,5 @@ done
 %{_includedir}/nss3/shsign.h
 
 %changelog
+* Mon Jan 16 2012 yd
+- rebuild with libc 0.6.4 runtime.

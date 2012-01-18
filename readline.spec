@@ -1,7 +1,7 @@
 Summary: A library for editing typed command lines
 Name: readline
 Version: 6.1
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: GPLv3+
 Group: System Environment/Libraries
 URL: http://cnswww.cns.cwru.edu/php/chet/readline/rltop.html
@@ -59,7 +59,7 @@ library.
 
 %build
 #export CPPFLAGS="-I%{_includedir}/ncurses"
-CONFIG_SHELL="/bin/sh" ; export CONFIG_SHELL ; \
+export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
 LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp" ; export LDFLAGS ; \
 %configure \
     --disable-shared \
@@ -141,3 +141,5 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/*_s.a
 
 %changelog
+* Mon Jan 16 2012 yd
+- rebuild with libc 0.6.4 runtime.

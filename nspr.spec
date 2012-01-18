@@ -1,7 +1,7 @@
 Summary:        Netscape Portable Runtime
 Name:           nspr
 Version:        4.8.6
-Release:        2%{?dist}
+Release:        3%{?dist}
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 URL:            http://www.mozilla.org/projects/nspr/
 Group:          System Environment/Libraries
@@ -51,10 +51,10 @@ Header files for doing development with the Netscape Portable Runtime.
 %build
 
 cd mozilla/nsprpub
-autoconf
+/@unixroot/usr/bin/autoconf
 
-export CONFIG_SHELL="/bin/sh"
-export MAKESHELL="/bin/sh"
+export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
+export MAKESHELL="/@unixroot/usr/bin/sh.exe"
 export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 ./configure \
                  --prefix=%{_prefix} \
@@ -142,3 +142,5 @@ cat %{SOURCE1} | sed -e "s,%%libdir%%,%{_libdir},g" \
 %{_bindir}/nspr-config
 
 %changelog
+* Mon Jan 16 2012 yd
+- rebuild with libc 0.6.4 runtime.

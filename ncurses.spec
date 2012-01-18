@@ -2,7 +2,7 @@
 Summary: Ncurses support utilities
 Name: ncurses
 Version: 5.7
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: MIT
 Group: System Environment/Base
 URL: http://invisible-island.net/ncurses/ncurses.html
@@ -112,11 +112,11 @@ which will use ncurses.
 
 #export PKG_CONFIG_LIBDIR=%{_libdir}/pkgconfig
 
+export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
 export AWK="awk" ; \
 export CC="gcc" ; \
 export CXX="gcc" ; \
 export AR_OPTS="cru" ; \
-export CONFIG_SHELL="/bin/sh" ; \
 export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp" ; \
 export LIBS="-lurpo -lmmap -lpthread" ; \
 %configure \
@@ -153,7 +153,7 @@ make DESTDIR=$RPM_BUILD_ROOT install
 #        sed 's,\(^/\|\)[^/][^/]*,..,g')/%{_lib}/$(readlink $l) $l
 #done
 
-mv "$RPM_BUILD_ROOT%{_bindir}/*.dll" $RPM_BUILD_ROOT/%{_libdir}
+mv $RPM_BUILD_ROOT%{_bindir}/*.dll $RPM_BUILD_ROOT/%{_libdir}
 
 #mkdir -p $RPM_BUILD_ROOT%{rootdatadir}/terminfo
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/terminfo
@@ -282,3 +282,5 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/terminfo
 rm -rf ${RPM_BUILD_ROOT}
 
 %changelog
+* Mon Jan 16 2012 yd
+- rebuild with libc 0.6.4 runtime.
