@@ -128,10 +128,10 @@ CFLAGS="%{optflags} -D_GNU_SOURCE" \
 #%{__install} -p -m 0755 %{SOURCE3} %{buildroot}%{_initrddir}/dhcrelay
 
 # Start empty lease databases
-%{__mkdir} -p %{buildroot}%{_localstatedir}/lib/dhcpd/
-touch %{buildroot}%{_localstatedir}/lib/dhcpd/dhcpd.leases
-touch %{buildroot}%{_localstatedir}/lib/dhcpd/dhcpd6.leases
-%{__mkdir} -p %{buildroot}%{_localstatedir}/lib/dhclient/
+%{__mkdir} -p %{buildroot}%{_localstatedir}/lib/
+touch %{buildroot}%{_localstatedir}/lib/dhcpd.leases
+#touch %{buildroot}%{_localstatedir}/lib/dhcpd/dhcpd6.leases
+%{__mkdir} -p %{buildroot}%{_localstatedir}/lib/
 
 # Create default sysconfig files for dhcpd and dhcrelay
 %{__mkdir} -p %{buildroot}%{_sysconfdir}/sysconfig
@@ -147,10 +147,10 @@ EOF
 DHCPDARGS=
 EOF
 
-%{__cat} <<EOF > %{buildroot}%{_sysconfdir}/sysconfig/dhcpd6
+#%{__cat} <<EOF > %{buildroot}%{_sysconfdir}/sysconfig/dhcpd6
 # Command line options here
-DHCPDARGS=
-EOF
+#DHCPDARGS=
+#EOF
 
 # Copy sample conf files into position (called by doc macro)
 %{__cp} -p client/dhclient.conf dhclient.conf.sample
@@ -169,14 +169,14 @@ EOF
 EOF
 
 # Install default (empty) dhcpd6.conf:
-%{__cat} << EOF > %{buildroot}%{dhcpconfdir}/dhcpd6.conf
+#%{__cat} << EOF > %{buildroot}%{dhcpconfdir}/dhcpd6.conf
 #
 # DHCP for IPv6 Server Configuration file.
 #   see /usr/share/doc/dhcp*/dhcpd6.conf.sample
 #   see 'man 5 dhcpd.conf'
 #   run 'service dhcpd6 start' or 'dhcpd -6 -cf /etc/dhcp/dhcpd6.conf'
 #
-EOF
+#EOF
 
 # Install dhcp.schema for LDAP configuration
 #%{__mkdir} -p %{buildroot}%{_sysconfdir}/openldap/schema
@@ -207,9 +207,9 @@ EOF
 %doc doc/*.txt
 # __fedora_contrib/* 
 #ldap-for-dhcp-%{ldappatchver}/*.txt
-%dir %{_localstatedir}/lib/dhcpd
+%dir %{_localstatedir}/lib
 %attr(0750,root,root) %dir %{dhcpconfdir}
-%verify(not size md5 mtime) %config(noreplace) %{_localstatedir}/lib/dhcpd/dhcpd.leases
+%verify(not size md5 mtime) %config(noreplace) %{_localstatedir}/lib/dhcpd.leases
 #%verify(not size md5 mtime) %config(noreplace) %{_localstatedir}/lib/dhcpd/dhcpd6.leases
 %config(noreplace) %{_sysconfdir}/sysconfig/dhcpd
 #%config(noreplace) %{_sysconfdir}/sysconfig/dhcpd6
@@ -241,7 +241,7 @@ EOF
 # dhclient6.conf.sample
 %attr(0750,root,root) %dir %{dhcpconfdir}
 #%dir %{dhcpconfdir}/dhclient.d
-%dir %{_localstatedir}/lib/dhclient
+%dir %{_localstatedir}/lib
 %{_sbindir}/dhclient.exe
 #/sbin/dhclient-script
 #%attr(0755,root,root) %{_libdir}/pm-utils/sleep.d/56dhclient
