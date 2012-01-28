@@ -38,7 +38,7 @@ the rmt package.
 #autoreconf
 
 %build
-export CONFIG_SHELL="/bin/sh"
+export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
 export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 export LIBS="-lintl -lurpo"
 %configure \
