@@ -2,7 +2,7 @@ Summary: A GNU file archiving program
 Name: tar
 Epoch: 2
 Version: 1.23
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: GPLv3+
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/tar/
@@ -94,5 +94,8 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_usr}/share/locale/*
 
 %changelog
+* Thu Jan 28 2012 yd
+- Fix change target directory with -C option (libc cannot dup() a directory fd).
+
 * Wed Nov 16 2011 yd
 - keep all executables to /usr/bin and place symlinks in /bin
