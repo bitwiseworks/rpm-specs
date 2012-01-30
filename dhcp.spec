@@ -11,13 +11,14 @@
 Summary:  Dynamic host configuration protocol software
 Name:     dhcp
 Version:  %{basever}
-Release:  1%{?dist}
+Release:  2%{?dist}
 License:  ISC
 Group:    System Environment/Daemons
 URL:      http://isc.org/products/DHCP/
 
 Source0:  ftp://ftp.isc.org/isc/%{name}/%{name}-%{basedir}.tar.gz
 Source1:  dhcp-os2.h
+Source2:  dhconf.cmd
 
 Patch0:   dhcp-os2.patch
 
@@ -120,6 +121,7 @@ CFLAGS="%{optflags} -D_GNU_SOURCE" \
 #%{__mkdir} -p %{buildroot}/sbin
 #%{__mv} %{buildroot}%{_sbindir}/dhclient %{buildroot}/sbin/dhclient
 #%{__install} -p -m 0755 client/scripts/linux %{buildroot}/sbin/dhclient-script
+%{__install} -p -m 0755 %{SOURCE2} %{buildroot}%{_sbindir}/dhconf.cmd
 
 # Install init scripts
 #%{__mkdir} -p %{buildroot}%{_initrddir}
@@ -260,5 +262,9 @@ EOF
 %attr(0644,root,root) %{_mandir}/man3/omapi.3
 
 %changelog
+* Mon Jan 30 2012 yd
+- added dhconf.cmd.
+- use spawn instead of fork().
+
 * Tue Jan 24 2012 yd
 - initial unixroot build.
