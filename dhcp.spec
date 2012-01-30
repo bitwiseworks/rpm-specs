@@ -245,7 +245,7 @@ EOF
 #%dir %{dhcpconfdir}/dhclient.d
 %dir %{_localstatedir}/lib
 %{_sbindir}/dhclient.exe
-#/sbin/dhclient-script
+%{_sbindir}/dhconf.cmd
 #%attr(0755,root,root) %{_libdir}/pm-utils/sleep.d/56dhclient
 %attr(0644,root,root) %{_mandir}/man5/dhclient.conf.5
 %attr(0644,root,root) %{_mandir}/man5/dhclient.leases.5
