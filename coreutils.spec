@@ -16,26 +16,23 @@ Patch1: coreutils-os2.diff
 
 #BuildRequires: libselinux-devel
 #BuildRequires: libacl-devel
-#BuildRequires: gettext bison
+BuildRequires: gettext bison
 #BuildRequires: texinfo
 #BuildRequires: autoconf
 #BuildRequires: automake
 #%{?!nopam:BuildRequires: pam-devel}
 #BuildRequires: libcap-devel
 #BuildRequires: libattr-devel
-#BuildRequires: gmp-devel
+BuildRequires: gmp-devel
 #BuildRequires: attr
 #BuildRequires: strace
 
 #Requires:       libattr
-#Requires(pre): /sbin/install-info
-#Requires(preun): /sbin/install-info
-#Requires(post): /sbin/install-info
 #Requires(post): grep
 %{?!nopam:Requires: pam }
 #Requires(post): libcap
 Requires:       ncurses
-#Requires:       gmp
+Requires:       gmp
 #Requires: %{name}-libs = %{version}-%{release}
 
 Provides: fileutils = %{version}-%{release}
@@ -128,15 +125,8 @@ fi
 bzip2 -9f ChangeLog
 
 # let be compatible with old fileutils, sh-utils and textutils packages :
-mkdir -p $RPM_BUILD_ROOT/@unixroot/bin
-#mkdir -p $RPM_BUILD_ROOT/@unixroot/sbin
-mkdir -p $RPM_BUILD_ROOT%{_bindir}
 mkdir -p $RPM_BUILD_ROOT%{_sbindir}
 %{?!nopam:mkdir -p $RPM_BUILD_ROOT%_sysconfdir/pam.d}
-for f in basename cat chgrp chmod chown cp cut date dd df echo env false link ln ls mkdir mknod mktemp mv nice pwd readlink rm rmdir sleep sort stty sync touch true uname unlink
-do
-    ln -s /@unixroot/usr/bin/$f.exe $RPM_BUILD_ROOT/@unixroot/bin/$f
-done
 
 # chroot was in /usr/sbin :
 mv $RPM_BUILD_ROOT%_bindir/chroot.exe $RPM_BUILD_ROOT%_sbindir/chroot.exe
@@ -192,31 +182,6 @@ rm -f $RPM_BUILD_ROOT%{_usr}/lib/charset.alias
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-#%pre
-# We must deinstall these info files since they're merged in
-# coreutils.info. else their postun'll be run too late
-# and install-info will fail badly because of duplicates
-#for file in sh-utils textutils fileutils; do
-#  if [ -f %{_infodir}/$file.info.gz ]; then
-#    /sbin/install-info --delete %{_infodir}/$file.info.gz --dir=%{_infodir}/dir &> /dev/null || :
-#  fi
-#done
-
-#%preun
-#if [ $1 = 0 ]; then
-#  if [ -f %{_infodir}/%{name}.info.gz ]; then
-#    /sbin/install-info --delete %{_infodir}/%{name}.info.gz %{_infodir}/dir || :
-#  fi
-#fi
-
-#%post
-#/bin/grep -v '(sh-utils)\|(fileutils)\|(textutils)' %{_infodir}/dir > \
-#  %{_infodir}/dir.rpmmodify || exit 0
-#    /bin/mv -f %{_infodir}/dir.rpmmodify %{_infodir}/dir
-#if [ -f %{_infodir}/%{name}.info.gz ]; then
-#  /sbin/install-info %{_infodir}/%{name}.info.gz %{_infodir}/dir || :
-#fi
-
 %files
 # -f %{name}.lang
 %defattr(-,root,root,-)
@@ -227,7 +192,6 @@ rm -rf $RPM_BUILD_ROOT
 #%{?!nopam:%config(noreplace) %{_sysconfdir}/pam.d/runuser}
 #%{?!nopam:%config(noreplace) %{_sysconfdir}/pam.d/runuser-l}
 %doc COPYING ABOUT-NLS ChangeLog.bz2 NEWS README THANKS TODO old/*
-/@unixroot/bin/*
 %_bindir/*
 %_infodir/coreutils*
 #%_mandir/man*/*
@@ -240,6 +204,9 @@ rm -rf $RPM_BUILD_ROOT
 #%{_libdir}/coreutils
 
 %changelog
+* Thu Feb 02 2012 yd
+- Remove symlinks from /bin.
+
 * Sun Nov 20 2011 yd
 - fixed chown/chgrp, wildcard expansion for ls/touch.
 

@@ -1,7 +1,7 @@
 Summary: The GNU data compression program
 Name: gzip
 Version: 1.4
-Release: 5%{?dist}
+Release: 6%{?dist}
 # info pages are under GFDL license
 License: GPLv3+ and GFDL
 Group: Applications/File
@@ -51,8 +51,8 @@ very commonly used data compression program.
 %patch100 -p1 -b .os2~
 
 %build
-export MAKESHELL=/bin/sh
-export CONFIG_SHELL=/bin/sh
+export MAKESHELL=/@unixroot/usr/bin/sh.exe
+export CONFIG_SHELL=/@unixroot/usr/bin/sh.exe
 export DEFS="NO_ASM"
 export CPPFLAGS="-DHAVE_LSTAT"
 export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zexe -Zargs-wild -Zargs-resp"
@@ -65,7 +65,6 @@ make %{?smp_mflags}
 %install
 rm -rf ${RPM_BUILD_ROOT}
 %makeinstall
-mkdir -p ${RPM_BUILD_ROOT}/@unixroot/bin
 mkdir -p ${RPM_BUILD_ROOT}%{_bindir}
 #make DESTDIR=${RPM_BUILD_ROOT} install
 
@@ -80,12 +79,6 @@ cp -p ${RPM_BUILD_ROOT}%{_bindir}/gzip.exe ${RPM_BUILD_ROOT}%{_bindir}/uncompres
 #    mv ${RPM_BUILD_ROOT}/@unixroot/bin/$i ${RPM_BUILD_ROOT}%{_bindir}/$i
 #done
 
-# yd place a symlink for script compatibility
-ln -s /@unixroot/usr/bin/uncompress.exe $RPM_BUILD_ROOT/@unixroot/bin/uncompress
-ln -s /@unixroot/usr/bin/zcat $RPM_BUILD_ROOT/@unixroot/bin/zcat
-ln -s /@unixroot/usr/bin/gunzip.exe $RPM_BUILD_ROOT/@unixroot/bin/gunzip
-ln -s /@unixroot/usr/bin/gzip.exe $RPM_BUILD_ROOT/@unixroot/bin/gzip
-
 gzip -9nf ${RPM_BUILD_ROOT}%{_infodir}/gzip.info*
 
 # we don't ship it, so let's remove it from ${RPM_BUILD_ROOT}
@@ -96,26 +89,16 @@ rm -f ${RPM_BUILD_ROOT}/bin/uncompress
 %clean
 rm -rf ${RPM_BUILD_ROOT}
 
-%post
-#if [ -f %{_infodir}/gzip.info* ]; then
-#    /sbin/install-info %{_infodir}/gzip.info.gz %{_infodir}/dir || :
-#fi
-
-%preun
-#if [ $1 = 0 ]; then
-#    if [ -f %{_infodir}/gzip.info* ]; then
-#        /sbin/install-info --delete %{_infodir}/gzip.info.gz %{_infodir}/dir || :
-#    fi
-#fi
-
 %files
 %defattr(-,root,root)
 %doc NEWS README AUTHORS ChangeLog THANKS TODO
-/@unixroot/bin/*
 %{_bindir}/*
 %{_mandir}/*/*
 %{_infodir}/gzip.info*
 
 %changelog
+* Thu Feb 02 2012 yd
+- Remove symlinks from /bin.
+
 * Fri Nov 18 2011 yd
 - keep all executables to /usr/bin and place symlinks in /bin

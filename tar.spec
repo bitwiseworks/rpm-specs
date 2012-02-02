@@ -2,7 +2,7 @@ Summary: A GNU file archiving program
 Name: tar
 Epoch: 2
 Version: 1.23
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: GPLv3+
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/tar/
@@ -49,10 +49,6 @@ make %{?_smp_mflags}
 rm -rf $RPM_BUILD_ROOT
 make DESTDIR=$RPM_BUILD_ROOT install
 
-mkdir -p ${RPM_BUILD_ROOT}/@unixroot/bin
-ln -s %{_bindir}/tar.exe ${RPM_BUILD_ROOT}/@unixroot/bin/tar
-ln -s %{_bindir}/tar.exe ${RPM_BUILD_ROOT}/@unixroot/bin/tar.exe
-ln -s %{_bindir}/tar.exe ${RPM_BUILD_ROOT}/@unixroot/bin/gtar.exe
 rm -f $RPM_BUILD_ROOT/%{_infodir}/dir
 mkdir -p ${RPM_BUILD_ROOT}%{_mandir}/man1
 #install -c -p -m 0644 %{SOURCE2} ${RPM_BUILD_ROOT}%{_mandir}/man1
@@ -71,29 +67,19 @@ rm -f ${RPM_BUILD_ROOT}%{_libdir}/charset.alias
 %clean
 rm -rf ${RPM_BUILD_ROOT}
 
-#%post
-#if [ -f %{_infodir}/tar.info.gz ]; then
-#   /sbin/install-info %{_infodir}/tar.info.gz %{_infodir}/dir || :
-#fi
-
-#%preun
-#if [ $1 = 0 ]; then
-#   if [ -f %{_infodir}/tar.info.gz ]; then
-#      /sbin/install-info --delete %{_infodir}/tar.info.gz %{_infodir}/dir || :
-#   fi
-#fi
-
 %files
 # -f %{name}.lang
 %defattr(-,root,root)
 %doc AUTHORS ChangeLog ChangeLog.1 COPYING NEWS README THANKS TODO
-/@unixroot/bin/*
 %{_bindir}/*
 %{_mandir}/man*/*
 %{_infodir}/tar.info*
-%{_usr}/share/locale/*
+%{_datadir}/locale/*
 
 %changelog
+* Thu Feb 02 2012 yd
+- Remove symlinks from /bin.
+
 * Thu Jan 28 2012 yd
 - Fix change target directory with -C option (libc cannot dup() a directory fd).
 
