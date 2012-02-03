@@ -1,7 +1,7 @@
 Summary: A smaller version of the Bourne shell (sh).
 Name: ash
 Version: 0.0.0
-Release: 9%{?dist}
+Release: 10%{?dist}
 License: BSD
 Group: System Environment/Shells
 Source: ash.zip
@@ -17,6 +17,7 @@ Source: ash.zip
 #Conflicts: mkinitrd <= 1.7
 
 Requires: libc >= 0.6.3
+Provides: /@unixroot/bin/sh
 
 %description
 A shell is a basic system program that interprets keyboard and mouse
@@ -112,6 +113,9 @@ rm -rf %{buildroot}
 %{_mandir}/man1/*
 
 %changelog
+* Fri Feb 03 2012 yd
+- added Provides for virtual /@unixroot/bin/sh file.
+
 * Thu Feb 02 2012 yd
 - Remove symlinks from /bin.
 
