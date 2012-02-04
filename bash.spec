@@ -19,6 +19,8 @@ Source: bash.zip
 #Buildroot: %{_tmppath}/%{name}-%{version}-root
 #Conflicts: mkinitrd <= 1.7
 
+Provides: /@unixroot/bin/bash
+
 %description
 The GNU Bourne Again shell (Bash) is a shell or command language
 interpreter that is compatible with the Bourne shell (sh). Bash
@@ -55,53 +57,22 @@ incorporates useful features from the Korn shell (ksh) and the C shell
 
 %install
 rm -rf %{buildroot}
-mkdir -p %{buildroot}/@unixroot/bin
 mkdir -p %{buildroot}%{_bindir}
 
 cp -p usr/bin/bash.exe %{buildroot}%{_bindir}/bash.exe
-ln -s %{_bindir}bash.exe %{buildroot}/@unixroot/bin/bash
-
-#%post
-#if [ ! -f /etc/shells ]; then
-#	echo "/bin/ash" > /etc/shells
-#	echo "/bin/bsh" >> /etc/shells
-#else
-#	if ! grep '^/bin/ash$' /etc/shells > /dev/null; then
-#		echo "/bin/ash" >> /etc/shells
-#	fi
-#	if ! grep '^/bin/bsh$' /etc/shells > /dev/null; then
-#		echo "/bin/bsh" >> /etc/shells
-#	fi
-#fi
-
-#%postun
-#if [ "$1" = "0" ]; then
-#	grep -v '^/bin/ash' < /etc/shells | grep -v '^/bin/bsh' > /etc/shells.new
-#	mv /etc/shells.new /etc/shells
-#fi
-
-%verifyscript
-#
-#for n in ash bsh; do
-#    echo -n "Looking for $n in /etc/shells... "
-#    if ! grep "^/bin/${n}\$" /etc/shells > /dev/null; then
-#	echo "missing"
-#	echo "${n} missing from /etc/shells" >&2
-#    else
-#	echo "found"
-#    fi
-#done
 
 %clean
 rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root)
-/@unixroot/bin/bash
 %{_bindir}/bash.exe
-#/bin/bsh
 #%{_mandir}/man1/*
 
 %changelog
+* Sat Feb 04 2012 yd
+- added Provides for virtual /@unixroot/bin/bash file.
+- Remove symlinks from /bin.
+
 * Wed Nov 16 2011 yd
 - keep all executables to /usr/bin and place symlinks in /bin
