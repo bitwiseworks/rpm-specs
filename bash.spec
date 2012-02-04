@@ -4,7 +4,7 @@
 Summary: The GNU Bourne Again shell
 Name: bash
 Version: %{baseversion}%{patchleveltag}
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: BSD
 Group: System Environment/Shells
 Source: bash.zip
