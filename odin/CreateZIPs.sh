@@ -39,10 +39,10 @@ cp_prg_file()
         die "cp_prg_file: invalid arguments."
 
     local fbase=${1%.*}
-    run cp -Rdp "$1" "$out_base/$2"
+    run cp -Rdp $1 "$out_base/$2"
     # don't copy .map, it's not in the right place of the build tree any more
-#    run cp -Rdp "$fbase.sym" "$fbase.map" "$out_base_sym/$2"
-    run cp -Rdp "$fbase.sym" "$out_base_sym/$2"
+#    run cp -Rdp $fbase.sym "$fbase.map" "$out_base_sym/$2"
+    run cp -Rdp $fbase.sym "$out_base_sym/$2"
 
     # lxlite it in release mode
     if [ -z "$debug" ]; then
@@ -113,7 +113,7 @@ cmd_create()
         "$odin_root/WGSS50.lic" \
         "$out_base/"
     run cp -Rdp \
-        "$odin_root/doc/ChangeLog-*" \
+        "$odin_root/doc/ChangeLog-"* \
         "$odin_root/doc/Readme.txt" \
         "$odin_root/doc/ReportingBugs.txt" \
         "$odin_root/doc/Logging.txt" \
