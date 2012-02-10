@@ -5,7 +5,7 @@
 # 1. Requires GCC 3.3.5 CSD4 (ftp://ftp.netlabs.org/pub/gcc/GCC-3.3.5-csd4.zip)
 # 2. Build with rpmbuild -ba -D "master_mode 1" when packing a new release
 #    and changing %svn_rev / %svn_url.
-# 3. Use -D "test_mode 1" to skip the unzip step when debugging the build.
+# 3. Use -D "skip_unpack 1" to skip the unpack step when debugging the build.
 #
 
 Name:       kbuild
@@ -17,12 +17,12 @@ Url:        http://svn.netlabs.org/kbuild
 %define ver_minor   1
 %define ver_patch   9998
 
-%define os2_release 1
+%define os2_release 2
 
 %define rpm_release 1
 
 %define svn_url     http://svn.netlabs.org/repos/kbuild/trunk
-%define svn_rev     2546
+%define svn_rev     2557
 
 %define descr_brief kBuild is a GNU make fork with a set of scripts to simplify\
 complex build tasks and portable versions of various UNIX tools to ensure\
@@ -39,9 +39,19 @@ Release:    %{rpm_release}
 
 Source:     %{name}-%{version}.zip
 
+Patch1:     kbuild-001.patch
+Patch2:     kbuild-002.patch
+Patch3:     kbuild-003.patch
+Patch4:     kbuild-004.patch
+
+BuildRequires: kbuild
+
 #------------------------------------------------------------------------------
 # commons
 #------------------------------------------------------------------------------
+
+# TODO: patch -s (2.6.1-3.oc00) always fails, remove this flag from defaults
+%define _default_patch_flags %nil
 
 #------------------------------------------------------------------------------
 # main package
@@ -77,11 +87,22 @@ rm -f "%{_sourcedir}/%{name}-%{version}.zip"
 (cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}.zip" "%{name}-%{version}")
 %else
 # use source zip
-%if 0%{?test_mode}
+%if 0%{?skip_unpack}
 %setup -TD
 %else
 %setup -q
 %endif
+%endif
+
+%if ! 0%{?skip_unpack}
+%patch1
+[ $? = 0 ] || exit 1
+%patch2
+[ $? = 0 ] || exit 1
+%patch3
+[ $? = 0 ] || exit 1
+%patch4
+[ $? = 0 ] || exit 1
 %endif
 
 #------------------------------------------------------------------------------
@@ -134,6 +155,16 @@ rm -rf "%{buildroot}"
 #------------------------------------------------------------------------------
 %changelog
 
-* Wed Oct 5 2011 Dmitriy Kuminov <dmik/coding.org> 0.1.9998-1
+* Fri Feb 10 2012 Dmitriy Kuminov <coding/dmik.org> 0.1.9998.2-1
+- New SVN release 2557 of version 0.1.9998.
+- New patches:
+  - Install DLLs to "bin/" by default [001.patch].
+  - Make ld and ar in GCC3OMF/GXX3OMF tools output obey KBUILD_VERBOSE
+    setting and be quiet by default [002.patch].
+  - Support DLLs as sources for LIBRARIES targets for making import
+    libraries with GCC3OMF/GXX3OMF tools [003.patch].
+  - Add RC support to GCC3OMF/GXX3OMF tools [004.patch].
+
+* Wed Oct 5 2011 Dmitriy Kuminov <coding/dmik.org> 0.1.9998.1-1
 - New SVN release 2546 of version 0.1.9998.
 
