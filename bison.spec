@@ -1,7 +1,7 @@
 Summary: A GNU general-purpose parser generator
 Name: bison
 Version: 2.5
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv2+
 Group: Development/Tools
 Source: ftp://ftp.gnu.org/pub/gnu/bison/bison-%{version}.tar.bz2
@@ -70,6 +70,7 @@ Bison manual section for more information.
 export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
 export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 export LIBS="-lurpo -lmmap"
+export M4="/@unixroot/usr/bin/m4.exe"
 %configure \
    "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
 make %{?_smp_mflags}
@@ -117,5 +118,8 @@ gzip -9nf ${RPM_BUILD_ROOT}%{_infodir}/bison.info*
 rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Tue Feb 28 2012 yd
+- fixed m4 executable location.
+
 * Fri Jan 06 2012 yd
 - initial unixroot build.

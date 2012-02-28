@@ -1,7 +1,7 @@
 Summary: A tool for creating scanners (text pattern recognizers)
 Name: flex
 Version: 2.5.35
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: BSD
 Group: Development/Tools
 URL: http://flex.sourceforge.net/
@@ -60,6 +60,7 @@ application development.
 export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
 export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 export LIBS="-lurpo -lmmap"
+export M4="/@unixroot/usr/bin/m4.exe"
 %configure \
     --disable-dependency-tracking \
    "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
@@ -101,5 +102,8 @@ rm -rf ${RPM_BUILD_ROOT}
 #%{_libdir}/*.a
 
 %changelog
+* Tue Feb 28 2012 yd
+- fixed m4 executable location.
+
 * Fri Jan 06 2012 yd
 - initial unixroot build.
