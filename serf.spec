@@ -1,0 +1,91 @@
+%define serfver 1
+
+Summary:	A high-performance asynchronous HTTP client library
+Name:		serf
+Version:	1.0.1
+Release:        1%{?dist}
+License:	Apache License
+Group:		System/Libraries
+URL:		http://code.google.com/p/serf/
+Source0:	http://serf.googlecode.com/files/%{name}-%{version}.tar.bz2
+Patch1:         serf-os2.patch
+
+BuildRequires:	apr-devel
+BuildRequires:	apr-util-devel
+#BuildRequires:	autoconf2.5
+#BuildRequires:	automake
+#BuildRequires:	libtool
+BuildRequires:	openssl-devel
+BuildRequires:	zlib-devel
+BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
+
+%description
+The serf library is a C-based HTTP client library built upon the Apache
+Portable Runtime (APR) library. It multiplexes connections, running the
+read/write communication asynchronously. Memory copies and transformations are
+kept to a minimum to provide high performance operation.
+
+%package devel
+Summary:	Development libraries and headers for %{name}
+Group:		Development/C
+Requires:	%{name} = %{version}-%{release}
+Provides:	%{name}-devel = %{version}-%{release}
+
+%description devel
+The serf library is a C-based HTTP client library built upon the Apache
+Portable Runtime (APR) library. It multiplexes connections, running the
+read/write communication asynchronously. Memory copies and transformations are
+kept to a minimum to provide high performance operation.
+
+This package contains all of the development files that you will need in order
+to compile %{name} applications.
+
+%prep
+
+%setup -q
+%patch1 -p1 -b .os2
+
+# don't link against ldap libs
+#perl -pi -e "s|apu_config --link-libtool --libs|apu_config --link-libtool --avoid-ldap --libs|g" configure*
+# lib64 fix
+#perl -pi -e "s|/lib\b|/%{_lib}|g" configure*
+# no static builds
+#perl -pi -e "s|-static||g" Makefile*
+
+%build
+export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
+export LDFLAGS="-Zhigh-mem -Zargs-wild -Zargs-resp"
+export LIBS="-lurpo -lmmap"
+%configure \
+       "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
+make %{?_smp_mflags}
+
+%install
+rm -rf $RPM_BUILD_ROOT
+make install DESTDIR=$RPM_BUILD_ROOT
+
+# Unpackaged files:
+rm -f $RPM_BUILD_ROOT%{_libdir}/serf-*.la
+
+# rename static library
+mv $RPM_BUILD_ROOT%{_libdir}/serf-%{serfver}.lib $RPM_BUILD_ROOT%{_libdir}/serf-%{serfver}_s.lib
+# import library
+emximp -o $RPM_BUILD_ROOT%{_libdir}/serf-%{serfver}.lib $RPM_BUILD_ROOT%{_libdir}/serf-%{serfver}.dll
+
+%clean
+rm -rf %{buildroot}
+
+%files
+%defattr(-,root,root)
+%doc CHANGES LICENSE NOTICE README design-guide.txt
+%attr(0755,root,root) %{_libdir}/serf*.dll
+
+%files devel
+%defattr(-,root,root)
+%attr(0644,root,root) %{_includedir}/*.h
+%attr(0755,root,root) %{_libdir}/serf*.lib
+%{_libdir}/pkgconfig/*.pc
+
+%changelog
+* Fri Mar 02 2012 yd
+- initial unixroot build.
