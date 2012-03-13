@@ -24,7 +24,7 @@
 Summary: The RPM package management system
 Name: rpm
 Version: %{rpmver}
-Release: 13%{?dist}
+Release: 14%{?dist}
 Group: System Environment/Base
 Url: http://www.rpm.org/
 Source0: http://rpm.org/releases/rpm-4.8.x/%{name}-%{srcver}.tar.bz2
@@ -458,6 +458,9 @@ rm -rf $RPM_BUILD_ROOT
 #%doc doc/librpm/html/*
 
 %changelog
+* Tue Mar 13 2012 yd
+- updated warpin-conflict.cmd, ticket #27, #31.
+
 * Sun Nov 20 2011 yd
 - use shell in /usr/bin.
 

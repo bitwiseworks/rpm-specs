@@ -13,7 +13,7 @@
 Summary: The exim mail transfer agent
 Name: exim
 Version: 4.73
-Release: 0.3%{?dist}
+Release: 0.4%{?dist}
 License: GPLv2+
 Url: http://www.exim.org/
 Group: System Environment/Daemons
@@ -205,7 +205,8 @@ cp exim_monitor/EDITME Local/eximon.conf
 
 %build
 
-export CONFIG_SHELL="/bin/sh"
+export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
+export MAKESHELL="/@unixroot/usr/bin/sh.exe"
 export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp" 
 export  LFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp" 
 export CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE"
@@ -215,7 +216,7 @@ export CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE"
 %else
 	export PIE=-fPIE
 %endif
-make _lib=%{_lib} FULLECHO=
+make _lib=%{_lib} SHELL="/@unixroot/usr/bin/sh.exe" FULLECHO=
 
 %if 0%{?buildsa}
 # build sa-exim

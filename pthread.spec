@@ -1,7 +1,7 @@
 Summary: A posix pthread emulation for OS/2-eComStation
 Name: pthread
-Version: 20111102
-Release: 9%{?dist}
+Version: 20120313
+Release: 10%{?dist}
 License: unknown
 Group: Development/Libraries
 Source: pthread-%{version}-os2.zip
@@ -64,6 +64,9 @@ rm -rf %{buildroot}
 %{_libdir}/pthread.dll
 
 %changelog
+* Tue Mar 13 2012 yd
+- added missing prototypes and exports (detach and kill).
+
 * Wed Nov 02 2011 yd
 - added -Zdll to build system
 - improved build system
