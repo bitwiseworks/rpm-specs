@@ -3,13 +3,14 @@ Name:           libc
 License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Standard Shared Libraries
 Group:          System/Libraries
-Version:        0.6.4
-Release:        12%{?dist}
+Version:        0.6.5
+Release:        15%{?dist}
 Url:            http://svn.netlabs.org/libc
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 Source:         libc-%{version}.zip
-Source1:        libc-os2.tar.gz
+Source1:        libc-emxomf.zip
+Patch0:         libc.patch
 
 BuildRequires:  rexx_exe
 
@@ -54,6 +55,7 @@ library (gettext headers).
 
 %prep
 %setup -q -c -a 1
+%patch0 
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -67,13 +69,21 @@ mkdir -p %{buildroot}%{_usr}/info
 
 cp -p -r usr/bin/* %{buildroot}%{_bindir}
 cp -p -r usr/include/* %{buildroot}%{_includedir}
-cp -p -r include/* %{buildroot}%{_includedir}
 cp -p -r emxomf.exe %{buildroot}%{_bindir}
 cp -p -r usr/lib/* %{buildroot}%{_libdir}
 cp -p -r usr/man/* %{buildroot}%{_usr}/i386-pc-os2-elf
 cp -p -r usr/man/* %{buildroot}%{_usr}/i386-pc-os2-emx
 cp -p -r usr/man/* %{buildroot}%{_usr}/man
 cp -p -r usr/man/* %{buildroot}%{_usr}/info
+
+#remove (old) binutils headers/libs
+rm -f %{buildroot}%{_includedir}/ansidecl.h
+rm -f %{buildroot}%{_includedir}/bfd.h
+rm -f %{buildroot}%{_includedir}/bfdlink.h
+rm -f %{buildroot}%{_includedir}/dis-asm.h
+rm -f %{buildroot}%{_includedir}/symcat.h
+rm -f %{buildroot}%{_libdir}/libbfd.*
+rm -f %{buildroot}%{_libdir}/libopcodes.*
 
 rexx2vio $RPM_BUILD_ROOT%{_bindir}/dllar.cmd $RPM_BUILD_ROOT%{_bindir}/dllar.exe
 
@@ -109,6 +119,15 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/libintl.h
 
 %changelog
+* Mon May 11 2012 yd
+- remove obsolete binutil headers/libs
+
+* Tue Apr 17 2012 yd
+- update to csd5
+
+* Mon Jan 09 2012 yd
+- commented out sbrk/_sbrk definitions in stdlib.h (use unistd.h ones).
+
 * Fri Dec 16 2011 yd
 - restored stdarg.h/cdefs.h from original libc distribution.
 
