@@ -2,16 +2,14 @@
 
 Summary:	A high-performance asynchronous HTTP client library
 Name:		serf
-Version:	1.0.1
-Release:        2%{?dist}
+Version:	1.1.0
+Release:        3%{?dist}
 License:	Apache License
 Group:		System/Libraries
 URL:		http://code.google.com/p/serf/
 Source0:	http://serf.googlecode.com/files/%{name}-%{version}.tar.bz2
 Source1:	serf-1.def
 Patch1:         serf-os2.patch
-Patch2:         serf-1.0.0.issue68.patch
-Patch3:         serf-1.0.0.issue68b.patch
 
 BuildRequires:	apr-devel
 BuildRequires:	apr-util-devel
@@ -47,8 +45,6 @@ to compile %{name} applications.
 
 %setup -q
 %patch1 -p1 -b .os2
-%patch2 -p2 -b .68
-%patch3 -p2 -b .68b
 
 cp %{SOURCE1} .
 
@@ -94,6 +90,9 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
+* Wed Jun 27 2012 yd
+- update source to release 1.1.0 (required for AOO 3.5.x)
+
 * Fri Mar 02 2012 yd
 - added http://code.google.com/p/serf/issues/detail?id=68
 
