@@ -3,7 +3,7 @@
 Summary:	A high-performance asynchronous HTTP client library
 Name:		serf
 Version:	1.1.0
-Release:        3%{?dist}
+Release:        4%{?dist}
 License:	Apache License
 Group:		System/Libraries
 URL:		http://code.google.com/p/serf/
@@ -92,6 +92,7 @@ rm -rf %{buildroot}
 %changelog
 * Wed Jun 27 2012 yd
 - update source to release 1.1.0 (required for AOO 3.5.x)
+- added missing export.
 
 * Fri Mar 02 2012 yd
 - added http://code.google.com/p/serf/issues/detail?id=68
