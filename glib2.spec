@@ -3,12 +3,13 @@
 Name:           glib2
 %define _name glib
 Version:        2.25.15
-Release:        3%{?dist}
+Release:        4%{?dist}
 License:        LGPLv2.1+
 Summary:        A Library with Convenient Functions Written in C
 Url:            http://www.gtk.org/
 Group:          Development/Libraries/C and C++
 Source:         ftp://ftp.gnome.org/pub/GNOME/sources/%{_name}/2.14/%{_name}-%{version}.tar.gz
+Source1:        glib-gspawn-os2.c
 
 Patch0: %{_name}-%{version}-os2.diff
 
@@ -152,17 +153,19 @@ to a C programmer and is used by Gtk+ and GNOME.
 %setup -q -n %{_name}-%{version}
 #translation-update-upstream
 %patch0 -p1
+cp %{SOURCE1} glib/gspawn-os2.c
 
 %build
-CONFIG_SHELL=/bin/sh
-export CONFIG_SHELL
-LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
-export LDFLAGS
-LIBS="-lurpo -lmmap -lpthread"
-export LIBS
+export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
+export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+export LIBS="-lurpo -lmmap -lpthread"
 %configure \
         --enable-shared --disable-static \
         "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
+
+# YD fix extra CRLF after pass_all and execute it again (libtool hack breaks sed substitutions)
+sed -i "s/pass_all/pass_all\'\n_os2_dummy_var=\'/" config.status
+config.status
 
 make OPT="$CFLAGS" %{?_smp_mflags}
 
@@ -182,13 +185,13 @@ cp README $RPM_BUILD_ROOT%{_datadir}/doc/%{name}-%{version}
 cp NEWS $RPM_BUILD_ROOT%{_datadir}/doc/%{name}-%{version}
 cp ChangeLog $RPM_BUILD_ROOT%{_datadir}/doc/%{name}-%{version}
 
-cp glib/*.dll $RPM_BUILD_ROOT%{_libdir}
+cp glib/.libs/*.dll $RPM_BUILD_ROOT%{_libdir}
 cp glib/.libs/*.lib $RPM_BUILD_ROOT%{_libdir}
-cp gmodule/*.dll $RPM_BUILD_ROOT%{_libdir}
+cp gmodule/.libs/*.dll $RPM_BUILD_ROOT%{_libdir}
 cp gmodule/.libs/*.lib $RPM_BUILD_ROOT%{_libdir}
-cp gthread/*.dll $RPM_BUILD_ROOT%{_libdir}
+cp gthread/.libs/*.dll $RPM_BUILD_ROOT%{_libdir}
 cp gthread/.libs/*.lib $RPM_BUILD_ROOT%{_libdir}
-cp gobject/*.dll $RPM_BUILD_ROOT%{_libdir}
+cp gobject/.libs/*.dll $RPM_BUILD_ROOT%{_libdir}
 cp gobject/.libs/*.lib $RPM_BUILD_ROOT%{_libdir}
 
 rm $RPM_BUILD_ROOT%{_libdir}/charset.alias
@@ -301,3 +304,5 @@ rm -rf $RPM_BUILD_ROOT
 #%dir %{_datadir}/gdb/auto-load/%{_prefix}/%{_lib}
 
 %changelog
+* Wed Jul 18 2012 yd
+- include Dmitry's changes for OpenJDK build.
