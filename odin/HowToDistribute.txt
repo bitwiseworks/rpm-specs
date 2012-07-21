@@ -26,8 +26,7 @@ Main Routine
    such as installation or configuration instructions and usage pattern
    changes.
 
-4. Perform clean builds of the software by using the script
-   "$ODIN/makeall.cmd".
+4. Perform clean builds of the software (kmk and kmk BUILD_TYPE=debug).
 
 5. Create ZIP packages according to the instructions below.
 
