@@ -116,15 +116,19 @@ Odin\Odin\Changes to Config.sys
 
 %post -n lib%{name}
 
+ODIN_SYSTEMDIR_D="$(echo %{odin_systemdir} | sed -re 's,/@unixroot,'$UNIXROOT',g' -e 's,/,\\,g')"
+ODIN_BINDIR_D="$(echo %{odin_bindir} | sed -re 's,/@unixroot,'$UNIXROOT',g' -e 's,/,\\,g')"
+
 CFGSYS_CHANGED=
 %if "%{odin_systemdir}" != "%{_libdir}"
-export ODIN_SYSTEMDIR_D="$(echo %{odin_systemdir} | sed -re 's,/@unixroot,'$UNIXROOT',g' -e 's,/,\\,g')"
+export ODIN_SYSTEMDIR_D
 %cube {ADDSTRING ";%ODIN_SYSTEMDIR_D%" IN "LIBPATH=" (FIRST AFTER} %{os2_config_sys} >nul
 CFGSYS_CHANGED=y
 %endif
 %if "%{odin_bindir}" != "%{_bindir}"
-export ODIN_BINDIR_D="$(echo %{odin_bindir} | sed -re 's,/@unixroot,'$UNIXROOT',g' -e 's,/,\\,g')"
+export ODIN_BINDIR_D
 %cube {ADDSTRING ";%ODIN_BINDIR_D%" IN "SET PATH=" (FIRST AFTER} %{os2_config_sys} >nul
+CFGSYS_CHANGED=y
 %endif
 if [ -n "$CFGSYS_CHANGED" ]; then
     echo; echo "NOTE:"
@@ -140,6 +144,13 @@ echo \
 WINDOWS=$ODIN_WINDOWSDIR_D
 " \
 > "%{odin_systemdir}/ODIN.INI"
+echo \
+"[ODINSYSTEM]
+PE_EXE=$ODIN_BINDIR_D\\PE.EXE
+PEC_EXE=$ODIN_BINDIR_D\\PEC.EXE
+W16ODIN_EXE=$ODIN_BINDIR_D\\W16ODIN.EXE
+" \
+>> "%{odin_systemdir}/ODIN.INI"
 # mkdir -p fails on /@unixroot, replace it with the real value
 mkdir -p "$(echo %{odin_windowsdir} | sed -re 's,/@unixroot,'$UNIXROOT',g')"
 (cd "%{odin_systemdir}/"; "%{odin_systemdir}"/odininst.exe)
