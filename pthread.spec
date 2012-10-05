@@ -1,7 +1,9 @@
+%define kmk_dist out/os2.x86/release/dist
+
 Summary: A posix pthread emulation for OS/2-eComStation
 Name: pthread
-Version: 20120313
-Release: 10%{?dist}
+Version: 20120924
+Release: 11%{?dist}
 License: unknown
 Group: Development/Libraries
 Source: pthread-%{version}-os2.zip
@@ -33,7 +35,6 @@ The previous posix pthread emulation library.
 export KCFLAGS="%{optflags}"
 kmk -C src
 kmk -C src install
-kmk -C src build
 
 %install
 rm -rf %{buildroot}
@@ -41,11 +42,9 @@ mkdir -p %{buildroot}%{_libdir}
 mkdir -p %{buildroot}%{_includedir}
 
 cp pthread.dll %{buildroot}%{_libdir}
-cp pthr01.dll %{buildroot}%{_libdir}
-cp pthread.h %{buildroot}%{_includedir}
-cp pthread.a %{buildroot}%{_libdir}/pthread.a
-cp pthread_s.a %{buildroot}%{_libdir}/pthread_s.a
-cp pthread_g.a %{buildroot}%{_libdir}/pthread_g.a
+cp %{kmk_dist}/bin/pthr01.dll %{buildroot}%{_libdir}
+cp %{kmk_dist}/include/pthread.h %{buildroot}%{_includedir}
+cp %{kmk_dist}/lib/pthread*.a %{buildroot}%{_libdir}
 
 %clean
 rm -rf %{buildroot}
@@ -64,6 +63,9 @@ rm -rf %{buildroot}
 %{_libdir}/pthread.dll
 
 %changelog
+* Mon Sep 24 2012 yd
+- added stubs for pthread_rwlock_* functions.
+
 * Tue Mar 13 2012 yd
 - added missing prototypes and exports (detach and kill).
 
