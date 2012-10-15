@@ -17,12 +17,12 @@ Url:        http://svn.netlabs.org/kbuild
 %define ver_minor   1
 %define ver_patch   9998
 
-%define os2_release 2
+%define os2_release 3
 
 %define rpm_release 1
 
 %define svn_url     http://svn.netlabs.org/repos/kbuild/trunk
-%define svn_rev     2557
+%define svn_rev     2662
 
 %define descr_brief kBuild is a GNU make fork with a set of scripts to simplify\
 complex build tasks and portable versions of various UNIX tools to ensure\
@@ -39,10 +39,12 @@ Release:    %{rpm_release}
 
 Source:     %{name}-%{version}.zip
 
-Patch1:     kbuild-001.patch
-Patch2:     kbuild-002.patch
-Patch3:     kbuild-003.patch
-Patch4:     kbuild-004.patch
+Patch1:     kbuild-001-os2_default_inst_dll_to_bin.patch
+Patch2:     kbuild-002-gcc3omf_make_ld_ar_quiet.patch
+Patch3:     kbuild-003-gcc3omf_support_dll_as_library_source.patch
+Patch4:     kbuild-004-gcc3omf_add_rc_support.patch
+Patch5:     kbuild-005-gcc3omf_gen_implib_for_dll.patch
+Patch6:     kbuild-006-fix-os2-build.patch
 
 BuildRequires: kbuild
 
@@ -103,6 +105,10 @@ rm -f "%{_sourcedir}/%{name}-%{version}.zip"
 [ $? = 0 ] || exit 1
 %patch4
 [ $? = 0 ] || exit 1
+%patch5
+[ $? = 0 ] || exit 1
+%patch6
+[ $? = 0 ] || exit 1
 %endif
 
 #------------------------------------------------------------------------------
@@ -154,6 +160,12 @@ rm -rf "%{buildroot}"
 
 #------------------------------------------------------------------------------
 %changelog
+
+* Mon Oct 15 2012 Dmitriy Kuminov <coding/dmik.org> 0.1.9998.3-1
+- New SVN release 2662 of version 0.1.9998.
+- New patches:
+  - Automatically create import library for DLL in GCC3OMF/GXX3OMF
+    tools (may be disasbled with KMK_NOIMPLIB in LDFLAGS) [005.patch].
 
 * Fri Feb 10 2012 Dmitriy Kuminov <coding/dmik.org> 0.1.9998.2-1
 - New SVN release 2557 of version 0.1.9998.
