@@ -17,12 +17,12 @@ Url:        http://svn.netlabs.org/kbuild
 %define ver_minor   1
 %define ver_patch   9998
 
-%define os2_release 3
+%define os2_release 4
 
 %define rpm_release 1
 
 %define svn_url     http://svn.netlabs.org/repos/kbuild/trunk
-%define svn_rev     2662
+%define svn_rev     2663
 
 %define descr_brief kBuild is a GNU make fork with a set of scripts to simplify\
 complex build tasks and portable versions of various UNIX tools to ensure\
@@ -160,6 +160,9 @@ rm -rf "%{buildroot}"
 
 #------------------------------------------------------------------------------
 %changelog
+
+* Mon Oct 16 2012 Dmitriy Kuminov <coding/dmik.org> 0.1.9998.4-1
+- New SVN release 2663 of version 0.1.9998.
 
 * Mon Oct 15 2012 Dmitriy Kuminov <coding/dmik.org> 0.1.9998.3-1
 - New SVN release 2662 of version 0.1.9998.
