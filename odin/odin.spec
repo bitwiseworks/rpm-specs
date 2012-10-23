@@ -6,7 +6,7 @@
 
 %define ver_major   0
 %define ver_minor   8
-%define ver_patch   5
+%define ver_patch   6
 
 %define rpm_release 1
 
@@ -400,6 +400,9 @@ rm -rf %{buildroot}
 
 #------------------------------------------------------------------------------
 %changelog
+
+* Tue Oct 23 2012 Dmitriy Kuminov <coding/dmik.org> - 0.8.6-1
+- New release 0.8.6. See %{pkg_docdir}/ChangeLog for more information.
 
 * Sat Jul 21 2012 Dmitriy Kuminov <coding/dmik.org> - 0.8.5-1
 - New release 0.8.5. See %{pkg_docdir}/ChangeLog for more information.
