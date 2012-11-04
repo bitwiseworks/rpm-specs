@@ -17,7 +17,7 @@ Url:        http://svn.netlabs.org/kbuild
 %define ver_minor   1
 %define ver_patch   9998
 
-%define os2_release 4
+%define os2_release 5
 
 %define rpm_release 1
 
@@ -45,6 +45,7 @@ Patch3:     kbuild-003-gcc3omf_support_dll_as_library_source.patch
 Patch4:     kbuild-004-gcc3omf_add_rc_support.patch
 Patch5:     kbuild-005-gcc3omf_gen_implib_for_dll.patch
 Patch6:     kbuild-006-fix-os2-build.patch
+Patch7:     kbuild-007-gcc3omf_add_rc_support-NEW.patch
 
 BuildRequires: kbuild
 
@@ -109,6 +110,8 @@ rm -f "%{_sourcedir}/%{name}-%{version}.zip"
 [ $? = 0 ] || exit 1
 %patch6
 [ $? = 0 ] || exit 1
+%patch7
+[ $? = 0 ] || exit 1
 %endif
 
 #------------------------------------------------------------------------------
@@ -160,6 +163,11 @@ rm -rf "%{buildroot}"
 
 #------------------------------------------------------------------------------
 %changelog
+
+* Mon Nov 5 2012 Dmitriy Kuminov <coding/dmik.org> 0.1.9998.5-1
+- New patch:
+  - Add switching between RC/WRC in GCC3OMF/GXX3OMF tools based on
+    EMXOMFLD_RC_* environment variables [Patch6].
 
 * Mon Oct 16 2012 Dmitriy Kuminov <coding/dmik.org> 0.1.9998.4-1
 - New SVN release 2663 of version 0.1.9998.
