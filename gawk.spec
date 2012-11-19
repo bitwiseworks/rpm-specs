@@ -1,7 +1,7 @@
 Summary: The GNU version of the awk text processing utility
 Name: gawk
 Version: 4.0.0
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 # Most of source files are licensed under GPLv3+,
 # several files are GPL or LGPLv2.1+ licensed,
@@ -29,7 +29,7 @@ considered to be a standard Linux tool for processing text.
 
 %build
 export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
-export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf"
+export LDFLAGS="-Zhigh-mem -Zomf"
 export LIBS="-lurpo -lmmap"
 %configure \
    "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
@@ -71,5 +71,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/locale
 
 %changelog
+* Mon Nov 19 2012 yd
+- Fix CRLF translation to CRCRLF (removed -Zbin-files).
+
 * Wed Mar 21 2012 yd
 - initial unixroot build.
