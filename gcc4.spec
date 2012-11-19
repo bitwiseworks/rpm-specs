@@ -25,7 +25,6 @@ BuildRequires: gmp-devel >= 4.1.2-8, mpfr-devel >= 2.2.1
 Requires: libgcc446 = %{gcc_version}
 Requires: libc-devel >= 0.6.3
 Requires: binutils
-Requires: libssp, libstdc++, libsupc++
 
 %description
 The gcc package contains the GNU Compiler Collection version 4.4.
