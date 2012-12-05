@@ -21,7 +21,7 @@
 Summary: A general purpose cryptography library with TLS implementation
 Name: openssl
 Version: 1.0.0a
-Release: 4%{?dist}
+Release: 5%{?dist}
 
 Source: openssl-%{version}.tar.gz
 
@@ -36,7 +36,8 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-root
 #BuildRequires: mktemp, krb5-devel, perl, sed, zlib-devel, /usr/bin/cmp
 BuildRequires: zlib-devel
 #BuildRequires: /usr/bin/rename
-#Requires: mktemp, ca-certificates >= 2008-5
+#Requires: mktemp
+Requires: ca-certificates
 
 %description
 The OpenSSL toolkit provides support for secure communications between
@@ -310,5 +311,8 @@ rm -rf $RPM_BUILD_ROOT/%{_libdir}/fipscanister.*
 #%postun -p /sbin/ldconfig
 
 %changelog
+* Wed Dec 05 2012 yd
+- ca-certificates are required for proper ssl checks.
+
 * Mon Jan 16 2012 yd
 - rebuild with libc 0.6.4 runtime.
