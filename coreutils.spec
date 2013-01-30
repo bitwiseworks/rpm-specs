@@ -3,7 +3,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.6
-Release: 7%{?dist}
+Release: 8%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -88,6 +88,7 @@ export LIBS="-lintl -lurpo"
 #automake --copy --add-missing
 %configure \
            --includedir=/usr/include \
+           --without-gmp \
            --enable-largefile \
            --enable-install-program=su.exe,hostname.exe,arch \
            --with-tty-group \
@@ -144,6 +145,10 @@ for i in env cut readlink; do ln -sf /@unixroot/usr/bin/$i.exe $RPM_BUILD_ROOT/@
 # yd rename dir.exe to dir-unix.exe and place a symlink for script compatibility
 mv $RPM_BUILD_ROOT%_bindir/dir.exe $RPM_BUILD_ROOT%_bindir/dir-unix.exe
 ln -s /@unixroot/usr/bin/dir-unix.exe $RPM_BUILD_ROOT%_bindir/dir
+
+# yd rename date.exe to date-unix.exe and place a symlink for script compatibility
+mv $RPM_BUILD_ROOT%_bindir/date.exe $RPM_BUILD_ROOT%_bindir/date-unix.exe
+ln -s /@unixroot/usr/bin/date-unix.exe $RPM_BUILD_ROOT%_bindir/date
 
 # su
 install -m 4755 src/su.exe $RPM_BUILD_ROOT/@unixroot/usr/bin
@@ -204,6 +209,9 @@ rm -rf $RPM_BUILD_ROOT
 #%{_libdir}/coreutils
 
 %changelog
+* Wed Jan 30 2013 yd
+- rename date.exe to date-unix.exe and add symlink.
+
 * Thu Feb 02 2012 yd
 - Remove symlinks from /bin.
 
