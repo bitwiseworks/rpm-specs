@@ -132,7 +132,7 @@ CFGSYS_CHANGED=y
 %endif
 if [ -n "$CFGSYS_CHANGED" ]; then
     echo; echo "NOTE:"
-    echo; echo "The file '%{os2_config_sys}' has been changed. You need to reboot your"
+    echo; echo "The boot configuration has been changed. You need to reboot your"
     echo "computer in order to activate these changes."
     echo
 fi
@@ -182,7 +182,7 @@ EOF
     %endif
     if [ -n "$CFGSYS_CHANGED" ]; then
         echo; echo "NOTE:"
-        echo; echo "The file '%{os2_config_sys}' has been changed. You need to reboot your"
+        echo; echo "The boot configuration has been changed. You need to reboot your"
         echo "computer in order to activate these changes."
         echo
     fi
@@ -291,7 +291,7 @@ for general use. It is only provided for testing purposes.
 export ODIN_SYSTEMDIR_D="$(echo %{odin_systemdir} | sed -re 's,/@unixroot,'$UNIXROOT',g' -e 's,/,\\,g')"
 %cube {ADDLINE "DEVICE=%ODIN_SYSTEMDIR_D%\win32k.sys" (AFTER "DEVICE="} %{os2_config_sys} >nul
 echo; echo "NOTE:"
-echo; echo "The file '%{os2_config_sys}' has been changed. You need to reboot your"
+echo; echo "The boot configuration has been changed. You need to reboot your"
 echo "computer in order to activate these changes."
 echo
 
@@ -300,7 +300,7 @@ if [ "$1" -eq 0 ]; then # (upon removal)
     export ODIN_SYSTEMDIR_D="$(echo %{odin_systemdir} | sed -re 's,/@unixroot,'$UNIXROOT',g' -e 's,/,\\,g')"
     %cube {DELLINE "DEVICE=%ODIN_SYSTEMDIR_D%\win32k.sys"} %{os2_config_sys} >nul
     echo; echo "NOTE:"
-    echo; echo "The file '%{os2_config_sys}' has been changed. You need to reboot your"
+    echo; echo "The boot configuration has been changed. You need to reboot your"
     echo "computer in order to activate these changes."
     echo
 fi
