@@ -3,7 +3,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.6
-Release: 8%{?dist}
+Release: 9%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -150,6 +150,14 @@ ln -s /@unixroot/usr/bin/dir-unix.exe $RPM_BUILD_ROOT%_bindir/dir
 mv $RPM_BUILD_ROOT%_bindir/date.exe $RPM_BUILD_ROOT%_bindir/date-unix.exe
 ln -s /@unixroot/usr/bin/date-unix.exe $RPM_BUILD_ROOT%_bindir/date
 
+# yd rename sort.exe to sort-unix.exe and place a symlink for script compatibility
+mv $RPM_BUILD_ROOT%_bindir/sort.exe $RPM_BUILD_ROOT%_bindir/sort-unix.exe
+ln -s /@unixroot/usr/bin/sort-unix.exe $RPM_BUILD_ROOT%_bindir/sort
+
+# yd rename hostid.exe to hostid-unix.exe and place a symlink for script compatibility
+mv $RPM_BUILD_ROOT%_bindir/hostid.exe $RPM_BUILD_ROOT%_bindir/hostid-unix.exe
+ln -s /@unixroot/usr/bin/hostid-unix.exe $RPM_BUILD_ROOT%_bindir/hostid
+
 # su
 install -m 4755 src/su.exe $RPM_BUILD_ROOT/@unixroot/usr/bin
 #install -m 755 src/runuser $RPM_BUILD_ROOT/sbin
@@ -209,8 +217,11 @@ rm -rf $RPM_BUILD_ROOT
 #%{_libdir}/coreutils
 
 %changelog
+* Mon Feb 18 2013 yd
+- same change for sort/hostid tools.
+
 * Wed Jan 30 2013 yd
-- rename date.exe to date-unix.exe and add symlink.
+- rename sort.exe to sort-unix.exe and add symlink.
 
 * Thu Feb 02 2012 yd
 - Remove symlinks from /bin.
