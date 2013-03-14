@@ -24,7 +24,7 @@
 Summary: The RPM package management system
 Name: rpm
 Version: %{rpmver}
-Release: 14%{?dist}
+Release: 15%{?dist}
 Group: System Environment/Base
 Url: http://www.rpm.org/
 Source0: http://rpm.org/releases/rpm-4.8.x/%{name}-%{srcver}.tar.bz2
@@ -136,7 +136,7 @@ Summary: Scripts and executable programs used to build packages
 Group: Development/Tools
 Requires: rpm = %{version}-%{release}
 #Requires: elfutils >= 0.128 binutils
-#Requires: findutils sed grep gawk diffutils
+Requires: findutils sed grep gawk diffutils
 Requires: file patch >= 2.5
 Requires: unzip xz
 Requires: gzip bzip2 cpio
@@ -458,6 +458,9 @@ rm -rf $RPM_BUILD_ROOT
 #%doc doc/librpm/html/*
 
 %changelog
+* Tue Mar 14 2013 yd
+- added tool requirements for build package.
+
 * Tue Mar 13 2012 yd
 - updated warpin-conflict.cmd, ticket #27, #31.
 
