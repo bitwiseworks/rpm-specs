@@ -2,7 +2,7 @@
 Summary: Netlabs Stable Repository
 Name: netlabs-rel
 Version: 0.0.0
-Release: 3%{?dist}
+Release: 4%{?dist}
 
 License: free
 
@@ -29,3 +29,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %config(noreplace) %{_sysconfdir}/yum/repos.d/*.repo
+
+
+%changelog
+* Mon Jan 07 2013 yd
+- add US mirror URL.
+
