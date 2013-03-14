@@ -27,6 +27,7 @@ Source: openssl-%{version}.tar.gz
 
 # Build changes
 Patch0: openssl-os2.diff
+Patch1: openssl-find.pl
 
 License: OpenSSL
 Group: System Environment/Libraries
@@ -81,6 +82,7 @@ from other formats to the formats used by the OpenSSL toolkit.
 %prep
 %setup -q -n %{name}-%{version}
 %patch0 -p1 -b .os2~
+%patch1 -p0 -b .os2~
 
 # Modify the various perl scripts to reference perl in the right location.
 perl util/perlpath.pl `dirname %{__perl}`
@@ -306,13 +308,10 @@ rm -rf $RPM_BUILD_ROOT/%{_libdir}/fipscanister.*
 %{_sysconfdir}/pki/tls/misc/*.pl
 %{_sysconfdir}/pki/tls/misc/tsget
 
-#%post -p /sbin/ldconfig
-
-#%postun -p /sbin/ldconfig
-
 %changelog
 * Wed Dec 05 2012 yd
 - ca-certificates are required for proper ssl checks.
+- added File::Find wrapper for find.pl.
 
 * Mon Jan 16 2012 yd
 - rebuild with libc 0.6.4 runtime.
