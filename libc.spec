@@ -4,7 +4,7 @@ License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Standard Shared Libraries
 Group:          System/Libraries
 Version:        0.6.5
-Release:        15%{?dist}
+Release:        16%{?dist}
 Url:            http://svn.netlabs.org/libc
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -85,6 +85,10 @@ rm -f %{buildroot}%{_includedir}/symcat.h
 rm -f %{buildroot}%{_libdir}/libbfd.*
 rm -f %{buildroot}%{_libdir}/libopcodes.*
 
+#remove libstdc++/supc++ static libs (built with gcc 3.x)
+rm -f %{buildroot}%{_libdir}/libstdc++.*
+rm -f %{buildroot}%{_libdir}/libsupc++.*
+
 rexx2vio $RPM_BUILD_ROOT%{_bindir}/dllar.cmd $RPM_BUILD_ROOT%{_bindir}/dllar.exe
 
 %clean
@@ -119,6 +123,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/libintl.h
 
 %changelog
+* Thu Dec 13 2012 yd
+- remove gcc 3.x stdc++/supc++ static libraries.
+
 * Mon May 11 2012 yd
 - remove obsolete binutil headers/libs
 
