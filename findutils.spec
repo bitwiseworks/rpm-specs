@@ -1,7 +1,7 @@
 Summary: The GNU versions of find utilities (find and xargs)
 Name: findutils
 Version: 4.4.2
-Release: 1%{?dist}
+Release: 2%{?dist}
 Epoch: 1
 License: GPLv3+
 Group: Applications/File
@@ -58,6 +58,10 @@ rm -f $RPM_BUILD_ROOT/%{_libdir}/charset.alias
 # create /usr/bin/find -> /bin/find symlink
 #ln -sf ../../bin/find $RPM_BUILD_ROOT/usr/bin
 
+# yd rename find.exe to find-unix.exe and place a symlink for script compatibility
+mv $RPM_BUILD_ROOT%_bindir/find.exe $RPM_BUILD_ROOT%_bindir/find-unix.exe
+ln -s /@unixroot/usr/bin/find-unix.exe $RPM_BUILD_ROOT%_bindir/find
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -65,7 +69,8 @@ rm -rf $RPM_BUILD_ROOT
 # -f %{name}.lang
 %defattr(-,root,root,-)
 %doc AUTHORS COPYING NEWS README THANKS TODO
-%{_bindir}/find.exe
+%{_bindir}/find
+%{_bindir}/find-unix.exe
 %{_bindir}/oldfind.exe
 %{_bindir}/xargs.exe
 %{_bindir}/locate.exe
@@ -78,5 +83,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/locale/*
 
 %changelog
+* Thu Mar 14 2013 yd
+- rename find.exe to find-unix.exe and add symlink.
+
 * Sun Jan 08 2012 yd
 - initial unixroot build.
