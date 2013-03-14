@@ -2,7 +2,7 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.11
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: GPLv3+
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -38,7 +38,7 @@ Install cpio if you need a program to manage file archives.
 #autoheader
 
 %build
-export CONFIG_SHELL="/bin/sh"
+export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
 export CFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -pedantic -fno-strict-aliasing -Wall" ; \
 export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp" ; \
 export LIBS="-lintl -lurpo" ; \
@@ -91,3 +91,5 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_usr}/share/locale/*
 
 %changelog
+* Mon Dec 03 2012 yd
+- remove file name ending \r due to binary stdin. fixes ticket:16.
