@@ -4,7 +4,7 @@ License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Standard Shared Libraries
 Group:          System/Libraries
 Version:        0.6.5
-Release:        16%{?dist}
+Release:        17%{?dist}
 Url:            http://svn.netlabs.org/libc
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -43,12 +43,13 @@ These libraries are needed to develop programs which use the standard C
 library (db headers).
 
 
-%package -n gettext-devel
+%package gettext-devel
 License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Include Files and Libraries Mandatory for Development (gettext headers)
 Group:          Development/Libraries/C and C++
+Provides:       gettext-devel
 
-%description -n gettext-devel
+%description gettext-devel
 These libraries are needed to develop programs which use the standard C
 library (gettext headers).
 
@@ -118,11 +119,14 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/db.h
 %{_includedir}/ndbm.h
 
-%files -n gettext-devel
+%files gettext-devel
 %defattr(-,root,root)
 %{_includedir}/libintl.h
 
 %changelog
+* Thu Mar 21 2013 yd
+- renamed gettext-devel to libc-gettext-devel to make it more visible.
+
 * Thu Dec 13 2012 yd
 - remove gcc 3.x stdc++/supc++ static libraries.
 
