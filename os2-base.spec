@@ -2,7 +2,7 @@
 Summary: OS/2 - eComStation 2.0 base
 Name: os2-base
 Version: 0.0.0
-Release: 4%{?dist}
+Release: 5%{?dist}
 
 License: free
 
@@ -242,6 +242,14 @@ Provides: wpvidsys.dll
 %description
 Virtual package for OS/2 base shared libraries packaging.
 
+%package fhs
+License:        free
+Summary:        Provides a /@unixroot/bin directory for posix compatibility.
+
+%description fhs
+Adds /bin to provide posix directory compatibility for shell script esecution
+(as /bin/sh) as FHS http://www.linuxfoundation.org/collaborate/workgroups/lsb/fhs
+
 
 %prep
 # nothing to do
@@ -250,13 +258,18 @@ Virtual package for OS/2 base shared libraries packaging.
 # nothing to do
 
 %install
-# nothing to do
+rm -rf $RPM_BUILD_ROOT
+mkdir -p $RPM_BUILD_ROOT
+ln -s /@unixroot/usr/bin $RPM_BUILD_ROOT/bin
 
 %clean
 # nothing to do
 
 %files
 # no files in a virtual package
+
+%files fhs
+/
 
 %post
 if [ "$1" = 1 ] ; then
@@ -274,3 +287,7 @@ if [ "$1" = 0 ] ; then
 %cube {DELSTRING "%UNIXROOT%\usr\lib;" IN "LIBPATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
 %cube {DELLINE "SET UNIXROOT="} c:\config.sys > NUL
 fi
+
+%changelog
+* Thu Mar 21 2013 yd
+- added fhs package to provide /bin symlink (for FHS script compatibility).
