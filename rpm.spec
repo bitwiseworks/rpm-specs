@@ -24,7 +24,7 @@
 Summary: The RPM package management system
 Name: rpm
 Version: %{rpmver}
-Release: 15%{?dist}
+Release: 16%{?dist}
 Group: System Environment/Base
 Url: http://www.rpm.org/
 Source0: http://rpm.org/releases/rpm-4.8.x/%{name}-%{srcver}.tar.bz2
@@ -458,6 +458,9 @@ rm -rf $RPM_BUILD_ROOT
 #%doc doc/librpm/html/*
 
 %changelog
+* Wed Mar 28 2013 yd
+- r341, fix scripts symlinks.
+
 * Tue Mar 14 2013 yd
 - added tool requirements for build package.
 
