@@ -1,7 +1,7 @@
 Summary: A file compression and packaging utility compatible with PKZIP
 Name: zip
 Version: 3.0
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: BSD
 Group: Applications/Archiving
 Source: http://downloads.sourceforge.net/infozip/zip30.tar.gz
@@ -53,3 +53,5 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/zipsplit.1*
 
 %changelog
+* Fri Mar 29 2013 yd
+- r614 r615, restore default behaviour for symlink storage. Ticket:18.
