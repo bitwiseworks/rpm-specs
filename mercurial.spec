@@ -86,12 +86,15 @@ documentation.
 %patch0 -p1
 
 %build
-make SHELL=sh all
+# Building docs is broken due to missing python-docutils package, skip this step
+#make SHELL=sh all
+make SHELL=sh build
 
 %install
 rm -rf $RPM_BUILD_ROOT
 %{__python} setup.py install -O1 --root $RPM_BUILD_ROOT --prefix %{_prefix} --record=%{name}.files
-make install-doc SHELL=sh DESTDIR=$RPM_BUILD_ROOT MANDIR=%{_mandir}
+# As we can't build docs (see above) disable it for now (only affects man)
+#make install-doc SHELL=sh DESTDIR=$RPM_BUILD_ROOT MANDIR=%{_mandir}
 
 grep -v 'hgk.py*' < %{name}.files > %{name}-base.files
 grep 'hgk.py*' < %{name}.files > %{name}-hgk.files
@@ -145,7 +148,8 @@ rm -rf $RPM_BUILD_ROOT
 # -f %{name}-base.files
 %defattr(-,root,root,-)
 %doc CONTRIBUTORS COPYING doc/README doc/hg*.txt doc/hg*.html *.cgi contrib/*.fcgi
-%doc %attr(644,root,root) %{_mandir}/man?/hg*
+# As we can't build docs (see above) disable it for now (only affects man)
+#%doc %attr(644,root,root) %{_mandir}/man?/hg*
 %doc %attr(644,root,root) contrib/*.svg contrib/sample.hgrc
 %{_sysconfdir}/bash_completion.d/mercurial.sh
 %{_datadir}/zsh/site-functions/_mercurial
