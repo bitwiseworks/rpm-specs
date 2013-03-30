@@ -83,15 +83,15 @@ documentation.
 
 %prep
 %setup -q -a 1
-%patch0 -p1 -b .os2~
+%patch0 -p1
 
 %build
-make all
+make SHELL=sh all
 
 %install
 rm -rf $RPM_BUILD_ROOT
 %{__python} setup.py install -O1 --root $RPM_BUILD_ROOT --prefix %{_prefix} --record=%{name}.files
-make install-doc DESTDIR=$RPM_BUILD_ROOT MANDIR=%{_mandir}
+make install-doc SHELL=sh DESTDIR=$RPM_BUILD_ROOT MANDIR=%{_mandir}
 
 grep -v 'hgk.py*' < %{name}.files > %{name}-base.files
 grep 'hgk.py*' < %{name}.files > %{name}-hgk.files
