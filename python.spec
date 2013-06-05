@@ -45,7 +45,7 @@
 Summary: An interpreted, interactive, object-oriented programming language
 Name: %{python}
 Version: 2.6.5
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: Python
 Group: Development/Languages
 Provides: python-abi = %{pybasever}
@@ -547,6 +547,9 @@ fi
 # payload file would be unpackaged)
 
 %changelog
+* Wed Jun 05 2013 yd
+- r348, add samefile, sameopenfile, samestat to os.path module.
+
 * Thu Dec 27 2012 yd
 - fix local/bin requirements for python-tools.
 
