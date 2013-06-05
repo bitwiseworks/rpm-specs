@@ -1,7 +1,7 @@
 Summary: The GNU versions of find utilities (find and xargs)
 Name: findutils
 Version: 4.4.2
-Release: 2%{?dist}
+Release: 3%{?dist}
 Epoch: 1
 License: GPLv3+
 Group: Applications/File
@@ -83,6 +83,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/locale/*
 
 %changelog
+* Wed Jun 05 2013 yd
+- r641, fix xargs stop in freadahead.
+
 * Thu Mar 14 2013 yd
 - rename find.exe to find-unix.exe and add symlink.
 
