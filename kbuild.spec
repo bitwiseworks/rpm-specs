@@ -2,7 +2,7 @@
 # http://svn.netlabs.org/kbuild
 #
 # NOTES:
-# 1. Requires GCC 3.3.5 CSD4 (ftp://ftp.netlabs.org/pub/gcc/GCC-3.3.5-csd4.zip)
+# 1. Requires GCC 3.3.5 CSD5 (ftp://ftp.netlabs.org/pub/gcc/GCC-3.3.5-csd5.zip)
 # 2. Build with rpmbuild -ba -D "master_mode 1" when packing a new release
 #    and changing %svn_rev / %svn_url.
 # 3. Use -D "skip_unpack 1" to skip the unpack step when debugging the build.
@@ -17,14 +17,14 @@ Url:        http://svn.netlabs.org/kbuild
 %define ver_minor   1
 %define ver_patch   9998
 
-%define os2_release 5
+%define os2_release 6
 
 %define rpm_release 1
 
 %define svn_url     http://svn.netlabs.org/repos/kbuild/trunk
-%define svn_rev     2663
+%define svn_rev     2687
 
-%define descr_brief kBuild is a GNU make fork with a set of scripts to simplify\
+%define descr_brief kBuild is a GNU Make fork with a set of scripts to simplify\
 complex build tasks and portable versions of various UNIX tools to ensure\
 cross-platform portability.
 
@@ -44,7 +44,6 @@ Patch2:     kbuild-002-gcc3omf_make_ld_ar_quiet.patch
 Patch3:     kbuild-003-gcc3omf_support_dll_as_library_source.patch
 Patch4:     kbuild-004-gcc3omf_add_rc_support.patch
 Patch5:     kbuild-005-gcc3omf_gen_implib_for_dll.patch
-Patch6:     kbuild-006-fix-os2-build.patch
 Patch7:     kbuild-007-gcc3omf_add_rc_support-NEW.patch
 
 BuildRequires: kbuild
@@ -70,7 +69,27 @@ Group:      System Environment/Libraries
 %defattr(-,root,root,-)
 %docdir %{pkg_docdir}/
 %{_bindir}/*
+%exclude %{_bindir}/make.exe
 %{_datadir}/*
+
+#------------------------------------------------------------------------------
+%package make
+#------------------------------------------------------------------------------
+
+Summary:    GNU Make 3.81 implementation based on kBuild's kmk
+Group:      System Environment/Libraries
+Provides:   make = 3.81
+
+%description make
+A GNU Make executable compiled from the kmk source tree. The kmk tool itself is
+a fork of GNU Make and this build just disables all kmk-specific features. It
+may also contain some minor GNU Make bugfixes not specific to kmk which are
+absent from the upstream version. However, this executable should be fully
+compatible with the vanilla GNU Make function-wise.
+
+%files make
+%defattr(-,root,root,-)
+%{_bindir}/make.exe
 
 #------------------------------------------------------------------------------
 %prep
@@ -107,8 +126,6 @@ rm -f "%{_sourcedir}/%{name}-%{version}.zip"
 %patch4
 [ $? = 0 ] || exit 1
 %patch5
-[ $? = 0 ] || exit 1
-%patch6
 [ $? = 0 ] || exit 1
 %patch7
 [ $? = 0 ] || exit 1
@@ -150,10 +167,13 @@ rm -rf "%{buildroot}"
 cmd /c "kBuild\envos2.cmd" kmk $KMK_FLAGS PATH_INS="%{buildroot}" install
 
 # We don't want LIBC*.DLL, there is a separate package for them
-rm "%{buildroot}%{_bindir}/*.dll"
+rm "%{buildroot}%{_bindir}"/*.dll
 
 # Additional docs (not installed by install)
 cp -dp COPYING ChangeLog kBuild/doc/COPYING-FDL-1.3 "%{buildroot}%{pkg_docdir}/"
+
+# To make GNU Make we simply copy kmk_gmake.exe, this should be enough
+cp -dp "%{buildroot}%{_bindir}/kmk_gmake.exe" "%{buildroot}%{_bindir}/make.exe"
 
 #------------------------------------------------------------------------------
 %clean
@@ -163,6 +183,10 @@ rm -rf "%{buildroot}"
 
 #------------------------------------------------------------------------------
 %changelog
+
+* Thu Jul 11 2013 Dmitriy Kuminov <coding@dmik.org> 0.1.9998.6-1
+- New SVN release 2687 of version 0.1.9998.
+- Add kbuild-make package containing vanilla GNU Make executable.
 
 * Mon Nov 5 2012 Dmitriy Kuminov <coding/dmik.org> 0.1.9998.5-1
 - New patch:
