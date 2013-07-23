@@ -1,10 +1,19 @@
 %global gcc_version 4.4.6
 %global gcc_target_platform %{_target_cpu}
 
+# New package version scheme: X.Y.Z.N-R, where X.Y.Z is the GCC release (e.g.
+# 4.5.4, matches gcc_version above), N is the OS/2 release (1, 2, etc) and R is
+# the RPM release (1, 2, etc). The OS/2 release number increases with each
+# OS/2 specific update to the sources followed by a new build, the RPM repease
+# number increases with each new RPM build (which may use the same source tree
+# but fix only some RPM-specific things). Note that the RPM release number
+# resets to 1 each time the OS/2 release increases (which is reset to 1 in turn
+# when the GCC release changes.
+
 Summary: Various compilers (C, C++, Objective-C, Java, ...)
 Name: gcc
-Version: %{gcc_version}
-Release: 15%{?dist}
+Version: %{gcc_version}.16
+Release: 1%{?dist}
 
 # libgcc, libgfortran, libmudflap, libgomp, libstdc++ and crtstuff have
 # GCC Runtime Exception.
@@ -12,17 +21,20 @@ License: GPLv3+ and GPLv3+ with exceptions and GPLv2+ with exceptions
 Group: Development/Languages
 URL: http://gcc.gnu.org
 
-Source0: gcc-os2-20111223.tar.bz2
+Source0: gcc-os2-28901fb3d124e92951c7a69eaac678bc13924291.tar.bz2
 Patch0: gcc-os2.diff
-
-BuildRoot: %{_tmppath}/%{name}-%{version}-root-%(%{__id_u} -n)
 
 Obsoletes: gcc < %{gcc_version}
 
-BuildRequires: binutils
+BuildRequires: binutils make
+#BuildRequires: os2-base-fhs
+BuildRequires: ash gcc gcc-wlink gcc-wrc grep gettext-devel diffutils gawk flex sed
 BuildRequires: gmp-devel >= 4.1.2-8, mpfr-devel >= 2.2.1
 
-Requires: libgcc446 = %{gcc_version}
+Requires: libgcc446 = %{version}-%{release}
+Requires: libssp = %{version}-%{release}
+Requires: libstdc++ = %{version}-%{release}
+Requires: libsupc++ = %{version}-%{release}
 Requires: libc-devel >= 0.6.3
 Requires: binutils
 
@@ -42,6 +54,7 @@ e.g. for exception handling support.
 %package -n libssp
 Summary: GCC stack protector shared library
 Group: System Environment/Libraries
+Obsoletes: gcc-stack-protector
 
 %description -n libssp
 This package contains GCC shared library which is needed
@@ -50,6 +63,7 @@ for stack protector.
 %package -n libstdc++
 Summary: GNU Standard C++ Library v3
 Group: System Environment/Libraries
+Obsoletes: gcc-stdc++-shared-library
 
 %description -n libstdc++
 This package contains GNU Standard C++ Library v3 shared library.
@@ -57,6 +71,7 @@ This package contains GNU Standard C++ Library v3 shared library.
 %package -n libsupc++
 Summary: GNU Standard C++ Library v3 subset
 Group: System Environment/Libraries
+Obsoletes: gcc-supc++-shared-library
 
 %description -n libsupc++
 This package contains GNU Standard C++ Library v3 subset shared library.
@@ -92,12 +107,12 @@ script_dir=%{_topdir}/BUILD/%{name}-%{version}/obj-%{gcc_target_platform}
 export PATH="$script_dir/gcc${PATH:+;$PATH}"
 export BEGINLIBPATH="$script_dir/gcc${BEGINLIBPATH:+;$BEGINLIBPATH}"
 
-export CONFIG_SHELL=/@unixroot/usr/bin/sh.exe;
-export AWK=awk;
+export CONFIG_SHELL=%{_bindir}/sh.exe
 export CFLAGS="$RPM_OPT_FLAGS -DEMX -DOS2"
 export CXXFLAGS="$RPM_OPT_FLAGS -DEMX -DOS2"
 export LDFLAGS="-g -Zexe -Zomf -Zmap -Zargs-wild -Zhigh-mem"
-export LANG="";
+export LANG=C
+
 ../configure --prefix=%{_prefix} \
     --with-sysroot=/@unixroot \
     --enable-shared \
@@ -125,7 +140,7 @@ cd obj-%{gcc_target_platform}
 make DESTDIR=${RPM_BUILD_ROOT} install
 
 #build dll
-dllar -o stdcpp.dll i386-pc-os2-emx/libstdc++-v3/src/.libs/stdc++.a \
+dllar -o stdcpp.dll i386-pc-os2-emx/libstdc++-v3/src/.libs/libstdc++.a \
 	-d "GNU stdc++ %{gcc_version}" \
 	-nolxlite -flags "-Zmap -Zhigh-mem -Zomf -g" \
 	-ex "___main ___do_global_* ___ctordtor* ___eh* ___pop* _DLL_InitTerm" \
@@ -137,7 +152,7 @@ cp -p stdcpp.lib %{buildroot}%{_libdir}/stdc++.lib
 mv %{buildroot}%{_libdir}/stdc++.a %{buildroot}%{_libdir}/stdc++_s.a
 
 #build dll
-dllar -o supcpp.dll i386-pc-os2-emx/libstdc++-v3/libsupc++/.libs/supc++.a \
+dllar -o supcpp.dll i386-pc-os2-emx/libstdc++-v3/libsupc++/.libs/libsupc++.a \
 	-d "GNU supc++ %{gcc_version}" \
 	-nolxlite -flags "-Zmap -Zhigh-mem -Zomf -g" \
 	-ex "___main ___do_global_* ___ctordtor* ___eh* ___pop* _DLL_InitTerm" \
@@ -169,10 +184,8 @@ echo dummy for virtual package > gcc-wlink.txt
 
 rm %{buildroot}%{_libdir}/*.la
 
-#mv %{buildroot}%{_usr}/readme.os2 $RPM_BUILD_ROOT%_docdir/%{name}-%{version}/
-
-ln -s ./cc1.exe %{buildroot}%{_libexecdir}/gcc/i386-pc-os2-emx/%{version}/cc1
-ln -s ./cc1plus.exe %{buildroot}%{_libexecdir}/gcc/i386-pc-os2-emx/%{version}/cc1plus
+ln -s ./cc1.exe %{buildroot}%{_libexecdir}/gcc/i386-pc-os2-emx/%{gcc_version}/cc1
+ln -s ./cc1plus.exe %{buildroot}%{_libexecdir}/gcc/i386-pc-os2-emx/%{gcc_version}/cc1plus
 
 #yd fix attributes for executables
 chmod 0755 %{buildroot}%{_bindir}/*.exe
@@ -226,6 +239,10 @@ fi
 %{_usr}/libexec
 %{_usr}/man
 %{_usr}/share
+%doc ChangeLog ChangeLog.*
+%doc README README.*
+%doc COPYING COPYING.*
+%doc MAINTAINERS
 
 %files -n libssp
 %defattr(-,root,root,-)
@@ -251,8 +268,13 @@ fi
 #%doc %{_datadir}/doc/*
 
 %changelog
-* Wed Jan 11 2012 yd
-- use more conventionional names for shared libraries packages.
+
+* Mon Jul 23 2013 Dmitriy Kuminov <coding@dmik.org> - 4.4.6.16-1
+- New OS/2 Release 16 of 4.4.6. See ChangeLog.OS2 for more information.
+- Rename the following packages to better match the conventions:
+  + gcc-stack-protector => libssp
+  + gcc-stdc++-shared-library => libstdc++
+  + gcc-supc++-shared-library => libsupc++
 
 * Mon Jan 09 2012 yd
 - install also dlls with main package.
