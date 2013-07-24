@@ -1,7 +1,7 @@
 Summary: A file compression and packaging utility compatible with PKZIP
 Name: zip
 Version: 3.0
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: BSD
 Group: Applications/Archiving
 Source: http://downloads.sourceforge.net/infozip/zip30.tar.gz
@@ -26,9 +26,11 @@ program.
 
 %build
 export CFLAGS="$RPM_OPT_FLAGS"
+export MAKESHELL="/@unixroot/usr/bin/sh.exe"
 make -f os2/Makefile.os2 prefix=%{_prefix} klibc %{?_smp_mflags}
 
 %install
+export MAKESHELL="/@unixroot/usr/bin/sh.exe"
 rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT%{_bindir} 
 mkdir -p $RPM_BUILD_ROOT%{_mandir}/man1
@@ -53,5 +55,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/zipsplit.1*
 
 %changelog
+* Wed Jul 24 2013 yd
+- r659, added support for archive bit clearing by Alex Taylor. Ticket:21.
+
 * Fri Mar 29 2013 yd
 - r614 r615, restore default behaviour for symlink storage. Ticket:18.
