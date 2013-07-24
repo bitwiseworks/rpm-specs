@@ -2,7 +2,7 @@
 Summary: OS/2 - eComStation 2.0 base
 Name: os2-base
 Version: 0.0.0
-Release: 5%{?dist}
+Release: 6%{?dist}
 
 License: free
 
@@ -259,8 +259,8 @@ Adds /bin to provide posix directory compatibility for shell script esecution
 
 %install
 rm -rf $RPM_BUILD_ROOT
-mkdir -p $RPM_BUILD_ROOT
-ln -s /@unixroot/usr/bin $RPM_BUILD_ROOT/bin
+#mkdir -p $RPM_BUILD_ROOT/@unixroot
+#ln -s /@unixroot/usr/ban $RPM_BUILD_ROOT/@unixroot/ban
 
 %clean
 # nothing to do
@@ -269,7 +269,7 @@ ln -s /@unixroot/usr/bin $RPM_BUILD_ROOT/bin
 # no files in a virtual package
 
 %files fhs
-/
+%defattr(-,root,root,-)
 
 %post
 if [ "$1" = 1 ] ; then
@@ -288,6 +288,21 @@ if [ "$1" = 0 ] ; then
 %cube {DELLINE "SET UNIXROOT="} c:\config.sys > NUL
 fi
 
+%post fhs
+if [ "$1" = 1 ] ; then
+#execute only on first install
+ln -s /@unixroot/usr/bin /@unixroot/bin
+fi
+
+%postun fhs
+if [ "$1" = 0 ] ; then
+#execute only on last uninstall
+rm /@unixroot/bin
+fi
+
 %changelog
+* Wed Jul 24 2013 yd
+- put /bin into unixroot drive (requires scripting).
+
 * Thu Mar 21 2013 yd
 - added fhs package to provide /bin symlink (for FHS script compatibility).
