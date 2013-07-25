@@ -3,7 +3,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.6
-Release: 9%{?dist}
+Release: 10%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -142,21 +142,12 @@ for i in env cut readlink; do ln -sf /@unixroot/usr/bin/$i.exe $RPM_BUILD_ROOT/@
 #install -p -c -m644 %SOURCE105 $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/colorls.sh
 #install -p -c -m644 %SOURCE106 $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/colorls.csh
 
-# yd rename dir.exe to dir-unix.exe and place a symlink for script compatibility
-mv $RPM_BUILD_ROOT%_bindir/dir.exe $RPM_BUILD_ROOT%_bindir/dir-unix.exe
-ln -s /@unixroot/usr/bin/dir-unix.exe $RPM_BUILD_ROOT%_bindir/dir
-
-# yd rename date.exe to date-unix.exe and place a symlink for script compatibility
-mv $RPM_BUILD_ROOT%_bindir/date.exe $RPM_BUILD_ROOT%_bindir/date-unix.exe
-ln -s /@unixroot/usr/bin/date-unix.exe $RPM_BUILD_ROOT%_bindir/date
-
-# yd rename sort.exe to sort-unix.exe and place a symlink for script compatibility
-mv $RPM_BUILD_ROOT%_bindir/sort.exe $RPM_BUILD_ROOT%_bindir/sort-unix.exe
-ln -s /@unixroot/usr/bin/sort-unix.exe $RPM_BUILD_ROOT%_bindir/sort
-
-# yd rename hostid.exe to hostid-unix.exe and place a symlink for script compatibility
-mv $RPM_BUILD_ROOT%_bindir/hostid.exe $RPM_BUILD_ROOT%_bindir/hostid-unix.exe
-ln -s /@unixroot/usr/bin/hostid-unix.exe $RPM_BUILD_ROOT%_bindir/hostid
+# yd move conflicting tools to libexec/bin and place a symlink for script compatibility
+mkdir -p $RPM_BUILD_ROOT%{_libexecdir}/bin
+for i in dir date sort hostid; do
+  mv $RPM_BUILD_ROOT%_bindir/$i.exe $RPM_BUILD_ROOT%{_libexecdir}/bin/$i.exe
+  ln -s /@unixroot/usr/bin/libexec/bin/$i.exe $RPM_BUILD_ROOT%_bindir/$i
+done
 
 # su
 install -m 4755 src/su.exe $RPM_BUILD_ROOT/@unixroot/usr/bin
@@ -210,6 +201,7 @@ rm -rf $RPM_BUILD_ROOT
 #%_mandir/man*/*
 %_sbindir/chroot.exe
 #/@unixroot/sbin/runuser.exe
+%{_libexecdir}/*
 %{_datadir}/locale/*
 
 #%files libs
@@ -217,6 +209,9 @@ rm -rf $RPM_BUILD_ROOT
 #%{_libdir}/coreutils
 
 %changelog
+* Wed Jul 24 2013 yd
+- move conflicting tools to libexec/bin.
+
 * Mon Feb 18 2013 yd
 - same change for sort/hostid tools.
 

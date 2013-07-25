@@ -1,7 +1,7 @@
 Summary: The GNU versions of find utilities (find and xargs)
 Name: findutils
 Version: 4.4.2
-Release: 3%{?dist}
+Release: 4%{?dist}
 Epoch: 1
 License: GPLv3+
 Group: Applications/File
@@ -58,9 +58,12 @@ rm -f $RPM_BUILD_ROOT/%{_libdir}/charset.alias
 # create /usr/bin/find -> /bin/find symlink
 #ln -sf ../../bin/find $RPM_BUILD_ROOT/usr/bin
 
-# yd rename find.exe to find-unix.exe and place a symlink for script compatibility
-mv $RPM_BUILD_ROOT%_bindir/find.exe $RPM_BUILD_ROOT%_bindir/find-unix.exe
-ln -s /@unixroot/usr/bin/find-unix.exe $RPM_BUILD_ROOT%_bindir/find
+# yd move conflicting tools to libexec/bin and place a symlink for script compatibility
+mkdir -p $RPM_BUILD_ROOT%{_libexecdir}/bin
+for i in find; do
+  mv $RPM_BUILD_ROOT%_bindir/$i.exe $RPM_BUILD_ROOT%{_libexecdir}/bin/$i.exe
+  ln -s /@unixroot/usr/bin/libexec/bin/$i.exe $RPM_BUILD_ROOT%_bindir/$i
+done
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -70,7 +73,6 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root,-)
 %doc AUTHORS COPYING NEWS README THANKS TODO
 %{_bindir}/find
-%{_bindir}/find-unix.exe
 %{_bindir}/oldfind.exe
 %{_bindir}/xargs.exe
 %{_bindir}/locate.exe
@@ -83,6 +85,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/locale/*
 
 %changelog
+* Wed Jul 24 2013 yd
+- move conflicting tools to libexec/bin.
+
 * Wed Jun 05 2013 yd
 - r641, fix xargs stop in freadahead.
 
