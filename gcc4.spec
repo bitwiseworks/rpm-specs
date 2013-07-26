@@ -12,7 +12,7 @@
 
 Summary: Various compilers (C, C++, Objective-C, Java, ...)
 Name: gcc
-Version: %{gcc_version}.16
+Version: %{gcc_version}.17
 Release: 1%{?dist}
 
 # libgcc, libgfortran, libmudflap, libgomp, libstdc++ and crtstuff have
@@ -21,13 +21,13 @@ License: GPLv3+ and GPLv3+ with exceptions and GPLv2+ with exceptions
 Group: Development/Languages
 URL: http://gcc.gnu.org
 
-Source0: gcc-os2-28901fb3d124e92951c7a69eaac678bc13924291.tar.bz2
+Source0: gcc-os2-b41a22fed042051d238a596cdf40d6a5aa991391.tar.bz2
 Patch0: gcc-os2.diff
 
 Obsoletes: gcc < %{gcc_version}
 
 BuildRequires: binutils make
-#BuildRequires: os2-base-fhs
+BuildRequires: os2-base-fhs
 BuildRequires: ash gcc gcc-wlink gcc-wrc grep gettext-devel diffutils gawk flex sed
 BuildRequires: gmp-devel >= 4.1.2-8, mpfr-devel >= 2.2.1
 
@@ -268,6 +268,9 @@ fi
 #%doc %{_datadir}/doc/*
 
 %changelog
+
+* Mon Jul 25 2013 Dmitriy Kuminov <coding@dmik.org> - 4.4.6.17-1
+- New OS/2 Release 17 of 4.4.6. See ChangeLog.OS2 for more information.
 
 * Mon Jul 23 2013 Dmitriy Kuminov <coding@dmik.org> - 4.4.6.16-1
 - New OS/2 Release 16 of 4.4.6. See ChangeLog.OS2 for more information.
