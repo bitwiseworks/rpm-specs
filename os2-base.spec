@@ -2,7 +2,7 @@
 Summary: OS/2 - eComStation 2.0 base
 Name: os2-base
 Version: 0.0.0
-Release: 6%{?dist}
+Release: 7%{?dist}
 
 License: free
 
@@ -250,6 +250,14 @@ Summary:        Provides a /@unixroot/bin directory for posix compatibility.
 Adds /bin to provide posix directory compatibility for shell script esecution
 (as /bin/sh) as FHS http://www.linuxfoundation.org/collaborate/workgroups/lsb/fhs
 
+%package unixtools-path
+License:        free
+Summary:        Makes unix tools from findutils and coreutils first in PATH.
+
+%description unixtools-path
+Adds /@unixroot/usr/libexec/bin at beginning of system PATH, to allow conflicting
+tools from findutils and coreutils to be used instead of default OS/2 tools.
+
 
 %prep
 # nothing to do
@@ -300,7 +308,23 @@ if [ "$1" = 0 ] ; then
 rm /@unixroot/bin
 fi
 
+%post unixtools-path
+if [ "$1" = 1 ] ; then
+#execute only on first install
+%cube {ADDSTRING "%UNIXROOT%\usr\libexec\bin;" IN "SET PATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys c:\config.sys.yum > NUL
+fi
+
+%postun unixtools-path
+if [ "$1" = 0 ] ; then
+#execute only on last uninstall
+%cube {DELSTRING "%UNIXROOT%\usr\libexec\bin;" IN "SET PATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
+fi
+
+
 %changelog
+* Tue Jul 30 2013 yd
+- add unixtool-path package to prepend /@unixroot/usr/libexec/bin to PATH.
+
 * Wed Jul 24 2013 yd
 - put /bin into unixroot drive (requires scripting).
 
