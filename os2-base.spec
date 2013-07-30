@@ -273,11 +273,18 @@ rm -rf $RPM_BUILD_ROOT
 %clean
 # nothing to do
 
+
 %files
 # no files in a virtual package
 
 %files fhs
 %defattr(-,root,root,-)
+# no files in a virtual package
+
+%files unixtools-path
+%defattr(-,root,root,-)
+# no files in a virtual package
+
 
 %post
 if [ "$1" = 1 ] ; then
