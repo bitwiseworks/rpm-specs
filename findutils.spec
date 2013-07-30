@@ -1,7 +1,7 @@
 Summary: The GNU versions of find utilities (find and xargs)
 Name: findutils
 Version: 4.4.2
-Release: 4%{?dist}
+Release: 5%{?dist}
 Epoch: 1
 License: GPLv3+
 Group: Applications/File
@@ -36,6 +36,7 @@ export CFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE"
 export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 export LIBS="-lurpo -lmmap"
 %configure \
+   --without-fts \
    "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
 make %{?_smp_mflags}
 
@@ -73,7 +74,7 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root,-)
 %doc AUTHORS COPYING NEWS README THANKS TODO
 %{_bindir}/find
-%{_bindir}/oldfind.exe
+%{_bindir}/ftsfind.exe
 %{_bindir}/xargs.exe
 %{_bindir}/locate.exe
 %{_bindir}/updatedb
@@ -85,6 +86,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/locale/*
 
 %changelog
+* Tue Jul 30 2013 yd
+- disabled FTS code, now find works as before.
+
 * Wed Jul 24 2013 yd
 - move conflicting tools to libexec/bin.
 
