@@ -4,7 +4,7 @@ License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Standard Shared Libraries
 Group:          System/Libraries
 Version:        0.6.5
-Release:        17%{?dist}
+Release:        18%{?dist}
 Url:            http://svn.netlabs.org/libc
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -113,6 +113,7 @@ rm -rf $RPM_BUILD_ROOT
 %exclude %{_includedir}/libintl.h
 %{_usr}/info
 %{_libdir}
+%exclude %{_libdir}/gcc335.dll
 
 %files -n db1-devel
 %defattr(-,root,root)
@@ -124,6 +125,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/libintl.h
 
 %changelog
+* Thu Sep 11 2013 yd
+- ticket#63: remove gcc335.dll from devel distribution.
+
 * Thu Mar 21 2013 yd
 - renamed gettext-devel to libc-gettext-devel to make it more visible.
 
