@@ -55,7 +55,6 @@ make %{?_smp_mflags}
 %install
 %makeinstall
 rm $RPM_BUILD_ROOT%{_libdir}/libmpc.la
-rm $RPM_BUILD_ROOT%{_infodir}/dir
 
 cp -p src/mpc.dll $RPM_BUILD_ROOT%{_libdir}
 cp -p src/.libs/mpc_s.a $RPM_BUILD_ROOT%{_libdir}
