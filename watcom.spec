@@ -1,7 +1,7 @@
 Summary: Watcom Compiler tools for gcc
 Name: watcom
 Version: 1.9
-Release: 3
+Release: 4
 License: none
 
 Group: Development/Languages
@@ -44,5 +44,8 @@ rm -rf %{buildroot}
 %{_bindir}/wrc.exe
 
 %changelog
+* Wed Oct 30 2013 yd
+- upgraded wlink with highmem patch from R.Walsh (firefox build).
+
 * Mon Nov 28 2011 yd
 - upgraded wrc to release 1.9.
