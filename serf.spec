@@ -2,8 +2,8 @@
 
 Summary:	A high-performance asynchronous HTTP client library
 Name:		serf
-Version:	1.1.0
-Release:        4%{?dist}
+Version:	1.2.1
+Release:        5%{?dist}
 License:	Apache License
 Group:		System/Libraries
 URL:		http://code.google.com/p/serf/
@@ -41,6 +41,12 @@ kept to a minimum to provide high performance operation.
 This package contains all of the development files that you will need in order
 to compile %{name} applications.
 
+%package debug
+Summary: HLL debug data for exception handling support.
+
+%description debug
+HLL debug data for exception handling support.
+
 %prep
 
 %setup -q
@@ -60,12 +66,16 @@ export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
 export LDFLAGS="-Zhigh-mem -Zargs-wild -Zargs-resp"
 export LIBS="-lurpo -lmmap"
 %configure \
+	--includedir=/@unixroot/usr/include/serf-1 \
        "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
 make %{?_smp_mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT
+
+# add serf dir symlink for AOO
+ln -s /@unixroot/usr/include/serf-1 $RPM_BUILD_ROOT/@unixroot/usr/include/serf
 
 # Unpackaged files:
 rm -f $RPM_BUILD_ROOT%{_libdir}/serf-*.la
@@ -82,14 +92,24 @@ rm -rf %{buildroot}
 %defattr(-,root,root)
 %doc CHANGES LICENSE NOTICE README design-guide.txt
 %attr(0755,root,root) %{_libdir}/serf*.dll
+%exclude %{_libdir}/*.dbg
 
 %files devel
 %defattr(-,root,root)
-%attr(0644,root,root) %{_includedir}/*.h
+%attr(0644,root,root) %{_includedir}/serf-1/*.h
+%attr(0644,root,root) %{_includedir}/serf
 %attr(0755,root,root) %{_libdir}/serf*.lib
 %{_libdir}/pkgconfig/*.pc
 
+%files debug
+%defattr(-,root,root)
+%{_libdir}/*.dbg
+
 %changelog
+* Thu Feb 20 2014 yd
+- update source to release 1.2.1 (required for AOO 4.x)
+- added debug package with symbolic info for exceptq.
+
 * Wed Jun 27 2012 yd
 - update source to release 1.1.0 (required for AOO 3.5.x)
 - added missing export.
