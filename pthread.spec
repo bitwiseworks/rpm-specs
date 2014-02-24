@@ -2,8 +2,8 @@
 
 Summary: A posix pthread emulation for OS/2-eComStation
 Name: pthread
-Version: 20120924
-Release: 11%{?dist}
+Version: 20131117
+Release: 12%{?dist}
 License: unknown
 Group: Development/Libraries
 Source: pthread-%{version}-os2.zip
@@ -26,6 +26,12 @@ Summary: The previous posix pthread emulation library.
 
 %description legacy
 The previous posix pthread emulation library.
+
+%package debug
+Summary: HLL debug data for exception handling support.
+
+%description debug
+HLL debug data for exception handling support.
 
 %prep
 %setup -q -c -a 1
@@ -52,6 +58,7 @@ rm -rf %{buildroot}
 %files
 %defattr(-,root,root)
 %{_libdir}/pthr??.dll
+%exclude %{_libdir}/*.dbg
 
 %files devel
 %defattr(-,root,root)
@@ -62,7 +69,14 @@ rm -rf %{buildroot}
 %defattr(-,root,root)
 %{_libdir}/pthread.dll
 
+%files debug
+%defattr(-,root,root)
+%{_libdir}/*.dbg
+
 %changelog
+* Sat Nov 17 2013 yd
+- r684, fix initializer for mutex destroy, fixes AOO i123001.
+
 * Mon Sep 24 2012 yd
 - added stubs for pthread_rwlock_* functions.
 
