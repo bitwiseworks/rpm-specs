@@ -3,7 +3,7 @@ Name:           mpc
 BuildRequires:  gmp-devel
 BuildRequires:  mpfr-devel
 Version:        1.0.1
-Release:        1
+Release:        2
 Summary:        MPC multiple-precision complex shared library
 License:        LGPL-3.0+
 Group:          Development/Libraries/C and C++
@@ -72,5 +72,8 @@ cp -p src/.libs/mpc_s.a $RPM_BUILD_ROOT%{_libdir}
 %{_includedir}/mpc.h
 
 %changelog
+* Wed Nov 20 2013 yd
+- rebuild with newer gcc runtime.
+
 * Sat Oct 26 2013 yd
 - initial rpm build as dll.
