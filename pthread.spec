@@ -2,8 +2,8 @@
 
 Summary: A posix pthread emulation for OS/2-eComStation
 Name: pthread
-Version: 20131117
-Release: 12%{?dist}
+Version: 20140226
+Release: 13%{?dist}
 License: unknown
 Group: Development/Libraries
 Source: pthread-%{version}-os2.zip
@@ -74,6 +74,9 @@ rm -rf %{buildroot}
 %{_libdir}/*.dbg
 
 %changelog
+* Wed Feb 26 2014 komh
+- r704, pthread_mutex_destroy() crashs if a variable with PTHREAD_MUTEX_INITIALIZER is passed.
+
 * Sat Nov 17 2013 yd
 - r684, fix initializer for mutex destroy, fixes AOO i123001.
 
