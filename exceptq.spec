@@ -4,12 +4,12 @@
 Summary: Exceptq creates a debugging report.
 Name: exceptq
 Version: 7.11
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: custom
 Group: Development/Libraries
-Source: exceptq-7.11-dll-shl-2013-10-15.zip
+Source: exceptq-7.11-shl-2014-02-07.zip
 #Source1: exceptq.h
-Source2: exceptq71-dev.zip
+#Source2: exceptq71-dev.zip
 
 %description
 Exceptq creates a debugging report whenever a program that uses it
@@ -42,7 +42,7 @@ Exceptq developer package
 
 
 %prep
-%setup -q -c -a 2
+%setup -q -c
 
 %build
 
@@ -52,12 +52,12 @@ mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_libdir}
 mkdir -p %{buildroot}%{_includedir}
 
-cp -p *.dll %{buildroot}%{_libdir}
-cp -p *.xqs %{buildroot}%{_libdir}
+cp -p dll/*.dll %{buildroot}%{_libdir}
+cp -p dll/*.xqs %{buildroot}%{_libdir}
 
-cp -p exceptq71-dev/mapxqs.* %{buildroot}%{_bindir}
-cp -p exceptq71-dev/demangl.dll %{buildroot}%{_libdir}
-cp -p exceptq.h %{buildroot}%{_includedir}
+cp -p bin/mapxqs.* %{buildroot}%{_bindir}
+#cp -p exceptq71-dev/demangl.dll %{buildroot}%{_libdir}
+cp -p include/exceptq.h %{buildroot}%{_includedir}
 
 %clean
 rm -rf %{buildroot}
@@ -65,23 +65,28 @@ rm -rf %{buildroot}
 %files
 %defattr(-,root,root)
 %{_libdir}/*.dll
-%exclude %{_libdir}/demangl.dll
+#%exclude %{_libdir}/demangl.dll
 %{_libdir}/*.xqs
-%doc distorm-shl.txt
+#%doc distorm-shl.txt
+%doc exceptq.txt
 %doc exceptq-shl.txt
 %doc HISTORY
-%doc exceptq71-dev/exceptq.txt
+%doc readme.exceptq
 
 %files devel
 %defattr(-,root,root)
 %{_bindir}/*
 %{_includedir}/*.h
-%{_libdir}/demangl.dll
-%doc distorm-shl.txt
+#%{_libdir}/demangl.dll
+#%doc distorm-shl.txt
+%doc exceptq.txt
 %doc exceptq-shl.txt
 %doc HISTORY
-%doc exceptq71-dev/exceptq.txt
+%doc readme.exceptq
 
 %changelog
+* Fri Feb 28 2014 yd
+- update to SHL 2014-02-07 binaries.
+
 * Mon Oct 28 2013 yd
 - update to SHL 2013-10-15 binaries.
