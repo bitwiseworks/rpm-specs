@@ -14,7 +14,7 @@
 
 %define rpmhome %{_libdir}/rpm
 
-%define rpmver 4.8.1
+%define rpmver 4.11.1
 %define snapver %{nil}
 %define srcver %{rpmver}
 
@@ -24,14 +24,14 @@
 Summary: The RPM package management system
 Name: rpm
 Version: %{rpmver}
-Release: 16%{?dist}
+Release: 17%{?dist}
 Group: System Environment/Base
 Url: http://www.rpm.org/
 Source0: http://rpm.org/releases/rpm-4.8.x/%{name}-%{srcver}.tar.bz2
 %if %{with int_bdb}
 Source1: db-%{bdbver}.tar.gz
 %endif
-Source2: %{name}-%{srcver}-os2-src2.tar
+Source2: %{name}-os2-src2.tar
 
 Patch1: %{name}-os2.diff
 
@@ -181,6 +181,12 @@ Requires: crontabs logrotate rpm = %{version}-%{release}
 This package contains a cron job which creates daily logs of installed
 packages on a system.
 
+%package debug
+Summary: HLL debug data for exception handling support.
+
+%description debug
+HLL debug data for exception handling support.
+
 %prep
 # -D Do not delete the directory before unpacking.
 # -T Disable the automatic unpacking of the archives.
@@ -317,21 +323,23 @@ rm -rf $RPM_BUILD_ROOT
 # -f %{name}.lang
 %defattr(-,root,root,-)
 %doc GROUPS COPYING CREDITS ChangeLog.bz2 doc/manual/[a-z]*
+%dir %{_sysconfdir}/rpm
 
-%dir                            %{_sysconfdir}/rpm
-
-%attr(0755, root, root)   %dir %{_var}/lib/rpm
+%attr(0755, root, root) %dir %{_var}/lib/rpm
 %attr(0644, root, root) %verify(not md5 size mtime) %ghost %config(missingok,noreplace) %{_var}/lib/rpm/*
 %attr(0755, root, root) %dir %{rpmhome}
 
 %{_bindir}/rpm.exe
 %{_bindir}/rpm2cpio.exe
-%{_bindir}/rpmdb
-%{_bindir}/rpmsign
+%{_bindir}/rpmdb.exe
+%{_bindir}/rpmkeys.exe
+%{_bindir}/rpmsign.exe
 %{_bindir}/rpmquery
 %{_bindir}/rpmverify
 
 %{_mandir}/man8/rpm.8*
+%{_mandir}/man8/rpmdb.8*
+%{_mandir}/man8/rpmkeys.8*
 %{_mandir}/man8/rpm2cpio.8*
 
 # XXX this places translated manuals to wrong package wrt eg rpmbuild
@@ -349,7 +357,7 @@ rm -rf $RPM_BUILD_ROOT
 %{rpmhome}/rpmdb_*
 %{rpmhome}/rpm.daily
 %{rpmhome}/rpm.log
-%{rpmhome}/rpm.xinetd
+%{rpmhome}/rpm.supp
 %{rpmhome}/rpm2cpio.sh
 %{rpmhome}/tgpg
 
@@ -361,79 +369,37 @@ rm -rf $RPM_BUILD_ROOT
 %files libs
 %defattr(-,root,root)
 %{_libdir}/rpm*.dll
+%{_libdir}/rpm-plugins
 
 %files build
 %defattr(-,root,root)
 %{_bindir}/rpmbuild.exe
 %{_bindir}/gendiff
+%{_bindir}/rpmspec.exe
+%{_bindir}/rpmsign.exe
 
 %{_mandir}/man1/gendiff.1*
+%{_mandir}/man8/rpmbuild.8*
+%{_mandir}/man8/rpmdeps.8*
+%{_mandir}/man8/rpmspec.8*
+%{_mandir}/man8/rpmsign.8*
 
 %{rpmhome}/brp-*
-%{rpmhome}/check-buildroot
-%{rpmhome}/check-files
-%{rpmhome}/check-files.os2
-%{rpmhome}/check-prereqs
-%{rpmhome}/check-rpaths*
+%{rpmhome}/check-*
 #%{rpmhome}/debugedit
 #%{rpmhome}/find-debuginfo.sh
 %{rpmhome}/find-lang.sh
-%{rpmhome}/find-provides
-%{rpmhome}/find-requires
-%{rpmhome}/javadeps.exe
-%{rpmhome}/mono-find-provides
-%{rpmhome}/mono-find-requires
-%{rpmhome}/ocaml-find-provides.sh
-%{rpmhome}/ocaml-find-requires.sh
-%{rpmhome}/osgideps.pl
-%{rpmhome}/perldeps.pl
-%{rpmhome}/libtooldeps.sh
-%{rpmhome}/pkgconfigdeps.sh
-%{rpmhome}/perl.prov
-%{rpmhome}/perl.req
-%{rpmhome}/tcl.req
-%{rpmhome}/pythondeps.sh
-%{rpmhome}/rpmdeps.exe
-%{rpmhome}/config.guess
-%{rpmhome}/config.sub
+%{rpmhome}/*provides*
+%{rpmhome}/*requires*
+%{rpmhome}/*deps*
+%{rpmhome}/*.prov
+%{rpmhome}/*.req
+%{rpmhome}/config.*
 %{rpmhome}/mkinstalldirs
-%{rpmhome}/rpmdiff*
-%{rpmhome}/desktop-file.prov
-%{rpmhome}/fontconfig.prov
-#%{rpmhome}/postscriptdriver.prov
+%{rpmhome}/macros.p*
+%{rpmhome}/fileattrs
 
-%{rpmhome}/macros.perl
-%{rpmhome}/macros.python
-%{rpmhome}/macros.php
-
-%{_mandir}/man8/rpmbuild.8*
-%{_mandir}/man8/rpmdeps.8*
-
-%{_usr}/share/locale/ca/LC_MESSAGES/rpm.mo
-%{_usr}/share/locale/cs/LC_MESSAGES/rpm.mo
-%{_usr}/share/locale/da/LC_MESSAGES/rpm.mo
-%{_usr}/share/locale/de/LC_MESSAGES/rpm.mo
-%{_usr}/share/locale/es/LC_MESSAGES/rpm.mo
-%{_usr}/share/locale/fi/LC_MESSAGES/rpm.mo
-%{_usr}/share/locale/fr/LC_MESSAGES/rpm.mo
-%{_usr}/share/locale/is/LC_MESSAGES/rpm.mo
-%{_usr}/share/locale/it/LC_MESSAGES/rpm.mo
-%{_usr}/share/locale/ja/LC_MESSAGES/rpm.mo
-%{_usr}/share/locale/ko/LC_MESSAGES/rpm.mo
-%{_usr}/share/locale/ms/LC_MESSAGES/rpm.mo
-%{_usr}/share/locale/nb/LC_MESSAGES/rpm.mo
-%{_usr}/share/locale/nl/LC_MESSAGES/rpm.mo
-%{_usr}/share/locale/pl/LC_MESSAGES/rpm.mo
-%{_usr}/share/locale/pt/LC_MESSAGES/rpm.mo
-%{_usr}/share/locale/pt_BR/LC_MESSAGES/rpm.mo
-%{_usr}/share/locale/ru/LC_MESSAGES/rpm.mo
-%{_usr}/share/locale/sk/LC_MESSAGES/rpm.mo
-%{_usr}/share/locale/sl/LC_MESSAGES/rpm.mo
-%{_usr}/share/locale/sr/LC_MESSAGES/rpm.mo
-%{_usr}/share/locale/sr@latin/LC_MESSAGES/rpm.mo
-%{_usr}/share/locale/sv/LC_MESSAGES/rpm.mo
-%{_usr}/share/locale/tr/LC_MESSAGES/rpm.mo
-%{_usr}/share/locale/zh_TW/LC_MESSAGES/rpm.mo
+%{_datadir}/locale/*
 
 %files python
 %defattr(-,root,root)
@@ -453,11 +419,20 @@ rm -rf $RPM_BUILD_ROOT
 %{_sysconfdir}/cron.daily/rpm
 %config(noreplace) %{_sysconfdir}/logrotate.d/rpm
 
-#%files apidocs
-#%defattr(-,root,root)
-#%doc doc/librpm/html/*
+%files apidocs
+%defattr(-,root,root)
+%doc COPYING doc/librpm/html/*
+
+%files debug
+%defattr(-,root,root)
+%{_bindir}/*.dbg
+%{_libdir}/*.dbg
+%{_libdir}/rpm/*.dbg
 
 %changelog
+* Mon Mar 03 2014 yd
+- r378 and others, upgrade to vendor 4.11.1, build of debug info packages.
+
 * Wed Mar 28 2013 yd
 - r341, fix scripts symlinks.
 
