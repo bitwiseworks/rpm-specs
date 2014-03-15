@@ -3,7 +3,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.6
-Release: 10%{?dist}
+Release: 11%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -58,6 +58,13 @@ the old GNU fileutils, sh-utils, and textutils packages.
 
 #%description libs
 #Libraries for coreutils package.
+
+%package debug
+Summary: HLL debug data for exception handling support.
+
+%description debug
+HLL debug data for exception handling support.
+
 
 %prep
 %setup -q
@@ -145,8 +152,8 @@ for i in env cut readlink; do ln -sf /@unixroot/usr/bin/$i.exe $RPM_BUILD_ROOT/@
 # yd move conflicting tools to libexec/bin and place a symlink for script compatibility
 mkdir -p $RPM_BUILD_ROOT%{_libexecdir}/bin
 for i in dir date sort hostid; do
-  mv $RPM_BUILD_ROOT%_bindir/$i.exe $RPM_BUILD_ROOT%{_libexecdir}/bin/$i.exe
-  ln -s /@unixroot/usr/bin/libexec/bin/$i.exe $RPM_BUILD_ROOT%_bindir/$i
+  mv $RPM_BUILD_ROOT%{_bindir}/$i.exe $RPM_BUILD_ROOT%{_libexecdir}/bin/$i.exe
+  ln -s %{_libexecdir}/bin/$i.exe $RPM_BUILD_ROOT%{_bindir}/$i
 done
 
 # su
@@ -203,12 +210,25 @@ rm -rf $RPM_BUILD_ROOT
 #/@unixroot/sbin/runuser.exe
 %{_libexecdir}/*
 %{_datadir}/locale/*
+%exclude %{_bindir}/*.dbg
+%exclude %{_sbindir}/*.dbg
+%exclude %{_libexecdir}/bin/*.dbg
 
 #%files libs
 #%defattr(-, root, root, -)
 #%{_libdir}/coreutils
 
+%files debug
+%defattr(-,root,root)
+%{_bindir}/*.dbg
+%{_sbindir}/*.dbg
+%{_libexecdir}/bin/*.dbg
+
 %changelog
+* Sat Mar 15 2014 yd
+- fixed libexec dir for symlinks.
+- added debug package with symbolic info for exceptq.
+
 * Wed Jul 24 2013 yd
 - move conflicting tools to libexec/bin.
 
