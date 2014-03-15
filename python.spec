@@ -45,7 +45,7 @@
 Summary: An interpreted, interactive, object-oriented programming language
 Name: %{python}
 Version: 2.6.5
-Release: 7%{?dist}
+Release: 9%{?dist}
 License: Python
 Group: Development/Languages
 Provides: python-abi = %{pybasever}
@@ -199,6 +199,12 @@ never used in production.
 You might want to install the python-test package if you're developing python
 code that uses more than just unittest and/or test_support.py.
 
+%package debug
+Summary: HLL debug data for exception handling support.
+
+%description debug
+HLL debug data for exception handling support.
+
 %prep
 %setup -q -n Python-%{version}
 
@@ -233,9 +239,10 @@ find -name "*~" |xargs rm -f
 %build
 export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
 export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
-export LIBS="-lssl -lcrypto -lurpo -lmmap -lpthread"
+export LIBS="-lssl -lcrypto -lurpo -lmmap -lpthread -lintl"
 %configure \
         --enable-shared --disable-static \
+        --with-system-ffi --with-libs='-lmmap' \
         "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
 
 make OPT="$CFLAGS" %{?_smp_mflags}
@@ -353,6 +360,7 @@ fi
 %endif
 %{_bindir}/python%{pybasever}.exe
 %{_mandir}/*/*
+%exclude %{_bindir}/*.dbg
 
 %dir %{pylibdir}
 %dir %{dynload_dir}
@@ -373,12 +381,12 @@ fi
 %{dynload_dir}/_curses_.pyd
 %{dynload_dir}/_element.pyd
 %{dynload_dir}/_fileio.pyd
-%{dynload_dir}/_functoo.pyd
+#%{dynload_dir}/_functoo.pyd
 %{dynload_dir}/_hashlib.pyd
 %{dynload_dir}/_heapq.pyd
 %{dynload_dir}/_hotshot.pyd
 %{dynload_dir}/_json.pyd
-%{dynload_dir}/_locale.pyd
+#%{dynload_dir}/_locale.pyd
 %{dynload_dir}/_lsprof.pyd
 #%{dynload_dir}/_md5.pyd
 %{dynload_dir}/_multiby.pyd
@@ -413,7 +421,7 @@ fi
 %{dynload_dir}/math.pyd
 #%{dynload_dir}/mmap.pyd
 #%{dynload_dir}/nis.pyd
-%{dynload_dir}/operator.pyd
+#%{dynload_dir}/operator.pyd
 #%{dynload_dir}/ossaudiodev.pyd
 %{dynload_dir}/parser.pyd
 %{dynload_dir}/pyexpat.pyd
@@ -481,6 +489,7 @@ fi
 %{tapsetdir}/%{libpython_stp}
 %doc systemtap-example.stp pyfuntop.stp
 %endif
+%exclude %{_libdir}/*.dbg
 
 %files devel
 %defattr(-,root,root,-)
@@ -546,7 +555,16 @@ fi
 # (if it doesn't, then the rpmbuild ought to fail since the debug-gdb.py 
 # payload file would be unpackaged)
 
+%files debug
+%defattr(-,root,root)
+%{_bindir}/*.dbg
+%{_libdir}/*.dbg
+
 %changelog
+* Sat Mar 15 2014 yd
+- r385 and others, added support for virtualenv.
+- added debug package with symbolic info for exceptq.
+
 * Wed Jun 05 2013 yd
 - r348, add samefile, sameopenfile, samestat to os.path module.
 
