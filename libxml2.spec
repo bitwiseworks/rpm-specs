@@ -1,7 +1,7 @@
 Summary: Library providing XML and HTML support
 Name: libxml2
 Version: 2.7.7
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: MIT
 Group: Development/Libraries
 Source: ftp://xmlsoft.org/libxml2/libxml2-%{version}.tar.gz
@@ -11,6 +11,8 @@ BuildRequires: python python-devel zlib-devel pkgconfig
 URL: http://xmlsoft.org/
 
 Patch1: libxml2-os2.diff
+
+Requires: python(abi) = 2.7
 
 %description
 This library allows to manipulate XML files. It includes support 
@@ -158,5 +160,8 @@ rm -fr %{buildroot}
 #%doc doc/python.html
 
 %changelog
+* Mon Apr 07 2014 yd
+- build for python 2.7.
+
 * Mon Jan 16 2012 yd
 - rebuild with libc 0.6.4 runtime.

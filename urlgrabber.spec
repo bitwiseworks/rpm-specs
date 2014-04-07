@@ -5,7 +5,7 @@
 Summary: A high-level cross-protocol url-grabber
 Name: %{name}
 Version: %{version}
-Release: 2%{?dist}
+Release: 3%{?dist}
 Source0: %{name}-%{unmangled_version}.tar.gz
 License: LGPL
 Group: Development/Libraries
@@ -58,3 +58,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -f INSTALLED_FILES
 %defattr(-,root,root)
+
+%changelog
+* Mon Apr 07 2014 yd
+- build for python 2.7.

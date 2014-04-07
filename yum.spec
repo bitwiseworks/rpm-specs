@@ -1,9 +1,11 @@
 %{!?python_sitelib: %define python_sitelib %(python -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
+
+%global pybasever 2.7
  
 Summary: RPM installer/updater
 Name: yum
 Version: 3.2.27
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: GPLv2+
 Group: System Environment/Base
 Source0: http://yum.baseurl.org/download/3.2/%{name}-%{version}.tar.gz
@@ -21,6 +23,7 @@ BuildRequires: gettext
 BuildRequires: intltool
 
 Conflicts: pirut < 1.1.4
+
 Requires: python >= 2.4, rpm-python, rpm >= 0:4.4.2
 #Requires: python-iniparse
 Requires: python-sqlite
@@ -41,7 +44,7 @@ Provides: yum-plugin-protect-packages
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 Requires: python
-Requires: python(abi) = 2.6
+Requires: python(abi) = %{pybasever}
 
 %description
 Yum is a utility that can check for and automatically download and
@@ -63,19 +66,25 @@ Requires(post): /sbin/service
 yum-updatesd provides a daemon which checks for available updates and 
 can notify you when they are available via email, syslog or dbus. 
 
+%package debug
+Summary: HLL debug data for exception handling support.
+
+%description debug
+HLL debug data for exception handling support.
+
 %prep
 %setup -q -a 1
 %patch0 -p1
 
 %build
-export MAKESHELL="/bin/sh"
-export PERL_SH_DIR="/bin"
+export MAKESHELL="/@unixroot/usr/bin/sh"
+export PERL_SH_DIR="/@unixroot/usr/bin"
 make
 
 %install
 rm -rf $RPM_BUILD_ROOT
-export MAKESHELL="/bin/sh"
-export PERL_SH_DIR="/bin"
+export MAKESHELL="/@unixroot/usr/bin/sh"
+export PERL_SH_DIR="/@unixroot/usr/bin"
 make DESTDIR=$RPM_BUILD_ROOT install
 #install -m 644 %{SOURCE1} $RPM_BUILD_ROOT/%{_sysconfdir}/yum.conf
 #mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/yum/pluginconf.d $RPM_BUILD_ROOT/usr/lib/yum-plugins
@@ -98,7 +107,10 @@ mkdir -p $RPM_BUILD_ROOT/%{_var}/lib/yum/plugins
 mkdir -p $RPM_BUILD_ROOT/%{_var}/lib/yum/yumdb
 touch $RPM_BUILD_ROOT/%{_var}/lib/yum/uuid
 
-cp yum.exe $RPM_BUILD_ROOT/%{_bindir}
+#build exe wrapper
+#cp yum.exe $RPM_BUILD_ROOT/%{_bindir}
+gcc -g -Zomf %optflags -DPYTHON_EXE=\"python%{pybasever}.exe\" -o $RPM_BUILD_ROOT/%{_bindir}/yum.exe exec-py.c
+
 
 #%find_lang %name
 
@@ -136,5 +148,17 @@ rm -rf $RPM_BUILD_ROOT
 #%dir %{_sysconfdir}/yum/pluginconf.d 
 #%dir /usr/lib/yum-plugins
 %{_usr}/share/locale/*
+%exclude %{_bindir}/*.dbg
+
+%files debug
+%defattr(-,root,root)
+%{_bindir}/*.dbg
 
 %changelog
+* Mon Apr 07 2014 yd
+- build for python 2.7.
+
+* Fri Mar 21 2014 yd
+- build wrapper agains pythonX.Y.exe
+- r396, makefiles updates for unixroot and python virtualenv changes.
+- added debug package with symbolic info for exceptq.

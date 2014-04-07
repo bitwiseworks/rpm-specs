@@ -1,7 +1,7 @@
 %define name s3cmd
 %define version 1.1.0.beta3
 %define unmangled_version 1.1.0.beta3
-%define release 3
+%define release 4
 
 Summary: Command line tool for managing Amazon S3 and CloudFront services
 Name: %{name}
@@ -45,3 +45,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -f INSTALLED_FILES
 %defattr(-,root,root)
+
+%changelog
+* Mon Apr 07 2014 yd
+- build for python 2.7.

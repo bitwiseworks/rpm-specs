@@ -3,7 +3,7 @@
 Summary: Utilities based around the yum package manager
 Name: yum-utils
 Version: 1.1.31
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv2+
 Group: Development/Tools
 Source: http://yum.baseurl.org/download/yum-utils/%{name}-%{version}.tar.gz
@@ -13,6 +13,8 @@ URL: http://yum.baseurl.org/download/yum-utils/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch: noarch
 Requires: yum >= 3.2.27
+Requires: python(abi) = 2.7
+
 #Requires: python-kitchen
 BuildRequires: python-devel >= 2.4
 BuildRequires: gettext
@@ -673,5 +675,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/yum-plugins/puppetverify.*
 
 %changelog
+* Mon Apr 07 2014 yd
+- build for python 2.7.
+
 * Wed Jun 05 2013 yd
 - r639, initial public build.

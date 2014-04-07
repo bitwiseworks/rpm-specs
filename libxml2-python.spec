@@ -5,7 +5,7 @@
 Summary: libxml2 package
 Name: %{name}
 Version: %{version}
-Release: 4%{?dist}
+Release: 5%{?dist}
 Source: libxml2-%{version}.tar.gz
 #Source1: %{name}-%{unmangled_version}.tar.gz
 License: MIT Licence
@@ -22,7 +22,7 @@ BuildRoot: %{_tmppath}/libxml2-%{version}-%{release}-buildroot
 
 Requires: libxml2 = %{version}
 Requires: python
-Requires: python(abi) = 2.6
+Requires: python(abi) = 2.7
 
 %description
 The libxml2-python package contains a module that permits applications
@@ -53,5 +53,8 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root)
 
 %changelog
+* Mon Apr 07 2014 yd
+- build for python 2.7.
+
 * Mon Jan 16 2012 yd
 - rebuild with libc 0.6.4 runtime.

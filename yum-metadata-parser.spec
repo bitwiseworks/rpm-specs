@@ -2,7 +2,7 @@
 Summary: A fast metadata parser for yum
 Name: yum-metadata-parser
 Version: 1.1.4
-Release: 3%{?dist}
+Release: 4%{?dist}
 Source0: %{name}-%{version}.tar.gz
 License: GPL
 Group: Development/Libraries
@@ -16,6 +16,7 @@ BuildRequires: pkgconfig
 BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 Requires: sqlite, glib2, libxml2
+Requires: python(abi) = 2.7
 
 %description
 Fast metadata parser for yum implemented in C.
@@ -39,3 +40,5 @@ Fast metadata parser for yum implemented in C.
 
 
 %changelog
+* Mon Apr 07 2014 yd
+- build for python 2.7.

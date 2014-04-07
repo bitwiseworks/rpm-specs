@@ -1,5 +1,5 @@
 %{!?__python_ver:%global __python_ver EMPTY}
-#global __python_ver 26
+#global __python_ver 2.7
 %global unicode ucs4
 
 %global _default_patch_fuzz 2
@@ -14,8 +14,8 @@
 %global tkinter tkinter
 %endif
 
-%global pybasever 2.6
-%global pybasever_cond 26
+%global pybasever 2.7
+%global pybasever_cond 27
 %global pylibdir %{_libdir}/python%{pybasever}
 %global tools_dir %{pylibdir}/Tools
 %global demo_dir %{pylibdir}/Demo
@@ -44,13 +44,13 @@
 
 Summary: An interpreted, interactive, object-oriented programming language
 Name: %{python}
-Version: 2.6.5
-Release: 9%{?dist}
+Version: 2.7.6
+Release: 10%{?dist}
 License: Python
 Group: Development/Languages
 Provides: python-abi = %{pybasever}
 Provides: python(abi) = %{pybasever}
-Source: http://www.python.org/ftp/python/%{version}/Python-%{version}.tgz
+Source: http://www.python.org/ftp/python/%{version}/Python-%{version}.tar.xz
 
 Patch0: Python-%{version}-os2.diff
 Patch1: Python-%{version}-os2knix.diff
@@ -116,6 +116,13 @@ set for Tk and RPM.
 
 Note that documentation for Python is provided in the python-docs
 package.
+
+%package common
+Summary: An interpreted, interactive, object-oriented programming language
+Group: Development/Languages
+
+%description common
+Only binary files without versioned name. Allows multiple installations.
 
 %package libs
 Summary: The libraries for python runtime
@@ -238,6 +245,10 @@ find -name "*~" |xargs rm -f
 
 %build
 export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
+export SHELL=$CONFIG_SHELL
+export EMXSHELL=$CONFIG_SHELL
+export MAKESHELL=$CONFIG_SHELL
+
 export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 export LIBS="-lssl -lcrypto -lurpo -lmmap -lpthread -lintl"
 %configure \
@@ -353,8 +364,9 @@ fi
 %defattr(-, root, root, -)
 %doc LICENSE README
 %{_bindir}/pydoc*
-%{_bindir}/%{python}
-%{_bindir}/%{python}.exe
+%{_bindir}/python
+%{_bindir}/python.exe
+%{_bindir}/python2.exe
 %if %{main_python}
 #%{_bindir}/python2
 %endif
@@ -367,7 +379,7 @@ fi
 %{dynload_dir}/Python-%{version}-py%{pybasever}.egg-info
 %{dynload_dir}/_bisect.pyd
 %{dynload_dir}/_bsddb.pyd
-%{dynload_dir}/_bytesio.pyd
+#%{dynload_dir}/_bytesio.pyd
 %{dynload_dir}/_codecs_.pyd
 #%{dynload_dir}/_codecs_hk.pyd
 #%{dynload_dir}/_codecs_iso2022.pyd
@@ -376,15 +388,16 @@ fi
 #%{dynload_dir}/_codecs_tw.pyd
 %{dynload_dir}/_collect.pyd
 %{dynload_dir}/_csv.pyd
-#%{dynload_dir}/_ctypes.pyd
+%{dynload_dir}/_ctypes.pyd
 %{dynload_dir}/_curses.pyd
 %{dynload_dir}/_curses_.pyd
 %{dynload_dir}/_element.pyd
-%{dynload_dir}/_fileio.pyd
+#%{dynload_dir}/_fileio.pyd
 #%{dynload_dir}/_functoo.pyd
 %{dynload_dir}/_hashlib.pyd
 %{dynload_dir}/_heapq.pyd
 %{dynload_dir}/_hotshot.pyd
+%{dynload_dir}/_io.pyd
 %{dynload_dir}/_json.pyd
 #%{dynload_dir}/_locale.pyd
 %{dynload_dir}/_lsprof.pyd
@@ -399,7 +412,7 @@ fi
 %{dynload_dir}/_sqlite3.pyd
 %{dynload_dir}/_ssl.pyd
 %{dynload_dir}/_struct.pyd
-%{dynload_dir}/_weakref.pyd
+#%{dynload_dir}/_weakref.pyd
 %{dynload_dir}/array.pyd
 %{dynload_dir}/audioop.pyd
 %{dynload_dir}/binascii.pyd
@@ -459,12 +472,14 @@ fi
 %{pylibdir}/encodings
 %{pylibdir}/hotshot
 %{pylibdir}/idlelib
+%{pylibdir}/importlib
 %dir %{pylibdir}/json
 %{pylibdir}/json/*.py*
 %{pylibdir}/lib2to3
 %{pylibdir}/logging
 %{pylibdir}/multiprocessing
 %{pylibdir}/plat-os2knix
+%{pylibdir}/pydoc_data
 %dir %{pylibdir}/sqlite3
 %{pylibdir}/sqlite3/*.py*
 %dir %{pylibdir}/test
@@ -501,9 +516,10 @@ fi
 %if %{main_python}
 %{_bindir}/python-config
 %endif
-%{_bindir}/python%{pybasever}-config
+%{_bindir}/python*-config
 #%{_libdir}/libpython%{pybasever}.pyd
 %{_libdir}/python%{pybasever}_dll.a
+%{_libdir}/pkgconfig
 
 %files tools
 %defattr(-,root,root,755)
@@ -536,6 +552,7 @@ fi
 %{pylibdir}/json/tests
 %{pylibdir}/sqlite3/test
 %{pylibdir}/test/*
+%{pylibdir}/unittest/*
 # These two are shipped in the main subpackage:
 %exclude %{pylibdir}/test/test_support.py*
 %exclude %{pylibdir}/test/__init__.py*
@@ -561,6 +578,9 @@ fi
 %{_libdir}/*.dbg
 
 %changelog
+* Mon Apr 07 2014 yd
+- build for python 2.7.
+
 * Sat Mar 15 2014 yd
 - r385 and others, added support for virtualenv.
 - added debug package with symbolic info for exceptq.
