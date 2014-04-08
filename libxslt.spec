@@ -54,12 +54,18 @@ to load and save XML and HTML files. Direct access to XPath and
 the XSLT transformation context are possible to extend the XSLT language
 with XPath functions written in Python.
 
+%package debug
+Summary: HLL debug data for exception handling support.
+
+%description debug
+HLL debug data for exception handling support.
+
 %prep
 %setup -q
 %patch1 -p1 -b .os2~
 
 %build
-export CONFIG_SHELL="/bin/sh"
+export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
 export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 export LIBS="-lurpo -lmmap -lpthread"
 %configure \
@@ -137,6 +143,12 @@ rm -fr %{buildroot}
 %doc python/tests/*.xml
 %doc python/tests/*.xsl
 
+%files debug
+%defattr(-,root,root)
+%{_bindir}/*.dbg
+%{_libdir}/*.dbg
+
 %changelog
 * Mon Apr 07 2014 yd
 - build for python 2.7.
+- added debug package with symbolic info for exceptq.

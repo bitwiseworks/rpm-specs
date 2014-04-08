@@ -68,6 +68,12 @@ to read, modify and write XML and HTML files. There is DTDs support
 this includes parsing and validation even with complex DTDs, either
 at parse time or later once the document has been modified.
 
+%package debug
+Summary: HLL debug data for exception handling support.
+
+%description debug
+HLL debug data for exception handling support.
+
 %prep
 %setup -q
 %patch001 -p1 -b .os2~
@@ -159,9 +165,15 @@ rm -fr %{buildroot}
 #%doc doc/*.py
 #%doc doc/python.html
 
+%files debug
+%defattr(-,root,root)
+%{_bindir}/*.dbg
+%{_libdir}/*.dbg
+
 %changelog
 * Mon Apr 07 2014 yd
 - build for python 2.7.
+- added debug package with symbolic info for exceptq.
 
 * Mon Jan 16 2012 yd
 - rebuild with libc 0.6.4 runtime.
