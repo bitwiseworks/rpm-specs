@@ -5,7 +5,7 @@
 Summary: A high-level cross-protocol url-grabber
 Name: %{name}
 Version: %{version}
-Release: 3%{?dist}
+Release: 4%{?dist}
 Source0: %{name}-%{unmangled_version}.tar.gz
 License: LGPL
 Group: Development/Libraries
@@ -51,7 +51,12 @@ following features:
 python setup.py build
 
 %install
+rm -rf $RPM_BUILD_ROOT
 python setup.py install --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES
+# temporary workaround for wrong paths http://trac.netlabs.org/rpm/ticket/71
+mkdir $RPM_BUILD_ROOT/@unixroot
+mv $RPM_BUILD_ROOT/USR $RPM_BUILD_ROOT/@unixroot/usr
+sed -e 's#/USR/#/@unixroot/usr/#g' -i INSTALLED_FILES
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -60,5 +65,8 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root)
 
 %changelog
+* Tue Apr 08 2014 yd
+- workaround for http://trac.netlabs.org/rpm/ticket/71
+
 * Mon Apr 07 2014 yd
 - build for python 2.7.

@@ -5,7 +5,7 @@
 Summary: libxml2 package
 Name: %{name}
 Version: %{version}
-Release: 5%{?dist}
+Release: 6%{?dist}
 Source: libxml2-%{version}.tar.gz
 #Source1: %{name}-%{unmangled_version}.tar.gz
 License: MIT Licence
@@ -45,6 +45,10 @@ env CFLAGS="$RPM_OPT_FLAGS" python setup.py build
 %install
 cd python
 python setup.py install --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES
+# temporary workaround for wrong paths http://trac.netlabs.org/rpm/ticket/71
+mkdir $RPM_BUILD_ROOT/@unixroot
+mv $RPM_BUILD_ROOT/USR $RPM_BUILD_ROOT/@unixroot/usr
+sed -e 's#/USR/#/@unixroot/usr/#g' -i INSTALLED_FILES
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -53,6 +57,9 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root)
 
 %changelog
+* Tue Apr 08 2014 yd
+- workaround for http://trac.netlabs.org/rpm/ticket/71
+
 * Mon Apr 07 2014 yd
 - build for python 2.7.
 
