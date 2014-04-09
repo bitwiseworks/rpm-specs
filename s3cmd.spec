@@ -1,3 +1,4 @@
+
 %define name s3cmd
 %define version 1.1.0.beta3
 %define unmangled_version 1.1.0.beta3
@@ -8,6 +9,8 @@ Name: %{name}
 Version: %{version}
 Release: %{release}
 Source0: %{name}-%{unmangled_version}.tar.gz
+Source1: python-wrapper.zip
+
 License: GPL version 2
 Group: Development/Libraries
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
@@ -15,6 +18,8 @@ Prefix: %{_prefix}
 BuildArch: noarch
 Vendor: Michal Ludvig <michal@logix.cz>
 Url: http://s3tools.org
+
+Requires: python(abi) = %{python_version}
 
 %description
 
@@ -31,24 +36,34 @@ Authors:
     Michal Ludvig  <michal@logix.cz>
 
 
+%package debug
+Summary: HLL debug data for exception handling support.
+
+%description debug
+HLL debug data for exception handling support.
+
+
 %prep
-%setup -n %{name}-%{unmangled_version}
+%setup -n %{name}-%{unmangled_version} -a 1
 
 %build
 python setup.py build
 
 %install
-python setup.py install --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES
-# temporary workaround for wrong paths http://trac.netlabs.org/rpm/ticket/71
-mkdir $RPM_BUILD_ROOT/@unixroot
-mv $RPM_BUILD_ROOT/USR $RPM_BUILD_ROOT/@unixroot/usr
-sed -e 's#/USR/#/@unixroot/usr/#g' -i INSTALLED_FILES
+python setup.py install --root=$RPM_BUILD_ROOT --prefix %{_prefix} --record=INSTALLED_FILES
+#build exe wrapper
+gcc -g -Zomf %optflags -DPYTHON_EXE=\"python%{python_version}.exe\" -o $RPM_BUILD_ROOT/%{_bindir}/%{name}.exe exec-py.c
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %files -f INSTALLED_FILES
 %defattr(-,root,root)
+%{_bindir}/*.exe
+
+%files debug
+%defattr(-,root,root)
+%{_bindir}/*.dbg
 
 %changelog
 * Tue Apr 08 2014 yd

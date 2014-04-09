@@ -1,3 +1,4 @@
+
 %define name libxml2-python
 %define version 2.7.7
 %define unmangled_version 2.7.7
@@ -22,7 +23,7 @@ BuildRoot: %{_tmppath}/libxml2-%{version}-%{release}-buildroot
 
 Requires: libxml2 = %{version}
 Requires: python
-Requires: python(abi) = 2.7
+Requires: python(abi) = %{python_version}
 
 %description
 The libxml2-python package contains a module that permits applications
@@ -44,11 +45,7 @@ env CFLAGS="$RPM_OPT_FLAGS" python setup.py build
 
 %install
 cd python
-python setup.py install --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES
-# temporary workaround for wrong paths http://trac.netlabs.org/rpm/ticket/71
-mkdir $RPM_BUILD_ROOT/@unixroot
-mv $RPM_BUILD_ROOT/USR $RPM_BUILD_ROOT/@unixroot/usr
-sed -e 's#/USR/#/@unixroot/usr/#g' -i INSTALLED_FILES
+python setup.py install --root=$RPM_BUILD_ROOT --prefix %{_prefix} --record=INSTALLED_FILES
 
 %clean
 rm -rf $RPM_BUILD_ROOT

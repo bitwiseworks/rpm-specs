@@ -1,6 +1,4 @@
 %{!?python_sitelib: %define python_sitelib %(python -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
-
-%global pybasever 2.7
  
 Summary: RPM installer/updater
 Name: yum
@@ -9,9 +7,7 @@ Release: 6%{?dist}
 License: GPLv2+
 Group: System Environment/Base
 Source0: http://yum.baseurl.org/download/3.2/%{name}-%{version}.tar.gz
-Source1: yum-os2.zip
-#Source1: yum.conf.fedora
-#Source2: yum-updatesd.conf.fedora
+Source1: python-wrapper.zip
 
 Patch0: yum-os2.diff
 
@@ -44,7 +40,7 @@ Provides: yum-plugin-protect-packages
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 Requires: python
-Requires: python(abi) = %{pybasever}
+Requires: python(abi) = %{python_version}
 
 %description
 Yum is a utility that can check for and automatically download and
@@ -108,8 +104,7 @@ mkdir -p $RPM_BUILD_ROOT/%{_var}/lib/yum/yumdb
 touch $RPM_BUILD_ROOT/%{_var}/lib/yum/uuid
 
 #build exe wrapper
-#cp yum.exe $RPM_BUILD_ROOT/%{_bindir}
-gcc -g -Zomf %optflags -DPYTHON_EXE=\"python%{pybasever}.exe\" -o $RPM_BUILD_ROOT/%{_bindir}/yum.exe exec-py.c
+gcc -g -Zomf %optflags -DPYTHON_EXE=\"python%{python_version}.exe\" -o $RPM_BUILD_ROOT/%{_bindir}/%{name}.exe exec-py.c
 
 
 #%find_lang %name

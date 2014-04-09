@@ -1,7 +1,5 @@
 %{!?python_sitearch: %define python_sitearch %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)")}
 
-%global pybasever 2.7
-
 Summary: A fast, lightweight distributed source control management system 
 Name: mercurial
 Version: 2.5.2
@@ -10,7 +8,7 @@ License: GPLv2+
 Group: Development/Tools
 URL: http://www.selenic.com/mercurial/
 Source0: http://www.selenic.com/mercurial/release/%{name}-%{version}.tar.gz
-Source1: mercurial-os2.zip
+Source1: python-wrapper.zip
 
 Patch0: mercurial-os2.diff
 
@@ -21,7 +19,7 @@ BuildRequires: pkgconfig
 Provides: hg = %{version}-%{release}
 
 Requires: python
-Requires: python(abi) = %{pybasever}
+Requires: python(abi) = %{python_version}
 
 %description
 Mercurial is a fast, lightweight source control management system designed
@@ -138,8 +136,7 @@ mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/mercurial/hgrc.d
 install contrib/mergetools.hgrc $RPM_BUILD_ROOT%{_sysconfdir}/mercurial/hgrc.d/mergetools.rc
 
 #build exe wrapper
-#cp yum.exe $RPM_BUILD_ROOT/%{_bindir}
-gcc -g -Zomf %optflags -DPYTHON_EXE=\"python%{pybasever}.exe\" -o $RPM_BUILD_ROOT/%{_bindir}/hg.exe exec-py.c
+gcc -g -Zomf %optflags -DPYTHON_EXE=\"python%{python_version}.exe\" -o $RPM_BUILD_ROOT/%{_bindir}/hg.exe exec-py.c
 
 
 %clean

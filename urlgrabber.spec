@@ -1,3 +1,4 @@
+
 %define name urlgrabber
 %define version 3.1.0
 %define unmangled_version 3.1.0
@@ -14,6 +15,8 @@ Prefix: %{_prefix}
 BuildArch: noarch
 Vendor: Michael D. Stenner, Ryan Tomayko <mstenner@linux.duke.edu, rtomayko@naeblis.cx>
 Url: http://linux.duke.edu/projects/urlgrabber/
+
+Requires: python(abi) = %{python_version}
 
 %description
 A high-level cross-protocol url-grabber.
@@ -52,11 +55,7 @@ python setup.py build
 
 %install
 rm -rf $RPM_BUILD_ROOT
-python setup.py install --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES
-# temporary workaround for wrong paths http://trac.netlabs.org/rpm/ticket/71
-mkdir $RPM_BUILD_ROOT/@unixroot
-mv $RPM_BUILD_ROOT/USR $RPM_BUILD_ROOT/@unixroot/usr
-sed -e 's#/USR/#/@unixroot/usr/#g' -i INSTALLED_FILES
+python setup.py install --root=$RPM_BUILD_ROOT --prefix %{_prefix} --record=INSTALLED_FILES
 
 %clean
 rm -rf $RPM_BUILD_ROOT
