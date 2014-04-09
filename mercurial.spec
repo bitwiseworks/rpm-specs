@@ -1,5 +1,7 @@
 %{!?python_sitearch: %define python_sitearch %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)")}
 
+%global pybasever 2.7
+
 Summary: A fast, lightweight distributed source control management system 
 Name: mercurial
 Version: 2.5.2
@@ -19,7 +21,7 @@ BuildRequires: pkgconfig
 Provides: hg = %{version}-%{release}
 
 Requires: python
-Requires: python(abi) = 2.6
+Requires: python(abi) = %{pybasever}
 
 %description
 Mercurial is a fast, lightweight source control management system designed
@@ -30,18 +32,6 @@ Tutorial: http://www.selenic.com/mercurial/wiki/index.cgi/Tutorial
 Extensions: http://www.selenic.com/mercurial/wiki/index.cgi/CategoryExtension
 
 %define pkg mercurial
-
-# If the emacs-el package has installed a pkgconfig file, use that to determine
-# install locations and Emacs version at build time, otherwise set defaults.
-#if ($(pkgconfig emacs) ; echo $?)
-#define emacs_version 22.1
-#define emacs_lispdir %{_datadir}/emacs/site-lisp
-#define emacs_startdir %{_datadir}/emacs/site-lisp/site-start.d
-#else
-#define emacs_version %{expand:%(pkg-config emacs --modversion)}
-#define emacs_lispdir %{expand:%(pkg-config emacs --variable sitepkglispdir)}
-#define emacs_startdir %{expand:%(pkg-config emacs --variable sitestartdir)}
-#endif
 
 #%package -n emacs-%{pkg}
 #Summary:	Mercurial version control system support for Emacs
@@ -81,16 +71,25 @@ Adds the "hg view" command.  See
 http://www.selenic.com/mercurial/wiki/index.cgi/UsingHgk for more
 documentation.
 
+%package debug
+Summary: HLL debug data for exception handling support.
+
+%description debug
+HLL debug data for exception handling support.
+
 %prep
 %setup -q -a 1
 %patch0 -p1
 
 %build
+export SHELL="/@unixroot/usr/bin/sh.exe"
+export EMXSHELL="cmd.exe"
 # Building docs is broken due to missing python-docutils package, skip this step
 #make SHELL=sh all
-make SHELL=sh build
+make build
 
 %install
+export EMXSHELL="cmd.exe"
 rm -rf $RPM_BUILD_ROOT
 %{__python} setup.py install -O1 --root $RPM_BUILD_ROOT --prefix %{_prefix} --record=%{name}.files
 # As we can't build docs (see above) disable it for now (only affects man)
@@ -138,7 +137,9 @@ mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/mercurial/hgrc.d
 
 install contrib/mergetools.hgrc $RPM_BUILD_ROOT%{_sysconfdir}/mercurial/hgrc.d/mergetools.rc
 
-cp hg.exe $RPM_BUILD_ROOT/%{_bindir}
+#build exe wrapper
+#cp yum.exe $RPM_BUILD_ROOT/%{_bindir}
+gcc -g -Zomf %optflags -DPYTHON_EXE=\"python%{pybasever}.exe\" -o $RPM_BUILD_ROOT/%{_bindir}/hg.exe exec-py.c
 
 
 %clean
@@ -176,10 +177,17 @@ rm -rf $RPM_BUILD_ROOT
 #%{_libexecdir}/mercurial/
 #%{_sysconfdir}/mercurial/hgrc.d/hgk.rc
 
+%files debug
+%defattr(-,root,root)
+%{_bindir}/*.dbg
+
 ##%%check
 ##cd tests && %{__python} run-tests.py
 
 %changelog
+* Wed Apr 09 2014 yd
+- build for python 2.7.
+- added debug package with symbolic info for exceptq.
 
 * Sat Mar 30 2013 Dmitriy Kuminov <coding@dmik.org> - 2.5.2-1
 - Update to version 2.5.2 from vendor.
