@@ -24,7 +24,7 @@
 Summary: The RPM package management system
 Name: rpm
 Version: %{rpmver}
-Release: 17%{?dist}
+Release: 18%{?dist}
 Group: System Environment/Base
 Url: http://www.rpm.org/
 Source0: http://rpm.org/releases/rpm-4.8.x/%{name}-%{srcver}.tar.bz2
@@ -471,6 +471,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Wed Apr 09 2014 yd
+- backported r409, popen() does not recognize unixroot, fixes macro expansion.
+
 * Mon Apr 07 2014 yd
 - build for python 2.7.
 
