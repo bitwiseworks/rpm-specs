@@ -11,7 +11,7 @@
 Summary:  Dynamic host configuration protocol software
 Name:     dhcp
 Version:  %{basever}
-Release:  2%{?dist}
+Release:  3%{?dist}
 License:  ISC
 Group:    System Environment/Daemons
 URL:      http://isc.org/products/DHCP/
@@ -70,6 +70,12 @@ Requires: %{name} = %{epoch}:%{version}-%{release}
 %description devel
 Header files and API documentation for using the ISC DHCP libraries.  The
 libdhcpctl and libomapi static libraries are also included in this package.
+
+%package debug
+Summary: HLL debug data for exception handling support.
+
+%description debug
+HLL debug data for exception handling support.
 
 %prep
 %setup -q -n %{name}-%{basedir}
@@ -261,7 +267,15 @@ EOF
 %attr(0644,root,root) %{_mandir}/man3/dhcpctl.3
 %attr(0644,root,root) %{_mandir}/man3/omapi.3
 
+%files debug
+%defattr(-,root,root)
+%{_bindir}/*.dbg
+%{_sbindir}/*.dbg
+
 %changelog
+* Sun Apr 13 2014 yd
+- r711, Add support for DHCLIENT_BEEP and DHCLIENT_LOGFILE env variables, by Andreas Buchinger.
+
 * Mon Jan 30 2012 yd
 - added dhconf.cmd.
 - use spawn instead of fork().
