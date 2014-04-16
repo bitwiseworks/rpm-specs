@@ -58,21 +58,16 @@ HLL debug data for exception handling support.
 
 %build
 export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
-%configure --libdir=/%{_lib}
+%configure
 make CFLAGS="$RPM_OPT_FLAGS"
 
 %install
 rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT
-rm -f $RPM_BUILD_ROOT/%{_lib}/*.la
-
-mkdir -p %{buildroot}%{_libdir}/pkgconfig
-mv %{buildroot}/%{_lib}/pkgconfig/* %{buildroot}%{_libdir}/pkgconfig/
-mv %{buildroot}/%{_lib}/*.a %{buildroot}%{_libdir}
+rm -f $RPM_BUILD_ROOT/%{_libdir}/*.la
 
 cp -p libusb/*.dll %{buildroot}%{_libdir}
 cp -p libusb/.libs/usb-*_s.a %{buildroot}%{_libdir}
-rm -fr %{buildroot}/%{_lib}
 
 %clean
 rm -rf $RPM_BUILD_ROOT
