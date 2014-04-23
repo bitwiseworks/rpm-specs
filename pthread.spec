@@ -2,8 +2,8 @@
 
 Summary: A posix pthread emulation for OS/2-eComStation
 Name: pthread
-Version: 20140226
-Release: 13%{?dist}
+Version: 20140423
+Release: 14%{?dist}
 License: unknown
 Group: Development/Libraries
 Source: pthread-%{version}-os2.zip
@@ -74,6 +74,9 @@ rm -rf %{buildroot}
 %{_libdir}/*.dbg
 
 %changelog
+* Wed Apr 24 2014 Dmitriy Kuminov <dmik/coding.org>
+- r718, fix invalid dereference in TlsAlloc and TlsFree.
+
 * Wed Feb 26 2014 komh
 - r704, pthread_mutex_destroy() crashs if a variable with PTHREAD_MUTEX_INITIALIZER is passed.
 
