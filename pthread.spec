@@ -2,8 +2,8 @@
 
 Summary: A posix pthread emulation for OS/2-eComStation
 Name: pthread
-Version: 20140423
-Release: 14%{?dist}
+Version: 20140425
+Release: 15%{?dist}
 License: unknown
 Group: Development/Libraries
 Source: pthread-%{version}-os2.zip
@@ -74,7 +74,10 @@ rm -rf %{buildroot}
 %{_libdir}/*.dbg
 
 %changelog
-* Wed Apr 24 2014 Dmitriy Kuminov <dmik/coding.org>
+* Fri Apr 25 2014 Dmitriy Kuminov <dmik/coding.org>
+- r720, Return proper POSIX errors in 'key' APIs. Fix pthread_key_delete() return code.
+
+* Thu Apr 24 2014 Dmitriy Kuminov <dmik/coding.org>
 - r718, fix invalid dereference in TlsAlloc and TlsFree.
 
 * Wed Feb 26 2014 komh
