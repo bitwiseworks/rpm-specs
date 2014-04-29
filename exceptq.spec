@@ -4,10 +4,10 @@
 Summary: Exceptq creates a debugging report.
 Name: exceptq
 Version: 7.11
-Release: 7%{?dist}
+Release: 8%{?dist}
 License: custom
 Group: Development/Libraries
-Source: exceptq-7.11-shl-2014-02-07.zip
+Source: exceptq-7.11-shl-2014-03-03.zip
 #Source1: exceptq.h
 #Source2: exceptq71-dev.zip
 
@@ -85,6 +85,9 @@ rm -rf %{buildroot}
 %doc readme.exceptq
 
 %changelog
+* Tue Apr 29 2014 yd
+- update to SHL 2014-03-03 binaries.
+
 * Fri Feb 28 2014 yd
 - update to SHL 2014-02-07 binaries.
 
