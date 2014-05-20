@@ -4,12 +4,14 @@
 Summary: Exceptq creates a debugging report.
 Name: exceptq
 Version: 7.11
-Release: 8%{?dist}
+Release: 9%{?dist}
 License: custom
 Group: Development/Libraries
 Source: exceptq-7.11-shl-2014-03-03.zip
 #Source1: exceptq.h
 #Source2: exceptq71-dev.zip
+
+Patch1: exceptq_h.diff
 
 %description
 Exceptq creates a debugging report whenever a program that uses it
@@ -43,6 +45,9 @@ Exceptq developer package
 
 %prep
 %setup -q -c
+
+%patch1 -p0 -b .bak
+[ $? = 0 ] || exit 1
 
 %build
 
@@ -85,6 +90,9 @@ rm -rf %{buildroot}
 %doc readme.exceptq
 
 %changelog
+* Tue May 20 2014 Dmitriy Kuminov <coding@dmik.org> 7.11-9
+- Patch exceptq.h to fix usage in muptiple sources.
+
 * Tue Apr 29 2014 yd
 - update to SHL 2014-03-03 binaries.
 
