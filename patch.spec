@@ -1,7 +1,7 @@
 Summary: Utility for modifying/upgrading files
 Name: patch
 Version: 2.6.1
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: GPLv2+
 URL: http://www.gnu.org/software/patch/patch.html
 Group: Development/Tools
@@ -52,5 +52,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/*
 
 %changelog
+* Thu May 22 2014 yd
+- r728, Consistently use KLIBC. 
+- r727, Make --help say that binary is always set on OS/2.
+- r726, Do not ignore --binary in silent (-s) mode. This looks like an upstream...
+
 * Mon Jan 09 2012 yd
 - fixed binary/text access.
