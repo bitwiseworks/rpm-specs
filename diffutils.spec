@@ -1,7 +1,7 @@
 Summary: A GNU collection of diff utilities
 Name: diffutils
 Version: 3.2
-Release: 2%{?dist}
+Release: 3%{?dist}
 Group: Applications/Text
 URL: http://www.gnu.org/software/diffutils/diffutils.html
 Source: ftp://ftp.gnu.org/gnu/diffutils/diffutils-%{version}.tar.xz
@@ -28,6 +28,12 @@ changes and warnings about conflicts.  The sdiff command can be used
 to merge two files interactively.
 
 Install diffutils if you need to compare text files.
+
+%package debug
+Summary: HLL debug data for exception handling support.
+
+%description debug
+HLL debug data for exception handling support.
 
 %prep
 %setup -q
@@ -67,12 +73,20 @@ rm -rf $RPM_BUILD_ROOT
 # -f %{name}.lang
 %defattr(-,root,root)
 %doc NEWS README
-%{_bindir}/*
+%{_bindir}/*.exe
 %{_mandir}/*/*
 %{_infodir}/diffutils.info*gz
 %{_datadir}/locale/*
 
+%files debug
+%defattr(-,root,root)
+%{_bindir}/*.dbg
+
 %changelog
+* Fri May 23 2014 yd
+- r730, Force --binary and no --strip-trailing-cr on OS/2.
+- r729, Fix broken --binary option on OS/2.
+
 * Mon Jan 09 2012 yd
 - do not build with -Zbin-files flag.
 
