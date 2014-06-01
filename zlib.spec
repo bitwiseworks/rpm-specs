@@ -1,7 +1,7 @@
 Summary: The zlib compression and decompression library.
 Name: zlib
 Version: 1.2.5
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: BSD
 Group: System Environment/Libraries
 URL: http://www.zlib.net
