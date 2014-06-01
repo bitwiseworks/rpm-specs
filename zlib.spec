@@ -27,6 +27,12 @@ Requires: %name = %version-%release
 The zlib-devel package contains the header files and libraries needed to
 develop programs that use the zlib compression and decompression library.
 
+%package debug
+Summary: HLL debug data for exception handling support.
+
+%description debug
+HLL debug data for exception handling support.
+
 %prep
 %setup -q
 %patch0 -p0 -b .os2~
@@ -85,13 +91,20 @@ install -p -m644 README \
 %files devel
 %defattr(-,root,root)
 %_libdir/*.a
-%_libdir/z.dll
 %_includedir/*
 %_mandir/man?/*
 %dir %docdir
 %docdir/*.c
 #%docdir/*.bz2
 
+%files debug
+%defattr(-,root,root)
+%{_libdir}/*.dbg
+
 %changelog
+* Mon Jun 02 2014 yd
+- remove dll from devel package.
+- added debug package with symbolic info for exceptq.
+
 * Mon Jan 16 2012 yd
 - rebuild with libc 0.6.4 runtime.
