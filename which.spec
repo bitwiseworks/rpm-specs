@@ -30,7 +30,7 @@ that would be run had these commands actually been invoked.
 %else
 %setup -n "%{name}-%{version}" -Tc
 svn export -r %{svn_rev} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}.zip"
+rm -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip"
 (cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" "%{name}-%{version}")
 %endif
 
