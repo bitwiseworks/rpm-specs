@@ -2,7 +2,7 @@
 %define name s3cmd
 %define version 1.1.0.beta3
 %define unmangled_version 1.1.0.beta3
-%define release 5
+%define release 6
 
 Summary: Command line tool for managing Amazon S3 and CloudFront services
 Name: %{name}
@@ -66,6 +66,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/*.dbg
 
 %changelog
+* Wed Jun 18 2014 yd
+- rebuild to fix for http://trac.netlabs.org/rpm/ticket/77
+
 * Tue Apr 08 2014 yd
 - workaround for http://trac.netlabs.org/rpm/ticket/71
 

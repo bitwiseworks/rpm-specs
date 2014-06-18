@@ -6,7 +6,7 @@
 Summary: A high-level cross-protocol url-grabber
 Name: %{name}
 Version: %{version}
-Release: 4%{?dist}
+Release: 5%{?dist}
 Source0: %{name}-%{unmangled_version}.tar.gz
 License: LGPL
 Group: Development/Libraries
@@ -64,6 +64,9 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root)
 
 %changelog
+* Wed Jun 18 2014 yd
+- rebuild to fix for http://trac.netlabs.org/rpm/ticket/77
+
 * Tue Apr 08 2014 yd
 - workaround for http://trac.netlabs.org/rpm/ticket/71
 
