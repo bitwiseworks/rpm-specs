@@ -1,7 +1,7 @@
 Summary: Watcom Compiler tools for gcc
 Name: watcom
-Version: 1.9
-Release: 5%{?dist}
+Version: 2.0beta1
+Release: 6%{?dist}
 License: none
 
 Group: Development/Languages
@@ -38,6 +38,7 @@ rm -rf %{buildroot}
 %files wlink-hll
 %defattr(-,root,root)
 %{_bindir}/wl.exe
+%doc wl.lvl
 
 %files wrc
 %defattr(-,root,root)
@@ -45,6 +46,9 @@ rm -rf %{buildroot}
 %doc wrc.lvl
 
 %changelog
+* Fri Jun 20 2014 yd
+- wlink build 20140527, uses highmem allocations.
+
 * Fri Apr 18 2014 yd
 - wrc, corrects large (over 64KB) page table truncation
 - wrc, uses per-process unique temporary file names
