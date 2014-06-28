@@ -4,7 +4,7 @@ License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Standard Shared Libraries
 Group:          System/Libraries
 Version:        0.6.5
-Release:        18%{?dist}
+Release:        19%{?dist}
 Url:            http://svn.netlabs.org/libc
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -125,6 +125,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/libintl.h
 
 %changelog
+* Wed Jun 25 2014 yd
+- emxomf, merged libc tickets #251, #293, #295.
+
 * Thu Sep 11 2013 yd
 - ticket#63: remove gcc335.dll from devel distribution.
 
