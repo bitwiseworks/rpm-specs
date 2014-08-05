@@ -40,6 +40,12 @@ Requires:       mpfr-devel
 MPC multiple-precision complex library development files.
 
 
+%package debug
+Summary: HLL debug data for exception handling support.
+
+%description debug
+HLL debug data for exception handling support.
+
 
 %prep
 %setup -q
@@ -70,9 +76,14 @@ cp -p src/.libs/mpc_s.a $RPM_BUILD_ROOT%{_libdir}
 %{_libdir}/mpc*.a
 %{_includedir}/mpc.h
 
+%files debug
+%defattr(-,root,root)
+%{_libdir}/*.dbg
+
 %changelog
 * Thu Aug 05 2014 yd
 - resolve dll conflict with devel package, fixes ticket#82.
+- added debug package with symbolic info for exceptq.
 
 * Wed Nov 20 2013 yd
 - rebuild with newer gcc runtime.
