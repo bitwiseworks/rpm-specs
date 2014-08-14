@@ -1,11 +1,14 @@
 Name:		noip
 Version:	2.1.9
-Release:	1%{?dist}
+Release:	1.1%{?dist}
 Summary:	A dynamic DNS update client
 Group:		System Environment/Daemons
 License:	GPLv2+
 URL:		http://www.no-ip.com
 Source0:	http://www.no-ip.com/client/linux/noip-duc-linux.tar.gz
+Source1:        noip2.jpg
+Source2:        noip2.ico
+
 # Patch for Fedora specifics 
 Patch0:		noip-2.1.9-1.patch
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -48,7 +51,7 @@ rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root,-)
-%doc COPYING README.FIRST
+%doc COPYING README.FIRST %{SOURCE1} %{SOURCE2}
 %{_sbindir}/noip2.exe
 %attr(600,noip,noip) %config(noreplace) %{_sysconfdir}/no-ip2.conf
 
