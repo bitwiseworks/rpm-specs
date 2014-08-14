@@ -1,12 +1,15 @@
+%define svn_url     http://svn.netlabs.org/repos/ports/pthread/trunk
+%define svn_rev     813
+
 %define kmk_dist out/os2.x86/release/dist
 
 Summary: A posix pthread emulation for OS/2-eComStation
 Name: pthread
-Version: 20140425
-Release: 15%{?dist}
+Version: 20140814
+Release: 16%{?dist}
 License: unknown
 Group: Development/Libraries
-Source: pthread-%{version}-os2.zip
+Source: %{name}-%{version}-r%{svn_rev}.zip
 Source1: pthread-legacy-os2.zip
 
 
@@ -34,8 +37,14 @@ Summary: HLL debug data for exception handling support.
 HLL debug data for exception handling support.
 
 %prep
-%setup -q -c -a 1
-
+%if %(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')
+%setup -q
+%else
+%setup -n "%{name}-%{version}" -T -c -a 1
+svn export -r %{svn_rev} %{svn_url} . --force
+rm -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip"
+(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" "%{name}-%{version}")
+%endif
 
 %build
 export KCFLAGS="%{optflags}"
@@ -74,6 +83,10 @@ rm -rf %{buildroot}
 %{_libdir}/*.dbg
 
 %changelog
+* Thu Aug 14 2014 yd
+- r812-813, set stack to be at least 2MB for new threads.
+- Pull sources directly from SVN/GIT, ticket#76.
+
 * Fri Apr 25 2014 Dmitriy Kuminov <dmik/coding.org>
 - r720, Return proper POSIX errors in 'key' APIs. Fix pthread_key_delete() return code.
 
