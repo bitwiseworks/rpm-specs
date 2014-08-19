@@ -4,13 +4,20 @@ License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Standard Shared Libraries
 Group:          System/Libraries
 Version:        0.6.5
-Release:        19%{?dist}
+Release:        20%{?dist}
 Url:            http://svn.netlabs.org/libc
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 Source:         libc-%{version}.zip
 Source1:        libc-emxomf.zip
 Patch0:         libc.patch
+
+# These patches are not actually applied but they record what
+# needs to be done to the stock LIBC 0.6 source in order to build
+# emxomf.exe contained in libc-emxomf.zip 
+Patch101:       libc-dmik-emxomf-02-remove-asterisk.diff
+Patch102:       libc-yuri-emxomf-verbose-warnings-3.patch
+Patch103:       libc-steven-emxomf-index-too-large.diff
 
 BuildRequires:  rexx_exe
 
@@ -26,7 +33,7 @@ interesting to play with and what is requested by porters using kLIBC.
 License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Include Files and Libraries Mandatory for Development
 Group:          Development/Libraries/C and C++
-Requires:       libc = %{version}
+Requires:       libc = %{version}-%{release}
 
 %description devel
 These libraries are needed to develop programs which use the standard C
@@ -48,6 +55,7 @@ License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Include Files and Libraries Mandatory for Development (gettext headers)
 Group:          Development/Libraries/C and C++
 Provides:       gettext-devel
+Requires:       libc = %{version}-%{release}
 
 %description gettext-devel
 These libraries are needed to develop programs which use the standard C
@@ -125,6 +133,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/libintl.h
 
 %changelog
+* Tue Aug 19 2014 Dmitriy Kuminov <coding@dmik.org> 0.6.5-20
+- Merged emxomf-remove-asterick.diff from libc ticket #220.
+- Made libc-devel and libc-gettext-devel strictly depend on current libc.
+
 * Wed Jun 25 2014 yd
 - emxomf, merged libc tickets #251, #293, #295.
 
