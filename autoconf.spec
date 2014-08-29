@@ -1,15 +1,20 @@
 Summary:    A GNU tool for automatically configuring source code
 Name:       autoconf
-Version:    2.65
-Release:    4%{?dist}
+Version:    2.69
+Release:    1%{?dist}
 License:    GPLv2+ and GFDL
 Group:      Development/Tools
-Source:     http://ftp.gnu.org/gnu/autoconf/autoconf-%{version}.tar.xz
+#Source:     http://ftp.gnu.org/gnu/autoconf/autoconf-%{version}.tar.xz
 #Source1:    filter-provides-automake.sh
 #Source2:    filter-requires-automake.sh
 URL:        http://www.gnu.org/software/autoconf/
 BuildArch: noarch
 BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+
+%define svn_url     http://svn.netlabs.org/repos/ports/autoconf/trunk
+%define svn_rev     763
+
+Source: %{name}-%{version}-r%{svn_rev}.zip
 
 # m4 >= 1.4.6 is required, >= 1.4.13 is recommended:
 BuildRequires:      m4 >= 1.4.13
@@ -18,13 +23,14 @@ Requires:           m4 >= 1.4.13
 #Requires(post):     /sbin/install-info
 #Requires(preun):    /sbin/install-info
 
+# for autoreconf
+Requires: autoconf
+
 # for check only:
 #BuildRequires: automake libtool gcc-gfortran
 #%if 0%{?fedora}
 #BuildRequires: erlang
 #%endif
-
-Patch0: autoconf-os2.diff
 
 # Make AC_FUNC_MMAP work with C++ again.
 # Committed to Autoconf git soon after 2.65.
@@ -52,15 +58,25 @@ Autoconf is only required for the generation of the scripts, not
 their use.
 
 %prep
+%if %(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')
 %setup -q
-%patch0 -p1 -b .os2~
+%else
+%setup -n "%{name}-%{version}" -Tc
+svn export -r %{svn_rev} %{svn_url} . --force
+rm -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip"
+(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" "%{name}-%{version}")
+%endif
 
 %build
-export CONFIG_SHELL="/bin/sh"
-export PERL="/@unixroot/usr/bin/perl.exe" 
-export M4="/@unixroot/usr/bin/m4.exe" 
-%configure \
-    "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
+
+# make sure configure is updated to properly support OS/2
+autoreconf --verbose --install
+# autoreconf changes some doc files; prevent docs re-generation since we don't have
+# makeinfo/html2man yet
+touch doc/*
+
+%configure
+
 # not parallel safe
 make
 
@@ -101,5 +117,11 @@ rm -rf ${RPM_BUILD_ROOT}
 %doc AUTHORS COPYING ChangeLog NEWS README THANKS TODO
 
 %changelog
+* Fri Aug 29 2014 Dmitriy Kuminov <coding@dmik.org> 2.69-1
+- Update to version 2.69.
+- Fix PATH_SEPARATOR misdetection.
+- Remove annoying $ac_executable_extensions warning.
+- Apply various fixes to improve OS/2 and kLIBC support.
+
 * Wed Oct 26 2011 yd
 - fixed m4 path
