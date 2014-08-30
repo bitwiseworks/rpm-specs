@@ -1,4 +1,4 @@
-# Note this .spec is borrowed from automake-1.14.1-4.fc21.src.rpm
+# Note: this .spec is borrowed from automake-1.14.1-4.fc21.src.rpm
 
 %global api_version 1.14
 
@@ -77,7 +77,7 @@ cp m4/acdir/README README.aclocal
 cp contrib/multilib/README README.multilib
 
 %install
-rm -rf ${RPM_BUILD_ROOT}
+rm -rf ${buildroot}
 make install DESTDIR=%{buildroot}
 
 # TODO: we use %docdir below instead of %doc because the latter will rm -f the doc directory
@@ -114,5 +114,7 @@ make -k %{?_smp_mflags} check %{?TESTS_FLAGS: TESTS="%{TESTS_FLAGS}"} \
 %{_mandir}/man1/*
 
 %changelog
+* TBD
+
 * Sat Aug 30 2014 Dmitriy Kuminov <coding@dmik.org> 1.14.1-1
 - Initial package for version 1.14.1.
