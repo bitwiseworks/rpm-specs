@@ -20,14 +20,10 @@
 
 Summary: A general purpose cryptography library with TLS implementation
 Name: openssl
-Version: 1.0.0a
-Release: 5%{?dist}
+Version: 1.0.0n
+Release: 1%{?dist}
 
-Source: openssl-%{version}.tar.gz
-
-# Build changes
-Patch0: openssl-os2.diff
-Patch1: openssl-find.pl
+#Source: openssl-%{version}.tar.gz
 
 License: OpenSSL
 Group: System Environment/Libraries
@@ -39,6 +35,13 @@ BuildRequires: zlib-devel
 #BuildRequires: /usr/bin/rename
 #Requires: mktemp
 Requires: ca-certificates
+
+%define svn_url     http://svn.netlabs.org/repos/ports/openssl/branches/1.0.0
+%define svn_rev     843
+
+Source: %{name}-%{version}-r%{svn_rev}.zip
+
+BuildRequires: gcc make subversion zip
 
 %description
 The OpenSSL toolkit provides support for secure communications between
@@ -80,9 +83,17 @@ package provides Perl scripts for converting certificates and keys
 from other formats to the formats used by the OpenSSL toolkit.
 
 %prep
-%setup -q -n %{name}-%{version}
-%patch0 -p1 -b .os2~
-%patch1 -p0 -b .os2~
+%if %(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')
+%setup -q
+%else
+%setup -n "%{name}-%{version}" -Tc
+# we can't use svn export since it fails on symlinks (OS/2 bug in at least SVN 1.6.16), emulate with checkout
+#svn export -r %{svn_rev} %{svn_url} . --force
+svn checkout -r %{svn_rev} %{svn_url} .
+find . -type d -path "*/.svn" -exec rm -rf "{}" +
+rm -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip"
+(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" "%{name}-%{version}")
+%endif
 
 # Modify the various perl scripts to reference perl in the right location.
 perl util/perlpath.pl `dirname %{__perl}`
@@ -171,6 +182,9 @@ cp ssl_s.a $RPM_BUILD_ROOT%{_libdir}
 cp ssl%{soversion}.dll $RPM_BUILD_ROOT%{_libdir}
 cp crypto_s.a $RPM_BUILD_ROOT%{_libdir}
 cp crypto%{soversion}.dll $RPM_BUILD_ROOT%{_libdir}
+
+# Remove duplicate DLLs with lib* prefix (todo: fix it Makefiles)
+rm -f $RPM_BUILD_ROOT%{_libdir}/lib*%{soversion}.dll
 
 mv $RPM_BUILD_ROOT%{_libdir}/engines $RPM_BUILD_ROOT%{_libdir}/openssl
 mv $RPM_BUILD_ROOT%{_sysconfdir}/pki/tls/man/* $RPM_BUILD_ROOT%{_mandir}/
@@ -292,7 +306,6 @@ rm -rf $RPM_BUILD_ROOT/%{_libdir}/fipscanister.*
 %files devel
 %defattr(-,root,root)
 %{_prefix}/include/openssl
-%attr(0755,root,root) %{_libdir}/*%{soversion}.dll
 %attr(0755,root,root) %{_libdir}/lib*.a
 %attr(0644,root,root) %{_mandir}/man3*/*
 %attr(0644,root,root) %{_libdir}/pkgconfig/*.pc
@@ -309,6 +322,11 @@ rm -rf $RPM_BUILD_ROOT/%{_libdir}/fipscanister.*
 %{_sysconfdir}/pki/tls/misc/tsget
 
 %changelog
+* Tue Sep 2 2014 Dmitriy Kuminov <coding@dmik.org> 1.0.0n-1
+- Update to version 1.0.0n.
+- Move find.pl to SVN repository.
+- Remove DLLs from devel package.
+
 * Wed Dec 05 2012 yd
 - ca-certificates are required for proper ssl checks.
 - added File::Find wrapper for find.pl.
