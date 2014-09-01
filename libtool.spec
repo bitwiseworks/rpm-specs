@@ -5,7 +5,7 @@
 Summary: The GNU Portable Library Tool
 Name:    libtool
 Version: 2.4.2
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv2+ and LGPLv2+ and GFDL
 URL:     http://www.gnu.org/software/libtool/
 Group:   Development/Tools
@@ -13,7 +13,7 @@ Group:   Development/Tools
 #Source:  http://ftp.gnu.org/gnu/libtool/libtool-%{version}.tar.xz
 
 %define svn_url     http://svn.netlabs.org/repos/ports/libtool/trunk
-%define svn_rev     835
+%define svn_rev     842
 
 Source: %{name}-%{version}-r%{svn_rev}.zip
 
@@ -22,7 +22,7 @@ BuildRequires: gcc make subversion
 #Requires(post):  /sbin/install-info
 #Requires(preun): /sbin/install-info
 
-BuildRequires: autoconf, automake,
+BuildRequires: autoconf, automake
 #BuildRequires: texinfo
 Requires: autoconf, automake, sed, tar
 
@@ -162,5 +162,8 @@ fi
 %{_libdir}/ltdl*_dll.a
 
 %changelog
+* Mon Sep 1 2014 Dmitriy Kuminov <coding@dmik.org> 2.4.2-2
+- Fix PATH_SEPARATOR detection in libtoolize.
+
 * Sun Aug 31 2014 Dmitriy Kuminov <coding@dmik.org> 2.4.2-1
 - Initial package for version 2.4.2.
