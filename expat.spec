@@ -1,0 +1,107 @@
+# Note: this .spec is borrowed from expat-2.1.0-10.fc22.src.rpm
+
+Summary: An XML parser library
+Name: expat
+Version: 2.1.0
+Release: 10%{?dist}
+Group: System Environment/Libraries
+#Source: http://downloads.sourceforge.net/expat/expat-%{version}.tar.gz
+URL: http://www.libexpat.org/
+License: MIT
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+BuildRequires: autoconf, automake, libtool
+#BuildRequires: check-devel
+
+%define svn_url     http://svn.netlabs.org/repos/ports/expat/trunk
+%define svn_rev     770
+
+Source: %{name}-%{version}-r%{svn_rev}.zip
+
+BuildRequires: gcc make subversion
+
+%description
+This is expat, the C library for parsing XML, written by James Clark. Expat
+is a stream oriented XML parser. This means that you register handlers with
+the parser prior to starting the parse. These handlers are called when the
+parser discovers the associated structures in the document being parsed. A
+start tag is an example of the kind of structures for which you may
+register handlers.
+
+%package devel
+Summary: Libraries and header files to develop applications using expat
+Group: Development/Libraries
+Requires: expat = %{version}-%{release}
+
+%description devel
+The expat-devel package contains the libraries, include files and documentation
+to develop XML applications with expat.
+
+%package static
+Summary: expat XML parser static library
+Group: Development/Libraries
+Requires: expat-devel%{?_isa} = %{version}-%{release}
+
+%description static
+The expat-static package contains the static version of the expat library.
+Install it if you need to link statically with expat.
+
+%prep
+%if %(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')
+%setup -q
+%else
+%setup -n "%{name}-%{version}" -Tc
+svn export -r %{svn_rev} %{svn_url} . --force
+rm -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip"
+(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" "%{name}-%{version}")
+%endif
+
+# make sure configure is updated to properly support OS/2
+buildconf.sh
+
+%build
+#rm -rf autom4te*.cache
+#libtoolize --copy --force --automake && aclocal && autoheader && autoconf
+export CFLAGS="$RPM_OPT_FLAGS"
+%configure
+make %{?_smp_mflags}
+
+%install
+rm -rf ${RPM_BUILD_ROOT}
+
+rm -f examples/*.dsp examples/.cvsignore
+chmod 644 README COPYING Changes doc/* examples/*
+
+make install DESTDIR=$RPM_BUILD_ROOT
+
+rm -f $RPM_BUILD_ROOT%{_libdir}/*.la
+
+#%check
+#make check
+
+%clean
+rm -rf ${RPM_BUILD_ROOT}
+
+%files
+%defattr(-,root,root)
+%doc README
+%{!?_licensedir:%global license %%doc}
+%license COPYING
+%{_bindir}/*
+%{_libdir}/*.dll
+%{_mandir}/*/*
+
+%files devel
+%defattr(-,root,root)
+%doc Changes doc examples
+%{_libdir}/*_dll.a
+%{_libdir}/pkgconfig/*.pc
+%{_includedir}/*.h
+
+%files static
+%defattr(-,root,root)
+%exclude %{_libdir}/*_dll.a
+%{_libdir}/*.a
+
+%changelog
+* Mon Sep 1 2014 Dmitriy Kuminov <coding@dmik.org> 2.1.0-1
+- Initial package for version 2.1.0.
