@@ -1,18 +1,22 @@
 Summary: A utility for getting files from remote servers (FTP, HTTP, and others)
 Name: curl
-Version: 7.21.1
-Release: 4%{?dist}
+Version: 7.37.0
+Release: 1%{?dist}
 License: MIT
 Group: Applications/Internet
-Source: http://curl.haxx.se/download/%{name}-%{version}.tar.gz
-
-Patch0: curl-os2.diff
+#Source: http://curl.haxx.se/download/%{name}-%{version}.tar.gz
 
 Provides: webclient
 URL: http://curl.haxx.se/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-#BuildRequires: automake
+%define svn_url     http://svn.netlabs.org/repos/ports/curl/trunk
+%define svn_rev     831
+
+Source: %{name}-%{version}-r%{svn_rev}.zip
+
+BuildRequires: gcc make subversion zip automake libtool
+
 #BuildRequires: groff
 #BuildRequires: krb5-devel
 #BuildRequires: libidn-devel
@@ -72,7 +76,14 @@ package includes files needed for developing applications which can
 use cURL's capabilities internally.
 
 %prep
+%if %(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')
 %setup -q
+%else
+%setup -n "%{name}-%{version}" -Tc
+svn export -r %{svn_rev} %{svn_url} . --force
+rm -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip"
+(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" "%{name}-%{version}")
+%endif
 
 # Convert docs to UTF-8
 # NOTE: we do this _before_ applying of all patches, which are already UTF-8
@@ -81,16 +92,22 @@ use cURL's capabilities internally.
 #    mv -f ${f}.utf8 ${f}
 #done
 
-%patch0 -p1 -b .os2~
+# make sure configure is updated to properly support OS/2
+buildconf
 
 #autoreconf
 # replace hard wired port numbers in the test suite
 #sed -i s/899\\\([0-9]\\\)/%{?__isa_bits}9\\1/ tests/data/test*
 
 %build
-export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
-export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp" ; \
-export LIBS="-lurpo -lmmap -lpthread" ; \
+
+# curl m4 extensions override the nice autoconf PATH_SEPARATOR check with a very
+# stupid method designed to always fail on Windows and OS/2
+export PATH_SEPARATOR=';'
+
+export CFLAGS="-Zomf $RPM_OPT_FLAGS"
+export LDFLAGS="-Zomf -Zhigh-mem -Zargs-wild -Zargs-resp -Zbin-files"
+export LIBS="-lurpo"
 %configure \
     --disable-ipv6 \
     --disable-ldaps \
@@ -100,8 +117,7 @@ export LIBS="-lurpo -lmmap -lpthread" ; \
     --without-libidn \
     --without-libssh2 \
     --with-ssl --without-nss \
-    --enable-shared --disable-static \
-    "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
+    --enable-shared --disable-static
 
 # uncomment to turn off optimizations
 # find -name Makefile | xargs sed -i 's/-O2/-O0/'
@@ -131,10 +147,6 @@ rm -f ${RPM_BUILD_ROOT}%{_libdir}/libcurl.la
 install -d $RPM_BUILD_ROOT/%{_datadir}/aclocal
 install -m 644 docs/libcurl/libcurl.m4 $RPM_BUILD_ROOT/%{_datadir}/aclocal
 
-install -m 755 lib/curl7.dll $RPM_BUILD_ROOT/%{_libdir}
-#install -m 755 lib/.libs/curl.lib $RPM_BUILD_ROOT/%{_libdir}
-install -m 755 lib/.libs/curl_s.a $RPM_BUILD_ROOT/%{_libdir}
-
 #%define _curlbuild_h curlbuild-32.h
 #mv $RPM_BUILD_ROOT%{_includedir}/curl/curlbuild.h \
 #   $RPM_BUILD_ROOT%{_includedir}/curl/%{_curlbuild_h}
@@ -142,10 +154,6 @@ install -m 755 lib/.libs/curl_s.a $RPM_BUILD_ROOT/%{_libdir}
 
 %clean
 rm -rf $RPM_BUILD_ROOT
-
-#%post -n libcurl -p /sbin/ldconfig
-
-#%postun -n libcurl -p /sbin/ldconfig
 
 %files
 %defattr(-,root,root,-)
@@ -167,12 +175,15 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/curl-config*
 %{_includedir}/curl
 %{_libdir}/*.a
-#%{_libdir}/*.lib
 %{_libdir}/pkgconfig/*.pc
 %{_mandir}/man1/curl-config.1*
 %{_mandir}/man3/*
 %{_datadir}/aclocal/libcurl.m4
 
 %changelog
+* Tue Sep 2 2014 Dmitriy Kuminov <coding@dmik.org> 7.37.0-1
+- Update to version 7.37.0.
+- Use proper sleep function on OS/2.
+
 * Mon Jan 16 2012 yd
 - rebuild with libc 0.6.4 runtime.
