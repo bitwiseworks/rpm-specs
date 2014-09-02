@@ -1,7 +1,7 @@
 Summary:    A GNU tool for automatically configuring source code
 Name:       autoconf
 Version:    2.69
-Release:    1%{?dist}
+Release:    2%{?dist}
 License:    GPLv2+ and GFDL
 Group:      Development/Tools
 #Source:     http://ftp.gnu.org/gnu/autoconf/autoconf-%{version}.tar.xz
@@ -12,9 +12,11 @@ BuildArch: noarch
 BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %define svn_url     http://svn.netlabs.org/repos/ports/autoconf/trunk
-%define svn_rev     763
+%define svn_rev     845
 
 Source: %{name}-%{version}-r%{svn_rev}.zip
+
+BuildRequires: gcc make subversion zip
 
 # m4 >= 1.4.6 is required, >= 1.4.13 is recommended:
 BuildRequires:      m4 >= 1.4.13
@@ -71,9 +73,10 @@ rm -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip"
 
 # make sure configure is updated to properly support OS/2
 autoreconf --verbose --install
-# autoreconf changes some doc files; prevent docs re-generation since we don't have
-# makeinfo/html2man yet
-touch doc/*
+
+# we don't have makeinfo/help2man yet; fake them (this will wipe docs out)
+export MAKEINFO=:
+export HELP2MAN=:
 
 %configure
 
@@ -107,7 +110,7 @@ rm -rf ${RPM_BUILD_ROOT}
 %files
 %defattr(-,root,root,-)
 %{_bindir}/*
-%{_infodir}/autoconf.info*
+#%{_infodir}/autoconf.info*
 # don't include standards.info, because it comes from binutils...
 %exclude %{_infodir}/standards*
 %{_datadir}/autoconf/
@@ -117,6 +120,9 @@ rm -rf ${RPM_BUILD_ROOT}
 %doc AUTHORS COPYING ChangeLog NEWS README THANKS TODO
 
 %changelog
+* Wed Sep 3 2014 Dmitriy Kuminov <coding@dmik.org> 2.69-2
+- Use /@unixroot in generated files instead of absolute paths to programs.
+
 * Fri Aug 29 2014 Dmitriy Kuminov <coding@dmik.org> 2.69-1
 - Update to version 2.69.
 - Fix PATH_SEPARATOR misdetection.
