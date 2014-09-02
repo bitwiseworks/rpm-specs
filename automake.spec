@@ -7,7 +7,7 @@
 Summary:    A GNU tool for automatically creating Makefiles
 Name:       automake
 Version:    %{api_version}.1
-Release:    1%{?dist}
+Release:    2%{?dist}
 
 # docs ~> GFDL, sources ~> GPLv2+, mkinstalldirs ~> PD and install-sh ~> MIT
 License:    GPLv2+ and GFDL and Public Domain and MIT
@@ -20,11 +20,13 @@ Group:      Development/Tools
 
 Source: %{name}-%{version}-r%{svn_rev}.zip
 
+BuildRequires: gcc make subversion zip
+
 URL:        http://www.gnu.org/software/automake/
 Requires:   autoconf >= 2.65
 
 BuildRequires:  autoconf >= 2.65
-#BuildRequires:  automake <- needs to be reenabled on the next release
+BuildRequires:  automake
 #Requires(post): /sbin/install-info
 #Requires(preun): /sbin/install-info
 BuildArch:  noarch
@@ -67,8 +69,9 @@ bootstrap.sh
 
 %build
 
-# we don't have makeinfo yet; fake it (this will keep the old docs)
+# we don't have makeinfo/help2man yet; fake them (this will wipe docs out)
 export MAKEINFO=:
+export HELP2MAN=:
 
 %configure --docdir=%{pkg_docdir}
 
@@ -114,7 +117,8 @@ make -k %{?_smp_mflags} check %{?TESTS_FLAGS: TESTS="%{TESTS_FLAGS}"} \
 %{_mandir}/man1/*
 
 %changelog
-* TBD
+* Wed Sep 3 2014 Dmitriy Kuminov <coding@dmik.org> 1.14.1-2
+- Rebuild with autoconf 2.69-2.
 
 * Sat Aug 30 2014 Dmitriy Kuminov <coding@dmik.org> 1.14.1-1
 - Initial package for version 1.14.1.
