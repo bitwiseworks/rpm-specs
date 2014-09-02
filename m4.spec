@@ -1,7 +1,7 @@
 Summary: The GNU macro processor
 Name: m4
 Version: 1.4.17
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Group: Applications/Text
 #Source: http://ftp.gnu.org/gnu/m4/m4-%{version}.tar.xz
@@ -12,7 +12,9 @@ URL: http://www.gnu.org/software/m4/
 
 Source: %{name}-%{version}-r%{svn_rev}.zip
 
-BuildRequires: subversion autoconf
+BuildRequires: gcc make subversion zip
+
+BuildRequires: automake
 #BuildRequires: makeinfo html2man
 
 Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -45,8 +47,9 @@ rm -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip"
 
 export CFLAGS="$RPM_OPT_FLAGS"
 # YD do not use -Zbin-files
-export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
-export LIBS="-lintl -lurpo"
+export LDFLAGS="-Zomf -Zhigh-mem -Zargs-wild -Zargs-resp"
+export LIBS="-lurpo -lintl"
+
 #export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
 #export MAKESHELL="/@unixroot/usr/bin/sh.exe"
 
@@ -54,14 +57,12 @@ export LIBS="-lintl -lurpo"
 # call autoreconf directly instead
 #./bootstrap -f
 
+# make sure configure is updated to properly support OS/2
 autoreconf --verbose --install
-# autoreconf changes some doc files; prevent docs re-generation since we don't have
-# makeinfo/html2man yet
-touch doc/*
 
-#export PATH=`echo $PATH | sed -e 's@\\\\@/@g'`
-#export PATH_SEPARATOR=';'
-#export ac_executable_extensions='.exe'
+# we don't have makeinfo/help2man yet; fake them (this will wipe docs out)
+export MAKEINFO=:
+export HELP2MAN=:
 
 %configure
 
@@ -80,7 +81,7 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/charset.alias
 %defattr(-,root,root,-)
 %doc AUTHORS COPYING ChangeLog NEWS README THANKS TODO
 %{_bindir}/m4.exe
-%{_infodir}/*
+#%{_infodir}/*
 %{_mandir}/man1/m4.1*
 
 #%post
@@ -99,6 +100,9 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/charset.alias
 rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Wed Sep 3 2014 Dmitriy Kuminov <coding@dmik.org> 1.4.17-2
+- Rebuild with autoconf 2.69-2.
+
 * Fri Aug 29 2014 Dmitriy Kuminov <coding@dmik.org> 1.4.17-1
 - Updated to version 1.4.17.
 - Rebuilt with LIBC 0.6.5 and GCC 4.7.3 in attempt to fix some problems (see #28).
