@@ -1,7 +1,7 @@
 Summary: The GNU macro processor
 Name: m4
 Version: 1.4.17
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv3+
 Group: Applications/Text
 #Source: http://ftp.gnu.org/gnu/m4/m4-%{version}.tar.xz
@@ -30,6 +30,12 @@ etc.  The autoconf program needs m4 for generating configure scripts, but
 not for running configure scripts.
 
 Install m4 if you need a macro processor.
+
+%package debug
+Summary: HLL debug data for exception handling support.
+
+%description debug
+HLL debug data for exception handling support.
 
 %prep
 %if %(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')
@@ -84,6 +90,10 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/charset.alias
 #%{_infodir}/*
 %{_mandir}/man1/m4.1*
 
+%files debug
+%defattr(-,root,root)
+%{_bindir}/*.dbg
+
 #%post
 #if [ -f %{_infodir}/m4.info ]; then # --excludedocs?
 #    /sbin/install-info %{_infodir}/m4.info %{_infodir}/dir || :
@@ -100,6 +110,9 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/charset.alias
 rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Wed Sep 03 2014 yd
+- added debug package with symbolic info for exceptq.
+
 * Wed Sep 3 2014 Dmitriy Kuminov <coding@dmik.org> 1.4.17-2
 - Rebuild with autoconf 2.69-2.
 
