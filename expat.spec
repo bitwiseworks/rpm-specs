@@ -3,7 +3,7 @@
 Summary: An XML parser library
 Name: expat
 Version: 2.1.0
-Release: 10%{?dist}
+Release: 11%{?dist}
 Group: System Environment/Libraries
 #Source: http://downloads.sourceforge.net/expat/expat-%{version}.tar.gz
 URL: http://www.libexpat.org/
@@ -17,7 +17,7 @@ BuildRequires: autoconf, automake, libtool
 
 Source: %{name}-%{version}-r%{svn_rev}.zip
 
-BuildRequires: gcc make subversion
+BuildRequires: gcc make subversion zip
 
 %description
 This is expat, the C library for parsing XML, written by James Clark. Expat
@@ -62,6 +62,7 @@ buildconf.sh
 #rm -rf autom4te*.cache
 #libtoolize --copy --force --automake && aclocal && autoheader && autoconf
 export CFLAGS="$RPM_OPT_FLAGS"
+export LDFLAGS="-Zomf -Zhigh-mem -Zargs-wild -Zargs-resp -Zbin-files"
 %configure
 make %{?_smp_mflags}
 
@@ -103,5 +104,8 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_libdir}/*.a
 
 %changelog
-* Mon Sep 1 2014 Dmitriy Kuminov <coding@dmik.org> 2.1.0-1
+* Wed Sep 3 2014 Dmitriy Kuminov <coding@dmik.org> 2.1.0-11
+- Rebuild with high memory support.
+
+* Mon Sep 1 2014 Dmitriy Kuminov <coding@dmik.org> 2.1.0-10
 - Initial package for version 2.1.0.
