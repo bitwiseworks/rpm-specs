@@ -5,7 +5,7 @@
 Summary: The GNU Portable Library Tool
 Name:    libtool
 Version: 2.4.2
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv2+ and LGPLv2+ and GFDL
 URL:     http://www.gnu.org/software/libtool/
 Group:   Development/Tools
@@ -13,11 +13,11 @@ Group:   Development/Tools
 #Source:  http://ftp.gnu.org/gnu/libtool/libtool-%{version}.tar.xz
 
 %define svn_url     http://svn.netlabs.org/repos/ports/libtool/trunk
-%define svn_rev     842
+%define svn_rev     846
 
 Source: %{name}-%{version}-r%{svn_rev}.zip
 
-BuildRequires: gcc make subversion
+BuildRequires: gcc make subversion zip
 
 #Requires(post):  /sbin/install-info
 #Requires(preun): /sbin/install-info
@@ -88,7 +88,7 @@ bootstrap
 
 %build
 
-# we don't have makeinfo/help2man yet; fake it (this will keep the old docs)
+# we don't have makeinfo/help2man yet; fake them (this will wipe docs out)
 export MAKEINFO=:
 export HELP2MAN=:
 
@@ -130,10 +130,10 @@ rm -f %{buildroot}%{_libdir}/ltdl.a
 #%post
 #/sbin/install-info %{_infodir}/libtool.info.gz %{_infodir}/dir || :
 
-%preun
-if [ "$1" = 0 ]; then
-   /sbin/install-info --delete %{_infodir}/libtool.info.gz %{_infodir}/dir || :
-fi
+#%preun
+#if [ "$1" = 0 ]; then
+#   /sbin/install-info --delete %{_infodir}/libtool.info.gz %{_infodir}/dir || :
+#fi
 
 %files
 %defattr(-,root,root)
@@ -162,6 +162,11 @@ fi
 %{_libdir}/ltdl*_dll.a
 
 %changelog
+* Wed Sep 3 2014 Dmitriy Kuminov <coding@dmik.org> 2.4.2-3
+- Rebuild with autoconf 2.69-2.
+- Use /@unixroot in generated files instead of absolute paths to
+  compiler files.
+
 * Mon Sep 1 2014 Dmitriy Kuminov <coding@dmik.org> 2.4.2-2
 - Fix PATH_SEPARATOR detection in libtoolize.
 
