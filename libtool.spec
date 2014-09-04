@@ -5,7 +5,7 @@
 Summary: The GNU Portable Library Tool
 Name:    libtool
 Version: 2.4.2
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: GPLv2+ and LGPLv2+ and GFDL
 URL:     http://www.gnu.org/software/libtool/
 Group:   Development/Tools
@@ -72,6 +72,12 @@ License:  LGPLv2+
 
 %description ltdl-devel
 Static libraries and header files for development with ltdl.
+
+%package debug
+Summary: HLL debug data for exception handling support.
+
+%description debug
+HLL debug data for exception handling support.
 
 %prep
 %if %(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')
@@ -161,7 +167,14 @@ rm -f %{buildroot}%{_libdir}/ltdl.a
 # Import libraries must be in -devel subpackage
 %{_libdir}/ltdl*_dll.a
 
+%files debug
+%defattr(-,root,root)
+%{_libdir}/*.dbg
+
 %changelog
+* Thu Sep 04 2014 yd
+- added debug package with symbolic info for exceptq.
+
 * Wed Sep 3 2014 Dmitriy Kuminov <coding@dmik.org> 2.4.2-3
 - Rebuild with autoconf 2.69-2.
 - Use /@unixroot in generated files instead of absolute paths to
