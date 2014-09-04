@@ -1,7 +1,7 @@
 Summary: A utility for getting files from remote servers (FTP, HTTP, and others)
 Name: curl
 Version: 7.37.0
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: MIT
 Group: Applications/Internet
 #Source: http://curl.haxx.se/download/%{name}-%{version}.tar.gz
@@ -74,6 +74,12 @@ cURL is a tool for getting files from FTP, HTTP, Gopher, Telnet, and
 Dict servers, using any of the supported protocols. The libcurl-devel
 package includes files needed for developing applications which can
 use cURL's capabilities internally.
+
+%package debug
+Summary: HLL debug data for exception handling support.
+
+%description debug
+HLL debug data for exception handling support.
 
 %prep
 %if %(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')
@@ -180,7 +186,15 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man3/*
 %{_datadir}/aclocal/libcurl.m4
 
+%files debug
+%defattr(-,root,root)
+%{_bindir}/*.dbg
+%{_libdir}/*.dbg
+
 %changelog
+* Thu Sep 04 2014 yd
+- added debug package with symbolic info for exceptq.
+
 * Tue Sep 2 2014 Dmitriy Kuminov <coding@dmik.org> 7.37.0-1
 - Update to version 7.37.0.
 - Use proper sleep function on OS/2.
