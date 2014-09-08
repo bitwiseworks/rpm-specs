@@ -3,7 +3,7 @@
 Summary: An XML parser library
 Name: expat
 Version: 2.1.0
-Release: 11%{?dist}
+Release: 12%{?dist}
 Group: System Environment/Libraries
 #Source: http://downloads.sourceforge.net/expat/expat-%{version}.tar.gz
 URL: http://www.libexpat.org/
@@ -44,6 +44,12 @@ Requires: expat-devel%{?_isa} = %{version}-%{release}
 %description static
 The expat-static package contains the static version of the expat library.
 Install it if you need to link statically with expat.
+
+%package debug
+Summary: HLL debug data for exception handling support.
+
+%description debug
+HLL debug data for exception handling support.
 
 %prep
 %if %(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')
@@ -103,7 +109,14 @@ rm -rf ${RPM_BUILD_ROOT}
 %exclude %{_libdir}/*_dll.a
 %{_libdir}/*.a
 
+%files debug
+%defattr(-,root,root)
+%{_libdir}/*.dbg
+
 %changelog
+* Mon Sep 08 2014 yd
+- added debug package with symbolic info for exceptq.
+
 * Wed Sep 3 2014 Dmitriy Kuminov <coding@dmik.org> 2.1.0-11
 - Rebuild with high memory support.
 
