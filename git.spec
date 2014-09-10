@@ -12,7 +12,7 @@
 
 Name:           git
 Version:        2.0.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Fast Version Control System
 License:        GPLv2
 Group:          Development/Tools
@@ -233,6 +233,12 @@ Requires:       emacs-git = %{version}-%{release}
 %{summary}.
 
 %endif
+
+%package debug
+Summary: HLL debug data for exception handling support.
+
+%description debug
+HLL debug data for exception handling support.
 
 
 %prep
@@ -537,7 +543,15 @@ rm -rf %{buildroot}
 %files all
 # No files for you!
 
+%files debug
+%defattr(-,root,root)
+%{_bindir}/*.dbg
+%{gitcoredir}/*.dbg
+
 %changelog
+* Wed Sep 10 2014 yd
+- added debug package with symbolic info for exceptq.
+
 * Wed Sep 10 2014 Dmitriy Kuminov <coding@dmik.org> 2.0.0-1
 - Update git to version 2.0.0.
 - Fix cloning and pushing over HTTP(S).
