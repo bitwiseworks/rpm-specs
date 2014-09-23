@@ -1,30 +1,35 @@
 # $Revision: 1.101 $, $Date: 2011/05/05 07:42:12 $
 #
 # Conditional build:
-%bcond_without	apidocs		# do not build and package API docs
-%bcond_without	static_libs	# don't build static libraries
+%bcond_without	apidocs		# build and package API docs
+%bcond_with	static_libs	# don't build static libraries
 %bcond_with	kerberos5	# don't build Kerberos V support
 %bcond_with	libproxy	# don't build libproxy support
 
 Summary:	An HTTP and WebDAV client library
 Name:		neon
-Version:	0.29.6
+Version:	0.30.0
 Release:	1
 License:	LGPL v2+
 Group:		Libraries
-Source0:	http://www.webdav.org/neon/%{name}-%{version}.tar.gz
+# Source0:	http://www.webdav.org/neon/%{name}-%{version}.tar.gz
 
-Patch1:         neon-os2.diff
+%define svn_url     http://svn.netlabs.org/repos/ports/neon/trunk
+%define svn_rev     873
+
+Source: %{name}-%{version}-r%{svn_rev}.zip
+
+BuildRequires: gcc make subversion zip
 
 # Source0-md5:	591e0c82e6979e7e615211b386b8f6bc
 URL:		http://www.webdav.org/neon/
 
 BuildRequires:	autoconf >= 2.58
-#BuildRequires:	automake
+BuildRequires:	automake
 %{?with_kerberos5:BuildRequires:	heimdal-devel}
 %{?with_libproxy:BuildRequires:	libproxy-devel}
-#BuildRequires:	libtool >= 2:2.2
-BuildRequires:	libxml2-devel
+BuildRequires:	libtool >= 2.4
+BuildRequires:	expat-devel
 BuildRequires:	openssl-devel >= 0.9.7d
 BuildRequires:	pkgconfig
 BuildRequires:	zlib-devel
@@ -54,7 +59,7 @@ Group:		Development/Libraries
 Requires:	%{name} = %{version}-%{release}
 %{?with_kerberos5:Requires:	heimdal-devel}
 %{?with_libproxy:Requires:	libproxy-devel}
-Requires:	libxml2-devel
+Requires:	expat-devel
 Requires:	openssl-devel >= 0.9.7c
 
 %description devel
@@ -76,28 +81,28 @@ Group:		Documentation
 API and internal documentation for neon library.
 
 %prep
+%if %(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')
 %setup -q
-%patch1 -p1 -b .os2~
+%else
+%setup -n "%{name}-%{version}" -Tc
+svn export -r %{svn_rev} %{svn_url} . --force
+rm -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip"
+(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" "%{name}-%{version}")
+%endif
 
 %build
-export CONFIG_SHELL="/bin/sh" 
-export LIBS="-lurpo -lpthread"
-export NEON_LIBS="-lintl"
-#%{__libtoolize} --install
-#%{__aclocal} -I macros
-%{__autoconf}
+export LIBS="-lpthread"
+export NEON_LIBS="-lintl -lpthread"
+./autogen.sh
 %configure \
-	--enable-shared --disable-static \
+	--enable-shared \
 	--with-ssl \
 	--enable-threadsafe-ssl=posix \
-	--enable-shared \
 	%{!?with_static_libs:--disable-static} \
 	%{!?with_kerberos5:--without-gssapi} \
-	%{!?with_libproxy:--without-libproxy} \
-	--with-libxml2 \
-	"--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
+	%{!?with_libproxy:--without-libproxy}
 
-%{__make} %{_smp_mflags}
+%{__make} %{?_smp_mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -124,7 +129,7 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %doc doc/*.txt
 %attr(755,root,root) %{_bindir}/neon-config
-%attr(755,root,root) %{_libdir}/neon.a
+%attr(755,root,root) %{_libdir}/neon*_dll.a
 %{_libdir}/libneon.la
 %{_libdir}/pkgconfig/neon.pc
 %{_includedir}/neon
@@ -145,3 +150,5 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Tue Sep 23 2014 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.30.0-1
+- updated neon to 0.30.0
