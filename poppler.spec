@@ -1,6 +1,6 @@
 Summary:	PDF rendering library
 Name:		poppler
-Version:	0.26.0
+Version:	0.26.5
 Release:	1%{?dist}
 License:	(GPLv2 or GPLv3) and GPLv2+ and LGPLv2+ and MIT
 Group:		Development/Libraries
@@ -8,7 +8,7 @@ Group:		Development/Libraries
 # Source1:	http://poppler.freedesktop.org/%{name}-data-%{data_ver}.tar.gz
 URL:		http://poppler.freedesktop.org/
 %define svn_url     http://svn.netlabs.org/repos/ports/poppler/trunk
-%define svn_rev     874
+%define svn_rev     882
 
 Source: %{name}-%{version}-r%{svn_rev}.zip
 
@@ -60,6 +60,40 @@ Requires:	qt4-devel-kit
 
 %description qt-devel
 Header files for Qt4 wrapper for poppler.
+
+#%package qt5
+#Summary: Qt5 wrapper for poppler
+#Group:   System Environment/Libraries
+#Requires: %{name}%{?_isa} = %{version}-%{release}
+#%{?_qt5:Requires: qt5-qtbase%{?_isa} >= %{_qt5_version}}
+#%description qt5
+#%{summary}.
+
+#%package qt5-devel
+#Summary: Development files for Qt5 wrapper
+#Group:   Development/Libraries
+#Requires: %{name}-qt5%{?_isa} = %{version}-%{release}
+#Requires: %{name}-devel%{?_isa} = %{version}-%{release}
+#Requires: qt5-qtbase-devel
+#%description qt5-devel
+#%{summary}.
+
+%package cpp
+Summary: Pure C++ wrapper for poppler
+Group: Development/Libraries
+Requires: %{name}%{?_isa} = %{version}-%{release}
+
+%description cpp
+%{summary}.
+
+%package cpp-devel
+Summary: Development files for C++ wrapper
+Group: Development/Libraries
+Requires: %{name}-cpp%{?_isa} = %{version}-%{release}
+Requires: %{name}-devel%{?_isa} = %{version}-%{release}
+
+%description cpp-devel
+%{summary}.
 
 %package utils
 Summary:	Command line utilities for converting PDF files
@@ -131,11 +165,12 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(644,root,root,755)
 %doc COPYING README
-%attr(755,root,root) %{_libdir}/poppl*46.dll
+%attr(755,root,root) %{_libdir}/popple*.dll
 
 %files devel
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/poppler*_dll.a
+%attr(755,root,root) %{_libdir}/poppler_dll.a
+%attr(755,root,root) %{_libdir}/poppler46_dll.a
 %{_libdir}/pkgconfig/poppler.pc
 %{_libdir}/pkgconfig/poppler-splash.pc
 %dir %{_includedir}/poppler/
@@ -147,7 +182,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files qt
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/poppler*.dll
+%attr(755,root,root) %{_libdir}/poppq4*.dll
 
 %files qt-devel
 %defattr(644,root,root,755)
@@ -155,12 +190,36 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/pkgconfig/poppler-qt4.pc
 %{_includedir}/poppler/qt4/
 
+#%files qt5
+#%defattr(644,root,root,755)
+#%attr(755,root,root) %{_libdir}/poppq5*.dll
+
+#%files qt5-devel
+#%defattr(644,root,root,755)
+#%attr(755,root,root) %{_libdir}/poppler-qt5*_dll.a
+#%{_libdir}/pkgconfig/poppler-qt5.pc
+#%{_includedir}/poppler/qt5/
+
+%files cpp
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/popplc*.dll
+
+%files cpp-devel
+%defattr(644,root,root,755)
+%{_libdir}/pkgconfig/poppler-cpp.pc
+%attr(755,root,root) %{_libdir}/poppler-cpp*_dll.a
+%{_includedir}/poppler/cpp
+
 %files utils
 %defattr(644,root,root,755)
 %{_bindir}/pdf*
 %{_mandir}/man1/*
 
 %changelog
-* Fri Sep 26 2014 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.26.4
-- update poppler to 0.26.4
+* Tue Sep 30 2014 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.26.5
+- update poppler to 0.26.5
+- added cpp part
+- added qt5 part as comment
+
+* Fri Sep 26 2014 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.26.0
 - first rpm version
