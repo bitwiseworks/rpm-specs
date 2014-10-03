@@ -5,7 +5,7 @@
 Summary: The GNU Portable Library Tool
 Name:    libtool
 Version: 2.4.2
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: GPLv2+ and LGPLv2+ and GFDL
 URL:     http://www.gnu.org/software/libtool/
 Group:   Development/Tools
@@ -13,7 +13,7 @@ Group:   Development/Tools
 #Source:  http://ftp.gnu.org/gnu/libtool/libtool-%{version}.tar.xz
 
 %define svn_url     http://svn.netlabs.org/repos/ports/libtool/trunk
-%define svn_rev     881
+%define svn_rev     891
 
 Source: %{name}-%{version}-r%{svn_rev}.zip
 
@@ -172,6 +172,9 @@ rm -f %{buildroot}%{_libdir}/ltdl.a
 %{_libdir}/*.dbg
 
 %changelog
+* Tue Oct 3 2014 Dmitriy Kuminov <coding@dmik.org> 2.4.2-6
+- Generate proper DLL version suffix (CURRNENT - AGE).
+
 * Tue Sep 30 2014 Dmitriy Kuminov <coding@dmik.org> 2.4.2-5
 - Fix weird typo breaking correct OS/2 DLL name generation
   in some cases.
