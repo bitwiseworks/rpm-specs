@@ -1,7 +1,7 @@
 Summary:	PDF rendering library
 Name:		poppler
 Version:	0.26.5
-Release:	1%{?dist}
+Release:	2%{?dist}
 License:	(GPLv2 or GPLv3) and GPLv2+ and LGPLv2+ and MIT
 Group:		Development/Libraries
 # Source0:	http://poppler.freedesktop.org/%{name}-%{version}.tar.xz
@@ -23,6 +23,8 @@ BuildRequires:	zlib-devel
 BuildRequires:  libjpeg-devel
 BuildRequires:  libpng-devel
 BuildRequires:  libtiff-devel
+BuildRequires:  freetype-devel >= 2.5.3
+BuildRequires:  fontconfig-devel >= 2.8.0
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -130,6 +132,7 @@ autoreconf -f -i
 
 %build
 
+# these defines needs to go, as soon as we have a pkg-conf for qt
 POPPLER_QT4_CFLAGS='-D__OS2__'
 POPPLER_QT4_LIBS='-lQtCore4 -lQtGui4 -lQtNetwork4 -lQtXml4'
 POPPLER_QT4_TEST_CFLAGS=$POPPLER_QT4_CFLAGS
@@ -144,8 +147,6 @@ export POPPLER_QT4_TEST_LIBS
 
 %configure \
 	--enable-poppler-qt4=yes --enable-zlib=yes \
-	FREETYPE_LIBS=-lfreetype FREETYPE_CFLAGS=-D__OS2__ \
-	FONTCONFIG_LIBS=-lfontconfig FONTCONFIG_CFLAGS=-D__OS2__ \
 	--enable-shared --disable-static \
 	--enable-xpdf-headers
 
@@ -216,7 +217,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/*
 
 %changelog
-* Tue Sep 30 2014 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.26.5
+* Mon Oct 6 2014 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.26.5-2
+- rebuilt with new libtool, which gave new dll names
+
+* Tue Sep 30 2014 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.26.5-1
 - update poppler to 0.26.5
 - added cpp part
 - added qt5 part as comment
