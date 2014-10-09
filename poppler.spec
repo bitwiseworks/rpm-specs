@@ -1,14 +1,14 @@
 Summary:	PDF rendering library
 Name:		poppler
 Version:	0.26.5
-Release:	2%{?dist}
+Release:	3%{?dist}
 License:	(GPLv2 or GPLv3) and GPLv2+ and LGPLv2+ and MIT
 Group:		Development/Libraries
 # Source0:	http://poppler.freedesktop.org/%{name}-%{version}.tar.xz
 # Source1:	http://poppler.freedesktop.org/%{name}-data-%{data_ver}.tar.gz
 URL:		http://poppler.freedesktop.org/
 %define svn_url     http://svn.netlabs.org/repos/ports/poppler/trunk
-%define svn_rev     882
+%define svn_rev     903
 
 Source: %{name}-%{version}-r%{svn_rev}.zip
 
@@ -217,6 +217,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/*
 
 %changelog
+* Mon Oct 9 2014 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.26.5-3
+- fixed opening of files bin vs text due to bogous ifdef
+
 * Mon Oct 6 2014 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.26.5-2
 - rebuilt with new libtool, which gave new dll names
 
