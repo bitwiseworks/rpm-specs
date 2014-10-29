@@ -1,7 +1,7 @@
 Summary:	Font configuration and customization library
 Name:		fontconfig
 Version:	2.8.0
-Release:	1%{?dist}
+Release:	2%{?dist}
 # src/ftglue.[ch] is in Public Domain
 # src/fccache.c contains Public Domain code
 # fc-case/CaseFolding.txt is in the UCD
@@ -10,8 +10,8 @@ License:	MIT and Public Domain and UCD
 Group:		System Environment/Libraries
 #Source:	http://fontconfig.org/release/%{name}-%{version}.tar.bz2
 URL:		http://fontconfig.org
-#%define svn_url     http://svn.netlabs.org/repos/ports/freetype2/trunk
-%define svn_rev     890
+%define svn_url     http://svn.netlabs.org/repos/ports/fontconfig_os2/trunk
+%define svn_rev     918
 Source: %{name}-%{version}-r%{svn_rev}.zip
 
 BuildRoot: %{tmpdir}/%{name}-%{version}-root-%(id -u -n)
@@ -92,5 +92,8 @@ rm -rf "%{buildroot}"
 
 
 %changelog
+* Wed Oct 28 2014 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.8.0-2
+- build with svn source now
+
 * Mon Oct 6 2014 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.8.0-1
 - first public version
