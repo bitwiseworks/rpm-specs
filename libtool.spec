@@ -15,7 +15,7 @@ Group:   Development/Tools
 %define svn_url     http://svn.netlabs.org/repos/ports/libtool/trunk
 %define svn_rev     891
 
-Source: %{name}-%{version}-r%{svn_rev}.zip
+Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
 BuildRequires: gcc make subversion zip
 
@@ -80,13 +80,13 @@ Summary: HLL debug data for exception handling support.
 HLL debug data for exception handling support.
 
 %prep
-%if %(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')
+%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
 %setup -q
 %else
 %setup -n "%{name}-%{version}" -Tc
-svn export -r %{svn_rev} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" "%{name}-%{version}")
+svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
+rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
+(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
 %endif
 
 # make sure configure is updated to properly support OS/2
