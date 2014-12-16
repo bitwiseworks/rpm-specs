@@ -1,17 +1,18 @@
 Summary:	PDF rendering library
 Name:		poppler
-Version:	0.26.5
-Release:	3%{?dist}
+Version:	0.29.0
+Release:	0%{?dist}
 License:	(GPLv2 or GPLv3) and GPLv2+ and LGPLv2+ and MIT
 Group:		Development/Libraries
 # Source0:	http://poppler.freedesktop.org/%{name}-%{version}.tar.xz
-# Source1:	http://poppler.freedesktop.org/%{name}-data-%{data_ver}.tar.gz
 URL:		http://poppler.freedesktop.org/
-%define svn_url     http://svn.netlabs.org/repos/ports/poppler/trunk
-%define svn_rev     903
+%define svn_url	    e:/trees/poppler/trunk
+#%define svn_url     http://svn.netlabs.org/repos/ports/poppler/trunk
+#%define svn_rev     939
 
-Source: %{name}-%{version}-r%{svn_rev}.zip
+Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
+Requires: poppler-data >= 0.4.0
 BuildRequires: gcc make subversion zip
 
 BuildRequires:	libqt4-devel
@@ -118,13 +119,13 @@ Requires:	%{name}-glib%{?_isa} = %{version}-%{release}
 %{summary}.
 
 %prep
-%if %(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')
+%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{?!svn_rev):0}
 %setup -q
 %else
 %setup -n "%{name}-%{version}" -Tc
-svn export -r %{svn_rev} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" "%{name}-%{version}")
+svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
+rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
+(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
 %endif
 
 # hammer to nuke rpaths, recheck on new releases
@@ -171,7 +172,7 @@ rm -rf $RPM_BUILD_ROOT
 %files devel
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/poppler_dll.a
-%attr(755,root,root) %{_libdir}/poppler46_dll.a
+%attr(755,root,root) %{_libdir}/poppler48_dll.a
 %{_libdir}/pkgconfig/poppler.pc
 %{_libdir}/pkgconfig/poppler-splash.pc
 %dir %{_includedir}/poppler/
@@ -217,6 +218,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/*
 
 %changelog
+* Mon Dec 15 2014 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.29.0
+- updated poppler to 0.29.0
+- added poppler-data as requirement
+
 * Mon Oct 9 2014 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.26.5-3
 - fixed opening of files bin vs text due to bogous ifdef
 
