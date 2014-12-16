@@ -1,6 +1,6 @@
 #define svn_url     F:/rd/ports/ghostscript/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/ghostscript/trunk
-%define svn_rev     937
+%define svn_rev     941
 
 %define _with_freetype 1
 %define gs_ver 9.10
@@ -11,7 +11,7 @@ Summary: A PostScript interpreter and renderer
 Name: ghostscript
 Version: %{gs_ver}
 
-Release: 2%{?dist}
+Release: 3%{?dist}
 
 # Included CMap data is Redistributable, no modification permitted,
 # see http://bugzilla.redhat.com/487510
@@ -34,7 +34,7 @@ BuildRequires: libtiff-devel
 BuildRequires: libtool
 #BuildRequires: jasper-devel, gnutls-devel
 #BuildRequires: dbus-devel
-#BuildRequires: poppler-data
+BuildRequires: poppler-data
 #BuildRequires: lcms2-devel
 #BuildRequires: openjpeg-devel
 %{?_with_freetype:BuildRequires: freetype-devel}
@@ -144,6 +144,8 @@ EXTRACFLAGS="-fno-strict-aliasing"
 
 FONTPATH=
 for path in \
+        /@system_drive/psfonts \
+        /@system_drive/os2/psfonts \
         %{_datadir}/fonts/default/%{name} \
         %{_datadir}/fonts/default/Type1 \
         %{_datadir}/fonts/default/amspsfnt/pfb \
@@ -154,7 +156,7 @@ for path in \
         %{_sysconfdir}/%{name}/%{gs_dot_ver} \
         %{_datadir}/poppler/cMap/*
 do
-  FONTPATH="$FONTPATH${FONTPATH:+:}$path"
+  FONTPATH="$FONTPATH${FONTPATH:+;}$path"
 done
 
 #autoconf --force
@@ -325,7 +327,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Tue Dec 16 2014 yd
-- r937, fix FONTPATH handling.
+- r937, r941, fix FONTPATH handling, add PSFONTS dir.
 
 * Fri Dec 12 2014 yd
 - initial unixroot build.
