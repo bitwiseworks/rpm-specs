@@ -1,9 +1,6 @@
-#disable lxlite strip because it strips also gs embedded data
-%define __os_install_post	%{nil}
-
 #define svn_url     F:/rd/ports/ghostscript/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/ghostscript/trunk
-%define svn_rev     936
+%define svn_rev     937
 
 %define _with_freetype 1
 %define gs_ver 9.10
@@ -14,7 +11,7 @@ Summary: A PostScript interpreter and renderer
 Name: ghostscript
 Version: %{gs_ver}
 
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 # Included CMap data is Redistributable, no modification permitted,
 # see http://bugzilla.redhat.com/487510
@@ -327,5 +324,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/*.dbg
 
 %changelog
+* Tue Dec 16 2014 yd
+- r937, fix FONTPATH handling.
+
 * Fri Dec 12 2014 yd
 - initial unixroot build.
