@@ -1,6 +1,6 @@
 #define svn_url     F:/rd/ports/cups/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/cups/trunk
-%define svn_rev     943
+%define svn_rev     944
 
 %define _without_dbus 1
 %define _without_php 1
@@ -124,7 +124,9 @@ rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
 %build
 export CONFIG_SITE="/@unixroot/usr/share/config.legacy";
 export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe";
-CFLAGS="$RPM_OPT_FLAGS" CXXFLAGS="$RPM_OPT_FLAGS" LDFLAGS="$RPM_OPT_FLAGS" \
+export LDFLAGS=" -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp";
+export LIBS="-lurpo";
+CFLAGS="$RPM_OPT_FLAGS" CXXFLAGS="$RPM_OPT_FLAGS" LDFLAGS="$LDFLAGS $RPM_OPT_FLAGS" \
     %configure %{_dbus} %{_php} %{_static}
 # If we got this far, all prerequisite libraries must be here.
 make
@@ -284,4 +286,4 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Tue Dec 18 2014 yd
-- r943, initial unixroot build.
+- r944, initial unixroot build.
