@@ -1,13 +1,13 @@
 #define svn_url     F:/rd/ports/urpo/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/urpo/trunk
-%define svn_rev     947
+%define svn_rev     949
 
 %define kmk_dist out/os2.x86/release/dist
 
 Summary: unlink rename pending operation
 Name: urpo
-Version: 20141223
-Release: 7%{?dist}
+Version: 20150101
+Release: 9%{?dist}
 License: LGPL
 Group: Development/Libraries
 
@@ -16,14 +16,15 @@ Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 Requires: libc >= 0.6.5
 
 %description
-unlink rename pending operation library.
+unlink rename pending operation library, allows programs to rename/unlink
+opened files.
 
 %package devel
-Summary: Header files developing apps which will use pthread
+Summary: Header files developing apps which will use urpo
 Group: Development/Libraries
 
 %description devel
-Header files and a library of pthread functions, for developing apps
+Header files and a library of urpo functions, for developing apps
 which will use the library.
 
 %package debug
@@ -73,6 +74,10 @@ rm -rf %{buildroot}
 %{_libdir}/*.dbg
 
 %changelog
+* Thu Jan 01 2015 yd
+- r949, Add a new renameForce() update to resolve RPM issue#99. ticket#50.
+- r948, remove file from pending list if missing.
+
 * Tue Dec 23 2014 yd
 - r947, implemented rmdir() support, ticket#50.
 - r945, r946, build updates, static debug library.
