@@ -1,3 +1,7 @@
+#define svn_url     F:/rd/ports/rpm/rpm/branches/rpm-4.8.1
+%define svn_url     http://svn.netlabs.org/repos/rpm/rpm/branches/rpm-4.8.1
+%define svn_rev     486
+
 %define with_sqlite 1
 %undefine int_bdb
 
@@ -24,16 +28,10 @@
 Summary: The RPM package management system
 Name: rpm
 Version: %{rpmver}
-Release: 18%{?dist}
+Release: 19%{?dist}
 Group: System Environment/Base
 Url: http://www.rpm.org/
-Source0: http://rpm.org/releases/rpm-4.8.x/%{name}-%{srcver}.tar.bz2
-%if %{with int_bdb}
-Source1: db-%{bdbver}.tar.gz
-%endif
-Source2: %{name}-%{srcver}-os2-src2.tar
-
-Patch1: %{name}-%{srcver}-os2.diff
+Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
 # Partially GPL/LGPL dual-licensed and some bits with BSD
 # SourceLicense: (GPLv2+ and LGPLv2+ with exceptions) and BSD 
@@ -51,6 +49,7 @@ Requires: rpm-libs = %{version}-%{release}
 Requires: pthread
 Requires: cpio
 Requires: cube
+Requires: urpo >= 20150101
 
 Provides: rpm-macros-warpin
 Provides: rpm-macros-wps
@@ -188,16 +187,18 @@ Summary: HLL debug data for exception handling support.
 HLL debug data for exception handling support.
 
 %prep
-# -D Do not delete the directory before unpacking.
-# -T Disable the automatic unpacking of the archives.
-%setup -q -n %{name}-%{srcver} %{?with_int_bdb:-a 1} -a 2
+%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
+%setup -q
+%else
+%setup -n "%{name}-%{version}" -Tc
+svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
+rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
+(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
+%endif
 
 %if %{with int_bdb}
 ln -s db-%{bdbver} db
 %endif
-
-# Official patches
-%patch001 -p1 -b .base~
 
 %build
 %if %{without int_bdb}
@@ -210,17 +211,17 @@ ln -s db-%{bdbver} db
 
 # Using configure macro has some unwanted side-effects on rpm platform
 # setup, use the old-fashioned way for now only defining minimal paths.
-RPM_MKDIR="/@unixroot/usr/bin/mkdir.exe" ; export RPM_MKDIR ; \
-CONFIG_SHELL="/@unixroot/usr/bin/sh" ; export CONFIG_SHELL ; \
-LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp" ; export LDFLAGS ; \
-LIBS="-lintl -lurpo -lmmap" ; export LIBS ; \
+export RPM_MKDIR="/@unixroot/usr/bin/mkdir.exe";
+export CONFIG_SITE="/@unixroot/usr/share/config.legacy";
+export CONFIG_SHELL="/@unixroot/usr/bin/sh";
+export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp";
+export LIBS="-lintl -lurpo -lmmap -lpoll";
 CFLAGS="%{optflags} -I/@unixroot/usr/include/nss3 -I/@unixroot/usr/include/nspr4" ; \
 %configure \
     --enable-shared --disable-static --without-lua \
     %{!?with_int_bdb: --with-external-db} \
     %{?with_sqlite: --enable-sqlite3} \
-    --enable-python \
-    "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
+    --enable-python
 
 make %{?_smp_mflags}
 
@@ -471,8 +472,18 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Thu Jan 01 2015 yd
+- r486, use urpo renameForce() to rename locked databases. ticket#99.
+- implement subversion sources checkout.
+
+* Wed Dec 24 2014 yd
+- r484, r485, ticket#99.
+
+* Wed Sep 24 2014 yd
+- r461, sideport r409, popen() does not recognize unixroot, fixes macro expansion.
+
 * Wed Apr 09 2014 yd
-- backported r409, popen() does not recognize unixroot, fixes macro expansion.
+- r409, popen() does not recognize unixroot, fixes macro expansion.
 
 * Mon Apr 07 2014 yd
 - build for python 2.7.
