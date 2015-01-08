@@ -28,7 +28,7 @@
 Summary: The RPM package management system
 Name: rpm
 Version: %{rpmver}
-Release: 19%{?dist}
+Release: 20%{?dist}
 Group: System Environment/Base
 Url: http://www.rpm.org/
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
@@ -214,7 +214,7 @@ ln -s db-%{bdbver} db
 export RPM_MKDIR="/@unixroot/usr/bin/mkdir.exe";
 export CONFIG_SITE="/@unixroot/usr/share/config.legacy";
 export CONFIG_SHELL="/@unixroot/usr/bin/sh";
-export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp";
+export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp";
 export LIBS="-lintl -lurpo -lmmap -lpoll";
 CFLAGS="%{optflags} -I/@unixroot/usr/include/nss3 -I/@unixroot/usr/include/nspr4" ; \
 %configure \
@@ -472,6 +472,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Thu Jan 08 2015 yd
+- -Zbin-files is not optional...
+
 * Thu Jan 01 2015 yd
 - r486, use urpo renameForce() to rename locked databases. ticket#99.
 - implement subversion sources checkout.
