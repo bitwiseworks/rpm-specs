@@ -6,20 +6,19 @@ License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Standard Shared Libraries
 Group:          System/Libraries
 Version:        0.6.6
-Release:        21%{?dist}
+Release:        22%{?dist}
 Url:            http://svn.netlabs.org/libc
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 Source:         libc-%{version}.zip
-#Source1:        libc-emxomf.zip
+Source1:        libc-emxomf.zip
 Patch0:         libc.patch
 
 # These patches are not actually applied but they record what
 # needs to be done to the stock LIBC 0.6 source in order to build
 # emxomf.exe contained in libc-emxomf.zip 
-#Patch101:       libc-dmik-emxomf-02-remove-asterisk.diff
-#Patch102:       libc-yuri-emxomf-verbose-warnings-3.patch
-#Patch103:       libc-steven-emxomf-index-too-large.diff
+Patch101:       libc-dmik-emxomf-02-remove-asterisk.diff
+Patch102:       libc-yuri-emxomf-verbose-warnings-3.patch
 
 BuildRequires:  rexx_exe
 
@@ -72,7 +71,7 @@ HLL debug data for exception handling support.
 
 
 %prep
-%setup -q -c
+%setup -q -c -a 1
 %patch0 
 
 %install
@@ -80,22 +79,23 @@ rm -rf $RPM_BUILD_ROOT
 mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_includedir}
 mkdir -p %{buildroot}%{_libdir}
-#mkdir -p %{buildroot}%{_usr}/i386-pc-os2-elf
-#mkdir -p %{buildroot}%{_usr}/i386-pc-os2-emx
 mkdir -p %{buildroot}%{_usr}/man
 mkdir -p %{buildroot}%{_usr}/info
 
 cp -p -r usr/bin/* %{buildroot}%{_bindir}
 cp -p -r usr/include/* %{buildroot}%{_includedir}
-#cp -p -r emxomf.exe %{buildroot}%{_bindir}
 cp -p -r usr/lib/* %{buildroot}%{_libdir}
-#cp -p -r usr/man/* %{buildroot}%{_usr}/i386-pc-os2-elf
-#cp -p -r usr/man/* %{buildroot}%{_usr}/i386-pc-os2-emx
 cp -p -r usr/man/* %{buildroot}%{_usr}/man
 cp -p -r usr/man/* %{buildroot}%{_usr}/info
 
+# add new files
+cp -p -r emxomf.exe %{buildroot}%{_bindir}
+cp -p -r emxomfstrip.exe %{buildroot}%{_bindir}
+cp -p -r os2safe.h %{buildroot}%{_includedir}
+cp -p -r libos2.a %{buildroot}%{_libdir}
+
 #remove (old) binutils headers/libs
-rm -f %{buildroot}%{_includedir}/ansidecl.h
+#rm -f %{buildroot}%{_includedir}/ansidecl.h
 rm -f %{buildroot}%{_includedir}/bfd.h
 rm -f %{buildroot}%{_includedir}/bfdlink.h
 rm -f %{buildroot}%{_includedir}/dis-asm.h
@@ -106,6 +106,7 @@ rm -f %{buildroot}%{_libdir}/libopcodes.*
 #remove libstdc++/supc++ static libs (built with gcc 3.x)
 rm -f %{buildroot}%{_libdir}/libstdc++.*
 rm -f %{buildroot}%{_libdir}/libsupc++.*
+rm -f %{buildroot}%{_libdir}/libiberty.*
 
 rexx2vio $RPM_BUILD_ROOT%{_bindir}/dllar.cmd $RPM_BUILD_ROOT%{_bindir}/dllar.exe
 
@@ -128,8 +129,6 @@ rm -rf $RPM_BUILD_ROOT
 %doc %{_prefix}/man/man7/*
 %{_bindir}
 %exclude %{_bindir}/*.dbg
-#%{_usr}/i386-pc-os2-elf
-#%{_usr}/i386-pc-os2-emx
 %{_includedir}
 %exclude %{_includedir}/db.h
 %exclude %{_includedir}/ndbm.h
@@ -154,6 +153,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/*.dbg
 
 %changelog
+* Thu Jan 09 2015 yd
+- added new SafeDos* wrappers from trunk r3942 and r3943.
+- added emxomfstrip binary from trunk.
+
 * Tue Jan 06 2015 yd
 - update to libc 0.6.6-csd6, added omf libraries.
 
