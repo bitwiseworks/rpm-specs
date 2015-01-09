@@ -28,7 +28,7 @@
 Summary: The RPM package management system
 Name: rpm
 Version: %{rpmver}
-Release: 20%{?dist}
+Release: 21%{?dist}
 Group: System Environment/Base
 Url: http://www.rpm.org/
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
