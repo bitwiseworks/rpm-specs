@@ -6,7 +6,7 @@ License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Standard Shared Libraries
 Group:          System/Libraries
 Version:        0.6.6
-Release:        22%{?dist}
+Release:        23%{?dist}
 Url:            http://svn.netlabs.org/libc
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -95,7 +95,7 @@ cp -p -r os2safe.h %{buildroot}%{_includedir}
 cp -p -r libos2.a %{buildroot}%{_libdir}
 
 #remove (old) binutils headers/libs
-#rm -f %{buildroot}%{_includedir}/ansidecl.h
+rm -f %{buildroot}%{_includedir}/ansidecl.h
 rm -f %{buildroot}%{_includedir}/bfd.h
 rm -f %{buildroot}%{_includedir}/bfdlink.h
 rm -f %{buildroot}%{_includedir}/dis-asm.h
@@ -153,6 +153,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/*.dbg
 
 %changelog
+* Sun Jan 11 2015 yd
+- removed ansidecl.h since it is already in binutils-devel. ticket#103.
+
 * Thu Jan 09 2015 yd
 - added new SafeDos* wrappers from trunk r3942 and r3943.
 - added emxomfstrip binary from trunk.
