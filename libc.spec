@@ -153,6 +153,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/*.dbg
 
 %changelog
+* Sun Jan 18 2015 yd
+- added new SafeDos* wrappers from trunk r3944.
+
 * Sun Jan 11 2015 yd
 - removed ansidecl.h since it is already in binutils-devel. ticket#103.
 
