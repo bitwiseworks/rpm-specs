@@ -2,7 +2,7 @@
 Summary: Netlabs Stable Repository
 Name: netlabs-rel
 Version: 0.0.0
-Release: 4%{?dist}
+Release: 5%{?dist}
 
 License: free
 
@@ -11,8 +11,9 @@ Source: netlabs-rel.zip
 Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %description
-Netlabs Experimental Repository.
-Use with caution, packages on this repository are not considered stable versions.
+Netlabs Release Repository.
+This is the recommended repository for users since packages on this repository
+are considered stable versions.
 
 %prep
 %setup -q -c
@@ -32,6 +33,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Wed Jan 21 2015 yd
+- fixed description. ticket#105.
+
 * Mon Jan 07 2013 yd
 - add US mirror URL.
 
