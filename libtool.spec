@@ -5,7 +5,7 @@
 Summary: The GNU Portable Library Tool
 Name:    libtool
 Version: 2.4.2
-Release: 7%{?dist}
+Release: 8%{?dist}
 License: GPLv2+ and LGPLv2+ and GFDL
 URL:     http://www.gnu.org/software/libtool/
 Group:   Development/Tools
@@ -13,7 +13,7 @@ Group:   Development/Tools
 #Source:  http://ftp.gnu.org/gnu/libtool/libtool-%{version}.tar.xz
 
 %define svn_url     http://svn.netlabs.org/repos/ports/libtool/trunk
-%define svn_rev     925
+%define svn_rev     955
 
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
@@ -172,6 +172,10 @@ rm -f %{buildroot}%{_libdir}/ltdl.a
 %{_libdir}/*.dbg
 
 %changelog
+* Tue Jan 13 2015 Dmitriy Kuminov <coding@dmik.org> 2.4.2-8
+- Support -release option on OS/2.
+- Use response files for long command lines when linking DLLs on OS/2.
+
 * Fri Oct 31 2014 Dmitriy Kuminov <coding@dmik.org> 2.4.2-7
 - Rename -os2dllname switch to -shortname (old one is still
   supported for backward compatibility).
