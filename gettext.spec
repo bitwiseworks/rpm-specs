@@ -1,3 +1,7 @@
+#define svn_url     F:/rd/ports/gettext/trunk
+%define svn_url     http://svn.netlabs.org/repos/ports/gettext/trunk
+%define svn_rev     981
+
 %bcond_with jar
 %bcond_with java
 %bcond_without check
@@ -6,17 +10,16 @@
 Summary: GNU libraries and utilities for producing multi-lingual messages
 Name: gettext
 Version: 0.18.1.1
-Release: 3%{?dist}
+Release: 5%{?dist}
 License: GPLv3+ and LGPLv2+
 Group: Development/Tools
 URL: http://www.gnu.org/software/gettext/
-Source: ftp://ftp.gnu.org/gnu/gettext/%{name}-%{version}.tar.gz
+Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
+Source1: gettext-legacy-os2.zip
 
-Patch0: gettext-os2.diff
-
-#BuildRequires: autoconf >= 2.62
-#BuildRequires: automake
-#BuildRequires: libtool, bison, gcc-c++
+BuildRequires: autoconf >= 2.62
+BuildRequires: automake
+BuildRequires: libtool, bison
 %if %{with java}
 # libintl.jar requires gcj >= 4.3 to build
 #BuildRequires: gcc-java, libgcj
@@ -40,9 +43,6 @@ BuildRequires: zip, unzip
 
 Buildroot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
-#Requires(post): info
-#Requires(preun): info
-
 Requires: gettext-libs = %{version}-%{release}
 
 %description
@@ -65,8 +65,6 @@ Group: Development/Tools
 License: LGPLv2+ and GPLv3+
 Requires: %{name} = %{version}-%{release}
 Requires: %{name}-libs = %{version}-%{release}
-#Requires(post): info
-#Requires(preun): info
 # for autopoint
 #Requires: git
 Obsoletes: gettext-autopoint < 0.18.1.1-3
@@ -112,10 +110,30 @@ This package contains libraries used internationalization support.
 #Emacs.
 
 
-%prep
-%setup -q
-%patch0 -p1
+%package legacy
+Summary: The old gettext library.
 
+%description legacy
+The old gettext library.
+
+
+%package debug
+Summary: HLL debug data for exception handling support.
+
+%description debug
+HLL debug data for exception handling support.
+
+
+%prep
+%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
+%setup -q
+%else
+%setup -n "%{name}-%{version}" -Tc -a 1
+echo %{svn_rev}
+svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
+rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
+(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
+%endif
 
 %build
 %if %{with java}
@@ -125,9 +143,11 @@ export JAR=fastjar
 %endif
 %endif
 
-export CONFIG_SHELL="/bin/sh" ; \
 export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp" ; \
-export LIBS="-lurpo" ; \
+export LIBS="-lurpo -lmmap" ; \
+
+autogen.sh --skip-gnulib --quick
+
 %configure \
     --without-included-gettext --enable-nls \
     --without-included-libxml \
@@ -135,8 +155,7 @@ export LIBS="-lurpo" ; \
     --disable-java --disable-native-java\
     --disable-git \
     --disable-rpath \
-    --enable-shared --disable-static \
-    "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
+    --enable-shared --disable-static
 
 cd gettext-tools/gnulib-lib
 make fcntl.h
@@ -152,12 +171,11 @@ make install DESTDIR=${RPM_BUILD_ROOT} \
     lispdir=%{_datadir}/emacs/site-lisp/gettext \
     aclocaldir=%{_datadir}/aclocal EXAMPLESFILES=""
 
+rm -f ${RPM_BUILD_ROOT}%{_datadir}/gettext/archive.git.tar.gz
+
 # OS/2 specific files
 rm -f ${RPM_BUILD_ROOT}%{_libdir}/charset.alias
-cp gettext-runtime/intl/kintl.dll ${RPM_BUILD_ROOT}%{_libdir}
-cp gettext-tools/gnulib-lib/gtxtl.dll ${RPM_BUILD_ROOT}%{_libdir}
-cp gettext-tools/libgettextpo/gtxtp.dll ${RPM_BUILD_ROOT}%{_libdir}
-cp gettext-tools/src/gtxts.dll ${RPM_BUILD_ROOT}%{_libdir}
+cp -p kintl.dll %{buildroot}%{_libdir}
 
 
 # move gettext to /bin
@@ -312,10 +330,8 @@ rm -rf ${RPM_BUILD_ROOT}
 
 %files libs
 %defattr(-,root,root,-)
-%{_libdir}/kintl.dll
-%{_libdir}/gtxtl.dll
-%{_libdir}/gtxtp.dll
-%{_libdir}/gtxts.dll
+%{_libdir}/*.dll
+%exclude %{_libdir}/kintl.dll
 %if %{with jar}
 %{_datadir}/%{name}/libintl.jar
 %endif
@@ -330,4 +346,20 @@ rm -rf ${RPM_BUILD_ROOT}
 #%defattr(-,root,root,-)
 #%{_emacs_sitelispdir}/%{name}/*.el
 
+%files legacy
+%defattr(-,root,root)
+%{_libdir}/kintl.dll
+
+%files debug
+%defattr(-,root,root)
+%{_bindir}/*.dbg
+%{_libdir}/*.dbg
+
 %changelog
+* Sat Jan 24 2015 yd
+- r981, ignore pthreads rwlock(), they are only stubs.
+
+* Wed Jan 14 2015 yd
+- r963, rebuilt with new libtool, which gave new dll names
+- added legacy package.
+- added debug package with symbolic info for exceptq.
