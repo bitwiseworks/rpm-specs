@@ -1,11 +1,11 @@
 # Note: this .spec is borrowed from libtool-2.4.2-21.fc20.src.rpm
 
-%global gcc_version 4.7.3
+%global gcc_version 4.9.2
 
 Summary: The GNU Portable Library Tool
 Name:    libtool
 Version: 2.4.2
-Release: 8%{?dist}
+Release: 9%{?dist}
 License: GPLv2+ and LGPLv2+ and GFDL
 URL:     http://www.gnu.org/software/libtool/
 Group:   Development/Tools
@@ -172,6 +172,9 @@ rm -f %{buildroot}%{_libdir}/ltdl.a
 %{_libdir}/*.dbg
 
 %changelog
+* Tue Jan 23 2015 yd
+- rebuild for gcc 4.9.2.
+
 * Tue Jan 13 2015 Dmitriy Kuminov <coding@dmik.org> 2.4.2-8
 - Support -release option on OS/2.
 - Use response files for long command lines when linking DLLs on OS/2.
