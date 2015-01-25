@@ -1,6 +1,6 @@
 #define svn_url     F:/rd/ports/gettext/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/gettext/trunk
-%define svn_rev     981
+%define svn_rev     982
 
 %bcond_with jar
 %bcond_with java
@@ -10,7 +10,7 @@
 Summary: GNU libraries and utilities for producing multi-lingual messages
 Name: gettext
 Version: 0.18.1.1
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: GPLv3+ and LGPLv2+
 Group: Development/Tools
 URL: http://www.gnu.org/software/gettext/
@@ -356,6 +356,9 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_libdir}/*.dbg
 
 %changelog
+* Sun Jan 25 2015 yd
+- r982, revert r981, ignore pthreads rwlock(), they are only stubs.
+
 * Sat Jan 24 2015 yd
 - r981, ignore pthreads rwlock(), they are only stubs.
 
