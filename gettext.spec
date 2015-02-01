@@ -10,7 +10,7 @@
 Summary: GNU libraries and utilities for producing multi-lingual messages
 Name: gettext
 Version: 0.18.1.1
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: GPLv3+ and LGPLv2+
 Group: Development/Tools
 URL: http://www.gnu.org/software/gettext/
@@ -356,6 +356,9 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_libdir}/*.dbg
 
 %changelog
+* Mon Feb 02 2015 yd <yd@os2power.com> 0.18.1.1-7
+- rebuilt with gcc 4.9.2.
+
 * Sun Jan 25 2015 yd
 - r982, revert r981, ignore pthreads rwlock(), they are only stubs.
 
