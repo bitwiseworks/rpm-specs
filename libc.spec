@@ -6,7 +6,7 @@ License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Standard Shared Libraries
 Group:          System/Libraries
 Version:        0.6.6
-Release:        24%{?dist}
+Release:        25%{?dist}
 Url:            http://svn.netlabs.org/libc
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -153,6 +153,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/*.dbg
 
 %changelog
+* Fri Jan 23 2015 yd 0.6.6-25
+- added builtin.h and stddef.h patches required for building gcc 4.9.x.
+
 * Sun Jan 18 2015 yd
 - added new SafeDos* wrappers from trunk r3944.
 
@@ -163,7 +166,7 @@ rm -rf $RPM_BUILD_ROOT
 - added new SafeDos* wrappers from trunk r3942 and r3943.
 - added emxomfstrip binary from trunk.
 
-* Tue Jan 06 2015 yd
+* Tue Jan 06 2015 yd 0.6.6-21
 - update to libc 0.6.6-csd6, added omf libraries.
 
 * Tue Aug 19 2014 Dmitriy Kuminov <coding@dmik.org> 0.6.5-20
