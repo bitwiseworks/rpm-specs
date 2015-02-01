@@ -1,10 +1,10 @@
 %define ver_major   4
-%define ver_minor   7
-%define ver_patch   3
+%define ver_minor   9
+%define ver_patch   2
 
 %define os2_release 1
 
-%define rpm_release 1
+%define rpm_release 3
 
 %global gcc_version %{ver_major}.%{ver_minor}.%{ver_patch}
 %global gcc_target_platform %{_target_cpu}
@@ -29,8 +29,8 @@ License: GPLv3+ and GPLv3+ with exceptions and GPLv2+ with exceptions
 Group: Development/Languages
 URL: http://gcc.gnu.org
 
-Source0: gcc-gcc-4_7-branch-os2.zip
-Patch0: gcc-os2.diff
+Source0: gcc-gcc-4_9-branch-os2.tar.bz2
+Source1: gcc-libgcc-fwd.zip
 
 Obsoletes: gcc < %{gcc_version}
 
@@ -38,24 +38,41 @@ BuildRequires: binutils make
 BuildRequires: os2-base-fhs
 BuildRequires: ash gcc gcc-wlink gcc-wrc grep gettext-devel diffutils gawk flex sed
 BuildRequires: gmp-devel >= 4.1.2-8, mpfr-devel >= 2.2.1, mpc-devel
+BuildRequires: libc-devel >= 0.6.6-25
+BuildRequires: rpm >= 4.8.1-22
 
-Requires: libgcc%{ver_major}%{ver_minor}%{ver_patch} = %{version}-%{release}
+Requires: libgcc1 = %{version}-%{release}
 Requires: libssp = %{version}-%{release}
 Requires: libstdc++6 = %{version}-%{release}
 Requires: libsupc++6 = %{version}-%{release}
-Requires: libc-devel >= 0.6.3
+# libc header fixes
+Requires: libc-devel >= 0.6.6-25
+# rpm color workaround
+Requires: rpm >= 4.8.1-22
 Requires: binutils
 
 %description
 The gcc package contains the GNU Compiler Collection version %{ver_major}.%{ver_minor}.
 You'll need this package in order to compile C code.
 
-%package -n libgcc%{ver_major}%{ver_minor}%{ver_patch}
-Summary: GCC version %{ver_major}.%{ver_minor} shared support library
+%package -n libgcc-fwd
+Summary: GCC version shared support forwarder library
+Group: System Environment/Libraries
+Autoreq: false
+Obsoletes: libgcc335 libgcc432 libgcc433 libgcc434 libgcc440 libgcc441
+Obsoletes: libgcc442 libgcc444 libgcc445 libgcc446 libgcc452 libgcc453
+Obsoletes: libgcc473 libgcc490 libgcc492
+
+%description -n libgcc-fwd
+This package contains GCC shared support forwarder library which is needed
+e.g. for exception handling support.
+
+%package -n libgcc1
+Summary: GCC version 1 shared support library
 Group: System Environment/Libraries
 Autoreq: false
 
-%description -n libgcc%{ver_major}%{ver_minor}%{ver_patch}
+%description -n libgcc1
 This package contains GCC shared support library which is needed
 e.g. for exception handling support.
 
@@ -100,9 +117,16 @@ Requires: watcom-wrc
 This package triggers the required config.sys settings to allow use of Watcom
 resource compiler instead of IBM one.
 
+%package debug
+Summary: HLL debug data for exception handling support.
+
+%description debug
+HLL debug data for exception handling support.
+
+
 %prep
-%setup -q -c
-%patch0 -p1 -b .os2~
+%setup -q -c -a 1
+
 
 %build
 rm -fr obj-%{gcc_target_platform}
@@ -112,31 +136,33 @@ cd obj-%{gcc_target_platform}
 script_dir=%{_topdir}/BUILD/%{name}-%{version}/obj-%{gcc_target_platform}
 export PATH="$script_dir/gcc${PATH:+;$PATH}"
 export BEGINLIBPATH="$script_dir/gcc${BEGINLIBPATH:+;$BEGINLIBPATH}"
+export LIBPATHSTRICT=T
 
-export CONFIG_SHELL=%{_bindir}/sh.exe
 export CFLAGS="$RPM_OPT_FLAGS -DEMX -DOS2"
 export CXXFLAGS="$RPM_OPT_FLAGS -DEMX -DOS2"
 export LDFLAGS="-g -Zexe -Zomf -Zmap -Zargs-wild -Zhigh-mem"
 export LANG=en_US
 export GREP=grep
 
+export PATH_SEPARATOR=;
+export CONFIG_SITE=/@unixroot/usr/share/config.legacy
+
 ../configure --prefix=%{_prefix} \
     --with-sysroot=/@unixroot \
     --enable-shared \
     --enable-languages=c,c++ \
+    --enable-frame-pointer \
     --with-gnu-as \
     --disable-bootstrap \
     --disable-multilib \
     --disable-libstdcxx-pch \
     --enable-threads 
 
-make
-# %{?_smp_mflags}
+make %{?_smp_mflags}
 
 
 %install
 rm -rf $RPM_BUILD_ROOT
-
 cd obj-%{gcc_target_platform}
 
 # There are some MP bugs in libstdc++ Makefiles
@@ -149,13 +175,13 @@ make DESTDIR=${RPM_BUILD_ROOT} install
 
 # copy runtime files
 emxomf -o i386-pc-os2-emx/libgcc/libgcc_so_d.lib i386-pc-os2-emx/libgcc/libgcc_so_d.a
-cp -p i386-pc-os2-emx/libgcc/libgcc_so_d.a %{buildroot}%{_libdir}
-cp -p i386-pc-os2-emx/libgcc/libgcc_so_d.lib %{buildroot}%{_libdir}
-cp -p i386-pc-os2-emx/libgcc/gcc%{ver_major}%{ver_minor}%{ver_patch}.dll %{buildroot}%{_libdir}
+#cp -p i386-pc-os2-emx/libgcc/libgcc_so_d.a %{buildroot}%{_libdir}
+#cp -p i386-pc-os2-emx/libgcc/libgcc_so_d.lib %{buildroot}%{_libdir}
+#cp -p i386-pc-os2-emx/libgcc/gcc%{ver_major}%{ver_minor}%{ver_patch}.dll %{buildroot}%{_libdir}
 
 #build dll
 dllar -o stdcpp6.dll i386-pc-os2-emx/libstdc++-v3/src/.libs/libstdc++.a \
-	-d "GNU stdc++ %{gcc_version}" \
+	-d "GNU stdc++ %{version}-%{release}" \
 	-nolxlite -flags "-Zmap -Zhigh-mem -Zomf -g -L%{buildroot}%{_libdir}" \
 	-ex "___main ___do_global_* ___ctordtor* ___eh* ___pop* _DLL_InitTerm" \
 	-libf "INITINSTANCE TERMINSTANCE" \
@@ -167,7 +193,7 @@ mv %{buildroot}%{_libdir}/libstdc++.a %{buildroot}%{_libdir}/stdc++_s.a
 
 #build dll
 dllar -o supcpp6.dll i386-pc-os2-emx/libstdc++-v3/libsupc++/.libs/libsupc++.a \
-	-d "GNU supc++ %{gcc_version}" \
+	-d "GNU supc++ %{version}-%{release}" \
 	-nolxlite -flags "-Zmap -Zhigh-mem -Zomf -g -L%{buildroot}%{_libdir}" \
 	-ex "___main ___do_global_* ___ctordtor* ___eh* ___pop* _DLL_InitTerm" \
 	-libf "INITINSTANCE TERMINSTANCE" \
@@ -179,7 +205,7 @@ mv %{buildroot}%{_libdir}/libsupc++.a %{buildroot}%{_libdir}/supc++_s.a
 
 #build dll
 dllar -o ssp.dll i386-pc-os2-emx/libssp/.libs/ssp.a \
-	-d "GNU Stack Protector %{gcc_version}" \
+	-d "GNU Stack Protector %{version}-%{release}" \
 	-nolxlite -flags "-Zmap -Zhigh-mem -Zomf -g -L%{buildroot}%{_libdir}" \
 	-ex "___main ___do_global_* ___ctordtor* ___eh* ___pop* _DLL_InitTerm" \
 	-libf "INITINSTANCE TERMINSTANCE" \
@@ -190,6 +216,13 @@ cp -p ssp.lib %{buildroot}%{_libdir}
 mv %{buildroot}%{_libdir}/ssp.a %{buildroot}%{_libdir}/ssp_s.a
 
 cd ..
+
+#build gccXXX forwarders
+for bld in 335 432 433 434 435 440 441 442 444 445 446 452 453 454 464 473 474 482 483 490 491 492; do
+  sed -i 's/Forwarder/Forwarder %{version}-%{release}/' gcc${bld}.def
+  gcc -Zomf -Zmap -Zdll -nostdlib -o gcc${bld}.dll gcc${bld}.def fwdstub.s obj-%{gcc_target_platform}/gcc/libgcc_so_d.a -llibc
+  cp -p gcc${bld}.dll %{buildroot}%{_libdir}
+done
 
 echo dummy for virtual package > gcc-wrc.txt
 echo dummy for virtual package > gcc-wlink.txt
@@ -243,14 +276,20 @@ fi
 %files
 %defattr(-,root,root,-)
 %{_usr}/bin
+%exclude %{_bindir}/*.dbg
 %{_usr}/include
 %{_libdir}/*.*a
 %{_libdir}/*.lib
 %exclude %{_libdir}/*.dll
-%{_libdir}/*.spec
+%exclude %{_libdir}/*.dbg
 %{_libdir}/gcc/*
-%{_usr}/libexec
-%{_usr}/share
+%{_libexecdir}
+%exclude %{_libexecdir}/gcc/i386-pc-os2-emx/%{gcc_version}/*.dbg
+%exclude %{_libexecdir}/gcc/i386-pc-os2-emx/%{gcc_version}/install-tools/*.dbg
+%{_datadir}/gcc-%{gcc_version}
+%{_datadir}/locale
+%{_datadir}/info
+%{_datadir}/man
 %doc ChangeLog ChangeLog.*
 %doc README README.*
 %doc COPYING COPYING.*
@@ -274,12 +313,30 @@ fi
 %files wrc
 %doc gcc-wrc.txt
 
-%files -n libgcc%{ver_major}%{ver_minor}%{ver_patch}
+%files -n libgcc-fwd
 %defattr(-,root,root,-)
-%{_libdir}/gcc%{ver_major}%{ver_minor}%{ver_patch}.dll
+%{_libdir}/gcc???.dll
 
+%files -n libgcc1
+%defattr(-,root,root,-)
+%{_libdir}/gcc1.dll
+
+%files debug
+%defattr(-,root,root)
+%{_bindir}/*.dbg
+%{_libdir}/*.dbg
+%{_libexecdir}/gcc/i386-pc-os2-emx/%{gcc_version}/*.dbg
+%{_libexecdir}/gcc/i386-pc-os2-emx/%{gcc_version}/install-tools/*.dbg
 
 %changelog
+* Tue Jan 30 2015 yd <yd@os2power.com> 4.9.2.1-3
+- updated source code to gcc 4.9.2.
+- create gccXXX forwarders to gcc1 runtime dll, use libc06 exports for
+  non-standard symbols.
+- use --enable-frame-pointer to disable unwinding table generation.
+- build requires patched builtin.h and stddef.h (libc-0.6.6-25).
+- use standard toolchain to build gcc runtime dll, use named exports only.
+
 * Wed Nov 27 2013 yd
 - Rename the following packages to avoid ABI breaks (using gcc versioning policy):
   + libstdc++ => libstdc++6
