@@ -1,6 +1,6 @@
 #define svn_url     F:/rd/ports/rpm/rpm/branches/rpm-4.8.1
 %define svn_url     http://svn.netlabs.org/repos/rpm/rpm/branches/rpm-4.8.1
-%define svn_rev     486
+%define svn_rev     505
 
 %define with_sqlite 1
 %undefine int_bdb
@@ -28,7 +28,7 @@
 Summary: The RPM package management system
 Name: rpm
 Version: %{rpmver}
-Release: 21%{?dist}
+Release: 22%{?dist}
 Group: System Environment/Base
 Url: http://www.rpm.org/
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
@@ -472,6 +472,11 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Fri Jan 30 2015 yd <yd@os2power.com> 4.8.1-22
+- r505, define SHELL/CONFIG_SHELL/MAKESHELL automatically for every build.
+- r504, ignore colors, they are only used for X86_64 elf linux to mix 32/64 bit code.
+- r503, trunk backport, backport, enable short circuit also for -bb build binary packages option.
+
 * Thu Jan 08 2015 yd
 - -Zbin-files is not optional...
 
