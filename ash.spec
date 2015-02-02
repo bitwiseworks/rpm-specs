@@ -1,22 +1,18 @@
+#define svn_url     F:/rd/klibc/trunk/ash
+%define svn_url     https://svn.netlabs.org/repos/libc/trunk/
+%define svn_rev     3845
+
+%define kmk_dist out/os2.x86/release/dist
+
 Summary: A smaller version of the Bourne shell (sh).
 Name: ash
 Version: 0.0.0
-Release: 10%{?dist}
+Release: 11%{?dist}
 License: BSD
 Group: System Environment/Shells
-Source: ash.zip
-#Source: ftp://ftp.debian.org/debian/dists/woody/main/source/shells/%{name}_%{version}.orig.tar.gz
-#Patch0: ftp://ftp.debian.org/debian/dists/woody/main/source/shells/%{name}_%{version}-38.diff.gz
-#Patch2: ash-0.3.8-tempfile.patch
-#Patch1: ash-0.3.8-build.patch
-#Patch3: ash-0.3.8-mannewline.patch
-#Patch4: ash-0.3.8-segv.patch
-#Prereq: fileutils grep
-#BuildPrereq: pmake >= 1.45 byacc
-#Buildroot: %{_tmppath}/%{name}-%{version}-root
-#Conflicts: mkinitrd <= 1.7
 
-Requires: libc >= 0.6.3
+Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
+
 Provides: /@unixroot/bin/sh
 
 %description
@@ -30,32 +26,29 @@ memory.
 You should install ash if you need a lightweight shell with many of
 the same capabilities as the sh shell.
 
+%package debug
+Summary: HLL debug data for exception handling support.
+
+%description debug
+HLL debug data for exception handling support.
+
+
 %prep
-%setup -q -n ash-%{version}
-#%patch0 -p1 -b .linux
-#%patch2 -p1 -b .tempfile
-#%ifarch alpha
-#%patch1 -p1 -b .alpha
-#%endif
-#%patch3 -p1
-#%patch4 -p0 -b .segv
-#chmod -R a+rX .
+%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
+%setup -q
+%else
+%setup -n "%{name}-%{version}" -T -c
+svn export %{?svn_rev:-r %{svn_rev}} %{svn_url}ash ash --force
+svn export %{?svn_rev:-r %{svn_rev}} %{svn_url}Config.kmk --force
+rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
+(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
+%endif
+
 
 %build
-#chmod u+x debian/bsdyacc
-#pmake CFLAGS="-g ${RPM_OPT_FLAGS} \
-#    -DBSD=1 -DSMALL -D_GNU_SOURCE \
-#    -DGLOB_BROKEN -D__COPYRIGHT\(x\)= \
-#    -D__RCSID\(x\)= -D_DIAGASSERT\(x\)=" \
-#    YACC=`pwd`/debian/bsdyacc
-#mv sh sh.dynamic
-#
-#pmake CFLAGS="-g ${RPM_OPT_FLAGS} \
-#    -DBSD=1 -DSMALL -D_GNU_SOURCE \
-#    -DGLOB_BROKEN -D__COPYRIGHT\(x\)= \
-#    -D__RCSID\(x\)= -D_DIAGASSERT\(x\)=" \
-#    YACC=`pwd`/debian/bsdyacc LDFLAGS="-static"
-#mv sh sh.static
+export KCFLAGS="%{optflags}"
+kmk -C ash
+kmk -C ash install
 
 
 %install
@@ -63,56 +56,28 @@ rm -rf %{buildroot}
 mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_mandir}/man1
 
-mv bin/ash.exe %{buildroot}%{_bindir}/sh.exe
+cp %{kmk_dist}/bin/ash.exe %{buildroot}%{_bindir}/sh.exe
 ln -s %{_bindir}/sh.exe %{buildroot}%{_bindir}/sh
+cp -p ash/sh.1 %{buildroot}%{_mandir}/man1/sh.1
 
-cp -p usr/man/man1/ash.1.gz %{buildroot}%{_mandir}/man1/ash.1.gz
-
-#ln -sf ash.1 %{buildroot}%{_mandir}/man1/bsh.1
-#ln -sf ash %{buildroot}/bin/bsh
-#install -m 755 sh.static %{buildroot}/bin/ash.static
-
-#%post
-#if [ ! -f /etc/shells ]; then
-#	echo "/bin/ash" > /etc/shells
-#	echo "/bin/bsh" >> /etc/shells
-#else
-#	if ! grep '^/bin/ash$' /etc/shells > /dev/null; then
-#		echo "/bin/ash" >> /etc/shells
-#	fi
-#	if ! grep '^/bin/bsh$' /etc/shells > /dev/null; then
-#		echo "/bin/bsh" >> /etc/shells
-#	fi
-#fi
-
-#%postun
-#if [ "$1" = "0" ]; then
-#	grep -v '^/bin/ash' < /etc/shells | grep -v '^/bin/bsh' > /etc/shells.new
-#	mv /etc/shells.new /etc/shells
-#fi
-
-%verifyscript
-#
-#for n in ash bsh; do
-#    echo -n "Looking for $n in /etc/shells... "
-#    if ! grep "^/bin/${n}\$" /etc/shells > /dev/null; then
-#	echo "missing"
-#	echo "${n} missing from /etc/shells" >&2
-#    else
-#	echo "found"
-#    fi
-#done
 
 %clean
 rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root)
-%{_bindir}/sh*
-#/bin/bsh
+%{_bindir}/sh
+%{_bindir}/sh.exe
 %{_mandir}/man1/*
 
+%files debug
+%defattr(-,root,root)
+%{_bindir}/*.dbg
+
 %changelog
+* Mon Feb 02 2015 yd <yd@os2power.com> 0.0.0-11
+- r3845, rebuilt from sources with gcc 4.9.2.
+
 * Fri Feb 03 2012 yd
 - added Provides for virtual /@unixroot/bin/sh file.
 
