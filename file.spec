@@ -1,3 +1,7 @@
+#define svn_url     F:/rd/ports/file/trunk
+%define svn_url     http://svn.netlabs.org/repos/ports/file/trunk
+%define svn_rev     266
+
 %{!?python_sitelib: %define python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
 %{!?python_sitearch: %define python_sitearch %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)")}
 %define __libtoolize :
@@ -5,13 +9,12 @@
 Summary: A utility for determining file types
 Name: file
 Version: 5.04
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: BSD
 Group: Applications/File
-Source0: ftp://ftp.astron.com/pub/file/file-%{version}.tar.gz
 URL: http://www.darwinsys.com/file/
 
-Patch0: file-os2.diff
+Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
 Requires: file-libs = %{version}-%{release}
 Requires: mmap >= 20110103
@@ -62,30 +65,35 @@ This package contains the Python bindings to allow access to the
 libmagic API. The libmagic library is also used by the familiar
 file(1) command.
 
-%prep
+%package debug
+Summary: HLL debug data for exception handling support.
 
-# Don't use -b -- it will lead to poblems when compiling magic file
+%description debug
+HLL debug data for exception handling support.
+
+%prep
+%if %(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')
 %setup -q
-%patch0 -p1
+%else
+%setup -n "%{name}-%{version}" -T -c
+svn export -r %{svn_rev} %{svn_url} . --force
+rm -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip"
+(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" "%{name}-%{version}")
+%endif
 
 #iconv -f iso-8859-1 -t utf-8 < doc/libmagic.man > doc/libmagic.man_
 touch -r doc/libmagic.man doc/libmagic.man_
 mv doc/libmagic.man_ doc/libmagic.man
 
 %build
-export CONFIG_SHELL="/bin/sh"
+export CONFIG_SITE="/@unixroot/usr/share/config.legacy"
 export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 export LIBS="-lurpo -lmmap"
 export CFLAGS="%{optflags} -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE"
 %configure \
         --enable-fsect-man5 --disable-rpath \
-        --disable-shared --disable-static \
-        "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
+        --disable-shared --disable-static
 
-# remove hardcoded library paths from local libtool
-#sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
-#sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
-#export LD_LIBRARY_PATH=%{_builddir}/%{name}-%{version}/src/.libs
 make %{?_smp_mflags}
 
 cd python
@@ -117,10 +125,6 @@ cd python
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-#%post libs -p /sbin/ldconfig
-
-#%postun libs -p /sbin/ldconfig
-
 %files
 %defattr(-,root,root,-)
 %doc COPYING ChangeLog README
@@ -151,4 +155,10 @@ rm -rf $RPM_BUILD_ROOT
 %doc python/README COPYING python/example.py
 %{_libdir}/python*/*
 
+%files debug
+%defattr(-,root,root)
+%{_libdir}/*.dbg
+
 %changelog
+* Mon Feb 02 2015 yd <yd@os2power.com> 5.04-7
+- r266, rebuilt with gcc 4.9.2 and python 2.7.
