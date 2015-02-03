@@ -1,15 +1,18 @@
+#define svn_url     F:/rd/rpm/yum/trunk
+%define svn_url     http://svn.netlabs.org/repos/rpm/yum/trunk
+%define svn_rev     516
+
 %{!?python_sitelib: %define python_sitelib %(python -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
  
 Summary: RPM installer/updater
 Name: yum
-Version: 3.2.27
-Release: 6%{?dist}
+Version: 3.4.3
+Release: 7%{?dist}
 License: GPLv2+
 Group: System Environment/Base
-Source0: http://yum.baseurl.org/download/3.2/%{name}-%{version}.tar.gz
-Source1: python-wrapper.zip
 
-Patch0: yum-os2.diff
+Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
+Source1: yum-os2.zip
 
 URL: http://yum.baseurl.org/
 
@@ -37,7 +40,7 @@ Provides: yum-allow-downgrade
 Provides: yum-plugin-allow-downgrade
 Provides: yum-protect-packages
 Provides: yum-plugin-protect-packages
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
 Requires: python
 Requires: python(abi) = %{python_version}
@@ -69,17 +72,21 @@ Summary: HLL debug data for exception handling support.
 HLL debug data for exception handling support.
 
 %prep
-%setup -q -a 1
-%patch0 -p1
+%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
+%setup -q
+%else
+%setup -n "%{name}-%{version}" -Tc -a 1
+svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
+rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
+(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
+%endif
 
 %build
-export MAKESHELL="/@unixroot/usr/bin/sh"
 export PERL_SH_DIR="/@unixroot/usr/bin"
 make
 
 %install
 rm -rf $RPM_BUILD_ROOT
-export MAKESHELL="/@unixroot/usr/bin/sh"
 export PERL_SH_DIR="/@unixroot/usr/bin"
 make DESTDIR=$RPM_BUILD_ROOT install
 #install -m 644 %{SOURCE1} $RPM_BUILD_ROOT/%{_sysconfdir}/yum.conf
@@ -119,12 +126,17 @@ rm -rf $RPM_BUILD_ROOT
 %config(noreplace) %{_sysconfdir}/yum/yum.conf
 %dir %{_sysconfdir}/yum
 %config(noreplace) %{_sysconfdir}/yum/version-groups.conf
-#%dir %{_sysconfdir}/yum/protected.d
+%dir %{_sysconfdir}/yum/cron.daily/*
+%dir %{_sysconfdir}/yum/protected.d
+%dir %{_sysconfdir}/yum/rc.d/init.d/*
 %dir %{_sysconfdir}/yum/repos.d
-#%dir %{_sysconfdir}/yum/vars
+%dir %{_sysconfdir}/yum/sysconfig/*
+%dir %{_sysconfdir}/yum/vars
 %config(noreplace) %{_sysconfdir}/logrotate.d/yum
-%{_sysconfdir}/bash_completion.d
+%dir %{_sysconfdir}/yum/bash_completion.d/*
 %dir %{_datadir}/yum-cli
+%{_sysconfdir}/yum/yum-daily.yum
+%{_sysconfdir}/yum/yum-weekly.yum
 %{_datadir}/yum-cli/*
 %{_bindir}/yum
 %{_bindir}/yum.exe
@@ -150,6 +162,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/*.dbg
 
 %changelog
+* Tue Feb 03 2015 yd <yd@os2power.com> 3.4.3-7
+- r516, update source code to version 3.4.3.
+
 * Mon Apr 07 2014 yd
 - build for python 2.7.
 
