@@ -1,13 +1,15 @@
 
 %define name urlgrabber
-%define version 3.1.0
-%define unmangled_version 3.1.0
+%define version 3.10.1
+%define unmangled_version 3.10.1
 
 Summary: A high-level cross-protocol url-grabber
 Name: %{name}
 Version: %{version}
-Release: 5%{?dist}
+Release: 6%{?dist}
 Source0: %{name}-%{unmangled_version}.tar.gz
+Patch0: urlgrabber-os2.patch
+
 License: LGPL
 Group: Development/Libraries
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
@@ -49,6 +51,7 @@ following features:
 
 %prep
 %setup -n %{name}-%{unmangled_version}
+%patch0 -p0 -b .os2~
 
 %build
 python setup.py build
@@ -64,6 +67,9 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root)
 
 %changelog
+* Thu Feb 05 2015 yd <yd@os2power.com> 3.10.1-6
+- source code update to 3.10.1.
+
 * Wed Jun 18 2014 yd
 - rebuild to fix for http://trac.netlabs.org/rpm/ticket/77
 
