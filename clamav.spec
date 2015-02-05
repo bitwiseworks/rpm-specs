@@ -1,24 +1,26 @@
+#define svn_url     F:/rd/ports/clamav/trunk
+%define svn_url     http://svn.netlabs.org/repos/ports/clamav/trunk
+%define svn_rev     1001
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.97.2
-Release:        5%{?dist}
+Version:	0.98.6
+Release:        6%{?dist}
 
 License:	proprietary
 Group:		Applications/File
 URL:		http://www.clamav.net
-Source0:	http://download.sourceforge.net/sourceforge/clamav/%name-%version%{?snapshot}.tar.gz
+
+Source:		%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 Source1:	clamd.ico
 Source2:	ClamAV_ReadMe.txt
-
-Patch1:		clamav-os2.diff
 
 BuildRoot:	%_tmppath/%name-%version-%release-root
 
 Requires:	clamav-lib = %version-%release
-Requires:	data(clamav)
+#Requires:	data(clamav)
 
-#BuildRequires:	curl-devel
+BuildRequires:	curl-devel
 BuildRequires:	zlib-devel bzip2-devel
 BuildRequires:	ncurses-devel
 #BuildRequires:	bc
@@ -26,15 +28,13 @@ BuildRequires:	ncurses-devel
 %package lib
 Summary:	Dynamic libraries for the Clam Antivirus scanner
 Group:		System Environment/Libraries
-Requires:	data(clamav)
+#Requires:	data(clamav)
 
 %package devel
 Summary:	Header files and libraries for the Clam Antivirus scanner
 Group:		Development/Libraries
 Requires:	clamav-lib        = %version-%release
 #Requires:	clamav-filesystem = %version-%release
-Requires(pre):	%_libdir/pkgconfig
-Requires:	pkgconfig
 
 %package data
 Summary:	Virus signature data for the Clam Antivirus scanner
@@ -44,14 +44,6 @@ Group:		Applications/File
 Provides:		data(clamav) = full
 Conflicts:		data(clamav) < full
 Conflicts:		data(clamav) > full
-%{?noarch}
-
-%package data-empty
-Summary:	Empty data package for the Clam Antivirus scanner
-Group:		Applications/File
-Provides:	data(clamav) = empty
-Conflicts:	data(clamav) < empty
-Conflicts:	data(clamav) > empty
 %{?noarch}
 
 %package update
@@ -137,31 +129,10 @@ using the Clam Antivirus scanner.
 This package contains headerfiles and libraries which are needed to
 build applications using clamav.
 
+
 %description data
-This package contains the virus-database needed by clamav. This
-database should be updated regularly; the 'clamav-update' package
-ships a corresponding cron-job. This package and the
-'clamav-data-empty' package are mutually exclusive.
-
-Use -data when you want a working (but perhaps outdated) virus scanner
-immediately after package installation.
-
-Use -data-empty when you are updating the virus database regulary and
-do not want to download a >5MB sized rpm-package with outdated virus
-definitions.
-
-
-%description data-empty
 This is an empty package to fulfill inter-package dependencies of the
-clamav suite. This package and the 'clamav-data' package are mutually
-exclusive.
-
-Use -data when you want a working (but perhaps outdated) virus scanner
-immediately after package installation.
-
-Use -data-empty when you are updating the virus database regulary and
-do not want to download a >5MB sized rpm-package with outdated virus
-definitions.
+clamav suite. 
 
 
 %description update
@@ -193,17 +164,32 @@ e.g. used by the clamav-milter package.
 The SysV initscripts for clamav-scanner.
 
 
+%package debug
+Summary: HLL debug data for exception handling support.
+
+%description debug
+HLL debug data for exception handling support.
+
 
 ## ------------------------------------------------------------
 
 %prep
-%setup -q -n %{name}-%{version}
+%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
+%setup -q
+%else
+%setup -n "%{name}-%{version}" -Tc
+svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
+rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
+(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
+%endif
 
 sed -e 's!_VERSION_!%version!g;' \
     -e 's!_BUILD_!%release!g;' \
     %{SOURCE2} > ReadMe.txt
 
-%patch1 -p1 -b .os2~
+# restore symlinks
+ln -sf ../libclamav/getaddrinfo.c clamdscan/getaddrinfo.c
+ln -sf ../libclamav/getaddrinfo.c clamdtop/getaddrinfo.c
 
 #sed -ri \
 #    -e 's!^#?(LogFile ).*!#\1/var/log/clamd.<SERVICE>!g' \
@@ -223,22 +209,26 @@ sed -e 's!_VERSION_!%version!g;' \
 ## ------------------------------------------------------------
 
 %build
-# YD use sh for libtool, bash fails!
-export CONFIG_SHELL="/@unixroot/usr/bin/sh"
 export CFLAGS="$RPM_OPT_FLAGS -Wall -W -Wmissing-prototypes -Wmissing-declarations"
 export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 export LIBS="-lurpo -lmmap -lpthread"
+
+export CONFIG_SITE=/@unixroot/usr/share/config.legacy
+
 %configure \
     --disable-milter \
     --disable-rpath \
     --with-dbdir=/@unixroot/var/lib/clamav \
+    --with-xml=/@unixroot/usr \
+    --with-openssl=/@unixroot/usr \
+    --with-libcurl=/@unixroot/usr \
     --with-zlib=/@unixroot/usr \
+    --with-libjson=/@unixroot/usr \
     --enable-languages=c --disable-ltdl-install --disable-fdpassing \
     --disable-clamav \
     --disable-check \
     --disable-llvm \
-    --enable-shared --disable-static \
-    "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
+    --enable-shared --disable-static
 
 # TODO: check periodically that CLAMAVUSER is used for freshclam only
 
@@ -248,7 +238,6 @@ make %{?_smp_mflags}
 ## ------------------------------------------------------------
 
 %install
-export CONFIG_SHELL="/@unixroot/usr/bin/sh"
 rm -rf "$RPM_BUILD_ROOT" _doc*
 make DESTDIR="$RPM_BUILD_ROOT" install
 
@@ -257,7 +246,7 @@ cp %{SOURCE1} $RPM_BUILD_ROOT%{_sbindir}
 
 #LogFile must be readable to submit stats
 sed -i 's!#LogFileUnlock yes!LogFileUnlock yes!g;' \
-    $RPM_BUILD_ROOT%{_sysconfdir}/clamd.conf
+    $RPM_BUILD_ROOT%{_sysconfdir}/clamd.conf.sample
 
 
 rm $RPM_BUILD_ROOT%{_mandir}/man8/clamav-milter.8
@@ -277,8 +266,14 @@ rm $RPM_BUILD_ROOT%{_mandir}/man8/clamav-milter.8
 rm -f	${RPM_BUILD_ROOT}%_libdir/*.la
 rm -f	${RPM_BUILD_ROOT}%_libdir/clamunrar*
 
-#touch ${RPM_BUILD_ROOT}%homedir/daily.cld
-#touch ${RPM_BUILD_ROOT}%homedir/main.cld
+mkdir -p $RPM_BUILD_ROOT%{_var}/lib/clamav
+touch $RPM_BUILD_ROOT%{_var}/lib/clamav/daily.cld
+touch $RPM_BUILD_ROOT%{_var}/lib/clamav/daily.cvd
+touch $RPM_BUILD_ROOT%{_var}/lib/clamav/main.cld
+touch $RPM_BUILD_ROOT%{_var}/lib/clamav/main.cvd
+touch $RPM_BUILD_ROOT%{_var}/lib/clamav/bytecode.cld
+touch $RPM_BUILD_ROOT%{_var}/lib/clamav/bytecode.cvd
+touch $RPM_BUILD_ROOT%{_var}/lib/clamav/mirrors.dat
 
 
 ## prepare the server-files
@@ -375,7 +370,7 @@ CLAMAV_FRESHCLAM_CONF:WPShadow|freshclam.conf|<CLAMAV_FOLDER>|SHADOWID=((%_sysco
 %doc AUTHORS BUGS COPYING ChangeLog FAQ NEWS README UPGRADE
 %doc ReadMe.txt
 %doc docs/*.pdf
-%_bindir/*
+%_bindir/*.exe
 %_mandir/man[15]/*
 %exclude %_bindir/clamav-config
 %exclude %_bindir/freshclam.exe
@@ -402,15 +397,9 @@ CLAMAV_FRESHCLAM_CONF:WPShadow|freshclam.conf|<CLAMAV_FOLDER>|SHADOWID=((%_sysco
 
 %files data
 %defattr(-,%username,%username,-)
-# use %%config to keep files which were updated by 'freshclam'
-# already. Without this tag, they would be overridden with older
-# versions whenever a new -data package is installed.
-%config %verify(not size md5 mtime) %{_var}/lib/clamav/*.cvd
-
-
-%files data-empty
-%defattr(-,%username,%username,-)
 %ghost %attr(0664,%username,%username) %{_var}/lib/clamav/*.cvd
+%ghost %attr(0664,%username,%username) %{_var}/lib/clamav/*.cld
+%ghost %attr(0664,%username,%username) %{_var}/lib/clamav/*.dat
 
 
 ## -----------------------
@@ -420,13 +409,15 @@ CLAMAV_FRESHCLAM_CONF:WPShadow|freshclam.conf|<CLAMAV_FOLDER>|SHADOWID=((%_sysco
 %_bindir/freshclam.exe
 %_mandir/*/freshclam*
 #%pkgdatadir/freshclam-sleep
-%config(noreplace) %verify(not mtime)    %_sysconfdir/freshclam.conf
+%config(noreplace) %verify(not mtime)    %_sysconfdir/freshclam.conf.sample
 #%config(noreplace) %verify(not mtime)    %_sysconfdir/logrotate.d/*
 #%config(noreplace) %_sysconfdir/cron.d/*
 #%config(noreplace) %_sysconfdir/sysconfig/freshclam
 
 #%ghost %attr(0664,root,%username) %verify(not size md5 mtime) %freshclamlog
-#%ghost %attr(0664,%username,%username) %homedir/*.cld
+%ghost %attr(0664,%username,%username) %{_var}/lib/clamav/*.cld
+%ghost %attr(0664,%username,%username) %{_var}/lib/clamav/*.cvd
+%ghost %attr(0664,%username,%username) %{_var}/lib/clamav/*.dat
 
 
 ## -----------------------
@@ -435,10 +426,11 @@ CLAMAV_FRESHCLAM_CONF:WPShadow|freshclam.conf|<CLAMAV_FOLDER>|SHADOWID=((%_sysco
 %defattr(-,root,root,-)
 #%doc _doc_server/*
 %_mandir/man[58]/clamd*
-%_sbindir/*
+%_sbindir/*.exe
+%_sbindir/*.ico
 #%pkgdatadir/clamd-wrapper
 #%dir %_sysconfdir/clamd.d
-%config(noreplace) %verify(not mtime)    %_sysconfdir/clamd.conf
+%config(noreplace) %verify(not mtime)    %_sysconfdir/clamd.conf.sample
 
 
 %files server-sysvinit
@@ -463,7 +455,15 @@ CLAMAV_FRESHCLAM_CONF:WPShadow|freshclam.conf|<CLAMAV_FOLDER>|SHADOWID=((%_sysco
 %config(noreplace) %_sysconfdir/init/clamd.scan*
 %endif
 
+%files debug
+%defattr(-,root,root)
+%{_bindir}/*.dbg
+%{_libdir}/*.dbg
+%{_sbindir}/*.dbg
 
 %changelog
+* Thu Feb 05 2015 yd <yd@os2power.com> 0.98.6-6
+- r1001, update of source code to 0.98.6.
+
 * Thu Nov 24 2011 yd
 - fixed missing mmap check in build
