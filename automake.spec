@@ -7,7 +7,7 @@
 Summary:    A GNU tool for automatically creating Makefiles
 Name:       automake
 Version:    %{api_version}.1
-Release:    2%{?dist}
+Release:    3%{?dist}
 
 # docs ~> GFDL, sources ~> GPLv2+, mkinstalldirs ~> PD and install-sh ~> MIT
 License:    GPLv2+ and GFDL and Public Domain and MIT
@@ -16,7 +16,7 @@ Group:      Development/Tools
 #Source:     ftp://ftp.gnu.org/gnu/automake/automake-%{version}.tar.xz
 
 %define svn_url     http://svn.netlabs.org/repos/ports/automake/trunk
-%define svn_rev     755
+%define svn_rev     1006
 
 Source: %{name}-%{version}-r%{svn_rev}.zip
 
@@ -117,6 +117,9 @@ make -k %{?_smp_mflags} check %{?TESTS_FLAGS: TESTS="%{TESTS_FLAGS}"} \
 %{_mandir}/man1/*
 
 %changelog
+* Wed Feb 5 2015 Dmitriy Kuminov <coding@dmik.org> 1.14.1-3
+- aclocal: Work around 32K program arguments size limit on OS/2.
+
 * Wed Sep 3 2014 Dmitriy Kuminov <coding@dmik.org> 1.14.1-2
 - Rebuild with autoconf 2.69-2.
 
