@@ -6,7 +6,7 @@
 Summary: A high-level cross-protocol url-grabber
 Name: %{name}
 Version: %{version}
-Release: 6%{?dist}
+Release: 7%{?dist}
 Source0: %{name}-%{unmangled_version}.tar.gz
 Patch0: urlgrabber-os2.patch
 
@@ -19,6 +19,7 @@ Vendor: Michael D. Stenner, Ryan Tomayko <mstenner@linux.duke.edu, rtomayko@naeb
 Url: http://linux.duke.edu/projects/urlgrabber/
 
 Requires: python(abi) = %{python_version}
+Requires: python-pycurl
 
 %description
 A high-level cross-protocol url-grabber.
@@ -67,6 +68,9 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root)
 
 %changelog
+* Fri Feb 06 2015 yd <yd@os2power.com> 3.10.1-7
+- add python-curl requirement.
+
 * Thu Feb 05 2015 yd <yd@os2power.com> 3.10.1-6
 - source code update to 3.10.1.
 
