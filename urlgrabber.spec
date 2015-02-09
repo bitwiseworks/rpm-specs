@@ -6,7 +6,7 @@
 Summary: A high-level cross-protocol url-grabber
 Name: %{name}
 Version: %{version}
-Release: 7%{?dist}
+Release: 8%{?dist}
 Source0: %{name}-%{unmangled_version}.tar.gz
 Patch0: urlgrabber-os2.patch
 
@@ -68,6 +68,9 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root)
 
 %changelog
+* Mon Feb 09 2015 yd <yd@os2power.com> 3.10.1-8
+- fix progress bar display for multifile download.
+
 * Fri Feb 06 2015 yd <yd@os2power.com> 3.10.1-7
 - add python-curl requirement.
 
