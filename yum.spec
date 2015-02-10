@@ -1,13 +1,13 @@
 #define svn_url     F:/rd/rpm/yum/trunk
 %define svn_url     http://svn.netlabs.org/repos/rpm/yum/trunk
-%define svn_rev     516
+%define svn_rev     527
 
 %{!?python_sitelib: %define python_sitelib %(python -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
  
 Summary: RPM installer/updater
 Name: yum
 Version: 3.4.3
-Release: 7%{?dist}
+Release: 8%{?dist}
 License: GPLv2+
 Group: System Environment/Base
 
@@ -162,6 +162,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/*.dbg
 
 %changelog
+* Tue Feb 10 2015 yd <yd@os2power.com> 3.4.3-8
+- r527, do not rewrite paths starting with @unixroot.
+
 * Tue Feb 03 2015 yd <yd@os2power.com> 3.4.3-7
 - r516, update source code to version 3.4.3.
 
