@@ -1,20 +1,19 @@
 Summary: A library of functions for manipulating PNG image format files
 Name: libpng
-Version: 1.6.10
+Version: 1.6.14
 Release: 1%{?dist}
 License: zlib
 Group: System Environment/Libraries
 URL: http://www.libpng.org/pub/png/
+#define svn_url	    e:/trees/libpng/trunk
+%define svn_url     http://svn.netlabs.org/repos/ports/libpng/trunk
+%define svn_rev     933
 
-# Note: non-current tarballs get moved to the history/ subdirectory,
-# so look there if you fail to retrieve the version you want
-Source0: ftp://ftp.simplesystems.org/pub/libpng/png/src/libpng16/libpng-%{version}.tar.xz
-
-Patch0: libpng-os2.patch
+Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
 BuildRequires: zlib-devel, pkgconfig
-#BuildRequires: libtool, autoconf >= 2.65
-#BuildRequires: automake
+BuildRequires: libtool, autoconf >= 2.65
+BuildRequires: automake
 
 %description
 The libpng package contains a library of functions for creating and
@@ -59,32 +58,37 @@ Requires: %{name}%{?_isa} = %{version}-%{release}
 The libpng-tools package contains tools used by the authors of libpng.
 
 %package debug
-Summary: HLL debug data for exception handling support.
+Summary: HLL debug data for exception handling support
 
 %description debug
-HLL debug data for exception handling support.
+%{summary}.
 
 %prep
+%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{?!svn_rev):0}
 %setup -q
-%patch0 -p1
+%else
+%setup -n "%{name}-%{version}" -Tc
+svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
+rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
+(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
+%endif
+
+autoreconf -f -i
 
 %build
-export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
 export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp" ; \
-export LIBS="-lurpo -lmmap -lpthread" ; \
+
 %configure
 make %{?_smp_mflags}
 
 %install
 make DESTDIR=$RPM_BUILD_ROOT install
 
-cp -p .libs/*.dll %{buildroot}%{_libdir}
-cp -p libpng*.a %{buildroot}%{_libdir}
-cp -p libpng*.lib %{buildroot}%{_libdir}
-rm %{buildroot}%{_libdir}/png*.a
-
-# We don't ship .la files.
+# We don't ship .la files
 rm -rf $RPM_BUILD_ROOT%{_libdir}/*.la
+
+%clean
+rm -rf $RPM_BUILD_ROOT
 
 %files
 %doc libpng-manual.txt example.c README TODO CHANGES LICENSE
@@ -95,14 +99,12 @@ rm -rf $RPM_BUILD_ROOT%{_libdir}/*.la
 %{_bindir}/*.exe
 %{_bindir}/*-config
 %{_includedir}/*
-%{_libdir}/libpng.a
-%{_libdir}/libpng??.a
-%{_libdir}/libpng??.lib
+%{_libdir}/png*_dll.a
 %{_libdir}/pkgconfig/libpng*.pc
 %{_mandir}/man3/*
 
 %files static
-%{_libdir}/libpng*_s.a
+%{_libdir}/png??.a
 
 %files tools
 %{_bindir}/pngfix.exe
@@ -113,5 +115,9 @@ rm -rf $RPM_BUILD_ROOT%{_libdir}/*.la
 %{_libdir}/*.dbg
 
 %changelog
+* Tue Feb 10 2015 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.6.14-1
+- updated libpng to 1.6.14
+- added .dbg files
+
 * Thu Apr 17 2014 yd
 - first public build.
