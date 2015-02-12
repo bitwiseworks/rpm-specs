@@ -1,14 +1,14 @@
 Summary:	PDF rendering library
 Name:		poppler
-Version:	0.29.0
-Release:	0%{?dist}
+Version:	0.31.0
+Release:	1%{?dist}
 License:	(GPLv2 or GPLv3) and GPLv2+ and LGPLv2+ and MIT
 Group:		Development/Libraries
 # Source0:	http://poppler.freedesktop.org/%{name}-%{version}.tar.xz
 URL:		http://poppler.freedesktop.org/
-%define svn_url	    e:/trees/poppler/trunk
-#%define svn_url     http://svn.netlabs.org/repos/ports/poppler/trunk
-#%define svn_rev     939
+#define svn_url	    e:/trees/poppler/trunk
+%define svn_url     http://svn.netlabs.org/repos/ports/poppler/trunk
+%define svn_rev     1022
 
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
@@ -118,6 +118,12 @@ Requires:	%{name}-glib%{?_isa} = %{version}-%{release}
 %description demos
 %{summary}.
 
+%package debug
+Summary: HLL debug data for exception handling support
+
+%description debug
+%{summary}.
+
 %prep
 %if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{?!svn_rev):0}
 %setup -q
@@ -148,6 +154,7 @@ export POPPLER_QT4_TEST_LIBS
 
 %configure \
 	--enable-poppler-qt4=yes --enable-zlib=yes \
+	--enable-libopenjpeg=none \
 	--enable-shared --disable-static \
 	--enable-xpdf-headers
 
@@ -172,7 +179,7 @@ rm -rf $RPM_BUILD_ROOT
 %files devel
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/poppler_dll.a
-%attr(755,root,root) %{_libdir}/poppler48_dll.a
+%attr(755,root,root) %{_libdir}/poppler50_dll.a
 %{_libdir}/pkgconfig/poppler.pc
 %{_libdir}/pkgconfig/poppler-splash.pc
 %dir %{_includedir}/poppler/
@@ -214,10 +221,19 @@ rm -rf $RPM_BUILD_ROOT
 
 %files utils
 %defattr(644,root,root,755)
-%{_bindir}/pdf*
+%{_bindir}/pdf*.exe
 %{_mandir}/man1/*
 
+%files debug
+%defattr(-,root,root)
+%{_bindir}/*.dbg
+%{_libdir}/*.dbg
+
 %changelog
+* Wed Feb 11 2015 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.31.0-1
+- updated poppler to 0.31.0
+- added .dbg files
+
 * Mon Dec 15 2014 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.29.0
 - updated poppler to 0.29.0
 - added poppler-data as requirement
