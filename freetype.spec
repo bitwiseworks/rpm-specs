@@ -1,6 +1,6 @@
 Summary: A free and portable font rendering engine
 Name: freetype
-Version: 2.5.3
+Version: 2.5.5
 Release: 1%{?dist}
 License: (FTL or GPLv2+) and BSD and MIT and Public Domain and zlib with acknowledgement
 Group: System Environment/Libraries
@@ -8,9 +8,11 @@ URL: http://www.freetype.org
 #Source:  http://download.savannah.gnu.org/releases/freetype/freetype-%{version}.tar.bz2
 #Source1: http://download.savannah.gnu.org/releases/freetype/freetype-doc-%{version}.tar.bz2
 #Source2: http://download.savannah.gnu.org/releases/freetype/ft2demos-%{version}.tar.bz2
+#define svn_url	    e:/trees/freetype/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/freetype2/trunk
-%define svn_rev     890
-Source: %{name}-%{version}-r%{svn_rev}.zip
+%define svn_rev     1029
+
+Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
 BuildRoot: %{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
@@ -53,15 +55,20 @@ for the FreeType font rendering engine.
 Install freetype-devel if you want to develop programs which will use
 FreeType.
 
+%package debug
+Summary: HLL debug data for exception handling support
+
+%description debug
+%{summary}.
 
 %prep
-%if %(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')
+%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{?!svn_rev):0}
 %setup -q
 %else
 %setup -n "%{name}-%{version}" -Tc
-svn export -r %{svn_rev} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" "%{name}-%{version}")
+svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
+rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
+(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
 %endif
 autogen.sh
 
@@ -117,7 +124,14 @@ rm -rf $RPM_BUILD_ROOT
 %doc docs/reference
 %{_mandir}/man1/*
 
+%files debug
+%defattr(-,root,root)
+%{_libdir}/*.dbg
 
 %changelog
+* Wed Feb 11 2015 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.5.5-1
+- updated source to 2.5.5
+- added .dbg files
+
 * Mon Oct 6 2014 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.5.3-1
 - first version
