@@ -14,6 +14,8 @@ Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 BuildRoot: %{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 BuildRequires: gettext, ncurses-devel, pkgconfig
+#Requires(pre): /sbin/install-info
+#Requires(preun): /sbin/install-info
 Requires: aspell-en
 Provides: pspell < 0.13
 Obsoletes: pspell < 0.13
@@ -33,6 +35,8 @@ than one Aspell process is open at once.
 Summary: Static libraries and header files for Aspell development
 Group: Development/Libraries
 Requires: %{name} = %{version}-%{release}
+#Requires(pre): /sbin/install-info
+#Requires(preun): /sbin/install-info
 Requires: pkgconfig
 Provides: pspell-devel < 0.13
 Obsoletes: pspell-devel < 0.13
@@ -79,11 +83,32 @@ rm -f ${RPM_BUILD_ROOT}%{_libdir}/*.la
 rm -f ${RPM_BUILD_ROOT}%{_libdir}/aspell-0.60/*.la
 chmod 644 ${RPM_BUILD_ROOT}%{_bindir}/aspell-import
 
-#find_lang %{name}
+%find_lang %{name}
 
+#%post   
+#/sbin/install-info %{_infodir}/aspell.info.gz %{_infodir}/dir --entry="* Aspell: (aspell). "  || : 
 
-%files
-# -f %{name}.lang
+#%post        devel
+#/sbin/install-info %{_infodir}/aspell-dev.info.gz %{_infodir}/dir --entry="* Aspell-dev: (aspell-dev). " || :
+
+#%preun 
+#if [ $1 = 0 ]; then
+#    /sbin/install-info --delete %{_infodir}/aspell.info.gz %{_infodir}/dir 
+#fi
+#exit 0
+
+#%preun       devel
+#if [ $1 = 0 ]; then
+#    /sbin/install-info --delete %{_infodir}/aspell-dev.info.gz %{_infodir}/dir 
+#fi
+#exit 0
+
+#%postun
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%files -f %{name}.lang
 %defattr(-,root,root)
 %doc README TODO COPYING
 %dir %{_libdir}/aspell-0.60
