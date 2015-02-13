@@ -1,6 +1,6 @@
 #define svn_url     F:/rd/ports/gettext/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/gettext/trunk
-%define svn_rev     982
+%define svn_rev     1005
 
 %bcond_with jar
 %bcond_with java
@@ -9,8 +9,8 @@
 
 Summary: GNU libraries and utilities for producing multi-lingual messages
 Name: gettext
-Version: 0.18.1.1
-Release: 7%{?dist}
+Version: 0.18.3.2
+Release: 1%{?dist}
 License: GPLv3+ and LGPLv2+
 Group: Development/Tools
 URL: http://www.gnu.org/software/gettext/
@@ -32,7 +32,7 @@ BuildRequires: zip, unzip
 %endif
 %endif
 # need expat for xgettext on glade
-#Buildrequires: expat-devel
+Buildrequires: expat-devel
 # for po-mode.el
 #BuildRequires: emacs
 %if %{with git}
@@ -67,7 +67,7 @@ Requires: %{name} = %{version}-%{release}
 Requires: %{name}-libs = %{version}-%{release}
 # for autopoint
 #Requires: git
-Obsoletes: gettext-autopoint < 0.18.1.1-3
+Obsoletes: gettext-autopoint < 0.18.3.2-1
 Provides: gettext-autopoint = %{version}-%{release}
 
 
@@ -150,7 +150,7 @@ autogen.sh --skip-gnulib --quick
 
 %configure \
     --without-included-gettext --enable-nls \
-    --without-included-libxml \
+    --with-libxml2-prefix=/@unixroot/usr/include/libxml2 \
     --disable-csharp \
     --disable-java --disable-native-java\
     --disable-git \
@@ -171,7 +171,7 @@ make install DESTDIR=${RPM_BUILD_ROOT} \
     lispdir=%{_datadir}/emacs/site-lisp/gettext \
     aclocaldir=%{_datadir}/aclocal EXAMPLESFILES=""
 
-rm -f ${RPM_BUILD_ROOT}%{_datadir}/gettext/archive.git.tar.gz
+#rm -f ${RPM_BUILD_ROOT}%{_datadir}/gettext/archive.git.tar.gz
 
 # OS/2 specific files
 rm -f ${RPM_BUILD_ROOT}%{_libdir}/charset.alias
@@ -291,7 +291,7 @@ rm -rf ${RPM_BUILD_ROOT}
 %doc gettext-runtime/man/*.1.html
 %doc gettext-runtime/intl/COPYING*
 #/bin/*
-#%exclude %{_bindir}/autopoint
+%exclude %{_bindir}/autopoint
 %{_bindir}/*
 %{_infodir}/gettext*
 %exclude %{_mandir}/man1/autopoint.1*
@@ -310,8 +310,8 @@ rm -rf ${RPM_BUILD_ROOT}
 %files devel
 %defattr(-,root,root,-)
 #%doc gettext-runtime/man/*.3.html ChangeLog
-#%{_bindir}/autopoint
-#%{_datadir}/%{name}/archive.*.tar.gz
+%{_bindir}/autopoint
+%{_datadir}/%{name}/archive.*.tar.xz
 %{_datadir}/%{name}/projects/
 %{_datadir}/%{name}/config.rpath
 %{_datadir}/%{name}/*.h
@@ -356,6 +356,9 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_libdir}/*.dbg
 
 %changelog
+* Fri Feb 13 2015 yd <yd@os2power.com> 0.18.3.2-1
+- r1005 and others, updated source code to 0.18.3.2.
+
 * Mon Feb 02 2015 yd <yd@os2power.com> 0.18.1.1-7
 - rebuilt with gcc 4.9.2.
 
