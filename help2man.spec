@@ -7,7 +7,7 @@
 Name:           help2man
 Summary:        Create simple man pages from --help output
 Version:        1.46.4
-Release:        1%{?dist}
+Release:        2%{?dist}
 Group:          Development/Tools
 License:        GPLv3+
 URL:            http://www.gnu.org/software/help2man
@@ -24,7 +24,7 @@ BuildRequires: gcc make subversion zip
 
 %{!?with_nls:BuildArch: noarch}
 
-#BuildRequires:  texinfo
+BuildRequires:  texinfo
 #BuildRequires:  perl(Getopt::Long)
 #BuildRequires:  perl(POSIX)
 #BuildRequires:  perl(Text::ParseWords)
@@ -34,8 +34,9 @@ BuildRequires: gcc make subversion zip
 %{?with_nls:BuildRequires: perl(Encode)}
 %{?with_nls:BuildRequires: perl(I18N::Langinfo)}
 
-#Requires(post): /sbin/install-info
-#Requires(preun): /sbin/install-info
+# @todo Replace with `%info_requires` when it's available.
+Requires(post): %{_sbindir}/install-info.exe
+Requires(preun): %{_sbindir}/install-info.exe
 
 %description
 help2man is a script to create simple man pages from the --help and
@@ -69,14 +70,22 @@ rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT
 #%find_lang %name --with-man
 
-#%post
-#/sbin/install-info %{_infodir}/help2man.info %{_infodir}/dir 2>/dev/null || :
+%post
+# @todo Replace with `%info_post foobar.info` when it's available.
+if [ -f %{_infodir}/help2man.info ]; then
+    %{_sbindir}/install-info.exe %{_infodir}/help2man.info %{_infodir}/dir || :
+fi
 
-#%preun
-#if [ $1 -eq 0 ]; then
-#  /sbin/install-info --delete %{_infodir}/help2man.info \
-#    %{_infodir}/dir 2>/dev/null || :
-#fi
+%preun
+# @todo Replace with `%info_preun foobar.info` when it's available.
+if [ $1 -eq 0 ]; then
+    # @todo: don't remove these comment lines! See http://trac.netlabs.org/rpm/ticket/118 for more info.
+    #################################
+    #################################
+    if [ -f %{_infodir}/help2man.info ]; then
+        %{_sbindir}/install-info.exe --delete %{_infodir}/help2man.info %{_infodir}/dir || :
+    fi
+fi
 
 # See above
 #%files -f %name.lang
@@ -91,5 +100,8 @@ make install DESTDIR=$RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Fri Feb 13 2015 Dmitriy Kuminov <coding@dmik.org> 1.46.4-2
+- Enable proper info file and locale data installation.
+
 * Tue Jan 20 2015 Dmitriy Kuminov <coding@dmik.org> 1.46.4-1
 - Initial package for version 1.46.4.
