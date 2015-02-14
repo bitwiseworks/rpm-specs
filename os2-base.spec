@@ -2,7 +2,7 @@
 Summary: OS/2 - eComStation 2.0 base
 Name: os2-base
 Version: 0.0.0
-Release: 7%{?dist}
+Release: 8%{?dist}
 
 License: free
 
@@ -292,8 +292,10 @@ if [ "$1" = 1 ] ; then
 %cube {ADDSTRING "%UNIXROOT%\usr\sbin;%UNIXROOT%\usr\bin;" IN "SET PATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys c:\config.sys.yum > NUL
 %cube {ADDSTRING "%UNIXROOT%\usr\lib;" IN "LIBPATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
 %cube {DELLINE "SET UNIXROOT="} c:\config.sys > NUL
-%cube {ADDLINE "SET UNIXROOT=%UNIXROOT%"} c:\config.sys > NUL
+%cube {ADDLINE "SET UNIXROOT=%UNIXROOT%" (ALWAYS)} c:\config.sys > NUL
 fi
+%cube {DELLINE "SET TERM="} c:\config.sys > NUL
+%cube {ADDLINE "SET TERM=ansi" (ALWAYS)} c:\config.sys > NUL
 
 %postun
 if [ "$1" = 0 ] ; then
@@ -301,6 +303,7 @@ if [ "$1" = 0 ] ; then
 %cube {DELSTRING "%UNIXROOT%\usr\sbin;%UNIXROOT%\usr\bin;" IN "SET PATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
 %cube {DELSTRING "%UNIXROOT%\usr\lib;" IN "LIBPATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
 %cube {DELLINE "SET UNIXROOT="} c:\config.sys > NUL
+%cube {DELLINE "SET TERM="} c:\config.sys > NUL
 fi
 
 %post fhs
@@ -329,6 +332,9 @@ fi
 
 
 %changelog
+* Sat Feb 14 2015 yd <yd@os2power.com> 0.0.0-8
+- force TERM to ansi (texinfo requirement).
+
 * Tue Jul 30 2013 yd
 - add unixtool-path package to prepend /@unixroot/usr/libexec/bin to PATH.
 
