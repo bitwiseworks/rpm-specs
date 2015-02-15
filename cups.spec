@@ -42,7 +42,7 @@
 Summary: CUPS
 Name: cups
 Version: 1.4.8
-Release: 0%{?dist}
+Release: 1%{?dist}
 Epoch: 1
 
 License: GPL
@@ -285,5 +285,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/cups/daemon/*.dbg
 
 %changelog
+* Sun Feb 15 2015 yd <yd@os2power.com> 1.4.8-1
+- rebuild for new libpng release.
+
 * Tue Dec 18 2014 yd
 - r944, initial unixroot build.

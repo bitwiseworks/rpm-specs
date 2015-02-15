@@ -11,7 +11,7 @@ Summary: A PostScript interpreter and renderer
 Name: ghostscript
 Version: %{gs_ver}
 
-Release: 3%{?dist}
+Release: 4%{?dist}
 
 # Included CMap data is Redistributable, no modification permitted,
 # see http://bugzilla.redhat.com/487510
@@ -326,6 +326,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/*.dbg
 
 %changelog
+* Sun Feb 15 2015 yd <yd@os2power.com> 9.10-4
+- rebuild for new libpng release.
+
 * Tue Dec 16 2014 yd
 - r937, r941, fix FONTPATH handling, add PSFONTS dir.
 
