@@ -136,6 +136,9 @@ make
 rm -rf $RPM_BUILD_ROOT
 
 make BUILDROOT=$RPM_BUILD_ROOT install
+# remove readonly flag, emxomfstrip otherwise fails
+cd $RPM_BUILD_ROOT
+attrib -r "*" /s
 
 %clean
 rm -rf $RPM_BUILD_ROOT
