@@ -6,7 +6,7 @@
 Summary: A high-level cross-protocol url-grabber
 Name: %{name}
 Version: %{version}
-Release: 8%{?dist}
+Release: 9%{?dist}
 Source0: %{name}-%{unmangled_version}.tar.gz
 Patch0: urlgrabber-os2.patch
 
@@ -68,6 +68,9 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root)
 
 %changelog
+* Mon Feb 16 2015 yd <yd@os2power.com> 3.10.1-9
+- fix progress bar display for multifile download.
+
 * Mon Feb 09 2015 yd <yd@os2power.com> 3.10.1-8
 - fix progress bar display for multifile download.
 
