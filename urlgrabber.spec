@@ -52,7 +52,7 @@ following features:
 
 %prep
 %setup -n %{name}-%{unmangled_version}
-%patch0 -p0 -b .os2~
+%patch0 -p1 -b .os2~
 
 %build
 python setup.py build
