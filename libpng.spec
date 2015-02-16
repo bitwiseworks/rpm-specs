@@ -5,9 +5,9 @@ Release: 1%{?dist}
 License: zlib
 Group: System Environment/Libraries
 URL: http://www.libpng.org/pub/png/
-%define svn_url	    e:/trees/libpng/trunk
-#define svn_url     http://svn.netlabs.org/repos/ports/libpng/trunk
-#define svn_rev     1062
+#define svn_url	    e:/trees/libpng/trunk
+%define svn_url     http://svn.netlabs.org/repos/ports/libpng/trunk
+%define svn_rev     1062
 
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
