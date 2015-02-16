@@ -42,7 +42,7 @@
 Summary: CUPS
 Name: cups
 Version: 1.4.8
-Release: 1%{?dist}
+Release: 2%{?dist}
 Epoch: 1
 
 License: GPL
@@ -53,6 +53,9 @@ Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 Url: http://www.cups.org
 Packager: Anonymous <anonymous@foo.com>
 Vendor: Apple Inc.
+
+BuildRequires: libpng-devel, libjpeg-devel, libtiff-devel, libusb-compat-devel
+BuildRequires: openssl-devel, zlib-devel
 
 # Use buildroot so as not to disturb the version already installed
 BuildRoot: /tmp/%{name}-root
@@ -288,7 +291,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/cups/daemon/*.dbg
 
 %changelog
-* Sun Feb 15 2015 yd <yd@os2power.com> 1.4.8-1
+* Sun Feb 15 2015 yd <yd@os2power.com> 1.4.8-1 1.4.8-2
 - rebuild for new libpng release.
 
 * Tue Dec 18 2014 yd
