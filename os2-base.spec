@@ -2,7 +2,7 @@
 Summary: OS/2 - eComStation 2.0 base
 Name: os2-base
 Version: 0.0.0
-Release: 9%{?dist}
+Release: 10%{?dist}
 
 License: free
 
