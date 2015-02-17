@@ -5,7 +5,7 @@
 Summary: Tools needed to create Texinfo format documentation files
 Name: texinfo
 Version: 5.2
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Group: Applications/Publishing
 Url: http://www.gnu.org/software/texinfo/
@@ -14,7 +14,7 @@ Url: http://www.gnu.org/software/texinfo/
 #Source1: ftp://ftp.gnu.org/gnu/texinfo/texinfo-%{version}.tar.xz.sig
 
 %define svn_url     http://svn.netlabs.org/repos/ports/texinfo/trunk
-%define svn_rev     1043
+%define svn_rev     1066
 
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
@@ -212,5 +212,8 @@ fi
 %{_mandir}/man1/pdftexi2dvi.1*
 
 %changelog
+* Tue Feb 17 2015 Dmitriy Kuminov <coding@dmik.org> 5.2-2
+- Make @unixroot strings properly quoted in perl scripts.
+
 * Fri Feb 13 2015 Dmitriy Kuminov <coding@dmik.org> 5.2-1
 - Initial package for version 5.2.
