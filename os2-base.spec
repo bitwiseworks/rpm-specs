@@ -2,7 +2,7 @@
 Summary: OS/2 - eComStation 2.0 base
 Name: os2-base
 Version: 0.0.0
-Release: 8%{?dist}
+Release: 9%{?dist}
 
 License: free
 
@@ -294,8 +294,7 @@ if [ "$1" = 1 ] ; then
 %cube {DELLINE "SET UNIXROOT="} c:\config.sys > NUL
 %cube {ADDLINE "SET UNIXROOT=%UNIXROOT%" (ALWAYS)} c:\config.sys > NUL
 fi
-%cube {DELLINE "SET TERM="} c:\config.sys > NUL
-%cube {ADDLINE "SET TERM=ansi" (ALWAYS)} c:\config.sys > NUL
+%cube {ADDLINE "SET TERM=os2" (IFNEW)} c:\config.sys > NUL
 
 %postun
 if [ "$1" = 0 ] ; then
@@ -332,6 +331,9 @@ fi
 
 
 %changelog
+* Tue Feb 17 2015 yd <yd@os2power.com> 0.0.0-9
+- set TERM to os2 only if undefined.
+
 * Sat Feb 14 2015 yd <yd@os2power.com> 0.0.0-8
 - force TERM to ansi (texinfo requirement).
 
