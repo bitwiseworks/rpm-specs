@@ -294,7 +294,7 @@ if [ "$1" = 1 ] ; then
 %cube {DELLINE "SET UNIXROOT="} c:\config.sys > NUL
 %cube {ADDLINE "SET UNIXROOT=%UNIXROOT%" (ALWAYS)} c:\config.sys > NUL
 fi
-%cube {ADDLINE "SET TERM=os2" (IFNEW)} c:\config.sys > NUL
+%cube {ADDLINE "SET TERM=os2" (IFNOT "SET TERM")} c:\config.sys > NUL
 
 %postun
 if [ "$1" = 0 ] ; then
@@ -331,7 +331,7 @@ fi
 
 
 %changelog
-* Tue Feb 17 2015 yd <yd@os2power.com> 0.0.0-9
+* Tue Feb 17 2015 yd <yd@os2power.com> 0.0.0-10
 - set TERM to os2 only if undefined.
 
 * Sat Feb 14 2015 yd <yd@os2power.com> 0.0.0-8
