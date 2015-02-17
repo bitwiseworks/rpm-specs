@@ -4,8 +4,8 @@
 
 Summary: The GNU Portable Library Tool
 Name:    libtool
-Version: 2.4.2
-Release: 9%{?dist}
+Version: 2.4.6
+Release: 1%{?dist}
 License: GPLv2+ and LGPLv2+ and GFDL
 URL:     http://www.gnu.org/software/libtool/
 Group:   Development/Tools
@@ -13,14 +13,15 @@ Group:   Development/Tools
 #Source:  http://ftp.gnu.org/gnu/libtool/libtool-%{version}.tar.xz
 
 %define svn_url     http://svn.netlabs.org/repos/ports/libtool/trunk
-%define svn_rev     955
+%define svn_rev     1070
 
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
 BuildRequires: gcc make subversion zip
 
-#Requires(post):  /sbin/install-info
-#Requires(preun): /sbin/install-info
+# @todo Replace with `%info_requires` when it's available.
+Requires(post): %{_sbindir}/install-info.exe
+Requires(preun): %{_sbindir}/install-info.exe
 
 BuildRequires: autoconf, automake
 #BuildRequires: texinfo
@@ -89,14 +90,16 @@ rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
 (cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
 %endif
 
-# make sure configure is updated to properly support OS/2
-bootstrap
+# Make sure configure is updated to properly support OS/2
+export PATH=`echo $PATH | tr '\\\\' /`
+./bootstrap --copy --force --skip-git
+
+# Restore .version and ChangeLog as they are not properly regenerated (they need .git)
+rm -f .version ChangeLog
+mv .version~ .version
+mv ChangeLog~ ChangeLog
 
 %build
-
-# we don't have makeinfo/help2man yet; fake them (this will wipe docs out)
-export MAKEINFO=:
-export HELP2MAN=:
 
 %configure  --prefix=%{_prefix}                 \
             --exec-prefix=%{_prefix}            \
@@ -133,18 +136,24 @@ rm -f %{buildroot}%{_infodir}/dir
 rm -f %{buildroot}%{_libdir}/libltdl.la
 rm -f %{buildroot}%{_libdir}/ltdl.a
 
-#%post
-#/sbin/install-info %{_infodir}/libtool.info.gz %{_infodir}/dir || :
+%post
+# @todo Replace with `%info_post foobar.info` when it's available.
+if [ -f %{_infodir}/libtool.info ]; then
+    %{_sbindir}/install-info.exe %{_infodir}/libtool.info %{_infodir}/dir || :
+fi
 
-#%preun
-#if [ "$1" = 0 ]; then
-#   /sbin/install-info --delete %{_infodir}/libtool.info.gz %{_infodir}/dir || :
-#fi
+%preun
+# @todo Replace with `%info_preun foobar.info` when it's available.
+if [ $1 -eq 0 ]; then
+    if [ -f %{_infodir}/libtool.info ]; then
+        %{_sbindir}/install-info.exe --delete %{_infodir}/libtool.info %{_infodir}/dir || :
+    fi
+fi
 
 %files
 %defattr(-,root,root)
 %doc AUTHORS COPYING NEWS README THANKS TODO ChangeLog*
-#%{_infodir}/libtool.info*.gz
+%{_infodir}/libtool.info*
 %{_mandir}/man1/libtool.1*
 %{_mandir}/man1/libtoolize.1*
 %{_bindir}/libtool
@@ -172,6 +181,9 @@ rm -f %{buildroot}%{_libdir}/ltdl.a
 %{_libdir}/*.dbg
 
 %changelog
+* Tue Feb 17 2015 Dmitriy Kuminov <coding@dmik.org> 2.4.6-1
+- Update to version 2.4.6 from vendor.
+
 * Tue Jan 23 2015 yd
 - rebuild for gcc 4.9.2.
 
