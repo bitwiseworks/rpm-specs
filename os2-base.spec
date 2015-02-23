@@ -247,7 +247,7 @@ License:        free
 Summary:        Provides a /@unixroot/bin directory for posix compatibility.
 
 %description fhs
-Adds /bin to provide posix directory compatibility for shell script esecution
+Adds /bin to provide posix directory compatibility for shell script execution
 (as /bin/sh) as FHS http://www.linuxfoundation.org/collaborate/workgroups/lsb/fhs
 
 %package unixtools-path
