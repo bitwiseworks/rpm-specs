@@ -1,3 +1,7 @@
+#define svn_url     F:/rd/rpm/python/trunk
+%define svn_url     http://svn.netlabs.org/repos/rpm/python/trunk
+%define svn_rev     560
+
 %{!?__python_ver:%global __python_ver EMPTY}
 #global __python_ver 2.7
 %global unicode ucs4
@@ -45,15 +49,12 @@
 Summary: An interpreted, interactive, object-oriented programming language
 Name: %{python}
 Version: 2.7.6
-Release: 10%{?dist}
+Release: 11%{?dist}
 License: Python
 Group: Development/Languages
 Provides: python-abi = %{pybasever}
 Provides: python(abi) = %{pybasever}
-Source: http://www.python.org/ftp/python/%{version}/Python-%{version}.tar.xz
-
-Patch0: Python-%{version}-os2.diff
-Patch1: Python-%{version}-os2knix.diff
+Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
 %if %{main_python}
 Obsoletes: Distutils
@@ -73,14 +74,11 @@ Provides: python-uuid = 1.31
 
 # YD unix adds this automatically by parsing elf binaries
 Requires: %{name}-libs = %{version}-%{release}
-Requires: pthread
-Requires: gettext-libs
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-#BuildRequires: readline-devel, openssl-devel, gmp-devel
-BuildRequires: readline-devel, openssl-devel
+BuildRequires: readline-devel, openssl-devel, gmp-devel
 #BuildRequires: gdbm-devel, zlib-devel, expat-devel
-BuildRequires: ncurses-devel, zlib-devel
+BuildRequires: ncurses-devel, zlib-devel, expat-devel
 #BuildRequires: libGL-devel tk tix gcc-c++ libX11-devel glibc-devel
 #BuildRequires: tar findutils pkgconfig tcl-devel tk-devel
 BuildRequires: bzip2 pkgconfig tcl-devel
@@ -213,7 +211,14 @@ Summary: HLL debug data for exception handling support.
 HLL debug data for exception handling support.
 
 %prep
-%setup -q -n Python-%{version}
+%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
+%setup -q
+%else
+%setup -n "%{name}-%{version}" -Tc
+svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
+rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
+(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
+%endif
 
 %if 0%{?with_systemtap}
 # Provide an example of usage of the tapset:
@@ -232,29 +237,19 @@ cp -a %{SOURCE5} .
 #   Remove embedded copy of zlib:
 #rm -r Modules/zlib || exit 1
 
-#
-# Apply patches:
-#
-%patch0 -p1 -b .os2~
-%patch1 -p1 -b .os2knix~
-
 mkdir Lib/plat-os2knix
 
 # This shouldn't be necesarry, but is right now (2.2a3)
 find -name "*~" |xargs rm -f
 
 %build
-export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
-export SHELL=$CONFIG_SHELL
-export EMXSHELL=$CONFIG_SHELL
-export MAKESHELL=$CONFIG_SHELL
-
-export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+export CONFIG_SITE="/@unixroot/usr/share/config.legacy"
+export LDFLAGS="-g -Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 export LIBS="-lssl -lcrypto -lurpo -lmmap -lpthread -lintl"
 %configure \
         --enable-shared --disable-static \
-        --with-system-ffi --with-libs='-lmmap' \
-        "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
+	--with-system-expat \
+        --with-system-ffi --with-libs='-lmmap'
 
 make OPT="$CFLAGS" %{?_smp_mflags}
 
@@ -578,6 +573,10 @@ fi
 %{_libdir}/*.dbg
 
 %changelog
+* Thu Feb 26 2015 yd <yd@os2power.com> 2.7.6-11
+- r560, -O3 breaks the build, at least for pentium4 march.
+- r529, use unixroot path for script path replacement. Fixes ticket#114.
+
 * Mon Apr 07 2014 yd
 - build for python 2.7.
 
