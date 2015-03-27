@@ -1,12 +1,12 @@
 %define svn_url     http://svn.netlabs.org/repos/ports/pthread/trunk
-%define svn_rev     813
+%define svn_rev     1118
 
 %define kmk_dist out/os2.x86/release/dist
 
 Summary: A posix pthread emulation for OS/2-eComStation
 Name: pthread
-Version: 20140814
-Release: 16%{?dist}
+Version: 20150327
+Release: 17%{?dist}
 License: unknown
 Group: Development/Libraries
 Source: %{name}-%{version}-r%{svn_rev}.zip
@@ -83,6 +83,9 @@ rm -rf %{buildroot}
 %{_libdir}/*.dbg
 
 %changelog
+* Fri Mar 27 2015 yd <yd@os2power.com> 20150327-17
+- r1118, Change pthread_yield() return value to int, fixes ticket#63.
+
 * Thu Aug 14 2014 yd
 - r812-813, set stack to be at least 2MB for new threads.
 - Pull sources directly from SVN/GIT, ticket#76.
