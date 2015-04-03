@@ -1,3 +1,5 @@
+# Note: this .spec is borrowed from openssl-1.0.0k-2.1.src.rpm
+
 # For the curious:
 # 0.9.5a soversion = 0
 # 0.9.6  soversion = 1
@@ -20,7 +22,7 @@
 
 Summary: A general purpose cryptography library with TLS implementation
 Name: openssl
-Version: 1.0.0n
+Version: 1.0.0r
 Release: 1%{?dist}
 
 #Source: openssl-%{version}.tar.gz
@@ -29,15 +31,12 @@ License: OpenSSL
 Group: System Environment/Libraries
 URL: http://www.openssl.org/
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
-
-#BuildRequires: mktemp, krb5-devel, perl, sed, zlib-devel, /usr/bin/cmp
-BuildRequires: zlib-devel
-#BuildRequires: /usr/bin/rename
-#Requires: mktemp
-Requires: ca-certificates
+BuildRequires: coreutils, perl, sed, zlib-devel, diffutils
+# krb5-devel
+Requires: coreutils, ca-certificates
 
 %define svn_url     http://svn.netlabs.org/repos/ports/openssl/branches/1.0.0
-%define svn_rev     843
+%define svn_rev     1133
 
 Source: %{name}-%{version}-r%{svn_rev}.zip
 
@@ -96,7 +95,7 @@ rm -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip"
 %endif
 
 # Modify the various perl scripts to reference perl in the right location.
-perl util/perlpath.pl `dirname %{__perl}`
+%{__perl} util/perlpath.pl `dirname %{__perl}`
 
 # Generate a table with the compile settings for my perusal.
 touch Makefile
@@ -110,15 +109,21 @@ sslarch=OS2-KNIX
 # Configure the build tree.  Override OpenSSL defaults with known-good defaults
 # usable on all platforms.  The Configure script already knows to use -fPIC and
 # RPM_OPT_FLAGS, so we can skip specifiying them here.
-export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
-export MAKESHELL="/@unixroot/usr/bin/sh.exe"
-export CFLAGS="${CFLAGS:-%optflags}" ; \
+
+export CFLAGS="${CFLAGS:-%optflags}"
+export PERL="%{__perl}"
+
 ./Configure \
 	--prefix=%{_usr} --openssldir=%{_sysconfdir}/pki/tls ${sslflags} \
 	zlib enable-camellia enable-seed enable-tlsext enable-rfc3779 \
-	enable-cms no-idea no-mdc2 no-rc5 no-ec no-ecdh no-ecdsa \
-        no-krb5 \
-	${sslarch} shared
+	enable-cms enable-md2 experimental-jpake \
+	shared ${sslarch}
+
+# Original Fedora's openssl-1.0.0k-2.1 flags:
+#	zlib enable-camellia enable-seed enable-tlsext enable-rfc3779 \
+#	enable-cms enable-md2 no-idea experimental-jpake \
+#	--with-krb5-flavor=MIT --enginesdir=%{_libdir}/openssl/engines \
+#	--with-krb5-dir=/usr shared  ${sslarch} %{?!nofips:fips}
 
 # Add -Wa,--noexecstack here so that libcrypto's assembler modules will be
 # marked as not requiring an executable stack.
@@ -167,8 +172,6 @@ make rehash
 %install
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
 
-export MAKESHELL="/@unixroot/usr/bin/sh.exe"
-
 # Install OpenSSL.
 install -d $RPM_BUILD_ROOT%{_bindir}
 install -d $RPM_BUILD_ROOT%{_includedir}
@@ -183,7 +186,7 @@ cp ssl%{soversion}.dll $RPM_BUILD_ROOT%{_libdir}
 cp crypto_s.a $RPM_BUILD_ROOT%{_libdir}
 cp crypto%{soversion}.dll $RPM_BUILD_ROOT%{_libdir}
 
-# Remove duplicate DLLs with lib* prefix (todo: fix it Makefiles)
+# Remove duplicate DLLs with lib* prefix (todo: fix it in Makefiles)
 rm -f $RPM_BUILD_ROOT%{_libdir}/lib*%{soversion}.dll
 
 mv $RPM_BUILD_ROOT%{_libdir}/engines $RPM_BUILD_ROOT%{_libdir}/openssl
@@ -322,6 +325,11 @@ rm -rf $RPM_BUILD_ROOT/%{_libdir}/fipscanister.*
 %{_sysconfdir}/pki/tls/misc/tsget
 
 %changelog
+* Fri Apr 3 2015 Dmitriy Kuminov <coding@dmik.org> 1.0.0r-1
+- Update to version 1.0.0r.
+- Enable new algorithms: idea, md2, mdc2, ec, jpake.
+- Rebuild with kLIBC 0.6.6 and GCC 4.9.2.
+
 * Tue Sep 2 2014 Dmitriy Kuminov <coding@dmik.org> 1.0.0n-1
 - Update to version 1.0.0n.
 - Move find.pl to SVN repository.
