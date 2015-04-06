@@ -1,19 +1,25 @@
-#define svn_url     F:/rd/klibc/trunk/ash
-%define svn_url     https://svn.netlabs.org/repos/libc/trunk/
-%define svn_rev     3845
+# Disable debug symbols stuff - makes no sense w/o EXCEPTQ support
+# (also depends on http://trac.netlabs.org/rpm/ticket/134)
+%define _strip_no_debuginfo 1
 
 %define kmk_dist out/os2.x86/release/dist
 
 Summary: A smaller version of the Bourne shell (sh).
 Name: ash
-Version: 0.0.0
-Release: 11%{?dist}
+Version: 0.0.1
+Release: 1%{?dist}
 License: BSD
 Group: System Environment/Shells
 
+%define svn_url     https://svn.netlabs.org/repos/libc/trunk/
+%define svn_rev     3845
+
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
-Provides: /@unixroot/bin/sh
+BuildRequires: gcc make subversion zip
+
+# @todo when it's there:
+#BuildRequires: yacc
 
 %description
 A shell is a basic system program that interprets keyboard and mouse
@@ -26,11 +32,14 @@ memory.
 You should install ash if you need a lightweight shell with many of
 the same capabilities as the sh shell.
 
-%package debug
-Summary: HLL debug data for exception handling support.
+%package sh
+Summary:  Installs DASH as the system default POSIX shell.
+Requires: ash
+# @todo See http://trac.netlabs.org/rpm/ticket/137.
+Provides: /@unixroot/bin/sh
 
-%description debug
-HLL debug data for exception handling support.
+%description sh
+Virtual package that installs ash as the system default POSIX shell.
 
 
 %prep
@@ -56,25 +65,33 @@ rm -rf %{buildroot}
 mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_mandir}/man1
 
-cp %{kmk_dist}/bin/ash.exe %{buildroot}%{_bindir}/sh.exe
-ln -s %{_bindir}/sh.exe %{buildroot}%{_bindir}/sh
-cp -p ash/sh.1 %{buildroot}%{_mandir}/man1/sh.1
+cp %{kmk_dist}/bin/%{name}.exe %{buildroot}%{_bindir}/
+cp -p ash/sh.1 %{buildroot}%{_mandir}/man1/%{name}.1
 
+# Create a symlink for the default shell
+ln -s %{_bindir}/%{name}.exe %{buildroot}%{_bindir}/sh
+cp -p %{buildroot}%{_bindir}/%{name}.exe %{buildroot}%{_bindir}/sh.exe
+ln -s %{_mandir}/man1/%{name}.1 %{buildroot}%{_mandir}/man1/sh.1
 
 %clean
 rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root)
+%{_bindir}/%{name}.exe
+%{_mandir}/man1/%{name}.1
+
+%files sh
 %{_bindir}/sh
 %{_bindir}/sh.exe
-%{_mandir}/man1/*
-
-%files debug
-%defattr(-,root,root)
-%{_bindir}/*.dbg
+%{_mandir}/man1/sh.1
 
 %changelog
+* Mon Apr 6 2015 Dmitriy Kuminov <coding@dmik.org> 0.0.1-1
+- Change version to 0.0.1 to mark significant changes in package structure.
+- Make `ash` provide `ash.exe` and put `sh` symlinks to `ash-sh`.
+- Remove debug package (not needed w/o EXCEPTQ support).
+
 * Mon Feb 02 2015 yd <yd@os2power.com> 0.0.0-11
 - r3845, rebuilt from sources with gcc 4.9.2.
 
