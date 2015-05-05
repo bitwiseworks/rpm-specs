@@ -1,28 +1,35 @@
-# -*- coding: utf-8 -*-
 Summary: A portable x86 assembler which uses Intel-like syntax
 Name: nasm
-Version: 2.10
+Version: 2.11.08
 Release: 1%{?dist}
 License: BSD
 Group: Development/Languages
 URL: http://www.nasm.us
+#define svn_url	    e:/trees/nasm/trunk
+%define svn_url     http://svn.netlabs.org/repos/ports/nasm/trunk
+%define svn_rev     1048
 
-Source0: nasm-%{version}.tar.xz
-Source1: nasm-%{version}-xdoc.tar.xz
-
-Patch0: nasm-os2.patch
+Source0: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
+Source1: http://www.nasm.us/pub/nasm/releasebuilds/%{version}/%{name}-%{version}-xdoc.tar.bz2
 
 BuildRequires: perl
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+BuildRequires: autoconf
+#Requires(post): /sbin/install-info
+#Requires(preun): /sbin/install-info
 
-%package doc
-Summary: Documentation for NASM
-Group: Development/Languages
-#BuildRequires: ghostscript, texinfo
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %package rdoff
 Summary: Tools for the RDOFF binary format, sometimes used with NASM
 Group: Development/Tools
+
+%package doc
+Summary: Documentation for NASM
+BuildRequires: texinfo
+#BuildRequires: ghostscript, texinfo
+BuildArch: noarch
+# For arch to noarch conversion
+Obsoletes: %{name}-doc < %{version}-%{release}
 
 %description
 NASM is the Netwide Assembler, a free portable assembler for the Intel
@@ -38,57 +45,80 @@ Tools for the operating-system independent RDOFF binary format, which
 is sometimes used with the Netwide Assembler (NASM). These tools
 include linker, library manager, loader, and information dump.
 
+%package debug
+Summary: HLL debug data for exception handling support
+
+%description debug
+%{summary}.
+
 %prep
+%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{?!svn_rev):0}
 %setup -q
-%patch0 -p1 -b .os2~
-tar xf %{SOURCE1} --strip-components 1
+%else
+%setup -n "%{name}-%{version}" -Tc
+svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
+rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
+(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
+%endif
+tar xjf %{SOURCE1} --strip-components 1
 
 %build
-
-export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
+sh autogen.sh
 export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
-export LIBS="-lurpo -lmmap"
-%configure \
-   "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
-
-make %{?_smp_mflags}
+# as long as ghostscript is not there as rpm, take care that ps2pdf.cmd and gsos2
+# are found in the path
+export PS2PDF=ps2pdf.cmd
+%configure
+make everything %{?_smp_mflags}
 gzip -9f doc/nasmdoc.ps
 gzip -9f doc/nasmdoc.txt
 
 %install
 rm -rf $RPM_BUILD_ROOT
-#mkdir -p $RPM_BUILD_ROOT%{_bindir}
-#mkdir -p $RPM_BUILD_ROOT/%{_mandir}/man1
-make INSTALLROOT=$RPM_BUILD_ROOT install 
-#install_rdf
+make INSTALLROOT=$RPM_BUILD_ROOT install install_rdf
 install -d $RPM_BUILD_ROOT/%{_infodir}
 install -t $RPM_BUILD_ROOT/%{_infodir} doc/info/*
 
 %clean
 rm -rf ${RPM_BUILD_ROOT}
 
+#%post
+#if [ -e %{_infodir}/nasm.info.gz ]; then
+#  /sbin/install-info %{_infodir}/nasm.info.gz  %{_infodir}/dir || :
+#fi
+
+#%preun
+#if [ $1 = 0 -a -e %{_infodir}/nasm.info.gz ]; then
+#  /sbin/install-info --delete %{_infodir}/nasm.info.gz %{_infodir}/dir || :
+#fi
+
 %files
-%defattr(-,root,root)
 %doc AUTHORS CHANGES README TODO
 %{_bindir}/nasm.exe
 %{_bindir}/ndisasm.exe
-%{_mandir}/*/*
+%{_mandir}/man1/nasm*
+%{_mandir}/man1/ndisasm*
 %{_infodir}/nasm.info*
 
 %files doc
-%defattr(-,root,root)
-%doc doc/html doc/nasmdoc.txt.gz doc/nasmdoc.ps.gz
+%doc doc/html doc/nasmdoc.txt.gz doc/nasmdoc.ps.gz doc/nasmdoc.pdf
 
-#%files rdoff
-#%defattr(-,root,root)
-#%{_bindir}/ldrdf
-#%{_bindir}/rdf2bin
-#%{_bindir}/rdf2ihx
-#%{_bindir}/rdf2com
-#%{_bindir}/rdfdump
-#%{_bindir}/rdflib
-#%{_bindir}/rdx
-#%{_bindir}/rdf2ith
-#%{_bindir}/rdf2srec
+%files rdoff
+%{_bindir}/ldrdf.exe
+%{_bindir}/rdf2bin.exe
+%{_bindir}/rdf2ihx.exe
+%{_bindir}/rdf2com.exe
+%{_bindir}/rdfdump.exe
+%{_bindir}/rdflib.exe
+%{_bindir}/rdx.exe
+%{_bindir}/rdf2ith.exe
+%{_bindir}/rdf2srec.exe
+%{_mandir}/man1/rd*
+%{_mandir}/man1/ld*
+
+%files debug
+%{_bindir}/*.dbg
 
 %changelog
+* Thu Apr 30 2015 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.11.8-1
+- update to 2.11.8
