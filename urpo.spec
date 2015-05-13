@@ -1,19 +1,19 @@
 #define svn_url     F:/rd/ports/urpo/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/urpo/trunk
-%define svn_rev     949
+%define svn_rev     1149
 
 %define kmk_dist out/os2.x86/release/dist
 
 Summary: unlink rename pending operation
 Name: urpo
-Version: 20150101
-Release: 9%{?dist}
+Version: 20150513
+Release: 10%{?dist}
 License: LGPL
 Group: Development/Libraries
 
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
-Requires: libc >= 0.6.5
+Requires: libc >= 0.6.6
 
 %description
 unlink rename pending operation library, allows programs to rename/unlink
@@ -56,6 +56,7 @@ mkdir -p %{buildroot}%{_includedir}
 
 cp %{kmk_dist}/bin/urpo.dll %{buildroot}%{_libdir}
 cp %{kmk_dist}/lib/urpo.a %{buildroot}%{_libdir}/urpo.a
+cp src/urpo.h %{buildroot}%{_includedir}/urpo.h
 cp %{kmk_dist}/lib/urpo_g.a %{buildroot}%{_libdir}/urpo_g.a
 
 %clean
@@ -68,12 +69,16 @@ rm -rf %{buildroot}
 %files devel
 %defattr(-,root,root)
 %{_libdir}/*.a
+%{_includedir}/*.h
 
 %files debug
 %defattr(-,root,root)
 %{_libdir}/*.dbg
 
 %changelog
+* Wed May 13 2015 yd <yd@os2power.com> 20150513-10
+- r1149, Add renameForce() to headers and docs. ticket#68.
+
 * Thu Jan 01 2015 yd
 - r949, Add a new renameForce() update to resolve RPM issue#99. ticket#50.
 - r948, remove file from pending list if missing.
