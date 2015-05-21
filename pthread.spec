@@ -6,7 +6,7 @@
 Summary: A posix pthread emulation for OS/2-eComStation
 Name: pthread
 Version: 20150408
-Release: 18%{?dist}
+Release: 19%{?dist}
 License: unknown
 Group: Development/Libraries
 Source: %{name}-%{version}-r%{svn_rev}.zip
@@ -19,6 +19,7 @@ A posix pthread emulation library.
 %package devel
 Summary: Header files developing apps which will use pthread
 Group: Development/Libraries
+Requires: %{name} = %{version}-%{release}
 
 %description devel
 Header files and a library of pthread functions, for developing apps
@@ -32,6 +33,7 @@ The previous posix pthread emulation library.
 
 %package debug
 Summary: HLL debug data for exception handling support.
+Requires: %{name} = %{version}-%{release}
 
 %description debug
 HLL debug data for exception handling support.
@@ -83,6 +85,9 @@ rm -rf %{buildroot}
 %{_libdir}/*.dbg
 
 %changelog
+* Thu May 21 2015 yd <yd@os2power.com> 20150408-19
+- force -devel and -debug to depend on main package, fixes ticket:138.
+
 * Wed Apr 08 2015 yd <yd@os2power.com> 20150408-18
 - r1137, add missing export _pthread_attr_setdetachstate(), fixes ticket:65.
 
