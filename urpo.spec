@@ -7,7 +7,7 @@
 Summary: unlink rename pending operation
 Name: urpo
 Version: 20150513
-Release: 10%{?dist}
+Release: 11%{?dist}
 License: LGPL
 Group: Development/Libraries
 
@@ -22,6 +22,7 @@ opened files.
 %package devel
 Summary: Header files developing apps which will use urpo
 Group: Development/Libraries
+Requires: %{name} = %{version}-%{release}
 
 %description devel
 Header files and a library of urpo functions, for developing apps
@@ -29,6 +30,7 @@ which will use the library.
 
 %package debug
 Summary: HLL debug data for exception handling support.
+Requires: %{name} = %{version}-%{release}
 
 %description debug
 HLL debug data for exception handling support.
@@ -76,6 +78,9 @@ rm -rf %{buildroot}
 %{_libdir}/*.dbg
 
 %changelog
+* Tue Jun 09 2015 yd <yd@os2power.com> 20150513-11
+- force -devel and -debug to depend on main package, see ticket:138.
+
 * Wed May 13 2015 yd <yd@os2power.com> 20150513-10
 - r1149, Add renameForce() to headers and docs. ticket#68.
 
