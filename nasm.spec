@@ -7,7 +7,7 @@ Group: Development/Languages
 URL: http://www.nasm.us
 #define svn_url	    e:/trees/nasm/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/nasm/trunk
-%define svn_rev     1048
+%define svn_rev     1148
 
 Source0: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 Source1: http://www.nasm.us/pub/nasm/releasebuilds/%{version}/%{name}-%{version}-xdoc.tar.bz2
