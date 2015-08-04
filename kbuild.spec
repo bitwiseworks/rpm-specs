@@ -2,10 +2,9 @@
 # http://svn.netlabs.org/kbuild
 #
 # NOTES:
-# 1. Requires GCC 3.3.5 CSD5 (ftp://ftp.netlabs.org/pub/gcc/GCC-3.3.5-csd5.zip)
-# 2. Build with rpmbuild -ba -D "master_mode 1" when packing a new release
+# 1. Build with rpmbuild -ba -D "master_mode 1" when packing a new release
 #    and changing %svn_rev / %svn_url.
-# 3. Use -D "skip_unpack 1" to skip the unpack step when debugging the build.
+# 2. Use -D "skip_unpack 1" to skip the unpack step when debugging the build.
 #
 
 Name:       kbuild
@@ -17,12 +16,12 @@ Url:        http://svn.netlabs.org/kbuild
 %define ver_minor   1
 %define ver_patch   9998
 
-%define os2_release 6
+%define os2_release 7
 
 %define rpm_release 1
 
 %define svn_url     http://svn.netlabs.org/repos/kbuild/trunk
-%define svn_rev     2687
+%define svn_rev     2786
 
 %define descr_brief kBuild is a GNU Make fork with a set of scripts to simplify\
 complex build tasks and portable versions of various UNIX tools to ensure\
@@ -40,13 +39,11 @@ Release:    %{rpm_release}
 Source:     %{name}-%{version}.zip
 
 Patch1:     kbuild-001-os2_default_inst_dll_to_bin.patch
-Patch2:     kbuild-002-gcc3omf_make_ld_ar_quiet.patch
-Patch3:     kbuild-003-gcc3omf_support_dll_as_library_source.patch
-Patch4:     kbuild-004-gcc3omf_add_rc_support.patch
 Patch5:     kbuild-005-gcc3omf_gen_implib_for_dll.patch
 Patch7:     kbuild-007-gcc3omf_add_rc_support-NEW.patch
+Patch8:     kbuild-008-gcc4.patch
 
-BuildRequires: kbuild
+BuildRequires: kbuild gettext-devel
 
 #------------------------------------------------------------------------------
 # commons
@@ -119,15 +116,11 @@ rm -f "%{_sourcedir}/%{name}-%{version}.zip"
 %if ! 0%{?skip_unpack}
 %patch1
 [ $? = 0 ] || exit 1
-%patch2
-[ $? = 0 ] || exit 1
-%patch3
-[ $? = 0 ] || exit 1
-%patch4
-[ $? = 0 ] || exit 1
 %patch5
 [ $? = 0 ] || exit 1
-%patch7
+#%patch7
+#[ $? = 0 ] || exit 1
+%patch8
 [ $? = 0 ] || exit 1
 %endif
 
@@ -142,15 +135,15 @@ rm -f "%{_sourcedir}/%{name}-%{version}.zip"
     MY_INST_DATA=%{_datadir}/kbuild \
     MY_INST_DOC=%{pkg_docdir} \
     KMK_FLAGS="\
-        KBUILD_VERBOSE=2 \
         BUILD_TYPE=release \
+        LDFLAGS=-lintl \
         NIX_INSTALL_DIR=%{_prefix} \
         MY_INST_BIN=${MY_INST_BIN#/}/ \
         MY_INST_DATA=${MY_INST_DATA#/}/ \
         MY_INST_DOC=${MY_INST_DOC#/}/ \
         MY_INST_MODE=0644 \
         MY_INST_BIN_MODE=0755" \
-    unset BUILD_PLATFORM
+    BUILD_PLATFORM= \
 
 %{kmk_env}
 
@@ -183,6 +176,12 @@ rm -rf "%{buildroot}"
 
 #------------------------------------------------------------------------------
 %changelog
+
+* Wed Aug 05 2015 Dmitriy Kuminov <coding@dmik.org> 0.1.9998.7-1
+- New SVN release 2786 of version 0.1.9998.
+- Drop patches 2, 3 and 4 (applied upstream in r2774:2776).
+- Disable patch 7 claimed to be not necessary (see ticket #109).
+- Build with GCC 4 against LIBC 0.6.6 (patch 8, #125).
 
 * Thu Jul 11 2013 Dmitriy Kuminov <coding@dmik.org> 0.1.9998.6-1
 - New SVN release 2687 of version 0.1.9998.
