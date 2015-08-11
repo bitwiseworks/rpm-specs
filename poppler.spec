@@ -1,6 +1,6 @@
 Summary:	PDF rendering library
 Name:		poppler
-Version:	0.33.0
+Version:	0.35.0
 Release:	1%{?dist}
 License:	(GPLv2 or GPLv3) and GPLv2+ and LGPLv2+ and MIT
 Group:		Development/Libraries
@@ -8,7 +8,7 @@ Group:		Development/Libraries
 URL:		http://poppler.freedesktop.org/
 #define svn_url	    e:/trees/poppler/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/poppler/trunk
-%define svn_rev     1154
+%define svn_rev     1161
 
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
@@ -179,7 +179,7 @@ rm -rf $RPM_BUILD_ROOT
 %files devel
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/poppler_dll.a
-%attr(755,root,root) %{_libdir}/poppler52_dll.a
+%attr(755,root,root) %{_libdir}/poppler54_dll.a
 %{_libdir}/pkgconfig/poppler.pc
 %{_libdir}/pkgconfig/poppler-splash.pc
 %dir %{_includedir}/poppler/
@@ -230,6 +230,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/*.dbg
 
 %changelog
+* Tue Aug 11 2015 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.35.0-1
+- updated poppler to 0.35.0
+
 * Tue Jun 9 2015 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.33.0-1
 - updated poppler to 0.33.0
 
