@@ -1,13 +1,13 @@
 Summary: A library of functions for manipulating PNG image format files
 Name: libpng
-Version: 1.6.16
+Version: 1.6.18
 Release: 1%{?dist}
 License: zlib
 Group: System Environment/Libraries
 URL: http://www.libpng.org/pub/png/
 #define svn_url	    e:/trees/libpng/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/libpng/trunk
-%define svn_rev     1062
+%define svn_rev     1167
 
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
@@ -117,6 +117,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/*.dbg
 
 %changelog
+* Tue Sep 15 2015 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.6.18-1
+- updated libpng to 1.6.18
+
 * Mon Feb 16 2015 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.6.16-1
 - updated libpng to 1.6.16
 - add symlink for libpng
