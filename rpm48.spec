@@ -1,6 +1,6 @@
-#define svn_url     F:/rd/ports/rpm/rpm/branches/rpm-4.8.1
+#define svn_url     F:/rd/rpm/rpm/branches/rpm-4.8.1
 %define svn_url     http://svn.netlabs.org/repos/rpm/rpm/branches/rpm-4.8.1
-%define svn_rev     558
+%define svn_rev     582
 
 %define with_sqlite 1
 %undefine int_bdb
@@ -28,7 +28,7 @@
 Summary: The RPM package management system
 Name: rpm
 Version: %{rpmver}
-Release: 23%{?dist}
+Release: 24%{?dist}
 Group: System Environment/Base
 Url: http://www.rpm.org/
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
@@ -57,7 +57,7 @@ Provides: rpm-macros-wps
 BuildRequires: rexx_exe
 
 %if %{without int_bdb}
-BuildRequires: db4-devel%{_isa}
+BuildRequires: db4-devel
 %endif
 
 %if %{with check}
@@ -68,26 +68,26 @@ BuildRequires: db4-devel%{_isa}
 # is a bit special...
 #BuildRequires: redhat-rpm-config
 #BuildRequires: gawk
-#BuildRequires: elfutils-devel%{_isa} >= 0.112
-#BuildRequires: elfutils-libelf-devel%{_isa}
-BuildRequires: readline-devel%{_isa} zlib-devel%{_isa}
-BuildRequires: nss-devel%{_isa}
+#BuildRequires: elfutils-devel >= 0.112
+#BuildRequires: elfutils-libelf-devel
+BuildRequires: readline-devel zlib-devel
+BuildRequires: nss-devel
 # The popt version here just documents an older known-good version
-BuildRequires: popt-devel%{_isa} >= 1.10.2
-BuildRequires: file-devel%{_isa}
-BuildRequires: gettext-devel%{_isa}
-#BuildRequires: libselinux-devel%{_isa}
-BuildRequires: ncurses-devel%{_isa}
-BuildRequires: bzip2-devel%{_isa} >= 0.9.0c-2
-BuildRequires: python-devel%{_isa} >= 2.6
-#BuildRequires: lua-devel%{_isa} >= 5.1
-#BuildRequires: libcap-devel%{_isa}
-#BuildRequires: libacl-devel%{_isa}
+BuildRequires: popt-devel >= 1.10.2
+BuildRequires: file-devel
+BuildRequires: gettext-devel
+#BuildRequires: libselinux-devel
+BuildRequires: ncurses-devel
+BuildRequires: bzip2-devel >= 0.9.0c-2
+BuildRequires: python-devel >= 2.6
+#BuildRequires: lua-devel >= 5.1
+#BuildRequires: libcap-devel
+#BuildRequires: libacl-devel
 %if ! %{without xz}
-BuildRequires: xz-devel%{_isa} >= 4.999.8
+BuildRequires: xz-devel >= 4.999.8
 %endif
 %if %{with sqlite}
-BuildRequires: sqlite-devel%{_isa}
+BuildRequires: sqlite-devel
 %endif
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -106,7 +106,7 @@ License: GPLv2+ and LGPLv2+ with exceptions
 Requires: rpm = %{version}-%{release}
 # librpm uses cap_compare, introduced sometimes between libcap 2.10 and 2.16.
 # A manual require is needed, see #505596
-#Requires: libcap%{_isa} >= 2.16
+#Requires: libcap >= 2.16
 
 %description libs
 This package contains the RPM shared libraries.
@@ -116,8 +116,8 @@ Summary:  Development files for manipulating RPM packages
 Group: Development/Libraries
 License: GPLv2+ and LGPLv2+ with exceptions
 Requires: rpm = %{version}-%{release}
-#Requires: popt-devel%{_isa}
-Requires: file-devel%{_isa}
+#Requires: popt-devel
+Requires: file-devel
 
 %description devel
 This package contains the RPM C library and header files. These
@@ -472,6 +472,10 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Thu Nov 12 2015 yd <yd@os2power.com> 4.8.1-24
+- r582, allow use of platform specific macros file. fixes ticket#135. 
+- r581, standardize debug package creation. fixes ticket#134.
+
 * Wed Feb 25 2015 yd <yd@os2power.com> 4.8.1-23
 - r557, backport r536, Make %find_lang macro work on OS/2.
 - r558, add support for macros.d directory, fixes ticket#119. 
