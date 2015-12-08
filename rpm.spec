@@ -45,7 +45,7 @@ Requires: db4-utils
 Requires: popt >= 1.10.2.1
 Requires: curl
 Requires: rpm-libs = %{version}-%{release}
-Requires: pthread
+Requires: pthread >= 20151207
 Requires: cpio
 Requires: cube
 
