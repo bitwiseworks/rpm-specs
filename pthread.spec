@@ -1,12 +1,12 @@
 %define svn_url     http://svn.netlabs.org/repos/ports/pthread/trunk
-%define svn_rev     1137
+%define svn_rev     1208
 
 %define kmk_dist out/os2.x86/release/dist
 
 Summary: A posix pthread emulation for OS/2-eComStation
 Name: pthread
-Version: 20150408
-Release: 19%{?dist}
+Version: 20151207
+Release: 20%{?dist}
 License: unknown
 Group: Development/Libraries
 Source: %{name}-%{version}-r%{svn_rev}.zip
@@ -85,6 +85,9 @@ rm -rf %{buildroot}
 %{_libdir}/*.dbg
 
 %changelog
+* Mon Dec 07 2015 yd <yd@os2power.com> 20151207-20
+- r1208, added add some basic rwlock support.
+
 * Thu May 21 2015 yd <yd@os2power.com> 20150408-19
 - force -devel and -debug to depend on main package, fixes ticket:138.
 
