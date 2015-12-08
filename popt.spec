@@ -1,18 +1,20 @@
+#define svn_url     F:/rd/ports/popt/trunk
+%define svn_url     http://svn.netlabs.org/repos/ports/popt/trunk
+%define svn_rev     1209
+
 %define name popt
 %define version 1.15
 
 Summary:	C library for parsing command line parameters
 Name:		%{name}
 Version:	%{version}
-Release:        4%{?dist}
+Release:        5%{?dist}
 Epoch:		1
 License:	MIT
 Group:		System/Libraries
 Url:		http://rpm5.org/files/popt/
-Source0:	http://rpm5.org/files/popt/%{name}-%{version}.tar.gz
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
-
-Patch0: popt-os2.diff
+Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
 Requires: popt-libs = %{epoch}:%{version}-%{release}
 Requires: popt-data = %{epoch}:%{version}-%{release}
@@ -52,16 +54,27 @@ Group:		System/Libraries
 %description data
 This package contains popt data files like locales.
 
+%package debug
+Summary: HLL debug data for exception handling support.
+
+%description debug
+HLL debug data for exception handling support.
+
 %prep
+%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
 %setup -q
-%patch0 -p1 -b .os2~
+%else
+%setup -n "%{name}-%{version}" -Tc
+svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
+rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
+(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
+%endif
 
 %build
-CONFIG_SHELL="/bin/sh" ; export CONFIG_SHELL ; \
-LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp" ; export LDFLAGS ; \
+export CONFIG_SITE="/@unixroot/usr/share/config.legacy";
+export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp";
 %configure --disable-rpath \
-    --disable-shared --enable-static \
-    "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
+    --disable-shared --enable-static
 
 make %{?_smp_mflags}
 
@@ -69,7 +82,7 @@ make %{?_smp_mflags}
 rm -rf %{buildroot}
 make DESTDIR=${RPM_BUILD_ROOT} install
 cp popt.dll $RPM_BUILD_ROOT/%{_libdir}
-#%find_lang %name
+%find_lang %name
 
 %clean
 rm -rf %{buildroot}
@@ -88,13 +101,14 @@ rm -rf %{buildroot}
 %{_includedir}/%{name}.h
 %{_libdir}/%{name}*a
 %{_libdir}/lib%{name}*a
-#%{_libdir}/*.dll
 %{_mandir}/man3/popt.*
+%files data -f %{name}.lang
 
-%files data
-# -f %{name}.lang
+%files debug
 %defattr(-,root,root)
-%{_datadir}/locale/*
-
+%{_libdir}/*.dbg
 
 %changelog
+* Tue Dec 08 2015 yd <yd@os2power.com> 1.15-5
+- r1209, strip path and extension from programname.
+- added debug package with symbolic info for exceptq.
