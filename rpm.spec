@@ -1,3 +1,7 @@
+#define svn_url     F:/rd/rpm/rpm/trunk
+%define svn_url     http://svn.netlabs.org/repos/rpm/rpm/trunk
+%define svn_rev     596
+
 %define with_sqlite 1
 %undefine int_bdb
 
@@ -14,7 +18,7 @@
 
 %define rpmhome %{_libdir}/rpm
 
-%define rpmver 4.11.1
+%define rpmver 4.13.0
 %define snapver %{nil}
 %define srcver %{rpmver}
 
@@ -24,16 +28,10 @@
 Summary: The RPM package management system
 Name: rpm
 Version: %{rpmver}
-Release: 17%{?dist}
+Release: 25%{?dist}
 Group: System Environment/Base
 Url: http://www.rpm.org/
-Source0: http://rpm.org/releases/rpm-4.8.x/%{name}-%{srcver}.tar.bz2
-%if %{with int_bdb}
-Source1: db-%{bdbver}.tar.gz
-%endif
-Source2: %{name}-os2-src2.tar
-
-Patch1: %{name}-os2.diff
+Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
 # Partially GPL/LGPL dual-licensed and some bits with BSD
 # SourceLicense: (GPLv2+ and LGPLv2+ with exceptions) and BSD 
@@ -45,7 +43,6 @@ Requires: coreutils
 Requires: db4-utils
 %endif
 Requires: popt >= 1.10.2.1
-Requires: sqlite
 Requires: curl
 Requires: rpm-libs = %{version}-%{release}
 Requires: pthread
@@ -58,7 +55,7 @@ Provides: rpm-macros-wps
 BuildRequires: rexx_exe
 
 %if %{without int_bdb}
-BuildRequires: db4-devel%{_isa}
+BuildRequires: db4-devel
 %endif
 
 %if %{with check}
@@ -67,28 +64,22 @@ BuildRequires: db4-devel%{_isa}
 
 # XXX generally assumed to be installed but make it explicit as rpm
 # is a bit special...
-#BuildRequires: redhat-rpm-config
 #BuildRequires: gawk
-#BuildRequires: elfutils-devel%{_isa} >= 0.112
-#BuildRequires: elfutils-libelf-devel%{_isa}
-BuildRequires: readline-devel%{_isa} zlib-devel%{_isa}
-BuildRequires: nss-devel%{_isa}
+BuildRequires: readline-devel zlib-devel
+BuildRequires: nss-devel
 # The popt version here just documents an older known-good version
-BuildRequires: popt-devel%{_isa} >= 1.10.2
-BuildRequires: file-devel%{_isa}
-BuildRequires: gettext-devel%{_isa}
-#BuildRequires: libselinux-devel%{_isa}
-BuildRequires: ncurses-devel%{_isa}
-BuildRequires: bzip2-devel%{_isa} >= 0.9.0c-2
-BuildRequires: python-devel%{_isa} >= 2.6
-#BuildRequires: lua-devel%{_isa} >= 5.1
-#BuildRequires: libcap-devel%{_isa}
-#BuildRequires: libacl-devel%{_isa}
+BuildRequires: popt-devel >= 1.10.2
+BuildRequires: file-devel
+BuildRequires: gettext-devel
+BuildRequires: ncurses-devel
+BuildRequires: bzip2-devel >= 0.9.0c-2
+BuildRequires: python-devel >= 2.6
+#BuildRequires: lua-devel >= 5.1
 %if ! %{without xz}
-BuildRequires: xz-devel%{_isa} >= 4.999.8
+BuildRequires: xz-devel >= 4.999.8
 %endif
 %if %{with sqlite}
-BuildRequires: sqlite-devel%{_isa}
+BuildRequires: sqlite-devel
 %endif
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -105,9 +96,6 @@ Summary:  Libraries for manipulating RPM packages
 Group: Development/Libraries
 License: GPLv2+ and LGPLv2+ with exceptions
 Requires: rpm = %{version}-%{release}
-# librpm uses cap_compare, introduced sometimes between libcap 2.10 and 2.16.
-# A manual require is needed, see #505596
-#Requires: libcap%{_isa} >= 2.16
 
 %description libs
 This package contains the RPM shared libraries.
@@ -117,8 +105,8 @@ Summary:  Development files for manipulating RPM packages
 Group: Development/Libraries
 License: GPLv2+ and LGPLv2+ with exceptions
 Requires: rpm = %{version}-%{release}
-#Requires: popt-devel%{_isa}
-Requires: file-devel%{_isa}
+Requires: popt-devel
+Requires: file-devel
 
 %description devel
 This package contains the RPM C library and header files. These
@@ -188,39 +176,34 @@ Summary: HLL debug data for exception handling support.
 HLL debug data for exception handling support.
 
 %prep
-# -D Do not delete the directory before unpacking.
-# -T Disable the automatic unpacking of the archives.
-%setup -q -n %{name}-%{srcver} %{?with_int_bdb:-a 1} -a 2
+%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
+%setup -q
+%else
+%setup -n "%{name}-%{version}" -Tc
+svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
+rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
+(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
+%endif
 
 %if %{with int_bdb}
 ln -s db-%{bdbver} db
 %endif
 
-# Official patches
-%patch001 -p1 -b .base~
-
 %build
-%if %{without int_bdb}
-#CPPFLAGS=-I%{_includedir}/db%{bdbver} 
-#LDFLAGS=-L%{_libdir}/db%{bdbver}
-%endif
-#CPPFLAGS="$CPPFLAGS `pkg-config --cflags nss`"
-#CFLAGS="$RPM_OPT_FLAGS"
-#export CPPFLAGS CFLAGS LDFLAGS
 
 # Using configure macro has some unwanted side-effects on rpm platform
 # setup, use the old-fashioned way for now only defining minimal paths.
-RPM_MKDIR="/@unixroot/usr/bin/mkdir.exe" ; export RPM_MKDIR ; \
-CONFIG_SHELL="/@unixroot/usr/bin/sh" ; export CONFIG_SHELL ; \
-LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp" ; export LDFLAGS ; \
-LIBS="-lintl -lurpo -lmmap" ; export LIBS ; \
+export RPM_MKDIR="/@unixroot/usr/bin/mkdir.exe"; \
+export CONFIG_SITE="/@unixroot/usr/share/config.legacy";
+export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"; \
+export LIBS="-lintl -lurpo -lmmap"; \
 CFLAGS="%{optflags} -I/@unixroot/usr/include/nss3 -I/@unixroot/usr/include/nspr4" ; \
 %configure \
     --enable-shared --disable-static --without-lua \
     %{!?with_int_bdb: --with-external-db} \
     %{?with_sqlite: --enable-sqlite3} \
-    --enable-python \
-    "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
+    --without-archive \
+    --enable-python
 
 make %{?_smp_mflags}
 
@@ -231,9 +214,10 @@ make DESTDIR="$RPM_BUILD_ROOT" install
 
 # YD skip pkcconfig requirement
 #rm ${RPM_BUILD_ROOT}%{_libdir}/pkgconfig/rpm.pc
-install -m 755 scripts/check-files.os2 ${RPM_BUILD_ROOT}%{rpmhome}
-install -m 755 scripts/brp-strip.os2 ${RPM_BUILD_ROOT}%{rpmhome}
 mv ${RPM_BUILD_ROOT}/@unixroot/bin/rpm.exe ${RPM_BUILD_ROOT}%{_bindir}/rpm.exe
+
+# YD remove elf attr magic
+rm ${RPM_BUILD_ROOT}%{rpmhome}/fileattrs/elf.attr
 
 # YD remove paths from macros
 sed -i 's#.:/usr/bin/#/@unixroot/usr/bin/#gi' ${RPM_BUILD_ROOT}%{rpmhome}/macros
@@ -287,7 +271,7 @@ do
 done
 %endif
 
-#%find_lang %{name}
+%find_lang %{name}
 
 find $RPM_BUILD_ROOT -name "*.la"|xargs rm -f
 
@@ -319,8 +303,7 @@ rm -rf $RPM_BUILD_ROOT
 #fi
 #exit 0
 
-%files
-# -f %{name}.lang
+%files -f %{name}.lang
 %defattr(-,root,root,-)
 %doc GROUPS COPYING CREDITS ChangeLog.bz2 doc/manual/[a-z]*
 %dir %{_sysconfdir}/rpm
@@ -399,8 +382,6 @@ rm -rf $RPM_BUILD_ROOT
 %{rpmhome}/macros.p*
 %{rpmhome}/fileattrs
 
-%{_datadir}/locale/*
-
 %files python
 %defattr(-,root,root)
 %{_usr}/lib/python*.*/*
@@ -430,13 +411,50 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/rpm/*.dbg
 
 %changelog
+* Tue Dec 08 2015 yd <yd@os2power.com> 4.13.0-25
+- r596, ignore KDE macros in find-lang.
+- r595, build fixes.
+- r594, merge 4.13.0 changes into trunk, build fixes.
+- r589, set DB_PRIVATE flag to avoid issues with BDB and incomplete mmapping support.
+
+* Thu Nov 12 2015 yd <yd@os2power.com> 4.8.1-24
+- r582, allow use of platform specific macros file. fixes ticket#135. 
+- r581, standardize debug package creation. fixes ticket#134.
+
+* Wed Feb 25 2015 yd <yd@os2power.com> 4.8.1-23
+- r557, backport r536, Make %find_lang macro work on OS/2.
+- r558, add support for macros.d directory, fixes ticket#119. 
+- r536, Make %find_lang macro work on OS/2.
+
+Make %find_lang macro work on OS/2.
+* Fri Jan 30 2015 yd <yd@os2power.com> 4.8.1-22
+- r505, define SHELL/CONFIG_SHELL/MAKESHELL automatically for every build.
+- r504, ignore colors, they are only used for X86_64 elf linux to mix 32/64 bit code.
+- r503, trunk backport, backport, enable short circuit also for -bb build binary packages option.
+
+* Thu Jan 08 2015 yd
+- -Zbin-files is not optional...
+
+* Thu Jan 01 2015 yd
+- r486, use urpo renameForce() to rename locked databases. ticket#99.
+- implement subversion sources checkout.
+
+* Wed Dec 24 2014 yd
+- r484, r485, ticket#99.
+
+* Wed Apr 09 2014 yd
+- r409, popen() does not recognize unixroot, fixes macro expansion.
+
+* Mon Apr 07 2014 yd
+- build for python 2.7.
+
 * Mon Mar 03 2014 yd
 - r378 and others, upgrade to vendor 4.11.1, build of debug info packages.
 
-* Wed Mar 28 2013 yd
+* Thu Mar 28 2013 yd
 - r341, fix scripts symlinks.
 
-* Tue Mar 14 2013 yd
+* Thu Mar 14 2013 yd
 - added tool requirements for build package.
 
 * Tue Mar 13 2012 yd
