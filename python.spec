@@ -1,7 +1,3 @@
-#define svn_url     F:/rd/rpm/python/trunk
-%define svn_url     http://svn.netlabs.org/repos/rpm/python/trunk
-%define svn_rev     560
-
 %{!?__python_ver:%global __python_ver EMPTY}
 #global __python_ver 2.7
 %global unicode ucs4
@@ -39,7 +35,7 @@
 #
 # These errors are ignored by the normal python build, and aren't normally a
 # problem in the buildroots since /usr/bin/python isn't present.
-# 
+#
 # However, for the case where we're rebuilding the python srpm on a machine
 # that does have python installed we need to set this to avoid
 # brp-python-bytecompile treating these as fatal errors:
@@ -49,17 +45,23 @@
 Summary: An interpreted, interactive, object-oriented programming language
 Name: %{python}
 Version: 2.7.6
-Release: 11%{?dist}
+Release: 12%{?dist}
 License: Python
 Group: Development/Languages
 Provides: python-abi = %{pybasever}
 Provides: python(abi) = %{pybasever}
+
+%define svn_url     http://svn.netlabs.org/repos/rpm/python/trunk
+%define svn_rev     611
+
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
+
+BuildRequires: gcc make subversion zip
 
 %if %{main_python}
 Obsoletes: Distutils
 Provides: Distutils
-Obsoletes: python2 
+Obsoletes: python2
 Provides: python2 = %{version}
 Obsoletes: python-elementtree <= 1.2.6
 Obsoletes: python-sqlite < 2.3.2
@@ -84,7 +86,7 @@ BuildRequires: ncurses-devel, zlib-devel, expat-devel
 BuildRequires: bzip2 pkgconfig tcl-devel
 #BuildRequires: tix-devel
 BuildRequires: bzip2-devel sqlite-devel
-#BuildRequires: autoconf
+BuildRequires: autoconf
 BuildRequires: db4-devel >= 4.8
 #BuildRequires: libffi-devel
 %if 0%{?with_valgrind}
@@ -95,6 +97,9 @@ BuildRequires: valgrind-devel
 BuildRequires: systemtap-sdt-devel
 %global tapsetdir      /usr/share/systemtap/tapset
 %endif
+
+# OS/2 specific
+BuildRequires: mmap urpo-devel
 
 URL: http://www.python.org/
 
@@ -130,8 +135,8 @@ Requires: %{name} = %{version}-%{release}
 # Requires: binutils
 
 %description libs
-The python interpreter can be embedded into applications wanting to 
-use python as an embedded scripting language.  The python-libs package 
+The python interpreter can be embedded into applications wanting to
+use python as an embedded scripting language.  The python-libs package
 provides the libraries needed for this.
 
 %package devel
@@ -168,9 +173,9 @@ Provides: python2-tools = %{version}
 %endif
 
 %description tools
-This package includes several tools to help with the development of Python   
-programs, including IDLE (an IDE with editing and debugging facilities), a 
-color editor (pynche), and a python gettext program (pygettext.py).  
+This package includes several tools to help with the development of Python
+programs, including IDLE (an IDE with editing and debugging facilities), a
+color editor (pynche), and a python gettext program (pygettext.py).
 
 %package -n %{tkinter}
 Summary: A graphical user interface for the Python scripting language
@@ -237,18 +242,19 @@ cp -a %{SOURCE5} .
 #   Remove embedded copy of zlib:
 #rm -r Modules/zlib || exit 1
 
-mkdir Lib/plat-os2knix
-
 # This shouldn't be necesarry, but is right now (2.2a3)
 find -name "*~" |xargs rm -f
+
+# generate configure & friends
+autoreconf -fvi
 
 %build
 export CONFIG_SITE="/@unixroot/usr/share/config.legacy"
 export LDFLAGS="-g -Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 export LIBS="-lssl -lcrypto -lurpo -lmmap -lpthread -lintl"
 %configure \
-        --enable-shared --disable-static \
-	--with-system-expat \
+        --enable-shared \
+        --with-system-expat \
         --with-system-ffi --with-libs='-lmmap'
 
 make OPT="$CFLAGS" %{?_smp_mflags}
@@ -427,7 +433,7 @@ fi
 %{dynload_dir}/itertool.pyd
 #%{dynload_dir}/linuxaudiodev.pyd
 %{dynload_dir}/math.pyd
-#%{dynload_dir}/mmap.pyd
+%{dynload_dir}/mmap.pyd
 #%{dynload_dir}/nis.pyd
 #%{dynload_dir}/operator.pyd
 #%{dynload_dir}/ossaudiodev.pyd
@@ -511,7 +517,7 @@ fi
 %if %{main_python}
 %{_bindir}/python-config
 %endif
-%{_bindir}/python*-config
+%{_bindir}/python?*-config
 #%{_libdir}/libpython%{pybasever}.pyd
 %{_libdir}/python%{pybasever}_dll.a
 %{_libdir}/pkgconfig
@@ -556,15 +562,15 @@ fi
 
 # We put the debug-gdb.py file inside /usr/lib/debug to avoid noise from
 # ldconfig (rhbz:562980).
-# 
+#
 # The /usr/lib/rpm/redhat/macros defines %__debug_package to use
 # debugfiles.list, and it appears that everything below /usr/lib/debug and
 # (/usr/src/debug) gets added to this file (via LISTFILES) in
 # /usr/lib/rpm/find-debuginfo.sh
-# 
+#
 # Hence by installing it below /usr/lib/debug we ensure it is added to the
 # -debuginfo subpackage
-# (if it doesn't, then the rpmbuild ought to fail since the debug-gdb.py 
+# (if it doesn't, then the rpmbuild ought to fail since the debug-gdb.py
 # payload file would be unpackaged)
 
 %files debug
@@ -573,6 +579,15 @@ fi
 %{_libdir}/*.dbg
 
 %changelog
+* Fri Dec 12 2015 Dmitriy Kuminov <coding@dmik.org> 2.7.6-12
+- Provide dummy _dlopen in ctypes to make colorama package happy.
+- Use configured SHELL for subprocess.Popen(shell=True) instead of
+  hardcoded '/bin/sh'.
+- Make os.path.join replace all altsep (\) with sep (/) on return (to
+  fix joining names with components of PATH-like env. vars and passing
+  the results to a unix shell).
+- Make os.path.defpath return '$UNIXROOT\\usr\\bin'.
+
 * Thu Feb 26 2015 yd <yd@os2power.com> 2.7.6-11
 - r560, -O3 breaks the build, at least for pentium4 march.
 - r529, use unixroot path for script path replacement. Fixes ticket#114.
