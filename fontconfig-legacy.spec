@@ -1,7 +1,7 @@
 Summary:	Font configuration and customization library
-Name:		fontconfig
-Version:	2.8.0
-Release:	2%{?dist}
+Name:		fontconfig-legacy
+Version:	2.11.94
+Release:	1%{?dist}
 # src/ftglue.[ch] is in Public Domain
 # src/fccache.c contains Public Domain code
 # fc-case/CaseFolding.txt is in the UCD
@@ -10,35 +10,45 @@ License:	MIT and Public Domain and UCD
 Group:		System Environment/Libraries
 #Source:	http://fontconfig.org/release/%{name}-%{version}.tar.bz2
 URL:		http://fontconfig.org
+
 %define svn_url     http://svn.netlabs.org/repos/ports/fontconfig_os2/trunk
-%define svn_rev     918
+%define svn_rev     1188
+
 Source: %{name}-%{version}-r%{svn_rev}.zip
 
-BuildRoot: %{tmpdir}/%{name}-%{version}-root-%(id -u -n)
+BuildRequires: gcc make subversion zip
 
 BuildRequires:	freetype-devel >= 2.5.3
 BuildRequires:  kbuild
 
 Requires(pre):	freetype
 
+# fontconfig-legacy used to be fontconfig before 2.11.94 (fontconfig is now a different
+# package containing the complete upstream version with a differnt DLL name).
+Obsoletes:  fontconfig < 2.11.94
+
 %description
 Fontconfig is designed to locate fonts within the
-system and select them according to requirements specified by 
+system and select them according to requirements specified by
 applications.
 
 %package	devel
 Summary:	Font configuration and customization library
 Group:		Development/Libraries
-Requires:	%{name}%{?_isa} = %{version}-%{release}
+Requires:	%{name} = %{version}-%{release}
 Requires:	freetype-devel >= 2.5.3
 Requires:	pkgconfig
+
+Obsoletes:  fontconfig-devel < 2.11.94
 
 %description	devel
 The fontconfig-devel package includes the header files,
 and developer docs for the fontconfig package.
 
-Install fontconfig-devel if you want to develop programs which 
+Install fontconfig-devel if you want to develop programs which
 will use fontconfig.
+
+%debug_package
 
 
 %prep
@@ -52,13 +62,14 @@ rm -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip"
 %endif
 
 
-%build
 %define kmk_env \
     KMK_FLAGS="\
         KBUILD_VERBOSE=2 \
         BUILD_TYPE=release \
-        NIX_INST_DIR=%{_prefix}" \
-    unset BUILD_PLATFORM
+        INST_PREFIX=%{_prefix}"
+
+
+%build
 
 %{kmk_env}
 
@@ -70,9 +81,8 @@ cmd /c kmk $KMK_FLAGS
 
 rm -rf "%{buildroot}"
 
-cmd /c kmk $KMK_FLAGS PATH_INS="%{buildroot}/%{_prefix}" install
-emximp -o %{buildroot}/%{_libdir}/fontconfig_dll.a %{buildroot}/%{_libdir}/fontconfig.lib
-rm %{buildroot}/%{_libdir}/*.lib
+cmd /c kmk $KMK_FLAGS DESTDIR="%{buildroot}" install
+
 
 %clean
 rm -rf "%{buildroot}"
@@ -86,12 +96,21 @@ rm -rf "%{buildroot}"
 
 %files devel
 %defattr(-,root,root)
-%{_libdir}/fontconfig*.a
+%{_libdir}/fontconfig*.lib
 %{_libdir}/pkgconfig/*
 %{_includedir}/fontconfig
 
 
 %changelog
+* Mon Dec 14 2015 Dmitriy Kuminov <coding@dmik.orgh> - 2.11.94-1
+- Import version 2.11.94 and add many new exports.
+- Complete support for many APIs (FcPattern*, FcStr*, FcLang*)
+  which makes this version much closer to original fontconfig.
+- Hard-code substitution of WarpSans with Workplace Sans.
+- Makefiles cleanup.
+- Rename package from fontconfig to fontconfig-legacy due to the OS/2
+  release of the full version of the original fontconfig library.
+
 * Wed Oct 28 2014 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.8.0-2
 - build with svn source now
 
