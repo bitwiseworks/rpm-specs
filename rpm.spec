@@ -1,6 +1,6 @@
 #define svn_url     F:/rd/rpm/rpm/trunk
 %define svn_url     http://svn.netlabs.org/repos/rpm/rpm/trunk
-%define svn_rev     596
+%define svn_rev     615
 
 %define with_sqlite 1
 %undefine int_bdb

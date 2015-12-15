@@ -1,6 +1,6 @@
 #define svn_url     F:/rd/rpm/rpm/branches/rpm-4.8.1
 %define svn_url     http://svn.netlabs.org/repos/rpm/rpm/branches/rpm-4.8.1
-%define svn_rev     582
+%define svn_rev     615
 
 %define with_sqlite 1
 %undefine int_bdb
