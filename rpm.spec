@@ -28,7 +28,7 @@
 Summary: The RPM package management system
 Name: rpm
 Version: %{rpmver}
-Release: 1%{?dist}
+Release: 2%{?dist}
 Group: System Environment/Base
 Url: http://www.rpm.org/
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
@@ -411,6 +411,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/rpm/*.dbg
 
 %changelog
+* Tue Dec 15 2015 yd <yd@os2power.com> 4.13.0-2
+- r615, standardize debug package creation, ticket#149.
+
 * Tue Dec 08 2015 yd <yd@os2power.com> 4.13.0-1
 - r596, ignore KDE macros in find-lang.
 - r595, build fixes.

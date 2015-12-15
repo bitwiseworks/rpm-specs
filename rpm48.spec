@@ -28,7 +28,7 @@
 Summary: The RPM package management system
 Name: rpm
 Version: %{rpmver}
-Release: 24%{?dist}
+Release: 25%{?dist}
 Group: System Environment/Base
 Url: http://www.rpm.org/
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
@@ -472,6 +472,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Tue Dec 15 2015 yd <yd@os2power.com> 4.8.1-25
+- r615, standardize debug package creation, ticket#149.
+
 * Thu Nov 12 2015 yd <yd@os2power.com> 4.8.1-24
 - r582, allow use of platform specific macros file. fixes ticket#135. 
 - r581, standardize debug package creation. fixes ticket#134.
