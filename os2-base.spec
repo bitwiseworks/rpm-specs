@@ -2,7 +2,7 @@
 Summary: OS/2 - eComStation 2.0 base
 Name: os2-base
 Version: 0.0.0
-Release: 10%{?dist}
+Release: 11%{?dist}
 
 License: free
 
@@ -267,15 +267,16 @@ tools from findutils and coreutils to be used instead of default OS/2 tools.
 
 %install
 rm -rf $RPM_BUILD_ROOT
-#mkdir -p $RPM_BUILD_ROOT/@unixroot
-#ln -s /@unixroot/usr/ban $RPM_BUILD_ROOT/@unixroot/ban
+mkdir -p -m 755 $RPM_BUILD_ROOT%{_sysconfdir}/rpm
+echo i686-OS/2-OS/2 > $RPM_BUILD_ROOT%{_sysconfdir}/rpm/platform
 
 %clean
 # nothing to do
 
 
 %files
-# no files in a virtual package
+%defattr(-,root,root,-)
+%config(noreplace) %{_sysconfdir}/rpm/platform
 
 %files fhs
 %defattr(-,root,root,-)
@@ -331,6 +332,9 @@ fi
 
 
 %changelog
+* Thu Dec 17 2015 yd <yd@os2power.com> 0.0.0-11
+- set i686 as default platform.
+
 * Tue Feb 17 2015 yd <yd@os2power.com> 0.0.0-10
 - set TERM to os2 only if undefined.
 
