@@ -1,27 +1,24 @@
 #
 # http://svn.netlabs.org/kbuild
 #
-# NOTES:
-# 1. Build with rpmbuild -ba -D "master_mode 1" when packing a new release
-#    and changing %svn_rev / %svn_url.
-# 2. Use -D "skip_unpack 1" to skip the unpack step when debugging the build.
-#
 
 Name:       kbuild
 Vendor:     netlabs.org
 License:    BSD and GPLv2+
 Url:        http://svn.netlabs.org/kbuild
 
-%define ver_major   0
-%define ver_minor   1
-%define ver_patch   9998
+# Epoch is needed after dropping os2_release to keep proper updates.
+Epoch:      1
 
-%define os2_release 7
-
-%define rpm_release 1
+Version:    0.1.9998
+Release:    8%{?dist}
 
 %define svn_url     http://svn.netlabs.org/repos/kbuild/trunk
-%define svn_rev     2786
+%define svn_rev     2803
+
+Source:     %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
+
+BuildRequires: gcc make subversion zip
 
 %define descr_brief kBuild is a GNU Make fork with a set of scripts to simplify\
 complex build tasks and portable versions of various UNIX tools to ensure\
@@ -29,19 +26,18 @@ cross-platform portability.
 
 %define pkg_docdir      %{_docdir}/%{name}
 
-%if 0%{?os2_release}
-Version:    %{ver_major}.%{ver_minor}.%{ver_patch}.%{os2_release}
-%else
-Version:    %{ver_major}.%{ver_minor}.%{ver_patch}
-%endif
-Release:    %{rpm_release}
-
-Source:     %{name}-%{version}.zip
-
+# Install DLLs to /bin rather than to /lib. Rejected upstream (#109).
 Patch1:     kbuild-001-os2_default_inst_dll_to_bin.patch
+# Generate import libraries for DLL targets. Left w/o attention (#109).
 Patch5:     kbuild-005-gcc3omf_gen_implib_for_dll.patch
-Patch7:     kbuild-007-gcc3omf_add_rc_support-NEW.patch
+# Build with GCC4 (#124).
 Patch8:     kbuild-008-gcc4.patch
+# Fix slashes in .rsp files for OpenWatcom (#125).
+Patch9:     kbuild-009-OPENWATCOM_slashes.patch
+# Add major version suffix to Qt libs (#126).
+Patch10:    kbuild-010-qt4_major_suff.patch
+# Fix unsetting env vars in kmk_redirect (#127).
+Patch11:    kbuild-011-kmk_redirect.patch
 
 BuildRequires: kbuild gettext-devel
 
@@ -92,37 +88,33 @@ compatible with the vanilla GNU Make function-wise.
 %prep
 #------------------------------------------------------------------------------
 
-%if 0%{?master_mode}
-# get clean source tree from SVN (both for building and for SRPM)
-%setup -n "%{name}-%{version}" -Tc
-svn export %{svn_url}@%{svn_rev} . --force
-# generate SvnInfo.kmk
-echo \
-"KBUILD_SVN_URL := %{svn_url}@%{svn_rev}
-KBUILD_SVN_REV := %{svn_rev}
-" > SvnInfo.kmk
-# zip it up
-rm -f "%{_sourcedir}/%{name}-%{version}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}.zip" "%{name}-%{version}")
-%else
-# use source zip
-%if 0%{?skip_unpack}
-%setup -TD
-%else
+%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
 %setup -q
-%endif
+%else
+%setup -n "%{name}-%{version}" -Tc
+svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
+rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
+(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
 %endif
 
-%if ! 0%{?skip_unpack}
 %patch1
 [ $? = 0 ] || exit 1
 %patch5
 [ $? = 0 ] || exit 1
-#%patch7
-#[ $? = 0 ] || exit 1
 %patch8
 [ $? = 0 ] || exit 1
-%endif
+%patch9
+[ $? = 0 ] || exit 1
+%patch10
+[ $? = 0 ] || exit 1
+%patch11
+[ $? = 0 ] || exit 1
+
+# Makefiles expect SVN info, generate it.
+echo \
+"KBUILD_SVN_URL := %{svn_url}@%{svn_rev}
+KBUILD_SVN_REV := %{svn_rev}
+" > SvnInfo.kmk
 
 #------------------------------------------------------------------------------
 %build
@@ -177,11 +169,17 @@ rm -rf "%{buildroot}"
 #------------------------------------------------------------------------------
 %changelog
 
+* Thu Dec 17 2015 Dmitriy Kuminov <coding@dmik.org> 0.1.9998-8
+- New SVN release 2803 of version 0.1.9998.
+- Fix slashes in .rsp files for OpenWatcom (#125).
+- Add major version suffix to Qt libs (#126).
+- Fix unsetting env vars in kmk_redirect (#127).
+
 * Wed Aug 05 2015 Dmitriy Kuminov <coding@dmik.org> 0.1.9998.7-1
 - New SVN release 2786 of version 0.1.9998.
 - Drop patches 2, 3 and 4 (applied upstream in r2774:2776).
 - Disable patch 7 claimed to be not necessary (see ticket #109).
-- Build with GCC 4 against LIBC 0.6.6 (patch 8, #125).
+- Build with GCC 4 against LIBC 0.6.6 (patch 8, #124).
 
 * Thu Jul 11 2013 Dmitriy Kuminov <coding@dmik.org> 0.1.9998.6-1
 - New SVN release 2687 of version 0.1.9998.
