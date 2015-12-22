@@ -33,7 +33,7 @@ You should install ash if you need a lightweight shell with many of
 the same capabilities as the sh shell.
 
 %package sh
-Summary:  Installs DASH as the system default POSIX shell.
+Summary:  Installs ASH as the system default POSIX shell.
 Requires: ash
 # @todo See http://trac.netlabs.org/rpm/ticket/137.
 Provides: /@unixroot/bin/sh
