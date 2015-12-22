@@ -7,7 +7,7 @@
 Summary: A smaller version of the Bourne shell (sh).
 Name: ash
 Version: 0.0.1
-Release: 1.1%{?dist}
+Release: 1%{?dist}
 License: BSD
 Group: System Environment/Shells
 
@@ -33,7 +33,7 @@ You should install ash if you need a lightweight shell with many of
 the same capabilities as the sh shell.
 
 %package sh
-Summary:  Installs ASH as the system default POSIX shell.
+Summary:  Installs DASH as the system default POSIX shell.
 Requires: ash
 # @todo See http://trac.netlabs.org/rpm/ticket/137.
 Provides: /@unixroot/bin/sh

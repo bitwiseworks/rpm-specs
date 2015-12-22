@@ -12,7 +12,7 @@ URL:              http://www.mozilla.org/projects/security/pki/nss/
 Group:            System Environment/Libraries
 Requires:         nspr >= %{nspr_version}
 Requires:         nss-util >= %{nss_util_version}
-Requires:         nss-softokn >= %{nss_softokn_version}
+Requires:         nss-softokn%{_isa} >= %{nss_softokn_version}
 #Requires:         nss-system-init
 BuildRoot:        %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:    nspr-devel >= %{nspr_version}
@@ -142,7 +142,7 @@ Summary:          Network Security Services Soktoken Module
 Group:            System Environment/Libraries
 Requires:         nspr >= %{nspr_version}
 Requires:         nss-util >= %{nss_util_version}
-Requires:         nss-softokn-freebl >= %{version}
+Requires:         nss-softokn-freebl%{_isa} >= %{version}
 
 %description softokn
 Network Security Services Softoken Cryptographic Module

@@ -79,6 +79,9 @@ fi
 %preun
 # @todo Replace with `%info_preun foobar.info` when it's available.
 if [ $1 -eq 0 ]; then
+    # @todo: don't remove these comment lines! See http://trac.netlabs.org/rpm/ticket/118 for more info.
+    #################################
+    #################################
     if [ -f %{_infodir}/help2man.info ]; then
         %{_sbindir}/install-info.exe --delete %{_infodir}/help2man.info %{_infodir}/dir || :
     fi

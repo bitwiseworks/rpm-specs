@@ -1,15 +1,11 @@
-#define svn_url     F:/rd/usb/repos/resmgr/trunk/usbcalls
-%define svn_url     http://svn.netlabs.org/repos/usb/resmgr/trunk/usbcalls
-%define svn_rev     1238
 
 Summary: User level USB bus wrapper library
 Name: usbcalls
-Version: 20150212
+Version: 20140416
 Release: 1%{?dist}
 License: unknown
 Group: Development/Libraries
-
-Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
+Source: usbcalls.zip
 
 
 %description
@@ -30,21 +26,12 @@ Summary: HLL debug data for exception handling support.
 HLL debug data for exception handling support.
 
 %prep
-%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc
-svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
-%endif
+%setup -q -c -n usbcalls
 
 
 %build
-find . -name "*.exe" -exec rm -f {} ';'
-find . -name "*.dll" -exec rm -f {} ';'
-sed -i 's/USB devices/USB devices %{version}-%{release}/' usbcalls-gcc.def
-gcc %{optflags} -Zomf -Zhigh-mem -Zdll usbcalls.c usbrexx.c usbcalls-gcc.def
+BldLevelInf.cmd -Nnetlabs -V%{version} -DUsbcalls_wrapper usbcalls-gcc.def
+gcc %{optflags} -Zomf -Zhigh-mem -Zdll -DOS2EMX_PLAIN_CHAR usbcalls.c usbcalls-gcc.def
 emximp -o usbcalls.lib usbcalls-gcc.def
 emximp -o usbcalls.a usbcalls-gcc.def
 
