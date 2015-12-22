@@ -1,11 +1,11 @@
-#define svn_url     F:/rd/ports/clamav/trunk
-%define svn_url     http://svn.netlabs.org/repos/ports/clamav/trunk
-%define svn_rev     1001
+%define svn_url     F:/rd/ports/clamav/trunk
+#define svn_url     http://svn.netlabs.org/repos/ports/clamav/trunk
+#define svn_rev     1001
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.98.6
-Release:        6%{?dist}
+Release:        7%{?dist}
 
 License:	proprietary
 Group:		Applications/File
@@ -23,6 +23,7 @@ Requires:	clamav-lib = %version-%release
 BuildRequires:	curl-devel
 BuildRequires:	zlib-devel bzip2-devel
 BuildRequires:	ncurses-devel
+BuildRequires:	json-c-devel
 #BuildRequires:	bc
 
 %package lib
@@ -187,6 +188,8 @@ sed -e 's!_VERSION_!%version!g;' \
     -e 's!_BUILD_!%release!g;' \
     %{SOURCE2} > ReadMe.txt
 
+sed -i 's/Shared DLL/Shared DLL %{version}-%{release}/' libclamav/clamav.def
+
 # restore symlinks
 ln -sf ../libclamav/getaddrinfo.c clamdscan/getaddrinfo.c
 ln -sf ../libclamav/getaddrinfo.c clamdtop/getaddrinfo.c
@@ -224,10 +227,10 @@ export CONFIG_SITE=/@unixroot/usr/share/config.legacy
     --with-libcurl=/@unixroot/usr \
     --with-zlib=/@unixroot/usr \
     --with-libjson=/@unixroot/usr \
-    --enable-languages=c --disable-ltdl-install --disable-fdpassing \
+    --enable-languages=c,c++ --disable-ltdl-install --disable-fdpassing \
     --disable-clamav \
     --disable-check \
-    --disable-llvm \
+    --enable-llvm \
     --enable-shared --disable-static
 
 # TODO: check periodically that CLAMAVUSER is used for freshclam only
@@ -462,6 +465,9 @@ CLAMAV_FRESHCLAM_CONF:WPShadow|freshclam.conf|<CLAMAV_FOLDER>|SHADOWID=((%_sysco
 %{_sbindir}/*.dbg
 
 %changelog
+* Thu Feb 06 2015 yd <yd@os2power.com> 0.98.6-7
+- rXXXX, enabled bytecode LLVM.
+
 * Thu Feb 05 2015 yd <yd@os2power.com> 0.98.6-6
 - r1001, update of source code to 0.98.6.
 

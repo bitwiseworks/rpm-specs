@@ -1,3 +1,7 @@
+#define svn_url     F:/rd/rpm/python/trunk
+%define svn_url     http://svn.netlabs.org/repos/rpm/python/trunk
+%define svn_rev     568
+
 %{!?__python_ver:%global __python_ver EMPTY}
 #global __python_ver 2.7
 %global unicode ucs4
@@ -251,11 +255,11 @@ autoreconf -fvi
 %build
 export CONFIG_SITE="/@unixroot/usr/share/config.legacy"
 export LDFLAGS="-g -Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
-export LIBS="-lssl -lcrypto -lurpo -lmmap -lpthread -lintl"
+export LIBS="-lssl -lcrypto -lurpo -lpthread -lintl"
 %configure \
         --enable-shared \
         --with-system-expat \
-        --with-system-ffi --with-libs='-lmmap'
+        --with-system-ffi
 
 make OPT="$CFLAGS" %{?_smp_mflags}
 
@@ -579,6 +583,11 @@ fi
 %{_libdir}/*.dbg
 
 %changelog
+<<<<<<< .mine
+* Tue Apr 07 2015 yd <yd@os2power.com> 2.7.6-12
+- r568, build mmap module, by psmedley.
+
+=======
 * Fri Dec 12 2015 Dmitriy Kuminov <coding@dmik.org> 2.7.6-12
 - Provide dummy _dlopen in ctypes to make colorama package happy.
 - Use configured SHELL for subprocess.Popen(shell=True) instead of
@@ -588,6 +597,7 @@ fi
   the results to a unix shell).
 - Make os.path.defpath return '$UNIXROOT\\usr\\bin'.
 
+>>>>>>> .r622
 * Thu Feb 26 2015 yd <yd@os2power.com> 2.7.6-11
 - r560, -O3 breaks the build, at least for pentium4 march.
 - r529, use unixroot path for script path replacement. Fixes ticket#114.

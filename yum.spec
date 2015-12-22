@@ -126,14 +126,14 @@ rm -rf $RPM_BUILD_ROOT
 %config(noreplace) %{_sysconfdir}/yum/yum.conf
 %dir %{_sysconfdir}/yum
 %config(noreplace) %{_sysconfdir}/yum/version-groups.conf
-%dir %{_sysconfdir}/yum/cron.daily/*
+%{_sysconfdir}/yum/cron.daily
 %dir %{_sysconfdir}/yum/protected.d
-%dir %{_sysconfdir}/yum/rc.d/init.d/*
+%{_sysconfdir}/yum/rc.d/init.d/*
 %dir %{_sysconfdir}/yum/repos.d
-%dir %{_sysconfdir}/yum/sysconfig/*
+%{_sysconfdir}/yum/sysconfig/*
 %dir %{_sysconfdir}/yum/vars
 %config(noreplace) %{_sysconfdir}/logrotate.d/yum
-%dir %{_sysconfdir}/yum/bash_completion.d/*
+%{_sysconfdir}/yum/bash_completion.d/*
 %dir %{_datadir}/yum-cli
 %{_sysconfdir}/yum/yum-daily.yum
 %{_sysconfdir}/yum/yum-weekly.yum
