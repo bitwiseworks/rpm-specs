@@ -4,7 +4,7 @@
 Summary: System V poll system call emulation.
 Name: libpoll-devel
 Version: 1.5.1
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: BSD
 URL: http://software.clapper.org/poll/
 
@@ -28,6 +28,26 @@ what this small piece of software does.
 
 %prep
 %setup -q -n poll-release-%{version}
+
+# Add extra POLL constants used by some sources.
+# @todo We can't use patch directly because of EOLs (forced --binary on OS/2).
+tr -d '\r' > poll.diff <<"EOF"
+--- poll.h.b
++++ poll.h
+@@ -78,6 +78,11 @@
+ #define POLLHUP        0x10
+ #define POLLNVAL   0x20
+
++#define POLLRDNORM  0x0040
++#define POLLRDBAND  0x0080
++#define POLLWRNORM  0x0100
++#define POLLWRBAND  0x0200
++
+ struct pollfd
+ {
+     int     fd;
+EOF
+patch < poll.diff
 
 %build
 gcc %{optflags} -Zomf -c poll.c -o poll.obj
@@ -56,5 +76,8 @@ rm -rf %{buildroot}
 %{_libdir}/poll_s.lib
 
 %changelog
+* Wed Dec 22 2015 Dmitriy Kuminov <coding@dmik.org> 1.5.1-2
+- Add POLLRD* and POLLWR* constants.
+
 * Tue Dec 22 2015 Dmitriy Kuminov <coding@dmik.org> 1.5.1-1
 - Initial package for version 1.5.1.
