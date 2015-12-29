@@ -1,6 +1,6 @@
 #define svn_url     F:/rd/rpm/rpm/trunk
 %define svn_url     http://svn.netlabs.org/repos/rpm/rpm/trunk
-%define svn_rev     615
+%define svn_rev     628
 
 %define with_sqlite 1
 %undefine int_bdb
@@ -28,7 +28,7 @@
 Summary: The RPM package management system
 Name: rpm
 Version: %{rpmver}
-Release: 2%{?dist}
+Release: 3%{?dist}
 Group: System Environment/Base
 Url: http://www.rpm.org/
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
@@ -74,6 +74,7 @@ BuildRequires: gettext-devel
 BuildRequires: ncurses-devel
 BuildRequires: bzip2-devel >= 0.9.0c-2
 BuildRequires: python-devel >= 2.6
+BuildRequires: libpoll-devel
 #BuildRequires: lua-devel >= 5.1
 %if ! %{without xz}
 BuildRequires: xz-devel >= 4.999.8
@@ -411,6 +412,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/rpm/*.dbg
 
 %changelog
+* Tue Dec 29 2015 yd <yd@os2power.com> 4.13.0-3
+- r628, cleanup unused sqlite entries.
+- r627, use popen() to replace forking on script execution.
+
 * Tue Dec 15 2015 yd <yd@os2power.com> 4.13.0-2
 - r615, standardize debug package creation, ticket#149.
 
