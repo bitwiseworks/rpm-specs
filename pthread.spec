@@ -1,12 +1,12 @@
 %define svn_url     http://svn.netlabs.org/repos/ports/pthread/trunk
-%define svn_rev     1208
+%define svn_rev     1234
 
 %define kmk_dist out/os2.x86/release/dist
 
 Summary: A posix pthread emulation for OS/2-eComStation
 Name: pthread
-Version: 20151207
-Release: 20%{?dist}
+Version: 20151229
+Release: 21%{?dist}
 License: unknown
 Group: Development/Libraries
 Source: %{name}-%{version}-r%{svn_rev}.zip
@@ -85,6 +85,9 @@ rm -rf %{buildroot}
 %{_libdir}/*.dbg
 
 %changelog
+* Tue Dec 29 2015 yd <yd@os2power.com> 20151229-21
+- r1234, enable EXAPIS and mappings for fork() registration.
+
 * Mon Dec 07 2015 yd <yd@os2power.com> 20151207-20
 - r1208, added add some basic rwlock support.
 
