@@ -1,13 +1,13 @@
 Summary: A portable x86 assembler which uses Intel-like syntax
 Name: nasm
 Version: 2.11.08
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: BSD
 Group: Development/Languages
 URL: http://www.nasm.us
 #define svn_url	    e:/trees/nasm/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/nasm/trunk
-%define svn_rev     1148
+%define svn_rev     1237
 
 Source0: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 Source1: http://www.nasm.us/pub/nasm/releasebuilds/%{version}/%{name}-%{version}-xdoc.tar.bz2
@@ -45,11 +45,7 @@ Tools for the operating-system independent RDOFF binary format, which
 is sometimes used with the Netwide Assembler (NASM). These tools
 include linker, library manager, loader, and information dump.
 
-%package debug
-Summary: HLL debug data for exception handling support
-
-%description debug
-%{summary}.
+%debug_package
 
 %prep
 %if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{?!svn_rev):0}
@@ -116,9 +112,12 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_mandir}/man1/rd*
 %{_mandir}/man1/ld*
 
-%files debug
-%{_bindir}/*.dbg
 
 %changelog
+* Thu Dec 29 2015 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.11.8-2
+- added enhancement from http://sourceforge.net/p/nasm/mailman/message/34609638/
+  this is needed for vbox port, see vbox ticket #31 for further reference
+- changed debug creation to latest rpm macros
+
 * Thu Apr 30 2015 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.11.8-1
 - update to 2.11.8
