@@ -1,6 +1,6 @@
 Summary: A free and portable font rendering engine
 Name: freetype
-Version: 2.5.5
+Version: 2.6.2
 Release: 1%{?dist}
 License: (FTL or GPLv2+) and BSD and MIT and Public Domain and zlib with acknowledgement
 Group: System Environment/Libraries
@@ -10,7 +10,7 @@ URL: http://www.freetype.org
 #Source2: http://download.savannah.gnu.org/releases/freetype/ft2demos-%{version}.tar.bz2
 #define svn_url	    e:/trees/freetype/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/freetype2/trunk
-%define svn_rev     1029
+%define svn_rev     1212
 
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
@@ -55,11 +55,7 @@ for the FreeType font rendering engine.
 Install freetype-devel if you want to develop programs which will use
 FreeType.
 
-%package debug
-Summary: HLL debug data for exception handling support
-
-%description debug
-%{summary}.
+%debug_package
 
 %prep
 %if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{?!svn_rev):0}
@@ -96,7 +92,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/freetyp*.dll
 %doc README
 %doc docs/LICENSE.TXT docs/FTL.TXT docs/GPLv2.TXT
-%doc docs/CHANGES docs/VERSION.DLL docs/formats.txt
+%doc docs/CHANGES docs/formats.txt
 
 
 #%files demos
@@ -122,13 +118,16 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/freetype-config
 %{_libdir}/pkgconfig/freetype2.pc
 %doc docs/reference
+%doc docs/VERSION.DLL
 %{_mandir}/man1/*
 
-%files debug
-%defattr(-,root,root)
-%{_libdir}/*.dbg
 
 %changelog
+* Thu Dec 29 2015 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.6.2-1
+- updated source to 2.6.2
+- moved docs/version.dll to -devel
+- adjusted debug package creation to latest rpm macros
+
 * Wed Feb 11 2015 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.5.5-1
 - updated source to 2.5.5
 - added .dbg files

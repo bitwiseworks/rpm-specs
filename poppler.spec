@@ -1,7 +1,7 @@
 Summary:	PDF rendering library
 Name:		poppler
 Version:	0.38.0
-Release:	1%{?dist}
+Release:	2%{?dist}
 License:	(GPLv2 or GPLv3) and GPLv2+ and LGPLv2+ and MIT
 Group:		Development/Libraries
 # Source0:	http://poppler.freedesktop.org/%{name}-%{version}.tar.xz
@@ -25,7 +25,7 @@ BuildRequires:  libjpeg-devel
 BuildRequires:  libpng-devel
 BuildRequires:  libtiff-devel
 BuildRequires:  freetype-devel >= 2.5.3
-BuildRequires:  fontconfig-devel >= 2.8.0
+BuildRequires:  fontconfig-devel >= 2.11.94
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -118,11 +118,7 @@ Requires:	%{name}-glib%{?_isa} = %{version}-%{release}
 %description demos
 %{summary}.
 
-%package debug
-Summary: HLL debug data for exception handling support
-
-%description debug
-%{summary}.
+%debug_package
 
 %prep
 %if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{?!svn_rev):0}
@@ -224,12 +220,12 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/pdf*.exe
 %{_mandir}/man1/*
 
-%files debug
-%defattr(-,root,root)
-%{_bindir}/*.dbg
-%{_libdir}/*.dbg
 
 %changelog
+* Thu Dec 29 2015 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.38.0-2
+- updated required fontconfig to 2.11.94
+- adjusted debug package creation to latest rpm macros
+
 * Tue Nov 17 2015 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.38.0-1
 - updated poppler to 0.38.0
 
