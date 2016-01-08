@@ -1,6 +1,6 @@
 #define svn_url     F:/rd/rpm/rpm/trunk
 %define svn_url     http://svn.netlabs.org/repos/rpm/rpm/trunk
-%define svn_rev     636
+%define svn_rev     639
 
 %define with_sqlite 1
 %undefine int_bdb
@@ -28,7 +28,7 @@
 Summary: The RPM package management system
 Name: rpm
 Version: %{rpmver}
-Release: 4%{?dist}
+Release: 5%{?dist}
 Group: System Environment/Base
 Url: http://www.rpm.org/
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
@@ -414,6 +414,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Fri Jan 08 2016 yd <yd@os2power.com> 4.13.0-4
+- r639, rpm: check file handle before closing stuffs. ticket#143.
 - add sed as requirement, fixes ticket#162.
 - r636, remap /bin to /@unixroot/usr/bin. fixes ticket#137.
 - r634-635, replace fork() with popen() when redirecting output. fixes ticket#143.
