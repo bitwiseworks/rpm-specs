@@ -413,8 +413,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/rpm/*.dbg
 
 %changelog
-* Fri Jan 08 2016 yd <yd@os2power.com> 4.13.0-4
+* Fri Jan 08 2016 yd <yd@os2power.com> 4.13.0-5
 - r639, rpm: check file handle before closing stuffs. ticket#143.
+
+* Fri Jan 08 2016 yd <yd@os2power.com> 4.13.0-4
 - add sed as requirement, fixes ticket#162.
 - r636, remap /bin to /@unixroot/usr/bin. fixes ticket#137.
 - r634-635, replace fork() with popen() when redirecting output. fixes ticket#143.
