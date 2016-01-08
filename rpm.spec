@@ -1,6 +1,6 @@
 #define svn_url     F:/rd/rpm/rpm/trunk
 %define svn_url     http://svn.netlabs.org/repos/rpm/rpm/trunk
-%define svn_rev     628
+%define svn_rev     636
 
 %define with_sqlite 1
 %undefine int_bdb
@@ -28,7 +28,7 @@
 Summary: The RPM package management system
 Name: rpm
 Version: %{rpmver}
-Release: 3%{?dist}
+Release: 4%{?dist}
 Group: System Environment/Base
 Url: http://www.rpm.org/
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
@@ -412,6 +412,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/rpm/*.dbg
 
 %changelog
+* Fri Jan 08 2016 yd <yd@os2power.com> 4.13.0-4
+- r636, remap /bin to /@unixroot/usr/bin. fixes ticket#137.
+- r634-635, replace fork() with popen() when redirecting output. fixes ticket#143.
+
 * Tue Dec 29 2015 yd <yd@os2power.com> 4.13.0-3
 - r628, cleanup unused sqlite entries.
 - r627, use popen() to replace forking on script execution.
