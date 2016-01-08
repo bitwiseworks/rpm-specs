@@ -48,6 +48,7 @@ Requires: rpm-libs = %{version}-%{release}
 Requires: pthread >= 20151207
 Requires: cpio
 Requires: cube
+Requires: sed
 
 Provides: rpm-macros-warpin
 Provides: rpm-macros-wps
@@ -413,6 +414,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Fri Jan 08 2016 yd <yd@os2power.com> 4.13.0-4
+- add sed as requirement, fixes ticket#162.
 - r636, remap /bin to /@unixroot/usr/bin. fixes ticket#137.
 - r634-635, replace fork() with popen() when redirecting output. fixes ticket#143.
 
