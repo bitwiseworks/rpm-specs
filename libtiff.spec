@@ -10,7 +10,7 @@ Vendor:	bww bitwise works GmbH
 
 #define svn_url	    e:/trees/libtiff/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/libtiff/trunk
-%define svn_rev     1176
+%define svn_rev     1251
 
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
