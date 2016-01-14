@@ -4,6 +4,7 @@ Version:	0.38.0
 Release:	2%{?dist}
 License:	(GPLv2 or GPLv3) and GPLv2+ and LGPLv2+ and MIT
 Group:		Development/Libraries
+Vendor:		bww bitwise works GmbH
 # Source0:	http://poppler.freedesktop.org/%{name}-%{version}.tar.xz
 URL:		http://poppler.freedesktop.org/
 #define svn_url	    e:/trees/poppler/trunk

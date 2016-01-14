@@ -1,6 +1,6 @@
-#define svn_url     F:/rd/ports/cups/trunk
-%define svn_url     http://svn.netlabs.org/repos/ports/cups/trunk
-%define svn_rev     944
+%define svn_url     e:/trees/cups/trunk
+#define svn_url     http://svn.netlabs.org/repos/ports/cups/trunk
+#define svn_rev     944
 
 %define _without_dbus 1
 %define _without_php 1
@@ -42,7 +42,7 @@
 Summary: CUPS
 Name: cups
 Version: 1.4.8
-Release: 2%{?dist}
+Release: 3%{?dist}
 Epoch: 1
 
 License: GPL
@@ -51,17 +51,18 @@ Group: System Environment/Daemons
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
 Url: http://www.cups.org
-Packager: Anonymous <anonymous@foo.com>
-Vendor: Apple Inc.
+Vendor: bww bitwise works GmbH
 
 BuildRequires: libpng-devel, libjpeg-devel, libtiff-devel, libusb-compat-devel
 BuildRequires: openssl-devel, zlib-devel
+BuildRequires: libpoll-devel
 
 # Use buildroot so as not to disturb the version already installed
 BuildRoot: /tmp/%{name}-root
 
 # Dependencies...
 Requires: %{name}-libs = %{epoch}:%{version}
+Requires: poppler-utils
 Obsoletes: lpd, lpr, LPRng
 Provides: lpd, lpr, LPRng
 Obsoletes: cups-da, cups-de, cups-es, cups-et, cups-fi, cups-fr, cups-he
@@ -108,11 +109,7 @@ This package provides LPD client support.
 This package provides PHP support for CUPS.
 %endif
 
-%package debug
-Summary: HLL debug data for exception handling support.
-
-%description debug
-HLL debug data for exception handling support.
+%debug_package
 
 %prep
 %if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
@@ -124,11 +121,11 @@ rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
 (cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
 %endif
 
+autoconf --force
+
 %build
-export CONFIG_SITE="/@unixroot/usr/share/config.legacy";
-export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe";
 export LDFLAGS=" -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp";
-export LIBS="-lurpo";
+export LIBS="-lurpo -lpoll";
 CFLAGS="$RPM_OPT_FLAGS" CXXFLAGS="$RPM_OPT_FLAGS" LDFLAGS="$LDFLAGS $RPM_OPT_FLAGS" \
     %configure %{_dbus} %{_php} %{_static}
 # If we got this far, all prerequisite libraries must be here.
@@ -139,9 +136,6 @@ make
 rm -rf $RPM_BUILD_ROOT
 
 make BUILDROOT=$RPM_BUILD_ROOT install
-# remove readonly flag, emxomfstrip otherwise fails
-cd $RPM_BUILD_ROOT
-attrib -r "*" /s
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -213,13 +207,29 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/cups/templates/*
 %dir %{_datadir}/doc/cups
 %{_datadir}/doc/cups/*.*
+%dir %{_datadir}/doc/cups/de
+%{_datadir}/doc/cups/de/*
+%dir %{_datadir}/doc/cups/es
+%{_datadir}/doc/cups/es/*
+%dir %{_datadir}/doc/cups/eu
+%{_datadir}/doc/cups/eu/*
+%dir %{_datadir}/doc/cups/id
+%{_datadir}/doc/cups/id/*
+%dir %{_datadir}/doc/cups/it
+%{_datadir}/doc/cups/it/*
+%dir %{_datadir}/doc/cups/ja
+%{_datadir}/doc/cups/ja/*
+%dir %{_datadir}/doc/cups/pl
+%{_datadir}/doc/cups/pl/*
+%dir %{_datadir}/doc/cups/ru
+%{_datadir}/doc/cups/ru/*
 %dir %{_datadir}/doc/cups/help
 %{_datadir}/doc/cups/help/accounting.html
 %{_datadir}/doc/cups/help/cgi.html
 %{_datadir}/doc/cups/help/glossary.html
 %{_datadir}/doc/cups/help/kerberos.html
 %{_datadir}/doc/cups/help/license.html
-#%{_datadir}/doc/cups/help/man-*.html
+%{_datadir}/doc/cups/help/man-*.html
 %{_datadir}/doc/cups/help/network.html
 %{_datadir}/doc/cups/help/options.html
 %{_datadir}/doc/cups/help/overview.html
@@ -232,9 +242,15 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/doc/cups/help/whatsnew.html
 %dir %{_datadir}/doc/cups/images
 %{_datadir}/doc/cups/images/*
-#%{_datadir}/locale/*
+%{_datadir}/locale/*
 
-#%dir %{_datadir}/man
+%dir %{_datadir}/man
+%dir %{_datadir}/man/man1
+%{_datadir}/man/man1/*.1
+%dir %{_datadir}/man/man5
+%{_datadir}/man/man5/*.5
+%dir %{_datadir}/man/man8
+%{_datadir}/man/man8/*.8
 
 %dir /%{_var}/cache/cups
 %attr(0775,root,sys) %dir /%{_var}/cache/cups/rss
@@ -248,7 +264,16 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root)
 %dir %{_datadir}/cups/examples
 %{_datadir}/cups/examples/*
-#%dir %{_datadir}/man
+%dir %{_datadir}/man
+%dir %{_datadir}/man/man1
+%{_datadir}/man/man1/cups-config.1
+%{_datadir}/man/man1/ppd*.1
+%dir %{_datadir}/man/man5
+%{_datadir}/man/man5/ppdcfile.5
+%dir %{_datadir}/man/man7
+%{_datadir}/man/man7/backend.7
+%{_datadir}/man/man7/filter.7
+%{_datadir}/man/man7/notifier.7
 
 %{_bindir}/cups-config
 %{_bindir}/ppd*.exe
@@ -273,8 +298,8 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_libdir}/cups
 %dir %{_libdir}/cups/daemon
 %{_libdir}/cups/daemon/cups-lpd.exe
-#%dir %{_datadir}/man/man8
-#%{_datadir}/man/man8/cups-lpd.8.gz
+%dir %{_datadir}/man/man8
+%{_datadir}/man/man8/cups-lpd.8
 
 %if %{?_with_php:1}%{!?_with_php:0}
 %files php
@@ -282,15 +307,13 @@ rm -rf $RPM_BUILD_ROOT
 /usr/lib*/php*
 %endif
 
-%files debug
-%defattr(-,root,root)
-%{_bindir}/*.dbg
-%{_sbindir}/*.dbg
-%{_libdir}/*.dbg
-%{_libdir}/cups/backend/*.dbg
-%{_libdir}/cups/daemon/*.dbg
 
 %changelog
+* Mon Jan 11 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.4.8-3
+- rebuild with latest libraries
+- adjusted debug package creation to latest rpm macros
+- add poppler-utils as a requirement
+
 * Sun Feb 15 2015 yd <yd@os2power.com> 1.4.8-1 1.4.8-2
 - rebuild for new libpng release.
 

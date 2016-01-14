@@ -1,7 +1,7 @@
 Summary: Library of functions for manipulating TIFF format image files
-Name: libtiff
-Version: 4.0.6
-Release: 1%{?dist}
+Name: libtiff-legacy
+Version: 3.9.5
+Release: 2%{?dist}
 
 License: libtiff
 Group: System Environment/Libraries
@@ -10,16 +10,13 @@ Vendor:	bww bitwise works GmbH
 
 #define svn_url	    e:/trees/libtiff/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/libtiff/trunk
-%define svn_rev     1176
+%define svn_rev     675
 
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
 BuildRequires: zlib-devel libjpeg-devel pkgconfig
-BuildRequires: libtool automake autoconf
-
-# @todo Temporary enforce dependency on the legacy package 
-# to have it installed. This should be dropped at some point.
-Requires: libtiff-legacy
+#BuildRequires: libtool automake autoconf
+Obsoletes:  libtiff <= 3.9.5
 
 %description
 The libtiff package contains a library of functions for manipulating
@@ -35,6 +32,7 @@ Summary: Development tools for programs which will use the libtiff library
 Group: Development/Libraries
 Requires: %{name} = %{version}-%{release}
 Requires: pkgconfig
+Obsoletes:  libtiff-devel <= 3.9.5
 
 %description devel
 This package contains the header files and documentation necessary for
@@ -49,6 +47,7 @@ install the libtiff package.
 Summary: Static TIFF image format file library
 Group: Development/Libraries
 Requires: %{name}-devel = %{version}-%{release}
+Obsoletes:  libtiff-static <= 3.9.5
 
 %description static
 The libtiff-static package contains the statically linkable version of libtiff.
@@ -59,6 +58,7 @@ necessary for some boot packages.
 Summary: Command-line utility programs for manipulating TIFF files
 Group: Development/Libraries
 Requires: %{name} = %{version}-%{release}
+Obsoletes:  libtiff-tools <= 3.9.5
 
 %description tools
 This package contains command-line programs for manipulating TIFF format
@@ -77,18 +77,28 @@ rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
 %endif
 
 # Use build system's libtool.m4, not the one in the package.
-autogen.sh
+#autogen.sh
 
 %build
 export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 export CFLAGS="%{optflags} -fno-strict-aliasing"
-%configure
+%configure --enable-cxx=no PATH=`cmd.exe /c "echo %PATH%" | sed -e 's@\\\\@/@g'` PATH_SEPARATOR=';' \
+  CC=gcc CXX=g++ AWK=gawk LIBEXT="LIB" OBJEXT=o RM=rm.exe PERL=perl.exe \
+  AR=ar.exe RANLIB=echo ac_cv_path_STRIP='echo ' ac_cv_emxos2='yes' \
+  ac_cv_libext='lib' ac_executable_extensions=".exe" ac_cpp=g++.exe
+
+
 make %{?_smp_mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT
 
 make DESTDIR=$RPM_BUILD_ROOT install
+
+cp -p libtiff/*.dll %{buildroot}%{_libdir}
+cp -p libtiff/.libs/tiff.a %{buildroot}%{_libdir}
+cp -p libtiff/.libs/tiff.lib %{buildroot}%{_libdir}
+cp -p libtiff/.libs/tiff_s.a %{buildroot}%{_libdir}
 
 # remove what we didn't want installed
 rm $RPM_BUILD_ROOT%{_libdir}/*.la
@@ -121,9 +131,9 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root,0755)
 %doc TODO ChangeLog html
 %{_includedir}/*
-%{_libdir}/tiff*_dll.a
-%{_libdir}/tiffxx*_dll.a
-%{_libdir}/pkgconfig/libtiff-4.pc
+%{_libdir}/tiff.a
+%{_libdir}/tiff.lib
+#%{_libdir}/tiffxx.a
 %{_mandir}/man3/*
 
 %files static
@@ -136,9 +146,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/*
 
 %changelog
-* Wed Jan 13 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.0.6-1
-- updated source to 4.0.6 version
+* Wed Jan 13 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.9.5-2
 - adjusted debug package creation to latest rpm macros
+- done as legacy package, as new libtiff differs in dll name
 
 * Thu Apr 17 2014 yd
 - first public build.

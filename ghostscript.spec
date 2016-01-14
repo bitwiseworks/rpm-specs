@@ -11,13 +11,14 @@ Summary: A PostScript interpreter and renderer
 Name: ghostscript
 Version: %{gs_ver}
 
-Release: 4%{?dist}
+Release: 5%{?dist}
 
 # Included CMap data is Redistributable, no modification permitted,
 # see http://bugzilla.redhat.com/487510
 License: GPLv3+ and Redistributable, no modification permitted
 URL: http://www.ghostscript.com/
 Group: Applications/Publishing
+Vendor: bww bitwise works GmbH
 
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
@@ -98,8 +99,7 @@ CUPS filter and conversion rules for interpreting PostScript and PDF.
 %package debug
 Summary: HLL debug data for exception handling support.
 
-%description debug
-HLL debug data for exception handling support.
+%debug_package
 
 %prep
 %if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
@@ -112,7 +112,7 @@ rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
 %endif
 
 #rm -rf expat freetype icclib jasper jpeg lcms2 libpng openjpeg zlib cups/libs
-rm -rf expat freetype jpeg libpng zlib cups/libs
+rm -rf expat freetype jpeg libpng zlib cups/libs tiff
 
 
 
@@ -159,12 +159,10 @@ do
   FONTPATH="$FONTPATH${FONTPATH:+;}$path"
 done
 
-#autoconf --force
+autoconf --force
 # --with-ijs --enable-dynamic
-export CONFIG_SITE="/@unixroot/usr/share/config.legacy";
-export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe";
 %configure --with-fontpath="$FONTPATH" \
-        --with-drivers=ALL --disable-compile-inits \
+        --with-drivers=ALL --disable-compile-inits --with-system-libtiff=yes \
         CFLAGS="$CFLAGS $EXTRACFLAGS"
 
 # Build IJS
@@ -320,12 +318,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/gs.a
 %{_libdir}/gs.lib
 
-%files debug
-%defattr(-,root,root)
-%{_bindir}/*.dbg
-%{_libdir}/*.dbg
-
 %changelog
+* Wed Jan 13 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 9.10-5
+- rebuild with latest libraries
+- adjusted debug package creation to latest rpm macros
+
 * Sun Feb 15 2015 yd <yd@os2power.com> 9.10-4
 - rebuild for new libpng release.
 
