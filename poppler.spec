@@ -9,7 +9,7 @@ Vendor:		bww bitwise works GmbH
 URL:		http://poppler.freedesktop.org/
 #define svn_url	    e:/trees/poppler/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/poppler/trunk
-%define svn_rev     1176
+%define svn_rev     1266
 
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
@@ -223,9 +223,10 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
-* Thu Dec 29 2015 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.38.0-2
+* Mon Jan 18 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.38.0-2
 - updated required fontconfig to 2.11.94
 - adjusted debug package creation to latest rpm macros
+- create all pages in PSoutputDev, when writing to stdout
 
 * Tue Nov 17 2015 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.38.0-1
 - updated poppler to 0.38.0
