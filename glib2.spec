@@ -3,15 +3,23 @@
 Name:           glib2
 %define _name glib
 Version:        2.25.15
-Release:        4%{?dist}
+Release:        5%{?dist}
 License:        LGPLv2.1+
 Summary:        A Library with Convenient Functions Written in C
 Url:            http://www.gtk.org/
 Group:          Development/Libraries/C and C++
-Source:         ftp://ftp.gnome.org/pub/GNOME/sources/%{_name}/2.14/%{_name}-%{version}.tar.gz
-Source1:        glib-gspawn-os2.c
 
-Patch0: %{_name}-%{version}-os2.diff
+%define svn_url     http://svn.netlabs.org/repos/ports/glib/trunk
+%define svn_rev     508
+
+Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
+
+BuildRequires: gcc make subversion zip
+
+# @todo (dmik) later (see below about autogen.sh usage)
+#BuildRequires: autoconf automake
+## @todo (dmik) We need this for the moment, see #93
+#BuildRequires: libtool = 2.4.2
 
 #BuildRequires:  fam-devel
 #BuildRequires:  fdupes
@@ -20,6 +28,7 @@ Patch0: %{_name}-%{version}-os2.diff
 BuildRequires:  pkgconfig
 #BuildRequires:  translation-update-upstream
 BuildRequires:  zlib-devel
+BuildRequires:  libffi-devel gettext-devel bind-devel
 # For temporary %%posttrans script only.
 #PreReq:         coreutils
 #PreReq:         /bin/sed
@@ -147,21 +156,39 @@ Group:          Development/Libraries/C and C++
 This library provides convenient functions, such as lists and hashes,
 to a C programmer and is used by Gtk+ and GNOME.
 
-%lang_package
+# @todo (dmik) We don't support this macro, put language files into the main package
+#%lang_package
 
 %prep
-%setup -q -n %{_name}-%{version}
-#translation-update-upstream
-%patch0 -p1
-cp %{SOURCE1} glib/gspawn-os2.c
+%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
+%setup -q
+%else
+%setup -n "%{name}-%{version}" -Tc
+svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
+rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
+(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
+%endif
+
+# pick up m4 fix necessary for configure to work (remove when switched to that rev)
+svn export  %{svn_url}/m4macros/glib-gettext.m4@892 m4macros/glib-gettext.m4 --force
+# fix emxexp exports (r904), also to be removed
+sed -e 's/:space:/[:space:]/g' configure.ac -i
+
+# @todo (dmik) we can't use autogen.sh ATM because a newer trunk revison (2.33 with fixes) is necesary for that,
+# also there are some problems with libtool (see #93) so we also can't use autoreconf -fvi (because we need the
+# fixed ltmain.sh from SVN), and even when it finally works it will rename glib2.dll to glib200.dll so some
+# -legacy package is necessary...
+autoconf
+## Generate configure and friends
+#export NOCONFIGURE=1
+#autogen.sh
 
 %build
 export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
 export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 export LIBS="-lurpo -lmmap -lpthread"
 %configure \
-        --enable-shared --disable-static \
-        "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
+        --enable-shared --disable-static
 
 # YD fix extra CRLF after pass_all and execute it again (libtool hack breaks sed substitutions)
 sed -i "s/pass_all/pass_all\'\n_os2_dummy_var=\'/" config.status
@@ -219,9 +246,9 @@ rm $RPM_BUILD_ROOT%{_mandir}/man1/gsettings.1
 #rm $RPM_BUILD_ROOT%{_libdir}/gio/modules/libgiofam.*a
 # We do not need the la files for 11.1 and newer
 #%if %suse_version > 1100
-#rm $RPM_BUILD_ROOT%{_libdir}/*.la
+rm $RPM_BUILD_ROOT%{_libdir}/*.la
 #%endif
-#%find_lang %{_name}20
+%find_lang %{_name}20
 #%fdupes $RPM_BUILD_ROOT
 
 
@@ -229,9 +256,9 @@ rm $RPM_BUILD_ROOT%{_mandir}/man1/gsettings.1
 rm -rf $RPM_BUILD_ROOT
 
 
-%files
+%files -f %{_name}20.lang
 %defattr(-,root,root)
-%doc AUTHORS COPYING README NEWS ChangeLog 
+%doc AUTHORS COPYING README NEWS ChangeLog
 #/etc/profile.d/zzz-glib2.*
 #/sbin/conf.d/SuSEconfig.glib2
 #%{_bindir}/gio-querymodules*
@@ -270,6 +297,7 @@ rm -rf $RPM_BUILD_ROOT
 #%defattr(-,root,root)
 #%{_libdir}/gio/modules/libgiofam.so
 
+# @todo (dmik) We don't support this macro, put language files into the main package
 #%files lang -f %{_name}20.lang
 
 %files devel
@@ -284,8 +312,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/glib-2.0
 %{_includedir}/glib-2.0
 #%{_includedir}/gio-unix-2.0
-#%{_libdir}/*.dll
-%{_libdir}/*.*a
+%{_libdir}/*.a
 %{_libdir}/*.lib
 %{_libdir}/glib-2.0
 %{_libdir}/pkgconfig/*.pc
@@ -304,5 +331,10 @@ rm -rf $RPM_BUILD_ROOT
 #%dir %{_datadir}/gdb/auto-load/%{_prefix}/%{_lib}
 
 %changelog
+* Wed Jan 27 2016 Dmitriy Kuminov <coding@dmik.org> 2.25.15-5
+- Remove .la files from distribution.
+- Build with gcc-4.9.2 against libc-0.6.6.
+- Switch to downloading sources from SVN.
+
 * Wed Jul 18 2012 yd
 - include Dmitry's changes for OpenJDK build.
