@@ -1,7 +1,7 @@
 Summary: IBM OS/2 Developer's Toolkit Version 4.5
 Name: os2tk45
 Version: 4.5.2
-Release: 1%{?dist}
+Release: 2%{?dist}
 Group: System Environment/Libraries
 License: IBM
 Vendor: bww bitwise works GmbH
@@ -19,6 +19,7 @@ Requires: os2-base >= 0.0.0-12
 
 # Act like a meta-package and install all essential subpackages
 Requires: %{name}-headers = %{version}
+Requires: %{name}-libs = %{version}
 Requires: %{name}-books = %{version}
 
 %description
@@ -40,6 +41,14 @@ BuildArch: noarch
 
 %description headers
 Provides IBM OS/2 Developer's Toolkit header files.
+
+%package libs
+Summary: IBM OS/2 Developer's Toolkit libraries
+Requires: %{name}-readme = %{version}-%{release}
+BuildArch: noarch
+
+%description libs
+Provides IBM OS/2 Developer's Toolkit library files.
 
 %package books
 Summary: IBM OS/2 Developer's Toolkit books
@@ -67,9 +76,16 @@ mkdir -p %{buildroot}%{_includedir}/os2tk45
 cp -pR h/* %{buildroot}%{_includedir}/os2tk45/
 # copy inc directory inside to avoid one more dir under include
 cp -pR inc %{buildroot}%{_includedir}/os2tk45/
+# remove LIBC stuff, will go to a separate subpackage one day
+rm -rf %{buildroot}%{_includedir}/os2tk45/libc
 # remove SOM stuff, it will go to a separate subpackage one day
 rm %{buildroot}%{_includedir}/os2tk45/wincfg.*h
 rm %{buildroot}%{_includedir}/os2tk45/wp*.*h
+
+mkdir -p %{buildroot}%{_libdir}
+cp -pR lib/* %{buildroot}%{_libdir}/
+# remove LIBC stuff, will go to a separate subpackage one day
+rm %{buildroot}%{_libdir}/libc*.lib
 
 mkdir -p %{buildroot}%{_datadir}/os2/book
 cp -p book/* %{buildroot}%{_datadir}/os2/book/
@@ -83,19 +99,33 @@ cp -p book/* %{buildroot}%{_datadir}/os2/book/
 %files headers
 %{_includedir}/os2tk45
 
+%files libs
+%{_libdir}/*.lib
+
 %files books
 %{_datadir}/os2/book/*
 
 %post headers
 if [ "$1" = 1 ] ; then
 # execute only on first install
-%cube {ADDSTRING "%UNIXROOT%\usr\include\os2tk45\inc;%UNIXROOT%\usr\include\os2tk45\gl;%UNIXROOT%\usr\include\os2tk45;%UNIXROOT%\usr\include\os2tk45\libc;" IN "SET INCLUDE=" (FIRST IFNEW BEFORE ADDBOTTOM RS(%%)} c:\config.sys > NUL
+%cube {ADDSTRING "%UNIXROOT%\usr\include\os2tk45\inc;%UNIXROOT%\usr\include\os2tk45\gl;%UNIXROOT%\usr\include\os2tk45;" IN "SET INCLUDE=" (FIRST IFNEW BEFORE ADDBOTTOM RS(%%)} c:\config.sys > NUL
 fi
 
 %postun headers
 if [ "$1" = 0 ] ; then
 # execute only on last uninstall
-%cube {DELSTRING "%UNIXROOT%\usr\include\os2tk45\inc;%UNIXROOT%\usr\include\os2tk45\gl;%UNIXROOT%\usr\include\os2tk45;%UNIXROOT%\usr\include\os2tk45\libc;" IN "SET INCLUDE=" (FIRST} c:\config.sys > NUL
+%cube {DELSTRING "%UNIXROOT%\usr\include\os2tk45\inc;%UNIXROOT%\usr\include\os2tk45\gl;%UNIXROOT%\usr\include\os2tk45;" IN "SET INCLUDE=" (FIRST RS(%%)} c:\config.sys > NUL
+fi
+
+%post libs
+if [ "$1" = 1 ] ; then
+# execute only on first install
+%cube {ADDSTRING "%UNIXROOT%\usr\lib;" IN "SET LIB=" (FIRST IFNEW BEFORE ADDBOTTOM RS(%%)} c:\config.sys > NUL
+fi
+
+%postun libs
+if [ "$1" = 0 ] ; then
+# execute only on last uninstall
 fi
 
 %post books
@@ -119,6 +149,10 @@ if [ "$1" = 0 ] ; then
 fi
 
 %changelog
+* Wed Jan 27 2016 Dmitriy Kuminov <coding@dmik.org> 4.5.2-2
+- Add libs package.
+- Remove LIBC related files from headers and libraries.
+
 * Wed Jan 27 2016 Dmitriy Kuminov <coding@dmik.org> 4.5.2-1
 - Initial package for Toolkit version 4.5.2.
 - Remove ancient DOS EOF symbol (0x1A) from headers.
