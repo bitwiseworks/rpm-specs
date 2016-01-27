@@ -1,14 +1,12 @@
 # The default OS/2 Toolkit path, use --define to override on the command line
-%if %{undefined os2_toolkit_path}
-%define os2_toolkit_path D:/Tools/OS2TK45
-%endif
-
 Summary: K Audio Interface library for OS/2 multimedia subsystem
 Name: libkai
-Version: 1.1.4
+Version: 1.2.0
 Release: 1%{?dist}
 License:  LGPLv2+
 Group: System Environment/Libraries
+Vendor: bww bitwise works GmbH
+URL: https://github.com/komh/kai
 
 %define github_name kai
 %define github_url  https://github.com/komh/%{github_name}/archive
@@ -17,6 +15,8 @@ Group: System Environment/Libraries
 Source: %{github_name}-%{github_rev}.zip
 
 BuildRequires: gcc make curl zip
+
+BuildRequires: os2tk45-headers os2tk45-libs
 
 %description
 K Audio Interface is a frontend library that simplifies access to OS/2
@@ -27,7 +27,7 @@ MMPM/DART subsystem and through the UNIAUD driver directly.
 %package devel
 Summary: K Audio Interface developer package
 Group: Development/Libraries
-Requires: libkai = %{version}-%{release}
+Requires: %{name} = %{version}-%{release}
 
 %description devel
 Contains headers and libraries necessary to compile audio-enabled
@@ -36,18 +36,12 @@ applications that use K Audio Interface.
 %package static
 Summary: K Audio Interface static library
 Group: Development/Libraries
-Requires: libkai-devel = %{version}-%{release}
+Requires: %{name}-devel = %{version}-%{release}
 
 %description static
 Contains headers the static K Audio Interface library.
 
-%package debug
-Summary: HLL debug data for libkai
-Requires: libkai = %{version}-%{release}
-
-%description debug
-Contains symbol files necessary to generate proper crash reports
-in applications using the libkai package.
+%debug_package
 
 %prep
 %if %(sh -c 'if test -f "%{_sourcedir}/%{github_name}-%{github_rev}.zip" ; then echo 1 ; else echo 0 ; fi')
@@ -60,12 +54,10 @@ unzip "%{_sourcedir}/%{github_name}-%{github_rev}.zip" -d ..
 %endif
 
 %build
-make PREFIX=%{_prefix} CC="gcc -idirafter %{os2_toolkit_path}/h -DOS2EMX_PLAIN_CHAR"
+make PREFIX=%{_prefix} CC="gcc -idirafter %{_includedir}/os2tk45 -DOS2EMX_PLAIN_CHAR"
 
 %install
 make PREFIX=%{_prefix} INSTALL=%{_bindir}/install DESTDIR=%{buildroot} install
-# No need in .a once we have .lib
-rm -f %{buildroot}/%{_libdir}/*.a
 
 %clean
 rm -rf %{buildroot}
@@ -77,17 +69,19 @@ rm -rf %{buildroot}
 %files devel
 %defattr(-,root,root)
 %{_includedir}/*.h
-%{_libdir}/*_dll.lib
+%{_libdir}/*_dll.*
 
 %files static
 %defattr(-,root,root)
-%exclude %{_libdir}/*_dll.lib
-%{_libdir}/*.lib
-
-%files debug
-%defattr(-,root,root)
-%{_libdir}/*.dbg
+%exclude %{_libdir}/*_dll.*
+%{_libdir}/*.*
 
 %changelog
+* Thu Jan 28 2016 Dmitriy Kuminov <coding@dmik.org> 1.2.0-1
+- Update to version 1.2.0 from vendor:
++ uniaud: Fix device selection by index.
++ uniaud: Improve volume control.
+- Add .a libraries (for use with ld, e.g. in non-Zomf mode).
+
 * Wed Jul 1 2015 Dmitriy Kuminov <coding@dmik.org> 1.1.4-1
 - Initial package for version 1.1.4.
