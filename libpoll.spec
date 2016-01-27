@@ -4,7 +4,7 @@
 Summary: System V poll system call emulation.
 Name: libpoll-devel
 Version: 1.5.1
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: BSD
 URL: http://software.clapper.org/poll/
 
@@ -50,8 +50,9 @@ EOF
 patch < poll.diff
 
 %build
-gcc %{optflags} -Zomf -c poll.c -o poll.obj
-emxomfar rv poll_s.lib poll.obj
+gcc %{optflags} -c poll.c -o poll.o
+ar rv poll_s.a poll.o
+emxomf poll_s.a -o poll_s.lib
 
 # Add support for #include <poll.h>
 echo "#include <sys/poll.h>" > nosys_poll.h
@@ -63,7 +64,7 @@ install -m 644 nosys_poll.h %{buildroot}%{_includedir}/poll.h
 mkdir -p %{buildroot}%{_includedir}/sys
 install -m 644 poll.h %{buildroot}%{_includedir}/sys
 mkdir -p %{buildroot}%{_libdir}
-install -m 755 poll_s.lib %{buildroot}%{_libdir}
+install -m 755 poll_s.a poll_s.lib %{buildroot}%{_libdir}
 
 %clean
 rm -rf %{buildroot}
@@ -73,9 +74,13 @@ rm -rf %{buildroot}
 %doc CHANGELOG.md INSTALL README.md LICENSE
 %{_includedir}/poll.h
 %{_includedir}/sys/poll.h
+%{_libdir}/poll_s.a
 %{_libdir}/poll_s.lib
 
 %changelog
+* Wed Jan 27 2016 Dmitriy Kuminov <coding@dmik.org> 1.5.1-3
+- Add poll_s.a (for use with ld, e.g. in non-Zomf mode).
+
 * Wed Dec 22 2015 Dmitriy Kuminov <coding@dmik.org> 1.5.1-2
 - Add POLLRD* and POLLWR* constants.
 
