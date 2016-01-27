@@ -2,7 +2,7 @@
 Summary: OS/2 - eComStation 2.0 base
 Name: os2-base
 Version: 0.0.0
-Release: 11%{?dist}
+Release: 12%{?dist}
 
 License: free
 
@@ -270,6 +270,9 @@ rm -rf $RPM_BUILD_ROOT
 mkdir -p -m 755 $RPM_BUILD_ROOT%{_sysconfdir}/rpm
 echo i686-OS/2-OS/2 > $RPM_BUILD_ROOT%{_sysconfdir}/rpm/platform
 
+mkdir -p %{buildroot}%{_datadir}/os2/book
+mkdir -p %{buildroot}%{_datadir}/os2/help
+
 %clean
 # nothing to do
 
@@ -277,6 +280,8 @@ echo i686-OS/2-OS/2 > $RPM_BUILD_ROOT%{_sysconfdir}/rpm/platform
 %files
 %defattr(-,root,root,-)
 %config(noreplace) %{_sysconfdir}/rpm/platform
+%dir %{_datadir}/os2/book
+%dir %{_datadir}/os2/help
 
 %files fhs
 %defattr(-,root,root,-)
@@ -296,6 +301,8 @@ if [ "$1" = 1 ] ; then
 %cube {ADDLINE "SET UNIXROOT=%UNIXROOT%" (ALWAYS)} c:\config.sys > NUL
 fi
 %cube {ADDLINE "SET TERM=os2" (IFNOT "SET TERM")} c:\config.sys > NUL
+%cube {ADDSTRING "%UNIXROOT%\usr\share\os2\book;" IN "SET BOOKSHELF=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
+%cube {ADDSTRING "%UNIXROOT%\usr\share\os2\help;" IN "SET HELP=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
 
 %postun
 if [ "$1" = 0 ] ; then
@@ -304,6 +311,8 @@ if [ "$1" = 0 ] ; then
 %cube {DELSTRING "%UNIXROOT%\usr\lib;" IN "LIBPATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
 %cube {DELLINE "SET UNIXROOT="} c:\config.sys > NUL
 %cube {DELLINE "SET TERM="} c:\config.sys > NUL
+%cube {DELSTRING "%UNIXROOT%\usr\share\os2\book;" IN "SET BOOKSHELF=" (FIRST} c:\config.sys > NUL
+%cube {DELSTRING "%UNIXROOT%\usr\share\os2\help;" IN "SET HELP=" (FIRST} c:\config.sys > NUL
 fi
 
 %post fhs
@@ -332,6 +341,9 @@ fi
 
 
 %changelog
+* Wed Jan 27 2016 Dmitriy Kuminov <coding@dmik.org> 0.0.0-12
+- Add special UNIXROOT directories to BOOKSHELF and HELP in config.sys.
+
 * Thu Dec 17 2015 yd <yd@os2power.com> 0.0.0-11
 - set i686 as default platform.
 
