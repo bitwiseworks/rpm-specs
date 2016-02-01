@@ -4,8 +4,9 @@
 Summary: System V poll system call emulation.
 Name: libpoll-devel
 Version: 1.5.1
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: BSD
+Vendor:  bww bitwise works GmbH
 URL: http://software.clapper.org/poll/
 
 Group: Development/Libraries
@@ -20,11 +21,23 @@ Requires: libc-devel
 %description
 This package implements the System V poll(2) system call for Unix-like systems
 that do not support poll. For instance, the following Unix-like operating
-systems do not support poll: poll provides a method for multiplexing input and
-output on multiple open file descriptors; in traditional BSD systems, that
-capability is provided by select(2). While the semantics of select differ from
-those of poll, poll can be readily emulated in terms of select, which is exactly
-what this small piece of software does.
+systems do not support poll:
+
+    NetBSD, prior to version 1.3
+    FreeBSD, prior to version 3.0
+    OpenBSD, prior to version 2.0
+    BSD/OS. (See the BSD/OS man pages.)
+    Apple's Mac OS X (prior to OS X 10.3)
+    QNX version 6
+    4.4 BSD Lite 2 (not generally used by production systems)
+    386BSD (pretty much obsolete these days)
+    OS/2 (and derivatives)
+
+poll provides a method for multiplexing input and output on multiple open file
+descriptors; in traditional BSD systems, that capability is provided by
+select(2). While the semantics of select differ from those of poll, poll can
+be readily emulated in terms of select, which is exactly what this small piece
+of software does.
 
 %prep
 %setup -q -n poll-release-%{version}
@@ -78,6 +91,10 @@ rm -rf %{buildroot}
 %{_libdir}/poll_s.lib
 
 %changelog
+* Mon Feb 1 2016 Dmitriy Kuminov <coding@dmik.org> 1.5.1-4
+- Correct package description.
+- Add vendor tag.
+
 * Wed Jan 27 2016 Dmitriy Kuminov <coding@dmik.org> 1.5.1-3
 - Add poll_s.a (for use with ld, e.g. in non-Zomf mode).
 
