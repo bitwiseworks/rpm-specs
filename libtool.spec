@@ -5,23 +5,22 @@
 Summary: The GNU Portable Library Tool
 Name:    libtool
 Version: 2.4.6
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv2+ and LGPLv2+ and GFDL
 URL:     http://www.gnu.org/software/libtool/
 Group:   Development/Tools
+Vendor:  bww bitwise works GmbH
 
 #Source:  http://ftp.gnu.org/gnu/libtool/libtool-%{version}.tar.xz
 
 %define svn_url     http://svn.netlabs.org/repos/ports/libtool/trunk
-%define svn_rev     1070
+%define svn_rev     1283
 
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
 BuildRequires: gcc make subversion zip
 
-# @todo Replace with `%info_requires` when it's available.
-Requires(post): %{_sbindir}/install-info.exe
-Requires(preun): %{_sbindir}/install-info.exe
+%info_requires
 
 BuildRequires: autoconf, automake
 #BuildRequires: texinfo
@@ -74,11 +73,7 @@ License:  LGPLv2+
 %description ltdl-devel
 Static libraries and header files for development with ltdl.
 
-%package debug
-Summary: HLL debug data for exception handling support.
-
-%description debug
-HLL debug data for exception handling support.
+%debug_package
 
 %prep
 %if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
@@ -91,6 +86,7 @@ rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
 %endif
 
 # Make sure configure is updated to properly support OS/2
+# (slashes in PATH are needed for the bootstrap script itself)
 export PATH=`echo $PATH | tr '\\\\' /`
 ./bootstrap --copy --force --skip-git
 
@@ -122,6 +118,7 @@ make # %%{?_smp_mflags}
 #  mv -f $i.tmp $i
 #done
 
+# @todo Check seems to work per se but not under RPM
 #%check
 #make check VERBOSE=yes
 
@@ -137,18 +134,10 @@ rm -f %{buildroot}%{_libdir}/libltdl.la
 rm -f %{buildroot}%{_libdir}/ltdl.a
 
 %post
-# @todo Replace with `%info_post foobar.info` when it's available.
-if [ -f %{_infodir}/libtool.info ]; then
-    %{_sbindir}/install-info.exe %{_infodir}/libtool.info %{_infodir}/dir || :
-fi
+%info_post %{name}.info
 
 %preun
-# @todo Replace with `%info_preun foobar.info` when it's available.
-if [ $1 -eq 0 ]; then
-    if [ -f %{_infodir}/libtool.info ]; then
-        %{_sbindir}/install-info.exe --delete %{_infodir}/libtool.info %{_infodir}/dir || :
-    fi
-fi
+%info_preun %{name}.info
 
 %files
 %defattr(-,root,root)
@@ -176,11 +165,13 @@ fi
 # Import libraries must be in -devel subpackage
 %{_libdir}/ltdl*_dll.a
 
-%files debug
-%defattr(-,root,root)
-%{_libdir}/*.dbg
-
 %changelog
+* Tue Feb 2 2016 Dmitriy Kuminov <coding@dmik.org> 2.4.6-2
+- Fix missing DLL exports when -export-symbols-regex is given.
+- Fix broken -os2dllname compatiblity.
+- Set libext to lib when AR is emxomfar.
+- Make SYMBOL_UNDERSCORE correctly defined.
+
 * Tue Feb 17 2015 Dmitriy Kuminov <coding@dmik.org> 2.4.6-1
 - Update to version 2.4.6 from vendor.
 
