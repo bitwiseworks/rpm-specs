@@ -1,6 +1,6 @@
-%define svn_url     e:/trees/cups/trunk
-#define svn_url     http://svn.netlabs.org/repos/ports/cups/trunk
-#define svn_rev     944
+#define svn_url     e:/trees/cups/trunk
+%define svn_url     http://svn.netlabs.org/repos/ports/cups/trunk
+%define svn_rev     1294
 
 %define _without_dbus 1
 %define _without_php 1
@@ -42,7 +42,7 @@
 Summary: CUPS
 Name: cups
 Version: 1.4.8
-Release: 3%{?dist}
+Release: 4%{?dist}
 Epoch: 1
 
 License: GPL
@@ -62,7 +62,7 @@ BuildRoot: /tmp/%{name}-root
 
 # Dependencies...
 Requires: %{name}-libs = %{epoch}:%{version}
-Requires: poppler-utils
+Requires: poppler-utils >= 0.38.0-2
 Obsoletes: lpd, lpr, LPRng
 Provides: lpd, lpr, LPRng
 Obsoletes: cups-da, cups-de, cups-es, cups-et, cups-fi, cups-fr, cups-he
@@ -82,7 +82,7 @@ Provides: libcups1
 %package lpd
 Summary: CUPS - LPD support
 Group: System Environment/Daemons
-Requires: %{name} = %{epoch}:%{version} xinetd
+#Requires: %{name} = %{epoch}:%{version} xinetd
 
 %if %{?_with_php:1}%{!?_with_php:0}
 %package php
@@ -309,6 +309,11 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Thu Jan 26 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.4.8-4
+- poppler-utils needs to be at least 0.38.0-2
+- remove wrong req for cups-lpr
+- install all .a files for the dll
+
 * Mon Jan 11 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.4.8-3
 - rebuild with latest libraries
 - adjusted debug package creation to latest rpm macros
