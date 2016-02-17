@@ -100,13 +100,13 @@ autoreconf -fi
 %endif
 
 %build
-PATH=`echo $PATH | tr '\\\' '/'` \
-PATHSEP=";" EXEEXT=".exe" IMPLIBPREF="" IMPLIBSUFF="_dll.lib" \
-LDFLAGS="-Zomf -Zhigh-mem -lsocket -lmmap" SORT=sort \
-CC=gcc.exe CXX=g++.exe ECHO=echo RANLIB=echo \
-AR=emxomfar.exe LD=ld.exe PKG_CONFIG=pkg-config \
-EMXOMFLD_TYPE="wlink" EMXOMFLD_LINKER="wl.exe" \
-./configure --without-ipv6
+export  PATH=`echo $PATH | tr '\\\' '/'` \
+	PATHSEP=";" EXEEXT=".exe" IMPLIBPREF="" IMPLIBSUFF="_dll.lib" \
+	LDFLAGS="-Zomf -Zhigh-mem -lsocket -lmmap" CFLAGS="-Zomf" SORT=sort \
+	CC=gcc ECHO=echo RANLIB=echo AR=emxomfar LD=gcc PKG_CONFIG=pkg-config \
+	EMXOMFLD_TYPE="wlink" EMXOMFLD_LINKER="wl.exe"
+
+%configure --without-ipv6
 
 %{__make} %{?_smp_mflags}
 
@@ -132,16 +132,16 @@ EMXOMFLD_TYPE="wlink" EMXOMFLD_LINKER="wl.exe" \
 %doc README INSTALL AUTHORS ChangeLog NEWS TODO 
 # %{_bindir}/LinuxVNC
 %{_bindir}/libvncserver-config
-%{_libdir}/vncclie0.dll
-%{_libdir}/vncserv0.dll
+%{_libdir}/vnccli0.dll
+%{_libdir}/vncsrv0.dll
 
 %files devel
 %defattr(-,root,root)
 %{_includedir}/rfb/*
 %{_libdir}/pkgconfig/libvncclient.pc
 %{_libdir}/pkgconfig/libvncserver.pc
-%{_libdir}/vncclie0.dbg
-%{_libdir}/vncserv0.dbg
+%{_libdir}/vnccli0.dbg
+%{_libdir}/vncsrv0.dbg
 %{_libdir}/vncclient*.lib
 %{_libdir}/vncserver*.lib
 %exclude %{_libdir}/libvncclient.la
