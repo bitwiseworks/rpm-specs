@@ -101,10 +101,10 @@ autoreconf -fi
 
 %build
 PATH=`echo $PATH | tr '\\\' '/'` \
-PATHSEP=";" EXEEXT=".exe" IMPLIBPREF="" IMPLIBSUFF="_dll.a" \
-LDFLAGS="-lsocket -lmmap" SORT=sort \
+PATHSEP=";" EXEEXT=".exe" IMPLIBPREF="" IMPLIBSUFF="_dll.lib" \
+LDFLAGS="-Zomf -Zhigh-mem -lsocket -lmmap" SORT=sort \
 CC=gcc.exe CXX=g++.exe ECHO=echo RANLIB=echo \
-AR=ar.exe LD=ld.exe PKG_CONFIG=pkg-config \
+AR=emxomfar.exe LD=ld.exe PKG_CONFIG=pkg-config \
 EMXOMFLD_TYPE="wlink" EMXOMFLD_LINKER="wl.exe" \
 ./configure --without-ipv6
 
@@ -142,10 +142,10 @@ EMXOMFLD_TYPE="wlink" EMXOMFLD_LINKER="wl.exe" \
 %{_libdir}/pkgconfig/libvncserver.pc
 %{_libdir}/vncclie0.dbg
 %{_libdir}/vncserv0.dbg
-%{_libdir}/vncclient*.a
-%{_libdir}/vncserver*.a
-%{_libdir}/libvncclient.la
-%{_libdir}/libvncserver.la
+%{_libdir}/vncclient*.lib
+%{_libdir}/vncserver*.lib
+%exclude %{_libdir}/libvncclient.la
+%exclude %{_libdir}/libvncserver.la
 
 # %files x11vnc
 #%defattr(-,root,root)
