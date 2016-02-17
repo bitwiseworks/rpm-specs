@@ -72,11 +72,10 @@ specification for defining interfaces which can be used between
 different CORBA implementations.
 
 %prep
-# %setup -q -n %{_name}-%{version}
 %if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
 %setup -q
 %else
-%setup -n "%{name}-%{version}" -Tc
+%setup -q -n "%{name}-%{version}" -Tc
 svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
 rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
 (cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
@@ -87,17 +86,18 @@ autoreconf -fi
 %build
 export \
 	PATH=`echo $PATH | tr '\\\' '/'` \
-	EXEEXT=".exe" IMPLIBPREF="" IMPLIBSUFF="_dll.a" \
-	LDFLAGS="-Zomf -Zhigh-mem -lurpo -lmmap -lpthread -lintl" CFLAGS="-D__OS2__ -D__EMX__" \
+	EXEEXT=".exe" IMPLIBPREF="" IMPLIBSUFF="_dll.lib" \
+	LDFLAGS="-Zomf -Zhigh-mem -lurpo -lmmap -lpthread -lintl" CFLAGS="-Zomf -D__OS2__ -D__EMX__" \
 	PATH_SEPARATOR=";" PATHSEP=";" AWK=gawk SED=sed GREP=grep \
-	LD=gcc AR=ar STRIP=strip RANLIB=echo \
+	LD=gcc AR=emxomfar STRIP=strip RANLIB=echo \
 	ECHO=echo PKG_CONFIG=pkg-config CC=gcc \
 	LEX=flex YACC="bison -y" HAVE_YACC=yes \
 	EMXOMFLD_TYPE="wlink" EMXOMFLD_LINKER="wl.exe"
 
 %configure \
 	--prefix=%{_prefix} \
-	--enable-shared --enable-static
+	--enable-shared \
+	--enable-static
 
 # --with-pic
 
@@ -109,9 +109,10 @@ find %{buildroot} -type f -name "*.la" -exec %{__rm} -fv {} +
 mkdir -p $RPM_BUILD_ROOT%{_datadir}
 # mkdir $RPM_BUILD_ROOT%{_datadir}/idl
 rm -f %{buildroot}%{_datadir}/info/dir
-emxomf -o %{buildroot}%{_libdir}/IDL-2.lib %{buildroot}%{_libdir}/IDL-2.a
-emximp -o %{buildroot}%{_libdir}/IDL-2_dll.lib %{buildroot}%{_libdir}/IDL-20.dll
-emximp -o %{buildroot}%{_libdir}/IDL-20_dll.lib %{buildroot}%{_libdir}/IDL-20.dll
+# rm -f %{buildroot}%{_libdir}/*.lib
+# emxomf -o %{buildroot}%{_libdir}/IDL-2.lib %{buildroot}%{_libdir}/IDL-2.a
+# emximp -o %{buildroot}%{_libdir}/IDL-2_dll.lib %{buildroot}%{_libdir}/IDL-20.dll
+# emximp -o %{buildroot}%{_libdir}/IDL-20_dll.lib %{buildroot}%{_libdir}/IDL-20.dll
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -137,7 +138,7 @@ fi
 %files
 %defattr(-,root,root)
 %doc COPYING ChangeLog AUTHORS README* NEWS BUGS tstidl.c
-%{_libdir}/IDL-20.dll
+%{_libdir}/idl*.dll
 # generic directory for idl files
 # %dir %{_datadir}/idl
 
@@ -147,12 +148,9 @@ fi
 %{_includedir}/*
 %doc %{_infodir}/%{_name}2.info
 %{_libdir}/pkgconfig/*.pc
-%{_libdir}/IDL-20.dbg
-%{_libdir}/IDL-2.a
+%{_libdir}/idl*.dbg
 %{_libdir}/IDL-2.lib
-%{_libdir}/IDL-2_dll.a
 %{_libdir}/IDL-2_dll.lib
-%{_libdir}/IDL-20_dll.a
 %{_libdir}/IDL-20_dll.lib
 
 %changelog
