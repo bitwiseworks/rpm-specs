@@ -1,7 +1,7 @@
 Summary: The zlib compression and decompression library.
 Name: zlib
 Version: 1.2.5
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: BSD
 Group: System Environment/Libraries
 URL: http://www.zlib.net
@@ -33,6 +33,8 @@ Summary: HLL debug data for exception handling support.
 %description debug
 HLL debug data for exception handling support.
 
+%debug_package
+
 %prep
 %setup -q
 %patch0 -p0 -b .os2~
@@ -42,7 +44,6 @@ HLL debug data for exception handling support.
 
 %build
 # first build and test static zlib
-export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
 export TEST_LDFLAGS="-Zomf"
 CFLAGS="%optflags" \
 ./configure --prefix=/@unixroot/usr --static
@@ -65,12 +66,14 @@ rm -f *.s *.o
 %install
 rm -rf %buildroot
 mkdir -p %buildroot%_libdir
+mkdir -p %buildroot%_libdir/pkgconfig
 mkdir -p %buildroot%_includedir
 mkdir -p %buildroot%_mandir/man3
 
 cp -a libz.a %buildroot%_libdir/
 cp -a libz_s.a %buildroot%_libdir/
 cp -a z.dll %buildroot%_libdir/
+cp -a zlib.pc %buildroot%_libdir/pkgconfig/
 
 install -p -m644 zlib.h zconf.h %buildroot%_includedir/
 install -p -m644 zlib.3 %buildroot%_mandir/man3/
@@ -85,7 +88,7 @@ install -p -m644 README \
 %defattr(-,root,root)
 %_libdir/z.dll
 %dir %docdir
-#%docdir/License
+#docdir/License
 %docdir/README
 
 %files devel
@@ -95,13 +98,14 @@ install -p -m644 README \
 %_mandir/man?/*
 %dir %docdir
 %docdir/*.c
-#%docdir/*.bz2
-
-%files debug
-%defattr(-,root,root)
-%{_libdir}/*.dbg
+#docdir/*.bz2
+%{_libdir}/pkgconfig/*.pc
 
 %changelog
+* Thu Feb 18 2016 yd <yd@os2power.com> 1.2.5-6
+- added .pc file to distribution.
+- use new debug macros.
+
 * Mon Jun 02 2014 yd
 - remove dll from devel package.
 - added debug package with symbolic info for exceptq.
