@@ -1,13 +1,13 @@
 #define svn_url     F:/rd/rpm/yum/trunk
 %define svn_url     http://svn.netlabs.org/repos/rpm/yum/trunk
-%define svn_rev     527
+%define svn_rev     653
 
 %{!?python_sitelib: %define python_sitelib %(python -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
  
 Summary: RPM installer/updater
 Name: yum
 Version: 3.4.3
-Release: 8%{?dist}
+Release: 9%{?dist}
 License: GPLv2+
 Group: System Environment/Base
 
@@ -16,7 +16,6 @@ Source1: yum-os2.zip
 
 URL: http://yum.baseurl.org/
 
-BuildArch: noarch
 BuildRequires: python
 BuildRequires: gettext
 BuildRequires: intltool
@@ -56,10 +55,10 @@ Group: Applications/System
 Requires: yum = %{version}-%{release}
 Requires: dbus-python
 Requires: pygobject2
-Requires(preun): /sbin/chkconfig
-Requires(post): /sbin/chkconfig
-Requires(preun): /sbin/service
-Requires(post): /sbin/service
+#Requires(preun): /sbin/chkconfig
+#Requires(post): /sbin/chkconfig
+#Requires(preun): /sbin/service
+#Requires(post): /sbin/service
 
 %description updatesd
 yum-updatesd provides a daemon which checks for available updates and 
@@ -70,6 +69,8 @@ Summary: HLL debug data for exception handling support.
 
 %description debug
 HLL debug data for exception handling support.
+
+%debug_package
 
 %prep
 %if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
@@ -113,35 +114,35 @@ touch $RPM_BUILD_ROOT/%{_var}/lib/yum/uuid
 #build exe wrapper
 gcc -g -Zomf %optflags -DPYTHON_EXE=\"python%{python_version}.exe\" -o $RPM_BUILD_ROOT/%{_bindir}/%{name}.exe exec-py.c
 
+%find_lang %name
 
-#%find_lang %name
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%files
-# -f %{name}.lang
+
+%files -f %{name}.lang
 %defattr(-, root, root, -)
 %doc README AUTHORS COPYING TODO INSTALL ChangeLog
 %config(noreplace) %{_sysconfdir}/yum/yum.conf
 %dir %{_sysconfdir}/yum
 %config(noreplace) %{_sysconfdir}/yum/version-groups.conf
-%dir %{_sysconfdir}/yum/cron.daily/*
+%{_sysconfdir}/yum/cron.daily
 %dir %{_sysconfdir}/yum/protected.d
-%dir %{_sysconfdir}/yum/rc.d/init.d/*
+%{_sysconfdir}/yum/rc.d/init.d/*
 %dir %{_sysconfdir}/yum/repos.d
-%dir %{_sysconfdir}/yum/sysconfig/*
+%{_sysconfdir}/yum/sysconfig/*
 %dir %{_sysconfdir}/yum/vars
 %config(noreplace) %{_sysconfdir}/logrotate.d/yum
-%dir %{_sysconfdir}/yum/bash_completion.d/*
+%{_sysconfdir}/yum/bash_completion.d/*
 %dir %{_datadir}/yum-cli
 %{_sysconfdir}/yum/yum-daily.yum
 %{_sysconfdir}/yum/yum-weekly.yum
 %{_datadir}/yum-cli/*
 %{_bindir}/yum
 %{_bindir}/yum.exe
-#%{python_sitelib}/yum
-#%{python_sitelib}/rpmUtils
+#{python_sitelib}/yum
+#{python_sitelib}/rpmUtils
 %{_libdir}/*
 %dir %{_var}/cache/yum
 %dir %{_var}/lib/yum
@@ -152,16 +153,15 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man*/yum.*
 %{_mandir}/man*/yum-shell*
 # plugin stuff
-#%dir %{_sysconfdir}/yum/pluginconf.d 
-#%dir /usr/lib/yum-plugins
-%{_usr}/share/locale/*
-%exclude %{_bindir}/*.dbg
+#dir {_sysconfdir}/yum/pluginconf.d 
+#dir /usr/lib/yum-plugins
+#exclude {_bindir}/*.dbg
 
-%files debug
-%defattr(-,root,root)
-%{_bindir}/*.dbg
 
 %changelog
+* Wed Feb 10 2016 yd <yd@os2power.com> 3.4.3-9
+- r653, change default file path. fixes ticket#173.
+
 * Tue Feb 10 2015 yd <yd@os2power.com> 3.4.3-8
 - r527, do not rewrite paths starting with @unixroot.
 
