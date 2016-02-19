@@ -4,22 +4,13 @@
 Summary: The GNU Bourne Again shell
 Name: bash
 Version: %{baseversion}%{patchleveltag}
-Release: 7%{?dist}
+Release: 8%{?dist}
 License: BSD
 Group: System Environment/Shells
 Source: bash.zip
-#Source: ftp://ftp.debian.org/debian/dists/woody/main/source/shells/%{name}_%{version}.orig.tar.gz
-#Patch0: ftp://ftp.debian.org/debian/dists/woody/main/source/shells/%{name}_%{version}-38.diff.gz
-#Patch2: ash-0.3.8-tempfile.patch
-#Patch1: ash-0.3.8-build.patch
-#Patch3: ash-0.3.8-mannewline.patch
-#Patch4: ash-0.3.8-segv.patch
-#Prereq: fileutils grep
-#BuildPrereq: pmake >= 1.45 byacc
-#Buildroot: %{_tmppath}/%{name}-%{version}-root
-#Conflicts: mkinitrd <= 1.7
 
 Provides: /@unixroot/bin/bash
+Provides: /@unixroot/usr/bin/bash
 
 %description
 The GNU Bourne Again shell (Bash) is a shell or command language
@@ -70,6 +61,9 @@ rm -rf %{buildroot}
 #%{_mandir}/man1/*
 
 %changelog
+* Fri Feb 19 2016 yd <yd@os2power.com> 3.2.0-8
+- added Provides for virtual /@unixroot/usr/bin/bash file.
+
 * Sat Feb 04 2012 yd
 - added Provides for virtual /@unixroot/bin/bash file.
 - Remove symlinks from /bin.
