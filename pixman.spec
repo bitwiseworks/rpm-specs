@@ -2,12 +2,13 @@
 
 Name:           pixman
 Version:        0.32.8
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Pixel manipulation library
 
 Group:          System Environment/Libraries
 License:        MIT
 URL:            http://cgit.freedesktop.org/pixman/
+Vendor:         bww bitwise works GmbH
 
 %define svn_url     http://svn.netlabs.org/repos/ports/pixman/trunk
 %define svn_rev     1232
@@ -41,10 +42,11 @@ rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
 %endif
 
 # Generate confuigure and friends
-export NOCONFIGURE=1
-autogen.sh
+NOCONFIGURE=1 autogen.sh
 
 %build
+export LDFLAGS="-Zhigh-mem"
+export LIBS="-lurpo"
 %configure \
   --disable-static
 
@@ -73,5 +75,8 @@ make check %{?_smp_mflags} V=1 ||:
 %{_libdir}/pkgconfig/pixman-1.pc
 
 %changelog
+* Sat Feb 20 2016 Dmitriy Kuminov <coding@dmik.org> 0.32.8-2
+- Allow loading DLL into high memory.
+
 * Tue Dec 29 2015 Dmitriy Kuminov <coding@dmik.org> 0.32.8-1
 - Initial package for version 0.38.2.
