@@ -9,12 +9,12 @@
 %define github_rev  LibVNCServer-%{_version}
 %else
 %define github_url     http://svn.netlabs.org/repos/ports/libvncserver/trunk
-%define github_rev     1197
+%define github_rev     1315
 %endif
 
 Name:    %{github_name}
 Version: %{_version}
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: a library to make writing a vnc server easy
 License: GPL
 Group:  System/Libraries
@@ -52,6 +52,8 @@ Requires:     %{name} = %{version}
 %description devel
 Static Libraries and Header Files for LibVNCServer.
 
+%debug_package
+
 # %package x11vnc
 #Requires:     %{name} = %{version}
 #Summary:      VNC server for the current X11 session
@@ -63,8 +65,8 @@ Static Libraries and Header Files for LibVNCServer.
 #which serves the current X Window System desktop via RFB (VNC)
 #protocol to the user.
 
-Based on the ideas of x0rfbserver and on LibVNCServer, it has evolved
-into a versatile and performant while still easy to use program.
+#Based on the ideas of x0rfbserver and on LibVNCServer, it has evolved
+#into a versatile and performant while still easy to use program.
 
 %prep
 # %setup -n %{name}-%{version}
@@ -100,11 +102,7 @@ autoreconf -fi
 %endif
 
 %build
-export  PATH=`echo $PATH | tr '\\\' '/'` \
-	PATHSEP=";" EXEEXT=".exe" IMPLIBPREF="" IMPLIBSUFF="_dll.lib" \
-	LDFLAGS="-Zomf -Zhigh-mem -lsocket -lmmap" CFLAGS="-Zomf" SORT=sort \
-	CC=gcc ECHO=echo RANLIB=echo AR=emxomfar LD=gcc PKG_CONFIG=pkg-config \
-	EMXOMFLD_TYPE="wlink" EMXOMFLD_LINKER="wl.exe"
+export  LDFLAGS="-Zhigh-mem -lsocket -lmmap" RANLIB=echo
 
 %configure --without-ipv6
 
@@ -114,6 +112,18 @@ export  PATH=`echo $PATH | tr '\\\' '/'` \
 # [ -n "%{buildroot}" -a "%{buildroot}" != / ] && rm -rf %{buildroot}
 # make install prefix=%{buildroot}%{_prefix}
 %makeinstall includedir="%{buildroot}%{_includedir}/rfb"
+emxomf -o %{buildroot}%{_libdir}/vncserver.lib %{buildroot}%{_libdir}/vncserver.a
+emximp -o %{buildroot}%{_libdir}/vncserver_dll.lib %{buildroot}%{_libdir}/vncsrv0.dll
+emximp -o %{buildroot}%{_libdir}/vncserver0_dll.lib %{buildroot}%{_libdir}/vncsrv0.dll
+emxomf -o %{buildroot}%{_libdir}/vncclient.lib %{buildroot}%{_libdir}/vncclient.a
+emximp -o %{buildroot}%{_libdir}/vncclient_dll.lib %{buildroot}%{_libdir}/vnccli0.dll
+emximp -o %{buildroot}%{_libdir}/vncclient0_dll.lib %{buildroot}%{_libdir}/vnccli0.dll
+# change shell path in libvncserver-config
+sed -e 's-\#\!\/bin\/sh-#! /@unixroot/usr/bin/sh-g' \
+	<%{buildroot}%{_bindir}/libvncserver-config \
+	>%{buildroot}%{_bindir}/libvncserver-config-1
+rm -rf %{buildroot}%{_bindir}/libvncserver-config
+mv -f %{buildroot}%{_bindir}/libvncserver-config-1 %{buildroot}%{_bindir}/libvncserver-config
 
 #%{__install} -d -m0755 %{buildroot}%{_datadir}/x11vnc/classes
 #%{__install} webclients/java-applet/VncViewer.jar webclients/index.vnc \
@@ -140,12 +150,12 @@ export  PATH=`echo $PATH | tr '\\\' '/'` \
 %{_includedir}/rfb/*
 %{_libdir}/pkgconfig/libvncclient.pc
 %{_libdir}/pkgconfig/libvncserver.pc
-%{_libdir}/vnccli0.dbg
-%{_libdir}/vncsrv0.dbg
+%{_libdir}/vncclient*.a
+%{_libdir}/vncserver*.a
 %{_libdir}/vncclient*.lib
 %{_libdir}/vncserver*.lib
-%exclude %{_libdir}/libvncclient.la
-%exclude %{_libdir}/libvncserver.la
+%exclude %{_libdir}/libvncclient.la*
+%exclude %{_libdir}/libvncserver.la*
 
 # %files x11vnc
 #%defattr(-,root,root)
@@ -154,5 +164,10 @@ export  PATH=`echo $PATH | tr '\\\' '/'` \
 #%{_datadir}/x11vnc/classes
 
 %changelog
+* Thu Feb 18 2016 Valery Sedletski - <_valerius@mail.ru> 0.9.10-2
+- changed libs format to both a.out and OMF
+- added debug package
+- added OS/2 DLL shortname
+
 * Tue Nov 17 2015 Valery Sedletski - <_valerius@mail.ru> first OS/2 build
 - initial OS/2 build
