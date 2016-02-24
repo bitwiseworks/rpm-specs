@@ -23,7 +23,7 @@ Name:           libidl
 %define         _name libIDL
 Url:            http://www.gnome.org
 Version:        0.8.14
-Release:        1%{?dist}
+Release:        2%{?dist}
 #Release:        42.20
 # NOTE: on upgrade to a new upstream version, change the Obsoletes from <= to < (here and in baselibs.conf)
 Summary:        IDL Parsing Library
@@ -71,6 +71,8 @@ compliant Interface Definition Language (IDL) files, which is a
 specification for defining interfaces which can be used between
 different CORBA implementations.
 
+%debug_package
+
 %prep
 %if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
 %setup -q
@@ -81,25 +83,23 @@ rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
 (cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
 %endif
 
-autoreconf -fi
-
 %build
 export \
-	PATH=`echo $PATH | tr '\\\' '/'` \
-	EXEEXT=".exe" IMPLIBPREF="" IMPLIBSUFF="_dll.lib" \
-	LDFLAGS="-Zomf -Zhigh-mem -lurpo -lmmap -lpthread -lintl" CFLAGS="-Zomf -D__OS2__ -D__EMX__" \
-	PATH_SEPARATOR=";" PATHSEP=";" AWK=gawk SED=sed GREP=grep \
-	LD=gcc AR=emxomfar STRIP=strip RANLIB=echo \
-	ECHO=echo PKG_CONFIG=pkg-config CC=gcc \
-	LEX=flex YACC="bison -y" HAVE_YACC=yes \
-	EMXOMFLD_TYPE="wlink" EMXOMFLD_LINKER="wl.exe"
+        LDFLAGS="-Zhigh-mem -lintl" CFLAGS="-D__OS2__ -D__EMX__" RANLIB=echo
+
+autoreconf -fiv
 
 %configure \
-	--prefix=%{_prefix} \
-	--enable-shared \
-	--enable-static
+        --prefix=%{_prefix} \
+        --enable-shared \
+        --enable-static
 
-# --with-pic
+# Work around ASH bug: change RANLIB="echo\n" to RANLIB="echo" in libtool
+sed -e ':a;N;$!ba;s/RANLIB\=\"echo\n/RANLIB="echo/g' \
+	<%{_builddir}/%{?buildsubdir}/libtool \
+	>%{_builddir}/%{?buildsubdir}/libtool2
+rm -rf %{_builddir}/%{?buildsubdir}/libtool
+mv -f %{_builddir}/%{?buildsubdir}/libtool2 %{_builddir}/%{?buildsubdir}/libtool
 
 %{__make} %{?jobs:-j%jobs}
 
@@ -110,9 +110,15 @@ mkdir -p $RPM_BUILD_ROOT%{_datadir}
 # mkdir $RPM_BUILD_ROOT%{_datadir}/idl
 rm -f %{buildroot}%{_datadir}/info/dir
 # rm -f %{buildroot}%{_libdir}/*.lib
-# emxomf -o %{buildroot}%{_libdir}/IDL-2.lib %{buildroot}%{_libdir}/IDL-2.a
-# emximp -o %{buildroot}%{_libdir}/IDL-2_dll.lib %{buildroot}%{_libdir}/IDL-20.dll
-# emximp -o %{buildroot}%{_libdir}/IDL-20_dll.lib %{buildroot}%{_libdir}/IDL-20.dll
+emxomf -o %{buildroot}%{_libdir}/IDL-2.lib %{buildroot}%{_libdir}/IDL-2.a
+emximp -o %{buildroot}%{_libdir}/IDL-2_dll.lib %{buildroot}%{_libdir}/idl20.dll
+emximp -o %{buildroot}%{_libdir}/IDL-20_dll.lib %{buildroot}%{_libdir}/idl20.dll
+# change shell path in libIDL-config-2
+sed -e 's-\#\! \/bin\/sh-#! /@unixroot/usr/bin/sh-g' \
+	<%{buildroot}%{_bindir}/libIDL-config-2 \
+	>%{buildroot}%{_bindir}/libIDL-config-1
+rm -rf %{buildroot}%{_bindir}/libIDL-config-2
+mv -f %{buildroot}%{_bindir}/libIDL-config-1 %{buildroot}%{_bindir}/libIDL-config-2
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -123,16 +129,16 @@ rm -rf $RPM_BUILD_ROOT
 
 %post devel
 ### @todo Replace with ``%%info_post %%{_name}2.info`` when its available.
-if [ -f %{_infodir}/%{_name}2.info ]; then 
+if [ -f %{_infodir}/%{_name}2.info ]; then
     %{_sbindir}/install-info.exe %{_infodir}/%{_name}2.info %{_infodir}/dir
 fi
 
 %postun devel
 ### @todo Replace with ``%%info_postun %%{_name}2.info`` when its available.
-if [ $1 -eq 0 ]; then 
-    if [ -f %{_infodir}/%{_name}2.info ]; then 
+if [ $1 -eq 0 ]; then
+    if [ -f %{_infodir}/%{_name}2.info ]; then
         %{_sbindir}/install-info.exe --delete %{_infodir}/%{_name}2.info %{_infodir}/dir
-    fi 
+    fi
 fi
 
 %files
@@ -148,11 +154,18 @@ fi
 %{_includedir}/*
 %doc %{_infodir}/%{_name}2.info
 %{_libdir}/pkgconfig/*.pc
-%{_libdir}/idl*.dbg
+%{_libdir}/IDL-2.a
+%{_libdir}/IDL-2_dll.a
+%{_libdir}/IDL-20_dll.a
 %{_libdir}/IDL-2.lib
 %{_libdir}/IDL-2_dll.lib
 %{_libdir}/IDL-20_dll.lib
 
 %changelog
+* Thu Feb 18 2016 Valery Sedletski - <_valerius@mail.ru> 0.8.14-2
+- changed libs format to both a.out and OMF
+- added debug package
+- added OS/2 DLL shortname
+
 * Thu Dec 03 2015 Valery Sedletski - <_valerius@mail.ru> Initial OS/2 build
 - Initial OS/2 port
