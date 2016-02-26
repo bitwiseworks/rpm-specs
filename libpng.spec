@@ -1,7 +1,7 @@
 Summary: A library of functions for manipulating PNG image format files
 Name: libpng
 Version: 1.6.21
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: zlib
 Group: System Environment/Libraries
 URL: http://www.libpng.org/pub/png/
@@ -29,8 +29,8 @@ files.
 %package devel
 Summary: Development tools for programs to manipulate PNG image format files
 Group: Development/Libraries
-Requires: %{name}%{?_isa} = %{version}-%{release}
-Requires: zlib-devel%{?_isa} pkgconfig%{?_isa}
+Requires: %{name} = %{version}-%{release}
+Requires: zlib-devel pkgconfig
 
 %description devel
 The libpng-devel package contains header files and documentation necessary
@@ -43,7 +43,7 @@ the libpng package.
 %package static
 Summary: Static PNG image format file library
 Group: Development/Libraries
-Requires: %{name}-devel%{?_isa} = %{version}-%{release}
+Requires: %{name}-devel = %{version}-%{release}
 
 %description static
 The libpng-static package contains the statically linkable version of libpng.
@@ -53,7 +53,7 @@ necessary for some boot packages.
 %package tools
 Summary: Tools for PNG image format file library
 Group: Development/Libraries
-Requires: %{name}%{?_isa} = %{version}-%{release}
+Requires: %{name} = %{version}-%{release}
 
 %description tools
 The libpng-tools package contains tools used by the authors of libpng.
@@ -109,6 +109,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/pngfix.exe
 
 %changelog
+* Fri Feb 26 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.6.21-2
+- remove %{?_isa} macro
+
 * Fri Feb 26 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.6.21-1
 - updated libpng to 1.6.21
 - adjusted debug package creation to latest rpm macros
