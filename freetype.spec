@@ -1,6 +1,6 @@
 Summary: A free and portable font rendering engine
 Name: freetype
-Version: 2.6.2
+Version: 2.6.3
 Release: 1%{?dist}
 License: (FTL or GPLv2+) and BSD and MIT and Public Domain and zlib with acknowledgement
 Group: System Environment/Libraries
@@ -10,7 +10,7 @@ URL: http://www.freetype.org
 #Source2: http://download.savannah.gnu.org/releases/freetype/ft2demos-%{version}.tar.bz2
 #define svn_url	    e:/trees/freetype/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/freetype2/trunk
-%define svn_rev     1212
+%define svn_rev     1338
 
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
@@ -70,6 +70,7 @@ autogen.sh
 
 %build
 rm -f config.mk 
+export LDFLAGS=" -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 %configure --disable-static
 make %{?_smp_mflags}
 
@@ -123,6 +124,10 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Fri Feb 26 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.6.3-1
+- updated source to 2.6.3
+- added -Zhigh-mem
+
 * Thu Dec 29 2015 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.6.2-1
 - updated source to 2.6.2
 - moved docs/version.dll to -devel
