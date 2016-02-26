@@ -5,6 +5,7 @@ Release: 1%{?dist}
 License: zlib
 Group: System Environment/Libraries
 URL: http://www.libpng.org/pub/png/
+Vendor: bww bitwise works GmbH
 #define svn_url	    e:/trees/libpng/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/libpng/trunk
 %define svn_rev     1339

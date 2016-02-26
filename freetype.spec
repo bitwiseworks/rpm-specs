@@ -5,6 +5,7 @@ Release: 1%{?dist}
 License: (FTL or GPLv2+) and BSD and MIT and Public Domain and zlib with acknowledgement
 Group: System Environment/Libraries
 URL: http://www.freetype.org
+Vendor: bww bitwise works GmbH
 #Source:  http://download.savannah.gnu.org/releases/freetype/freetype-%{version}.tar.bz2
 #Source1: http://download.savannah.gnu.org/releases/freetype/freetype-doc-%{version}.tar.bz2
 #Source2: http://download.savannah.gnu.org/releases/freetype/ft2demos-%{version}.tar.bz2
