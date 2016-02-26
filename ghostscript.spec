@@ -1,6 +1,6 @@
 #define svn_url     F:/rd/ports/ghostscript/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/ghostscript/trunk
-%define svn_rev     1317
+%define svn_rev     1332
 
 %define _with_freetype 1
 %define gs_ver 9.18
@@ -12,7 +12,7 @@ Summary: A PostScript interpreter and renderer
 Name: ghostscript
 Version: %{gs_ver}
 
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 # Included CMap data is Redistributable, no modification permitted,
 # see http://bugzilla.redhat.com/487510
@@ -206,6 +206,8 @@ cd ijs
 %makeinstall
 cd ..
 
+install -m0644 base/gserrors.h $RPM_BUILD_ROOT%{_includedir}/ghostscript/
+
 echo ".so man1/gs.1" > $RPM_BUILD_ROOT/%{_mandir}/man1/ghostscript.1
 ln -sf gs $RPM_BUILD_ROOT%{_bindir}/ghostscript
 
@@ -303,6 +305,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/gs.lib
 
 %changelog
+* Fri Feb 26 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 9.18-2
+- add gserrors.h
+- fix a vendor init bug
+
 * Wed Jan 13 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 9.18-1
 - updated to ghostscript version 9.18
 - install the cmd files as well
