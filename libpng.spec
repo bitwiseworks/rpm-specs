@@ -1,13 +1,13 @@
 Summary: A library of functions for manipulating PNG image format files
 Name: libpng
-Version: 1.6.18
+Version: 1.6.21
 Release: 1%{?dist}
 License: zlib
 Group: System Environment/Libraries
 URL: http://www.libpng.org/pub/png/
 #define svn_url	    e:/trees/libpng/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/libpng/trunk
-%define svn_rev     1167
+%define svn_rev     1339
 
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
@@ -57,11 +57,7 @@ Requires: %{name}%{?_isa} = %{version}-%{release}
 %description tools
 The libpng-tools package contains tools used by the authors of libpng.
 
-%package debug
-Summary: HLL debug data for exception handling support
-
-%description debug
-%{summary}.
+%debug_package
 
 %prep
 %if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{?!svn_rev):0}
@@ -76,7 +72,7 @@ rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
 autoreconf -f -i
 
 %build
-export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp" ; \
+export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 
 %configure
 make %{?_smp_mflags}
@@ -111,12 +107,11 @@ rm -rf $RPM_BUILD_ROOT
 %files tools
 %{_bindir}/pngfix.exe
 
-%files debug
-%defattr(-,root,root)
-%{_bindir}/*.dbg
-%{_libdir}/*.dbg
-
 %changelog
+* Fri Feb 26 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.6.21-1
+- updated libpng to 1.6.21
+- adjusted debug package creation to latest rpm macros
+
 * Tue Sep 15 2015 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.6.18-1
 - updated libpng to 1.6.18
 
