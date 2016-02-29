@@ -6,7 +6,7 @@
 
 Summary:	A 2D graphics library
 Name:		cairo
-Version:	1.12.0
+Version:	1.12.18
 Release:	1%{?dist}
 URL:		http://cairographics.org
 #VCS:		git:git://git.freedesktop.org/git/cairo
@@ -16,7 +16,7 @@ Group:		System Environment/Libraries
 Vendor:     bww bitwise works GmbH
 
 %define svn_url     http://svn.netlabs.org/repos/ports/cairo/trunk
-%define svn_rev     1284
+%define svn_rev     1345
 
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
@@ -194,5 +194,8 @@ rm $RPM_BUILD_ROOT%{_libdir}/*.la
 #%{_libdir}/cairo/
 
 %changelog
+* Sat Feb 26 2016 Dmitriy Kuminov <coding@dmik.org> 1.12.18-1
+- Update to version 1.12.18.
+
 * Sat Feb 20 2016 Dmitriy Kuminov <coding@dmik.org> 1.12.0-1
 - Initial package for version 1.12.0.
