@@ -23,7 +23,7 @@ Name:           libidl
 %define         _name libIDL
 Url:            http://www.gnome.org
 Version:        0.8.14
-Release:        2%{?dist}
+Release:        3%{?dist}
 #Release:        42.20
 # NOTE: on upgrade to a new upstream version, change the Obsoletes from <= to < (here and in baselibs.conf)
 Summary:        IDL Parsing Library
@@ -41,10 +41,10 @@ Obsoletes:      %{name} <= %{version}
 Source:         %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 #Source:         http://ftp.gnome.org/pub/GNOME/sources/%{_name}/0.8/%{_name}-%{version}.tar.bz2
 #Source99:       baselibs.conf
+Requires:       glib2 libgcc1
 BuildRequires:  bison
 BuildRequires:  flex
 BuildRequires:  glib2-devel
-BuildRequires:  urpo-devel
 BuildRequires:  pkgconfig
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 
@@ -57,7 +57,7 @@ different CORBA implementations.
 %package devel
 Summary:        Include Files and Libraries mandatory for Development
 Group:          Development/Languages/Other
-Requires:       libidl = %{version}
+Requires:       %name = %version-%release
 #PreReq:         %install_info_prereq
 # bug437293
 #%ifarch ppc64
@@ -85,7 +85,7 @@ rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
 
 %build
 export \
-        LDFLAGS="-Zhigh-mem -lintl" CFLAGS="-D__OS2__ -D__EMX__" RANLIB=echo
+        LDFLAGS="-Zhigh-mem" CFLAGS="-D__OS2__ -D__EMX__" RANLIB=echo
 
 autoreconf -fiv
 
@@ -162,6 +162,9 @@ fi
 %{_libdir}/IDL-20_dll.lib
 
 %changelog
+* Mon Feb 29 2016 Valery Sedletski <_valerius@mail.ru> - 0.8.14-3
+- Added needed Requires and BuildRequires directives
+
 * Thu Feb 18 2016 Valery Sedletski - <_valerius@mail.ru> 0.8.14-2
 - changed libs format to both a.out and OMF
 - added debug package
