@@ -10,7 +10,7 @@
 Summary:	Font configuration and customization library
 Name:		fontconfig
 Version:	2.11.94
-Release:	1%{?dist}
+Release:	2%{?dist}
 # src/ftglue.[ch] is in Public Domain
 # src/fccache.c contains Public Domain code
 # fc-case/CaseFolding.txt is in the UCD
@@ -86,14 +86,14 @@ rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
 %endif
 
 # Generate configure and friends
-export NOCONFIGURE=1
-autogen.sh
+NOCONFIGURE=1 autogen.sh
 
 %build
 # We don't want to rebuild the docs, but we want to install the included ones.
 export HASDOCBOOK=no
 
 CFLAGS="%{optflags}" \
+LDFLAGS="-Zhigh-mem" \
 %configure \
         --with-add-fonts=%{_prefix}/local/share/fonts,%{_datadir}/fonts \
         --disable-static
@@ -168,5 +168,8 @@ mkdir -p %{_localstatedir}/cache/fontconfig
 # @todo docs %doc fontconfig-devel.txt fontconfig-devel
 
 %changelog
+* Tue Mar 1 2016 Dmitriy Kuminov <coding@dmik.org> 2.11.94-2
+- Allow loading DLL into high memory.
+
 * Mon Dec 14 2015 Dmitriy Kuminov <coding@dmik.org> 2.11.94-1
 - Initial package for version 2.11.94.
