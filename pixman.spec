@@ -2,7 +2,7 @@
 
 Name:           pixman
 Version:        0.32.8
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Pixel manipulation library
 
 Group:          System Environment/Libraries
@@ -45,8 +45,9 @@ rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
 NOCONFIGURE=1 autogen.sh
 
 %build
-export LDFLAGS="-Zhigh-mem"
-export LIBS="-lurpo"
+CFLAGS="%{optflags}" \
+LDFLAGS="-Zhigh-mem" \
+LIBS="-lurpo" \
 %configure \
   --disable-static
 
@@ -75,6 +76,9 @@ make check %{?_smp_mflags} V=1 ||:
 %{_libdir}/pkgconfig/pixman-1.pc
 
 %changelog
+* Tue Mar 1 2016 Dmitriy Kuminov <coding@dmik.org> 0.32.8-3
+- Use respective optimization flags for different architectures.
+
 * Sat Feb 20 2016 Dmitriy Kuminov <coding@dmik.org> 0.32.8-2
 - Allow loading DLL into high memory.
 
