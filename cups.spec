@@ -1,6 +1,7 @@
 #define svn_url     e:/trees/cups/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/cups/trunk
-%define svn_rev     1294
+%define svn_rev     1357
+%define _strip_opts --compress -i "*.cgi" --debuginfo -i "*.cgi"
 
 %define _without_dbus 1
 %define _without_php 1
@@ -42,7 +43,7 @@
 Summary: CUPS
 Name: cups
 Version: 1.4.8
-Release: 4%{?dist}
+Release: 5%{?dist}
 Epoch: 1
 
 License: GPL
@@ -61,7 +62,7 @@ BuildRequires: libpoll-devel
 BuildRoot: /tmp/%{name}-root
 
 # Dependencies...
-Requires: %{name}-libs = %{epoch}:%{version}
+Requires: %{name}-libs = %{epoch}:%{version}-%{release}
 Requires: poppler-utils >= 0.38.0-2
 Obsoletes: lpd, lpr, LPRng
 Provides: lpd, lpr, LPRng
@@ -72,7 +73,7 @@ Obsoletes: cups-pt, cups-ru, cups-sv, cups-zh
 %package devel
 Summary: CUPS - development environment
 Group: Development/Libraries
-Requires: %{name}-libs = %{epoch}:%{version}
+Requires: %{name}-libs = %{epoch}:%{version}-%{release}
 
 %package libs
 Summary: CUPS - shared libraries
@@ -82,13 +83,13 @@ Provides: libcups1
 %package lpd
 Summary: CUPS - LPD support
 Group: System Environment/Daemons
-#Requires: %{name} = %{epoch}:%{version} xinetd
+#Requires: %{name} = %{epoch}:%{version}-%{release} xinetd
 
 %if %{?_with_php:1}%{!?_with_php:0}
 %package php
 Summary: CUPS - PHP support
 Group: Development/Languages
-Requires: %{name}-libs = %{epoch}:%{version}
+Requires: %{name}-libs = %{epoch}:%{version}-%{release}
 %endif
 
 %description
@@ -309,6 +310,11 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Fri Mar 04 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.4.8-5
+- fixed lpd
+- added more socketpair vs pipe changes
+- also compress and strip debug info from cgi files
+
 * Thu Jan 26 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.4.8-4
 - poppler-utils needs to be at least 0.38.0-2
 - remove wrong req for cups-lpr

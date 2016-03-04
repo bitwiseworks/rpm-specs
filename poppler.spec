@@ -36,7 +36,7 @@ viewer developed by Derek Noonburg of Glyph and Cog, LLC.
 %package devel
 Summary:	Libraries and headers for poppler
 Group:		Development/Libraries
-Requires:	%{name}%{?_isa} = %{version}-%{release}
+Requires:	%{name} = %{version}-%{release}
 
 %description devel
 You should install the poppler-devel package if you would like to
@@ -45,8 +45,8 @@ compile applications based on poppler.
 %package qt
 Summary:	Qt4 wrapper for poppler
 Group:		System Environment/Libraries
-Requires:	%{name}%{?_isa} = %{version}-%{release}
-%{?_qt4:Requires: qt4%{?_isa} >= %{_qt4_version}}
+Requires:	%{name} = %{version}-%{release}
+%{?_qt4:Requires: qt4 >= %{_qt4_version}}
 Obsoletes:	poppler-qt4 < 0.16.0-3
 Provides:	poppler-qt4 = %{version}-%{release}
 
@@ -56,8 +56,8 @@ Qt4 wrapper for poppler.
 %package qt-devel
 Summary:	Development files for Qt4 wrapper
 Group:		Development/Libraries
-Requires:	%{name}-qt%{?_isa} = %{version}-%{release}
-Requires:	%{name}-devel%{?_isa} = %{version}-%{release}
+Requires:	%{name}-qt = %{version}-%{release}
+Requires:	%{name}-devel = %{version}-%{release}
 Obsoletes:	poppler-qt4-devel < 0.16.0-3
 Provides:	poppler-qt4-devel = %{version}-%{release}
 Requires:	qt4-devel-kit
@@ -68,16 +68,16 @@ Header files for Qt4 wrapper for poppler.
 #%package qt5
 #Summary: Qt5 wrapper for poppler
 #Group:   System Environment/Libraries
-#Requires: %{name}%{?_isa} = %{version}-%{release}
-#%{?_qt5:Requires: qt5-qtbase%{?_isa} >= %{_qt5_version}}
+#Requires: %{name} = %{version}-%{release}
+#%{?_qt5:Requires: qt5-qtbase >= %{_qt5_version}}
 #%description qt5
 #%{summary}.
 
 #%package qt5-devel
 #Summary: Development files for Qt5 wrapper
 #Group:   Development/Libraries
-#Requires: %{name}-qt5%{?_isa} = %{version}-%{release}
-#Requires: %{name}-devel%{?_isa} = %{version}-%{release}
+#Requires: %{name}-qt5 = %{version}-%{release}
+#Requires: %{name}-devel = %{version}-%{release}
 #Requires: qt5-qtbase-devel
 #%description qt5-devel
 #%{summary}.
@@ -85,7 +85,7 @@ Header files for Qt4 wrapper for poppler.
 %package cpp
 Summary: Pure C++ wrapper for poppler
 Group: Development/Libraries
-Requires: %{name}%{?_isa} = %{version}-%{release}
+Requires: %{name} = %{version}-%{release}
 
 %description cpp
 %{summary}.
@@ -93,8 +93,8 @@ Requires: %{name}%{?_isa} = %{version}-%{release}
 %package cpp-devel
 Summary: Development files for C++ wrapper
 Group: Development/Libraries
-Requires: %{name}-cpp%{?_isa} = %{version}-%{release}
-Requires: %{name}-devel%{?_isa} = %{version}-%{release}
+Requires: %{name}-cpp = %{version}-%{release}
+Requires: %{name}-devel = %{version}-%{release}
 
 %description cpp-devel
 %{summary}.
@@ -102,7 +102,7 @@ Requires: %{name}-devel%{?_isa} = %{version}-%{release}
 %package utils
 Summary:	Command line utilities for converting PDF files
 Group:		Applications/Text
-Requires:	%{name}%{?_isa} = %{version}-%{release}
+Requires:	%{name} = %{version}-%{release}
 
 %description utils
 Poppler, a PDF rendering library, is a fork of the xpdf PDF
@@ -114,7 +114,7 @@ converting PDF files to a number of other formats.
 %package demos
 Summary:	Demos for poppler
 Group:		Applications/Text
-Requires:	%{name}-glib%{?_isa} = %{version}-%{release}
+Requires:	%{name}-glib = %{version}-%{release}
 
 %description demos
 %{summary}.
@@ -141,7 +141,7 @@ POPPLER_QT4_CFLAGS='-D__OS2__'
 POPPLER_QT4_LIBS='-lQtCore4 -lQtGui4 -lQtNetwork4 -lQtXml4'
 POPPLER_QT4_TEST_CFLAGS=$POPPLER_QT4_CFLAGS
 POPPLER_QT4_TEST_LIBS=$POPPLER_QT4_LIBS
-LDFLAGS='-Zomf -Zhigh-mem'
+LDFLAGS=" -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 
 export LDFLAGS
 export POPPLER_QT4_CFLAGS
@@ -223,10 +223,11 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
-* Mon Jan 18 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.38.0-2
+* Mon ??? 18 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.38.0-2
 - updated required fontconfig to 2.11.94
 - adjusted debug package creation to latest rpm macros
 - create all pages in PSoutputDev, when writing to stdout
+- remove %{?_isa} macro
 
 * Tue Nov 17 2015 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.38.0-1
 - updated poppler to 0.38.0

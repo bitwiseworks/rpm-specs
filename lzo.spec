@@ -65,6 +65,7 @@ rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
 autoreconf -f -i
 
 %build
+export LDFLAGS=" -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 %configure --disable-static --enable-shared
 make %{?_smp_mflags}
 # build minilzo too (bz 439979)

@@ -1,4 +1,4 @@
-#define svn_url     F:/rd/ports/ghostscript/trunk
+#define svn_url     e:/trees/ghostscript/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/ghostscript/trunk
 %define svn_rev     1332
 
