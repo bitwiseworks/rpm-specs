@@ -14,7 +14,7 @@
 
 Name:    %{github_name}
 Version: %{_version}
-Release: 3%{?dist}
+Release: 4%{?dist}
 Summary: a library to make writing a vnc server easy
 License: GPL
 Group:  System/Libraries
@@ -28,7 +28,7 @@ Patch0: %{name}.patch
 Source: %{name}-%{version}%{?github_rev:-r%{github_rev}}.zip
 %endif
 BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
-Requires: pthread zlib libgcc1 openssllibpng libjpeg
+Requires: pthread zlib libgcc1 openssl libpng libjpeg
 BuildRequires: gcc make curl zip pthread-devel zlib-devel
 BuildRequires: openssl-devel  libpng-devel libjpeg-devel
 
@@ -49,7 +49,7 @@ Johannes Schindelin <Johannes.Schindelin@gmx.de>
 Requires:     %{name} = %{version}
 Summary:      Static Libraries and Header Files for LibVNCServer
 Group:        Libraries/Network
-Requires:     %name = %version-%release
+Requires:     %{name} = %{version}-%{release}
 
 %description devel
 Static Libraries and Header Files for LibVNCServer.
@@ -166,6 +166,9 @@ mv -f %{buildroot}%{_bindir}/libvncserver-config-1 %{buildroot}%{_bindir}/libvnc
 #%{_datadir}/x11vnc/classes
 
 %changelog
+* Mon Mar 07 2016 Valery Sedletski <_valerius@mail.ru> - 0.9.10-4
+- Corrected the wrong ASCII symbol in place of space in Requires directive
+
 * Mon Feb 29 2016 Valery Sedletski <_valerius@mail.ru> - 0.9.10-3
 - Added needed Requires and BuildRequires directives
 
