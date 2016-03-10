@@ -4,11 +4,11 @@
 Summary: Port of Asynchronous I/O support from glibc.
 Name: libaio
 Version: 0.0.1
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: GPLv2, LGPL 2.1
-URL: https://ftp.gnu.org/gnu/libc/
-Group: Development/Libraries
-Source: %{name}-%{version}-r%{svn_rev}.zip
+URL:     https://ftp.gnu.org/gnu/libc/
+Group:   Development/Libraries
+Source:  %{name}-%{version}-r%{svn_rev}.zip
 Requires:      libgcc1 pthread
 BuildRequires: gcc
 BuildRequires: libc-devel pthread-devel
@@ -24,7 +24,7 @@ License:        GPLv2, LGPL 2.1
 Summary:        Asynchronous I/O support library
 Group:          Development/Libraries
 BuildRequires:  pthread-devel
-Requires:       %name = %version-%release
+Requires:       %{name} = %{version}-%{release}
 
 %description devel
 Asynchronous I/O support library does the support of
@@ -71,6 +71,9 @@ rm -rf %{buildroot}
 %{_libdir}/aio_dll.lib
 
 %changelog
+* Thu Mar 10 2016 Valery Sedletski <_valerius@mail.ru> - 0.8.14-5
+- fixed Requires directive for 'devel' package to depend on %{name} = %{version}-%{release}
+
 * Mon Feb 29 2016 Valery Sedletski <_valerius@mail.ru> - 0.0.1-4
 - Added needed Requires and BuildRequires directives
 
