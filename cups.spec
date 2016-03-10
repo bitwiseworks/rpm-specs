@@ -1,10 +1,14 @@
-#define svn_url     e:/trees/cups/trunk
-%define svn_url     http://svn.netlabs.org/repos/ports/cups/trunk
-%define svn_rev     1357
+# this spec file is a combination from the fedora cups.spec and the
+# cups.spec as included in cups
+
+%define svn_url     e:/trees/cups/trunk
+#define svn_url     http://svn.netlabs.org/repos/ports/cups/trunk
+#define svn_rev     1357
 %define _strip_opts --compress -i "*.cgi" --debuginfo -i "*.cgi"
 
 %define _without_dbus 1
-%define _without_php 1
+%define _without_dnssd 1
+%define _without_systemd 1
 
 #
 # "$Id: cups.spec.in 9359 2010-11-11 19:09:24Z mike $"
@@ -13,7 +17,7 @@
 #
 #   Original version by Jason McMullan <jmcc@ontv.com>.
 #
-#   Copyright 2007-2010 by Apple Inc.
+#   Copyright 2007-2015 by Apple Inc.
 #   Copyright 1999-2007 by Easy Software Products, all rights reserved.
 #
 #   These coded instructions, statements, and computer programs are the
@@ -26,24 +30,35 @@
 # Conditional build options (--with name/--without name):
 #
 #   dbus     - Enable/disable DBUS support (default = enable)
-#   php      - Enable/disable PHP support (default = enable)
+#   dnssd    - Enable/disable DNS-SD support (default = enable)
+#   libusb1  - Enable/disable LIBUSB 1.0 support (default = enable)
+#   static   - Enable/disable static libraries (default = enable)
+#   systemd  - Enable/disable systemd support (default = enable)
 
 %{!?_with_dbus: %{!?_without_dbus: %define _with_dbus --with-dbus}}
 %{?_with_dbus: %define _dbus --enable-dbus}
 %{!?_with_dbus: %define _dbus --disable-dbus}
 
-%{!?_with_php: %{!?_without_php: %define _with_php --with-php}}
-%{?_with_php: %define _php --with-php}
-%{!?_with_php: %define _php --without-php}
+%{!?_with_dnssd: %{!?_without_dnssd: %define _with_dnssd --with-dnssd}}
+%{?_with_dnssd: %define _dnssd --enable-dnssd}
+%{!?_with_dnssd: %define _dnssd --disable-dnssd}
+
+%{!?_with_libusb1: %{!?_without_libusb1: %define _with_libusb1 --with-libusb1}}
+%{?_with_libusb1: %define _libusb1 --enable-libusb}
+%{!?_with_libusb1: %define _libusb1 --disable-libusb}
 
 %{!?_with_static: %{!?_without_static: %define _without_static --without-static}}
 %{?_with_static: %define _static --enable-static}
 %{!?_with_static: %define _static --disable-static}
 
+%{!?_with_systemd: %{!?_without_systemd: %define _with_systemd --with-systemd}}
+%{?_with_systemd: %define _systemd --enable-systemd}
+%{!?_with_systemd: %define _systemd --disable-systemd}
+
 Summary: CUPS
 Name: cups
-Version: 1.4.8
-Release: 5%{?dist}
+Version: 2.1.3
+Release: 1%{?dist}
 Epoch: 1
 
 License: GPL
@@ -54,61 +69,104 @@ Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 Url: http://www.cups.org
 Vendor: bww bitwise works GmbH
 
-BuildRequires: libpng-devel, libjpeg-devel, libtiff-devel, libusb-compat-devel
+# Dependencies...
+Requires: %{name}-filesystem = %{epoch}:%{version}-%{release}
+Requires: %{name}-libs = %{epoch}:%{version}-%{release}
+Requires: %{name}-client = %{epoch}:%{version}-%{release}
+
+Provides: cupsddk, cupsddk-drivers
+
+%if %{?_with_dbus:1}%{!?_with_dbus:0}
+BuildRequires: dbus-devel
+%endif
+
+%if %{?_with_dnssd:1}%{!?_with_dnssd:0}
+BuildRequires: avahi-devel
+%endif
+
+%if %{?_with_libusb1:1}%{!?_with_libusb1:0}
+BuildRequires: libusb1-devel >= 1.0
+%endif
+
+%if %{?_with_systemd:1}%{!?_with_systemd:0}
+BuildRequires: systemd-devel
+%endif
+
+BuildRequires: libpng-devel, libjpeg-devel, libtiff-devel
 BuildRequires: openssl-devel, zlib-devel
 BuildRequires: libpoll-devel
 
 # Use buildroot so as not to disturb the version already installed
-BuildRoot: /tmp/%{name}-root
+BuildRoot: %{_tmppath}/%{name}-root
 
-# Dependencies...
+%package client
+Summary: CUPS printing system - client programs
 Requires: %{name}-libs = %{epoch}:%{version}-%{release}
-Requires: poppler-utils >= 0.38.0-2
-Obsoletes: lpd, lpr, LPRng
-Provides: lpd, lpr, LPRng
-Obsoletes: cups-da, cups-de, cups-es, cups-et, cups-fi, cups-fr, cups-he
-Obsoletes: cups-id, cups-it, cups-ja, cups-ko, cups-nl, cups-no, cups-pl
-Obsoletes: cups-pt, cups-ru, cups-sv, cups-zh
+Provides: lpr
 
 %package devel
-Summary: CUPS - development environment
+Summary: CUPS printing system - development environment
 Group: Development/Libraries
 Requires: %{name}-libs = %{epoch}:%{version}-%{release}
+Provides: cupsddk-devel
 
 %package libs
-Summary: CUPS - shared libraries
+Summary: CUPS printing system - shared libraries
 Group: System Environment/Libraries
-Provides: libcups1
+
+%package filesystem
+Summary: CUPS printing system - directory layout
+BuildArch: noarch
 
 %package lpd
-Summary: CUPS - LPD support
+Summary: CUPS printing system - lpd emulation
 Group: System Environment/Daemons
-#Requires: %{name} = %{epoch}:%{version}-%{release} xinetd
-
-%if %{?_with_php:1}%{!?_with_php:0}
-%package php
-Summary: CUPS - PHP support
-Group: Development/Languages
+Requires: %{name} = %{epoch}:%{version}-%{release}
 Requires: %{name}-libs = %{epoch}:%{version}-%{release}
-%endif
+Provides: lpd
+
+%package ipptool
+Summary: CUPS printing system - tool for performing IPP requests
+Requires: %{name} = %{epoch}:%{version}-%{release}
 
 %description
-CUPS is the standards-based, open source printing system developed by
-Apple Inc. for Mac OS¨ X and other UNIX¨-like operating systems.
+CUPS printing system provides a portable printing layer for
+UNIX© operating systems. It has been developed by Apple Inc.
+to promote a standard printing solution for all UNIX vendors and users.
+CUPS provides the System V and Berkeley command-line interfaces.
+CUPS was ported to OS/2 to have the same benefit as UNIX has.
+
+%description client
+CUPS printing system provides a portable printing layer for
+UNIX© operating systems. This package contains command-line client
+programs.
 
 %description devel
-This package provides the CUPS headers and development environment.
+CUPS printing system provides a portable printing layer for
+UNIX© operating systems. This is the development package for creating
+additional printer drivers, and other CUPS services.
 
 %description libs
-This package provides the CUPS shared libraries.
+CUPS printing system provides a portable printing layer for
+UNIX© operating systems. It has been developed by Apple Inc.
+to promote a standard printing solution for all UNIX vendors and users.
+CUPS provides the System V and Berkeley command-line interfaces.
+CUPS was ported to OS/2 to have the same benefit as UNIX has.
+The cups-libs package provides libraries used by applications to use CUPS
+natively, without needing the lpp/lpr commands.
+
+%description filesystem
+CUPS printing system provides a portable printing layer for
+UNIX© operating systems. This package provides some directories which are
+required by other packages that add CUPS drivers (i.e. filters, backends etc.)
 
 %description lpd
-This package provides LPD client support.
+CUPS printing system provides a portable printing layer for
+UNIX© operating systems. This is the package that provides standard
+lpd emulation.
 
-%if %{?_with_php:1}%{!?_with_php:0}
-%description php
-This package provides PHP support for CUPS.
-%endif
+%description ipptool
+Sends IPP requests to the specified URI and tests and/or displays the result.
 
 %debug_package
 
@@ -128,7 +186,8 @@ autoconf --force
 export LDFLAGS=" -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp";
 export LIBS="-lurpo -lpoll";
 CFLAGS="$RPM_OPT_FLAGS" CXXFLAGS="$RPM_OPT_FLAGS" LDFLAGS="$LDFLAGS $RPM_OPT_FLAGS" \
-    %configure %{_dbus} %{_php} %{_static}
+    %configure %{_dbus} %{_dnssd} %{_libusb1} %{_static}
+
 # If we got this far, all prerequisite libraries must be here.
 make
 
@@ -138,15 +197,34 @@ rm -rf $RPM_BUILD_ROOT
 
 make BUILDROOT=$RPM_BUILD_ROOT install
 
+# remove not shipped files
+rm -rf %{buildroot}%{_initddir} \
+      %{buildroot}%{_sysconfdir}/init.d \
+      %{buildroot}%{_sysconfdir}/rc.d
+
+# rename some files
+for i in %{buildroot}%{_mandir}/man1/cancel \
+         %{buildroot}%{_mandir}/man1/lp \
+         %{buildroot}%{_mandir}/man1/lpq \
+         %{buildroot}%{_mandir}/man1/lprm \
+         %{buildroot}%{_mandir}/man1/lpstat; do
+           mv $i.1 $i-cups.1
+done
+
+mv %{buildroot}%{_mandir}/man8/lpc.8 %{buildroot}%{_mandir}/man8/lpc-cups.8
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %files
+%doc README.txt CREDITS.txt CHANGES.txt
 %docdir %{_datadir}/doc/cups
 %defattr(-,root,root)
 %dir %{_sysconfdir}/cups
 %config(noreplace) %{_sysconfdir}/cups/*.conf
+%{_sysconfdir}/cups/cups-files.conf.default
 %{_sysconfdir}/cups/cupsd.conf.default
+%{_sysconfdir}/cups/snmp.conf.default
 %dir %{_sysconfdir}/cups/interfaces
 %dir %{_sysconfdir}/cups/ppd
 %attr(0700,root,root) %dir %{_sysconfdir}/cups/ssl
@@ -156,18 +234,19 @@ rm -rf $RPM_BUILD_ROOT
 %{_sysconfdir}/dbus-1/system.d/*
 %endif
 
-%{_bindir}/cancel.exe
 %{_bindir}/cupstestdsc.exe
 %{_bindir}/cupstestppd.exe
-%{_bindir}/lp*.exe
 %dir %{_libdir}/cups
 %dir %{_libdir}/cups/backend
+%if %{?_with_dnssd:1}%{!?_with_dnssd:0}
+# DNS-SD
+%{_libdir}/cups/backend/dnssd
+%endif
 %{_libdir}/cups/backend/http
+#{_libdir}/cups/backend/https
 %attr(0700,root,root) %{_libdir}/cups/backend/ipp.exe
+#{_libdir}/cups/backend/ipps
 %attr(0700,root,root) %{_libdir}/cups/backend/lpd.exe
-%{_libdir}/cups/backend/parallel.exe
-%{_libdir}/cups/backend/scsi.exe
-#%{_libdir}/cups/backend/serial.exe
 %{_libdir}/cups/backend/snmp.exe
 %{_libdir}/cups/backend/socket.exe
 %{_libdir}/cups/backend/usb.exe
@@ -176,7 +255,7 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_libdir}/cups/daemon
 %{_libdir}/cups/daemon/cups-deviced.exe
 %{_libdir}/cups/daemon/cups-driverd.exe
-%{_libdir}/cups/daemon/cups-polld.exe
+%{_libdir}/cups/daemon/cups-exec.exe
 %dir %{_libdir}/cups/driver
 %dir %{_libdir}/cups/filter
 %{_libdir}/cups/filter/*
@@ -187,18 +266,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %{_sbindir}/*
 %dir %{_datadir}/cups
-%dir %{_datadir}/cups/banners
-%{_datadir}/cups/banners/*
-%dir %{_datadir}/cups/charmaps
-%{_datadir}/cups/charmaps/*
-%dir %{_datadir}/cups/charsets
-%{_datadir}/cups/charsets/*
-%dir %{_datadir}/cups/data
-%{_datadir}/cups/data/*
 %dir %{_datadir}/cups/drv
 %{_datadir}/cups/drv/*
-%dir %{_datadir}/cups/fonts
-%{_datadir}/cups/fonts/*
 %dir %{_datadir}/cups/mime
 %{_datadir}/cups/mime/*
 %dir %{_datadir}/cups/model
@@ -206,24 +275,14 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/cups/ppdc/*
 %dir %{_datadir}/cups/templates
 %{_datadir}/cups/templates/*
+%if %{?_with_libusb1:1}%{!?_with_libusb1:0}
+# LIBUSB quirks files
+%dir %{_datadir}/cups/usb
+%{_datadir}/cups/usb/*
+%endif
+
 %dir %{_datadir}/doc/cups
 %{_datadir}/doc/cups/*.*
-%dir %{_datadir}/doc/cups/de
-%{_datadir}/doc/cups/de/*
-%dir %{_datadir}/doc/cups/es
-%{_datadir}/doc/cups/es/*
-%dir %{_datadir}/doc/cups/eu
-%{_datadir}/doc/cups/eu/*
-%dir %{_datadir}/doc/cups/id
-%{_datadir}/doc/cups/id/*
-%dir %{_datadir}/doc/cups/it
-%{_datadir}/doc/cups/it/*
-%dir %{_datadir}/doc/cups/ja
-%{_datadir}/doc/cups/ja/*
-%dir %{_datadir}/doc/cups/pl
-%{_datadir}/doc/cups/pl/*
-%dir %{_datadir}/doc/cups/ru
-%{_datadir}/doc/cups/ru/*
 %dir %{_datadir}/doc/cups/help
 %{_datadir}/doc/cups/help/accounting.html
 %{_datadir}/doc/cups/help/cgi.html
@@ -238,11 +297,19 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/doc/cups/help/ref-*.html
 %{_datadir}/doc/cups/help/security.html
 %{_datadir}/doc/cups/help/sharing.html
-%{_datadir}/doc/cups/help/standard.html
 %{_datadir}/doc/cups/help/translation.html
-%{_datadir}/doc/cups/help/whatsnew.html
 %dir %{_datadir}/doc/cups/images
 %{_datadir}/doc/cups/images/*
+
+%dir %{_datadir}/doc/cups/de
+%{_datadir}/doc/cups/de/*
+%dir %{_datadir}/doc/cups/es
+%{_datadir}/doc/cups/es/*
+%dir %{_datadir}/doc/cups/ja
+%{_datadir}/doc/cups/ja/*
+%dir %{_datadir}/doc/cups/ru
+%{_datadir}/doc/cups/ru/*
+
 %{_datadir}/locale/*
 
 %dir %{_datadir}/man
@@ -261,55 +328,81 @@ rm -rf $RPM_BUILD_ROOT
 %attr(0710,lp,sys) %dir /%{_var}/spool/cups
 %attr(1770,lp,sys) %dir /%{_var}/spool/cups/tmp
 
-%files devel
-%defattr(-,root,root)
-%dir %{_datadir}/cups/examples
-%{_datadir}/cups/examples/*
-%dir %{_datadir}/man
+%files client
+%{_sbindir}/lpc.exe
+%{_bindir}/cancel.exe
+%{_bindir}/lp*.exe
 %dir %{_datadir}/man/man1
-%{_datadir}/man/man1/cups-config.1
-%{_datadir}/man/man1/ppd*.1
-%dir %{_datadir}/man/man5
-%{_datadir}/man/man5/ppdcfile.5
-%dir %{_datadir}/man/man7
-%{_datadir}/man/man7/backend.7
-%{_datadir}/man/man7/filter.7
-%{_datadir}/man/man7/notifier.7
-
-%{_bindir}/cups-config
-%{_bindir}/ppd*.exe
-%dir %{_includedir}/cups
-%{_includedir}/cups/*
-%{_libdir}/*.a
-
-%dir %{_datadir}/doc/cups/help
-%{_datadir}/doc/cups/help/api*.html
-%{_datadir}/doc/cups/help/postscript-driver.html
-%{_datadir}/doc/cups/help/ppd-compiler.html
-%{_datadir}/doc/cups/help/raster-driver.html
-%{_datadir}/doc/cups/help/spec*.html
+%{_datadir}/man/man1/lp*.1
+%{_datadir}/man/man1/cancel-cups*.1
+%dir %{_datadir}/man/man8
+%{_datadir}/man/man8/lpc-cups.8
 
 %files libs
+%doc LICENSE.txt
 %defattr(-,root,root)
 %{_libdir}/*.dll
 
+%files filesystem
+%dir %{_libdir}/cups
+%dir %{_libdir}/cups/backend
+%dir %{_libdir}/cups/driver
+%dir %{_libdir}/cups/filter
+%dir %{_datadir}/cups
+%dir %{_datadir}/cups/data
+%dir %{_datadir}/cups/drv
+%dir %{_datadir}/cups/mime
+%dir %{_datadir}/cups/model
+%dir %{_datadir}/cups/ppdc
+%dir %{_datadir}/ppd
+
+%files devel
+%defattr(-,root,root)
+%{_bindir}/cups-config
+%{_libdir}/*.a
+%dir %{_includedir}/cups
+%{_includedir}/cups/*
+%dir %{_datadir}/man
+%dir %{_datadir}/man/man1
+%{_datadir}/man/man1/cups-config.1
+
+%if %{?_with_static:1}%{!?_with_static:0}
+%{_libdir}/*_s.a
+%endif
+
 %files lpd
 %defattr(-,root,root)
+%if %{?_with_systemd:1}%{!?_with_systemd:0}
+# SystemD
+%{_libdir}/systemd/system/org.cups.cups-lpd*
+%else
+# Legacy xinetd
 #%{_sysconfdir}/xinetd.d/cups-lpd
+%endif
+
 %dir %{_libdir}/cups
 %dir %{_libdir}/cups/daemon
 %{_libdir}/cups/daemon/cups-lpd.exe
 %dir %{_datadir}/man/man8
 %{_datadir}/man/man8/cups-lpd.8
 
-%if %{?_with_php:1}%{!?_with_php:0}
-%files php
-# PHP
-/usr/lib*/php*
+%files ipptool
+%defattr(-,root,root)
+%if %{?_with_dnssd:1}%{!?_with_dnssd:0}
+%{_bindir}/ippfind.exe
 %endif
-
+%{_bindir}/ipptool.exe
+%dir %{_datadir}/cups/ipptool
+%{_datadir}/cups/ipptool/*
+%dir %{_datadir}/man/man1
+%{_datadir}/man/man1/ipptool*.1
+%dir %{_datadir}/man/man5
+%{_datadir}/man/man5/ipptool*.5
 
 %changelog
+* Mon Mar 07 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.1.3-1
+- updated to version 2.1.3
+
 * Fri Mar 04 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.4.8-5
 - fixed lpd
 - added more socketpair vs pipe changes
