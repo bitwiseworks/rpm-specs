@@ -23,7 +23,7 @@ Name:           libidl
 %define         _name libIDL
 Url:            http://www.gnome.org
 Version:        0.8.14
-Release:        3%{?dist}
+Release:        4%{?dist}
 #Release:        42.20
 # NOTE: on upgrade to a new upstream version, change the Obsoletes from <= to < (here and in baselibs.conf)
 Summary:        IDL Parsing Library
@@ -57,7 +57,7 @@ different CORBA implementations.
 %package devel
 Summary:        Include Files and Libraries mandatory for Development
 Group:          Development/Languages/Other
-Requires:       %name = %version-%release
+Requires:       %{name} = %{version}-%{release}
 #PreReq:         %install_info_prereq
 # bug437293
 #%ifarch ppc64
@@ -119,6 +119,7 @@ sed -e 's-\#\! \/bin\/sh-#! /@unixroot/usr/bin/sh-g' \
 	>%{buildroot}%{_bindir}/libIDL-config-1
 rm -rf %{buildroot}%{_bindir}/libIDL-config-2
 mv -f %{buildroot}%{_bindir}/libIDL-config-1 %{buildroot}%{_bindir}/libIDL-config-2
+chmod 755 %{buildroot}%{_bindir}/libIDL-config-2
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -162,6 +163,10 @@ fi
 %{_libdir}/IDL-20_dll.lib
 
 %changelog
+* Thu Mar 10 2016 Valery Sedletski <_valerius@mail.ru> - 0.8.14-4
+- fixed permissions for libIDL-config-2 to be 755
+- fixed Requires directive for 'devel' package to depend on %{name} = %{version}-%{release}
+
 * Mon Feb 29 2016 Valery Sedletski <_valerius@mail.ru> - 0.8.14-3
 - Added needed Requires and BuildRequires directives
 
