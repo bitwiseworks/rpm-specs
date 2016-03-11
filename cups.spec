@@ -1,9 +1,9 @@
 # this spec file is a combination from the fedora cups.spec and the
 # cups.spec as included in cups
 
-%define svn_url     e:/trees/cups/trunk
-#define svn_url     http://svn.netlabs.org/repos/ports/cups/trunk
-#define svn_rev     1357
+#define svn_url     e:/trees/cups/trunk
+%define svn_url     http://svn.netlabs.org/repos/ports/cups/trunk
+%define svn_rev     1360
 %define _strip_opts --compress -i "*.cgi" --debuginfo -i "*.cgi"
 
 %define _without_dbus 1
@@ -99,11 +99,6 @@ BuildRequires: libpoll-devel
 # Use buildroot so as not to disturb the version already installed
 BuildRoot: %{_tmppath}/%{name}-root
 
-%package client
-Summary: CUPS printing system - client programs
-Requires: %{name}-libs = %{epoch}:%{version}-%{release}
-Provides: lpr
-
 %package devel
 Summary: CUPS printing system - development environment
 Group: Development/Libraries
@@ -128,6 +123,11 @@ Provides: lpd
 %package ipptool
 Summary: CUPS printing system - tool for performing IPP requests
 Requires: %{name} = %{epoch}:%{version}-%{release}
+
+%package client
+Summary: CUPS printing system - client programs
+Requires: %{name}-libs = %{epoch}:%{version}-%{release}
+Provides: lpr
 
 %description
 CUPS printing system provides a portable printing layer for
@@ -183,10 +183,12 @@ rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
 autoconf --force
 
 %build
-export LDFLAGS=" -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp";
-export LIBS="-lurpo -lpoll";
+export LDFLAGS=" -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+export LIBS="-lurpo -lpoll"
+# --with-rcdir=no - don't install SysV init script
 CFLAGS="$RPM_OPT_FLAGS" CXXFLAGS="$RPM_OPT_FLAGS" LDFLAGS="$LDFLAGS $RPM_OPT_FLAGS" \
-    %configure %{_dbus} %{_dnssd} %{_libusb1} %{_static}
+    %configure %{_dbus} %{_dnssd} %{_libusb1} %{_static} \
+     --with-rcdir=no
 
 # If we got this far, all prerequisite libraries must be here.
 make
@@ -197,20 +199,12 @@ rm -rf $RPM_BUILD_ROOT
 
 make BUILDROOT=$RPM_BUILD_ROOT install
 
-# remove not shipped files
-rm -rf %{buildroot}%{_initddir} \
-      %{buildroot}%{_sysconfdir}/init.d \
-      %{buildroot}%{_sysconfdir}/rc.d
-
 # rename some files
-for i in %{buildroot}%{_mandir}/man1/cancel \
-         %{buildroot}%{_mandir}/man1/lp \
-         %{buildroot}%{_mandir}/man1/lpq \
-         %{buildroot}%{_mandir}/man1/lprm \
-         %{buildroot}%{_mandir}/man1/lpstat; do
-           mv $i.1 $i-cups.1
-done
-
+mv %{buildroot}%{_mandir}/man1/cancel.1 %{buildroot}%{_mandir}/man1/cancel-cups.1
+mv %{buildroot}%{_mandir}/man1/lp.1 %{buildroot}%{_mandir}/man1/lp-cups.1
+mv %{buildroot}%{_mandir}/man1/lpq.1 %{buildroot}%{_mandir}/man1/lpq-cups.1
+mv %{buildroot}%{_mandir}/man1/lprm.1 %{buildroot}%{_mandir}/man1/lprm-cups.1
+mv %{buildroot}%{_mandir}/man1/lpstat.1 %{buildroot}%{_mandir}/man1/lpstat-cups.1
 mv %{buildroot}%{_mandir}/man8/lpc.8 %{buildroot}%{_mandir}/man8/lpc-cups.8
 
 %clean
@@ -265,13 +259,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/cups/notifier/*
 
 %{_sbindir}/*
-%dir %{_datadir}/cups
-%dir %{_datadir}/cups/drv
 %{_datadir}/cups/drv/*
-%dir %{_datadir}/cups/mime
 %{_datadir}/cups/mime/*
-%dir %{_datadir}/cups/model
-%dir %{_datadir}/cups/ppdc
 %{_datadir}/cups/ppdc/*
 %dir %{_datadir}/cups/templates
 %{_datadir}/cups/templates/*
@@ -320,13 +309,13 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_datadir}/man/man8
 %{_datadir}/man/man8/*.8
 
-%dir /%{_var}/cache/cups
-%attr(0775,root,sys) %dir /%{_var}/cache/cups/rss
-%dir /%{_var}/log/cups
-%dir /%{_var}/run/cups
-#%attr(0711,lp,sys) %dir /%{_var}/run/cups/certs
-%attr(0710,lp,sys) %dir /%{_var}/spool/cups
-%attr(1770,lp,sys) %dir /%{_var}/spool/cups/tmp
+%dir %{_var}/cache/cups
+%attr(0775,root,sys) %dir %{_var}/cache/cups/rss
+%dir %{_var}/log/cups
+%dir %{_var}/run/cups
+#attr(0711,lp,sys) %dir %{_var}/run/cups/certs
+%attr(0710,lp,sys) %dir %{_var}/spool/cups
+%attr(1770,lp,sys) %dir %{_var}/spool/cups/tmp
 
 %files client
 %{_sbindir}/lpc.exe
@@ -354,21 +343,39 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_datadir}/cups/mime
 %dir %{_datadir}/cups/model
 %dir %{_datadir}/cups/ppdc
-%dir %{_datadir}/ppd
+#dir %{_datadir}/ppd
 
 %files devel
 %defattr(-,root,root)
 %{_bindir}/cups-config
+%{_bindir}/ppd*.exe
 %{_libdir}/*.a
 %dir %{_includedir}/cups
 %{_includedir}/cups/*
+
+%dir %{_datadir}/cups/examples
+%{_datadir}/cups/examples/*
 %dir %{_datadir}/man
 %dir %{_datadir}/man/man1
 %{_datadir}/man/man1/cups-config.1
+%{_datadir}/man/man1/ppd*.1
+%dir %{_datadir}/man/man5
+%{_datadir}/man/man5/ppdcfile.5
+%dir %{_datadir}/man/man7
+%{_datadir}/man/man7/backend.7
+%{_datadir}/man/man7/filter.7
+%{_datadir}/man/man7/notifier.7
 
 %if %{?_with_static:1}%{!?_with_static:0}
 %{_libdir}/*_s.a
 %endif
+
+%dir %{_datadir}/doc/cups/help
+%{_datadir}/doc/cups/help/api*.html
+%{_datadir}/doc/cups/help/postscript-driver.html
+%{_datadir}/doc/cups/help/ppd-compiler.html
+%{_datadir}/doc/cups/help/raster-driver.html
+%{_datadir}/doc/cups/help/spec*.html
 
 %files lpd
 %defattr(-,root,root)
@@ -377,7 +384,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/systemd/system/org.cups.cups-lpd*
 %else
 # Legacy xinetd
-#%{_sysconfdir}/xinetd.d/cups-lpd
+#{_sysconfdir}/xinetd.d/cups-lpd
 %endif
 
 %dir %{_libdir}/cups
