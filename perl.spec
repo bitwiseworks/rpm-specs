@@ -1,3 +1,7 @@
+#define svn_url     F:/rd/ports/perl/trunk
+%define svn_url     http://svn.netlabs.org/repos/ports/perl/trunk
+%define svn_rev     745
+
 %global perl_version    5.16.1
 %global perl_epoch      0
 %global perl_arch_stem -thread-multi
@@ -20,7 +24,7 @@
 Name:           perl
 Version:        %{perl_version}
 # release number must be even higher, becase dual-lived modules will be broken otherwise
-Release:        1%{?dist}
+Release:        2%{?dist}
 Epoch:          %{perl_epoch}
 Summary:        Practical Extraction and Report Language
 Group:          Development/Languages
@@ -32,9 +36,7 @@ Group:          Development/Languages
 # Copyright Only: for example ext/Text-Soundex/Soundex.xs 
 License:        (GPL+ or Artistic) and (GPLv2+ or Artistic) and Copyright Only and MIT and Public Domain and UCD
 Url:            http://www.perl.org/
-Source0:        http://www.cpan.org/src/5.0/perl-%{perl_version}.tar.gz
-
-Patch1:         perl-os2.patch
+Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
 # Update some of the bundled modules
 # see http://fedoraproject.org/wiki/Perl/perl.spec for instructions
@@ -971,19 +973,19 @@ A metapackage which requires all of the perl bits and modules in the upstream
 tarball from perl.org.
 
 
-%package debug
-Summary: HLL debug data for exception handling support.
-
-%description debug
-HLL debug data for exception handling support.
+%debug_package
 
 
 %{?perl_default_filter}
 %prep
-%setup -q -n perl-%{perl_version}
-%patch1 -p1
-
-attrib -s -h -r "*" /s
+%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
+%setup -q
+%else
+%setup -n "%{name}-%{version}" -Tc
+svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
+rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
+(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
+%endif
 
 find . -name \*.orig -exec rm -fv {} \;
 
@@ -1942,11 +1944,10 @@ rm -rf $RPM_BUILD_ROOT
 %files core
 # Nothing. Nada. Zilch. Zarro. Uh uh. Nope. Sorry.
 
-%files debug
-%defattr(-,root,root)
-%{_libdir}/*.dbg
-
 %changelog
+* Fri Mar 11 2016 yd <yd@os2power.com> 5.16.1-2
+- package rebuild due to broken hard links, ticket#172.
+
 * Wed Aug 13 2014 yd
 - first public release build.
 - added debug package with symbolic info for exceptq.
