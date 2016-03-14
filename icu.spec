@@ -1,221 +1,181 @@
-%global _icu_full_version 4.2.1
-%global _icu_dll_version 42
+# Note: this .spec is borrowed from icu-56.1-3.fc24.src.rpm
 
-Summary:        International Components for Unicode
-Name:           icu
-License:        X11/MIT
-Group:          System/Libraries
-Version:        %{_icu_full_version}
-Release:        1%{?dist}
-Requires:       libicu = %{version}
-Url:            http://ibm.com/software/globalization/icu
+Name:      icu
+Version:   56.1
+Release:   1%{?dist}
+Summary:   International Components for Unicode
+Group:     Development/Tools
+License:   MIT and UCD and Public Domain
+URL:       http://www.icu-project.org/
+#Source0:   http://download.icu-project.org/files/icu4c/56.1/icu4c-56_1-src.tgz
 
-Source0:        icu4c-4_2_1-src.tgz
-Source1:        icu-mh-os2
-Patch0:         icu-os2.patch
+# @todo (dmik) no doxygen RPM yet
+#BuildRequires: doxygen
+BuildRequires: autoconf
+Requires: lib%{name}%{?_isa} = %{version}-%{release}
 
-BuildRoot:      %{_tmppath}/%{name}-%{version}-build
+%define svn_url     http://svn.netlabs.org/repos/ports/icu/trunk
+%define svn_rev     1388
+
+Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
+
+BuildRequires: gcc make subversion zip
+
+Patch4: gennorm2-man.patch
+Patch5: icuinfo-man.patch
 
 %description
-ICU is a set of C and C++ libraries that provides robust and
-full-featured Unicode and locale support. The library provides calendar
-support, conversions for many character sets, language sensitive
-collation, date and time formatting, support for many locales, message
-catalogs and resources, message formatting, normalization, number and
-currency formatting, time zone support, transliteration, and word,
-line, and sentence breaking, etc.
+Tools and utilities for developing with icu.
 
-This package contains the Unicode character database and derived
-properties along with converters and time zone data.
+%package -n lib%{name}
+Summary: International Components for Unicode - libraries
+Group:   System Environment/Libraries
 
-This package contains the runtime libraries for ICU. It does not
-contain any of the data files needed at runtime and present in the icu
-and icu-locales packages.
+%description -n lib%{name}
+The International Components for Unicode (ICU) libraries provide
+robust and full-featured Unicode services on a wide variety of
+platforms. ICU supports the most current version of the Unicode
+standard, and they provide support for supplementary Unicode
+characters (needed for GB 18030 repertoire support).
+As computing environments become more heterogeneous, software
+portability becomes more important. ICU lets you produce the same
+results across all the various platforms you support, without
+sacrificing performance. It offers great flexibility to extend and
+customize the supplied services.
 
+%package  -n lib%{name}-devel
+Summary:  Development files for International Components for Unicode
+Group:    Development/Libraries
+Requires: lib%{name}%{?_isa} = %{version}-%{release}
+Requires: pkgconfig
 
+%description -n lib%{name}-devel
+Includes and definitions for developing with icu.
 
-Authors:
---------
-    The ICU project, International Business Machines (IBM) and Others.  <icu@oss.software.ibm.com>
+# @todo (dmik) no doxygen RPM yet
+#%package -n lib%{name}-doc
+#Summary: Documentation for International Components for Unicode
+#Group:   Documentation
+#BuildArch: noarch
 
-%package -n libicu
-License:        IBM Public License
-Summary:        International Components for Unicode (development files)
-Group:          Development/Libraries/C and C++
-
-%description -n libicu
-ICU is a set of C and C++ libraries that provides robust and
-full-featured Unicode support. This package contains the runtime
-libraries for ICU. It does not contain any of the data files needed at
-runtime and present in the `icu' and `icu-locales` packages.
-
-
-
-Authors:
---------
-    The ICU project, International Business Machines (IBM) and Others.  <icu@oss.software.ibm.com>
-
-%package -n libicu-devel
-License:        IBM Public License
-Summary:        International Components for Unicode (development files)
-Group:          Development/Libraries/C and C++
-Requires:       libicu = %{version}
-
-%description -n libicu-devel
-ICU is a C++ and C library that provides robust and full-featured
-Unicode support. This package contains the development files for ICU.
-
-
-
-Authors:
---------
-    The ICU project, International Business Machines (IBM) and Others.  <icu@oss.software.ibm.com>
-
-%package -n libicu-doc
-License:        IBM Public License
-Summary:        International Components for Unicode  (html documentation)
-Group:          Development/Libraries/C and C++
-
-%description -n libicu-doc
-ICU is a C++ and C library that provides robust and full-featured
-Unicode support. This package contains the html documentation.
-
-
-
-Authors:
---------
-    The ICU project, International Business Machines (IBM) and Others.  <icu@oss.software.ibm.com>
-
-%package -n icu-data
-License:        IBM Public License
-Summary:        International Components for Unicode (Sources for the Data in ICU)
-Group:          System/Libraries
-Requires:       libicu >= %{version}
-
-%description -n icu-data
-ICU is a C++ and C library that provides robust and full-featured
-Unicode support. This package contains the source files for the data
-found in the "icu" package.
-
-This data describes the Unicode data (normative and informative) and
-also all the table-based converters provided in the ICU distribution.
-
-This package contains uncompiled source data. Precompiled data is in
-the `libicu%{version}' package.
-
-
-
-Authors:
---------
-    The ICU project, International Business Machines (IBM) and Others.  <icu@oss.software.ibm.com>
+# @todo (dmik) no doxygen RPM yet
+#%description -n lib%{name}-doc
+#%{summary}.
 
 %prep
-%setup -q -n icu
-%patch0 -p1
 
-cp %{SOURCE1} source/config/mh-os2
+%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
+%setup -q
+%else
+%setup -n "%{name}-%{version}" -Tc
+svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
+rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
+(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
+%endif
+
+%patch4 -p1
+%patch5 -p1
 
 %build
 
 cd source
-rm -f config.cache
+autoreconf -fvi
+%configure --with-data-packaging=library --disable-samples \
+           --disable-renaming \
+           --enable-shared --disable-static
 
-script_dir=%{_topdir}/BUILD/%{name}/source
-export PATH="$script_dir/bin${PATH:+;$PATH}"
-export BEGINLIBPATH="$script_dir/lib;$script_dir/stubdata;$script_dir/tools/ctestfw;${BEGINLIBPATH:+;$BEGINLIBPATH}"
-export LIBPATHSTRICT=T
+# The configure --disable-renaming and possibly other options
+# result in icu/source/uconfig.h.prepend being created, include that content in
+# icu/source/common/unicode/uconfig.h to propagate to consumer packages.
+test -f uconfig.h.prepend && sed -e '/^#define __UCONFIG_H__/ r uconfig.h.prepend' -i common/unicode/uconfig.h
 
-#force libc to use sh for system() in pkgdata.exe
-export EEEMXSHELL="sh"
+# We use --disable-renaming in configure options to build a non-versioned librariy for
+# system-wide installation on OS/2. This installation also requires hiding draft and
+# deprecated API to maintain backward ABI compatibility (see
+# http://userguide.icu-project.org/design#TOC-ICU-Binary-Compatibility:-Using-ICU-as-an-Operating-System-Level-Library).
+# Note that we cannot use --disable-draft because it defines U_HIDE_INTERNAL_API but
+# this breaks the build (upstream bug). Note that we also cannot use U_HIDE_SYSTEM_API
+# or U_HIDE_DEPRECATED_API (despite readme.html recommedation) for the same reason...
+# Note that we actually can't use U_HIDE_DRAFT_API... This part of ICU is really broken.
+# And the open source model is really evil. Really. Low code quality.
+#echo '
+##define U_HIDE_DRAFT_API 1
+#' > uconfig.h.prepend
+#sed -e '/^#define __UCONFIG_H__/ r uconfig.h.prepend' -i common/unicode/uconfig.h
 
-export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
-export LDFLAGS="-Zomf -Zhigh-mem"
-export LIBS="-lurpo -lpthread"
-%configure \
-    --disable-static \
-    --enable-shared \
-    --without-samples \
-   "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
 make %{?_smp_mflags}
+# @todo (dmik) no doxygen RPM yet
+#make %{?_smp_mflags} doc
 
 %install
-rm -rf ${RPM_BUILD_ROOT}
 
-script_dir=%{_topdir}/BUILD/%{name}/source
-export PATH="$script_dir/bin${PATH:+;$PATH}"
-export BEGINLIBPATH="$script_dir/lib;$script_dir/stubdata;$script_dir/tools/ctestfw;${BEGINLIBPATH:+;$BEGINLIBPATH}"
-export LIBPATHSTRICT=T
+# @todo (dmik) no doxygen RPM yet
+#rm -rf $RPM_BUILD_ROOT source/__docs
+make %{?_smp_mflags} -C source install DESTDIR=$RPM_BUILD_ROOT
 
-cd source
-make DESTDIR=$RPM_BUILD_ROOT install
-# to extract debug info
-#chmod a+rx $RPM_BUILD_ROOT%{_libdir}/*.so.*
-# install uncompiled source data:
-mkdir -p $RPM_BUILD_ROOT%{_datadir}/icu/%{version}/unidata
-install -m 644 data/unidata/*.txt $RPM_BUILD_ROOT%{_datadir}/icu/%{version}/unidata
-ln -s unidata/UnicodeData.txt $RPM_BUILD_ROOT%{_datadir}/icu/%{version}/
+# @todo (dmik) no doxygen RPM yet
+#make %{?_smp_mflags} -C source install-doc docdir=__docs
 
-rm $RPM_BUILD_ROOT%{_libdir}/*.a.bak
-rm $RPM_BUILD_ROOT%{_libdir}/icu??.dll
-rm $RPM_BUILD_ROOT%{_libdir}/icudt??.dll
-mv $RPM_BUILD_ROOT%{_libdir}/icudt%{_icu_dll_version}.1.dll $RPM_BUILD_ROOT%{_libdir}/icudt%{_icu_dll_version}.dll
+%check
 
-# run test suite:
-#pushd data
-#ln -sf build/*.cnv build/*.res build/*.dat build/*.brk .
-#popd
-#make check || echo "make check returned $?, ignored."
-#popd
-rm $RPM_BUILD_ROOT/%{_datadir}/icu/%{version}/license.html
-rm $RPM_BUILD_ROOT/%{_datadir}/icu/%{version}/install-sh
-
-%clean
-rm -rf $RPM_BUILD_ROOT
+# test to ensure that -j(X>1) didn't "break" man pages. b.f.u #2357
+if grep -q @VERSION@ source/tools/*/*.8 source/tools/*/*.1 source/config/*.1; then
+    exit 1
+fi
+# make %{?_smp_mflags} -C source check
 
 %files
-%defattr(-, root, root)
-%doc license.html readme.html
-%dir %{_libdir}/icu/
-%dir %{_libdir}/icu/%{version}
-%{_libdir}/icu/current
+%defattr(-,root,root,-)
 %{_bindir}/derb.exe
 %{_bindir}/genbrk.exe
 %{_bindir}/gencfu.exe
 %{_bindir}/gencnval.exe
+%{_bindir}/gendict.exe
 %{_bindir}/genrb.exe
-%{_bindir}/genctd.exe
 %{_bindir}/makeconv.exe
 %{_bindir}/pkgdata.exe
 %{_bindir}/uconv.exe
-%{_mandir}/*/*
+%{_sbindir}/*
+%{_mandir}/man1/derb.1*
+%{_mandir}/man1/gencfu.1*
+%{_mandir}/man1/gencnval.1*
+%{_mandir}/man1/gendict.1*
+%{_mandir}/man1/genrb.1*
+%{_mandir}/man1/genbrk.1*
+%{_mandir}/man1/makeconv.1*
+%{_mandir}/man1/pkgdata.1*
+%{_mandir}/man1/uconv.1*
+%{_mandir}/man8/*.8*
 
-%files -n libicu
-%defattr(-, root, root)
-%attr (755, root, root) %{_libdir}/*.dll
+%files -n lib%{name}
+%defattr(-,root,root,-)
+%doc license.html readme.html
+%{_libdir}/*.dll
 
-%files -n libicu-devel
-%defattr(-, root, root)
-%{_libdir}/*.a
-%{_includedir}/unicode/
-%{_includedir}/layout/
-%{_libdir}/icu/%{version}/Makefile.inc
-%{_libdir}/icu/%{version}/pkgdata.inc
-%{_libdir}/icu/Makefile.inc
-%{_libdir}/icu/pkgdata.inc
-%{_bindir}/icu-config
-%dir %{_datadir}/icu
-%dir %{_datadir}/icu/%{version}
-%{_datadir}/icu/%{version}/mkinstalldirs
-%{_datadir}/icu/%{version}/config/
-%{_sbindir}/*.exe
+%files -n lib%{name}-devel
+%defattr(-,root,root,-)
+%{_bindir}/%{name}-config
+%{_bindir}/icuinfo.exe
+%{_mandir}/man1/%{name}-config.1*
+%{_mandir}/man1/icuinfo.1*
+%{_includedir}/layout
+%{_includedir}/unicode
+%{_libdir}/*_dll.a
+%{_libdir}/pkgconfig/*.pc
+%{_libdir}/%{name}
+%dir %{_datadir}/%{name}
+%dir %{_datadir}/%{name}/%{version}
+%{_datadir}/%{name}/%{version}/install-sh
+%{_datadir}/%{name}/%{version}/mkinstalldirs
+%{_datadir}/%{name}/%{version}/config
+%doc %{_datadir}/%{name}/%{version}/license.html
 
-#%files -n libicu-doc
-#%defattr(-, root, root)
-#%doc html/
-
-%files -n icu-data
-%defattr(-, root, root)
-%{_datadir}/icu/%{version}/unidata/
-%{_datadir}/icu/%{version}/UnicodeData.txt
+# @todo (dmik) no doxygen RPM yet
+#%files -n lib%{name}-doc
+#%defattr(-,root,root,-)
+#%doc license.html readme.html
+#%doc source/__docs/%{name}/html/*
 
 %changelog
+* Tue Mar 15 2016 Dmitriy Kuminov <coding@dmik.org> 56.1-1
+- Initial package for version 56.1.
