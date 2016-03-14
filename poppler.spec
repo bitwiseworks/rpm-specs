@@ -1,7 +1,7 @@
 Summary:	PDF rendering library
 Name:		poppler
 Version:	0.38.0
-Release:	2%{?dist}
+Release:	3%{?dist}
 License:	(GPLv2 or GPLv3) and GPLv2+ and LGPLv2+ and MIT
 Group:		Development/Libraries
 Vendor:		bww bitwise works GmbH
@@ -27,6 +27,7 @@ BuildRequires:  libpng-devel
 BuildRequires:  libtiff-devel
 BuildRequires:  freetype-devel >= 2.5.3
 BuildRequires:  fontconfig-devel >= 2.11.94
+BuildRequires:  lcms2-devel
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -223,11 +224,14 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
-* Mon ??? 18 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.38.0-2
+* Mon Mar 14 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.38.0-3
+- remove %{?_isa} macro
+- enable LCMS support
+
+* Mon Jan 18 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.38.0-2
 - updated required fontconfig to 2.11.94
 - adjusted debug package creation to latest rpm macros
 - create all pages in PSoutputDev, when writing to stdout
-- remove %{?_isa} macro
 
 * Tue Nov 17 2015 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.38.0-1
 - updated poppler to 0.38.0
