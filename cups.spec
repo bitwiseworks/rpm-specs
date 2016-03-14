@@ -3,7 +3,7 @@
 
 #define svn_url     e:/trees/cups/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/cups/trunk
-%define svn_rev     1360
+%define svn_rev     1365
 %define _strip_opts --compress -i "*.cgi" --debuginfo -i "*.cgi"
 
 %define _without_dbus 1
@@ -58,7 +58,7 @@
 Summary: CUPS
 Name: cups
 Version: 2.1.3
-Release: 1%{?dist}
+Release: 2%{?dist}
 Epoch: 1
 
 License: GPL
@@ -186,9 +186,11 @@ autoconf --force
 export LDFLAGS=" -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 export LIBS="-lurpo -lpoll"
 # --with-rcdir=no - don't install SysV init script
+# --with-system_groups=admin - add a value to SystemGroups parameter
 CFLAGS="$RPM_OPT_FLAGS" CXXFLAGS="$RPM_OPT_FLAGS" LDFLAGS="$LDFLAGS $RPM_OPT_FLAGS" \
     %configure %{_dbus} %{_dnssd} %{_libusb1} %{_static} \
-     --with-rcdir=no
+     --with-rcdir=no \
+     --with-system_groups=admin
 
 # If we got this far, all prerequisite libraries must be here.
 make
@@ -245,18 +247,18 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/cups/backend/socket.exe
 %{_libdir}/cups/backend/usb.exe
 %dir %{_libdir}/cups/cgi-bin
-%{_libdir}/cups/cgi-bin/*
+%{_libdir}/cups/cgi-bin/*.cgi
 %dir %{_libdir}/cups/daemon
 %{_libdir}/cups/daemon/cups-deviced.exe
 %{_libdir}/cups/daemon/cups-driverd.exe
 %{_libdir}/cups/daemon/cups-exec.exe
 %dir %{_libdir}/cups/driver
 %dir %{_libdir}/cups/filter
-%{_libdir}/cups/filter/*
+%{_libdir}/cups/filter/*.exe
 %dir %{_libdir}/cups/monitor
-%{_libdir}/cups/monitor/*
+%{_libdir}/cups/monitor/*.exe
 %dir %{_libdir}/cups/notifier
-%{_libdir}/cups/notifier/*
+%{_libdir}/cups/notifier/*.exe
 
 %{_sbindir}/*
 %{_datadir}/cups/drv/*
@@ -310,12 +312,12 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/man/man8/*.8
 
 %dir %{_var}/cache/cups
-%attr(0775,root,sys) %dir %{_var}/cache/cups/rss
+%attr(0775,root,root) %dir %{_var}/cache/cups/rss
 %dir %{_var}/log/cups
 %dir %{_var}/run/cups
-#attr(0711,lp,sys) %dir %{_var}/run/cups/certs
-%attr(0710,lp,sys) %dir %{_var}/spool/cups
-%attr(1770,lp,sys) %dir %{_var}/spool/cups/tmp
+#attr(0711,root,root) %dir %{_var}/run/cups/certs
+%attr(0710,root,root) %dir %{_var}/spool/cups
+%attr(1770,root,root) %dir %{_var}/spool/cups/tmp
 
 %files client
 %{_sbindir}/lpc.exe
@@ -407,6 +409,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/man/man5/ipptool*.5
 
 %changelog
+* Fri Mar 11 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.1.3-2
+- removed dbg packages from normal installation
+- added SystemGroups value
+- fixed some pipe() problems
+
 * Mon Mar 07 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.1.3-1
 - updated to version 2.1.3
 
@@ -415,7 +422,7 @@ rm -rf $RPM_BUILD_ROOT
 - added more socketpair vs pipe changes
 - also compress and strip debug info from cgi files
 
-* Thu Jan 26 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.4.8-4
+* Tue Jan 26 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.4.8-4
 - poppler-utils needs to be at least 0.38.0-2
 - remove wrong req for cups-lpr
 - install all .a files for the dll
@@ -428,5 +435,5 @@ rm -rf $RPM_BUILD_ROOT
 * Sun Feb 15 2015 yd <yd@os2power.com> 1.4.8-1 1.4.8-2
 - rebuild for new libpng release.
 
-* Tue Dec 18 2014 yd
+* Thu Dec 18 2014 yd
 - r944, initial unixroot build.
