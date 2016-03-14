@@ -1,6 +1,6 @@
 #define svn_url     e:/trees/ghostscript/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/ghostscript/trunk
-%define svn_rev     1332
+%define svn_rev     1356
 
 %define _with_freetype 1
 %define gs_ver 9.18
@@ -12,7 +12,7 @@ Summary: A PostScript interpreter and renderer
 Name: ghostscript
 Version: %{gs_ver}
 
-Release: 2%{?dist}
+Release: 3%{?dist}
 
 # Included CMap data is Redistributable, no modification permitted,
 # see http://bugzilla.redhat.com/487510
@@ -305,6 +305,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/gs.lib
 
 %changelog
+* Mon Mar 14 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 9.18-3
+- fontnames in GS and in the urw package differ, bring inline
+
 * Fri Feb 26 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 9.18-2
 - add gserrors.h
 - fix a vendor init bug
