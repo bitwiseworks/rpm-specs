@@ -3,7 +3,7 @@
 
 #define svn_url     e:/trees/cups/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/cups/trunk
-%define svn_rev     1365
+%define svn_rev     1396
 %define _strip_opts --compress -i "*.cgi" --debuginfo -i "*.cgi"
 
 %define _without_dbus 1
@@ -58,7 +58,7 @@
 Summary: CUPS
 Name: cups
 Version: 2.1.3
-Release: 2%{?dist}
+Release: 3%{?dist}
 Epoch: 1
 
 License: GPL
@@ -209,6 +209,10 @@ mv %{buildroot}%{_mandir}/man1/lprm.1 %{buildroot}%{_mandir}/man1/lprm-cups.1
 mv %{buildroot}%{_mandir}/man1/lpstat.1 %{buildroot}%{_mandir}/man1/lpstat-cups.1
 mv %{buildroot}%{_mandir}/man8/lpc.8 %{buildroot}%{_mandir}/man8/lpc-cups.8
 
+# Ship an rpm macro for where to put driver executables
+mkdir -p %{buildroot}/%{_rpmconfigdir}/macros.d
+install -m 0644 %{_builddir}/%{buildsubdir}/macros.cups %{buildroot}%{_rpmconfigdir}/macros.d
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -260,7 +264,12 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_libdir}/cups/notifier
 %{_libdir}/cups/notifier/*.exe
 
-%{_sbindir}/*
+%{_sbindir}/cups*.exe
+%{_sbindir}/lpadmin.exe
+%{_sbindir}/lpinfo.exe
+%{_sbindir}/lpmove.exe
+%{_sbindir}/accept.exe
+%{_sbindir}/reject.exe
 %{_datadir}/cups/drv/*
 %{_datadir}/cups/mime/*
 %{_datadir}/cups/ppdc/*
@@ -354,6 +363,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/*.a
 %dir %{_includedir}/cups
 %{_includedir}/cups/*
+%{_rpmconfigdir}/macros.d/macros.cups
 
 %dir %{_datadir}/cups/examples
 %{_datadir}/cups/examples/*
@@ -409,6 +419,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/man/man5/ipptool*.5
 
 %changelog
+* Wed Mar 16 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.1.3-3
+- ship a rpm macro for cups_serverbin
+- removed dbg packages from sbin dir in normal installation
+
 * Fri Mar 11 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.1.3-2
 - removed dbg packages from normal installation
 - added SystemGroups value
