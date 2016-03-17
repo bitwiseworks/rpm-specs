@@ -5,7 +5,7 @@
 Summary: OpenPrinting CUPS filters and backends
 Name:    cups-filters
 Version: 1.8.2
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 # For a breakdown of the licensing, see COPYING file
 # GPLv2:   filters: commandto*, imagetoraster, pdftops, rasterto*,
@@ -70,7 +70,8 @@ Requires: poppler-utils >= 0.38.0-2
 Requires: ghostscript >= 9.18
 
 # texttopdf
-Requires: liberation-mono-fonts
+# not needed, as we have courier installed anyway
+#Requires: liberation-mono-fonts
 
 # pstopdf
 Requires: bc grep sed
@@ -291,5 +292,8 @@ fi
 %{_libdir}/fontembed*.a
 
 %changelog
+* Thu Mar 17 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.8.2-2
+- remove libaration font req
+
 * Mon Mar 14 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.8.2-1
 - first version
