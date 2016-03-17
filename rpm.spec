@@ -1,6 +1,6 @@
 #define svn_url     F:/rd/rpm/rpm/trunk
 %define svn_url     http://svn.netlabs.org/repos/rpm/rpm/trunk
-%define svn_rev     639
+%define svn_rev     706
 
 %define with_sqlite 1
 %undefine int_bdb
@@ -28,7 +28,7 @@
 Summary: The RPM package management system
 Name: rpm
 Version: %{rpmver}
-Release: 5%{?dist}
+Release: 7%{?dist}
 Group: System Environment/Base
 Url: http://www.rpm.org/
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
@@ -171,11 +171,7 @@ Requires: crontabs logrotate rpm = %{version}-%{release}
 This package contains a cron job which creates daily logs of installed
 packages on a system.
 
-%package debug
-Summary: HLL debug data for exception handling support.
-
-%description debug
-HLL debug data for exception handling support.
+%debug_package
 
 %prep
 %if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
@@ -406,13 +402,14 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root)
 %doc COPYING doc/librpm/html/*
 
-%files debug
-%defattr(-,root,root)
-%{_bindir}/*.dbg
-%{_libdir}/*.dbg
-%{_libdir}/rpm/*.dbg
-
 %changelog
+* Thu Mar 17 2016 yd <yd@os2power.com> 4.13.0-7
+- r706, fix full paths in rpmbuild command line.
+
+* Sun Mar 13 2016 yd <yd@os2power.com> 4.13.0-6
+- r693, do not try to start NULL scripts. fixes ticket#178.
+- r692, disable hard link table building, ticket#172.
+
 * Fri Jan 08 2016 yd <yd@os2power.com> 4.13.0-5
 - r639, rpm: check file handle before closing stuffs. ticket#143.
 
