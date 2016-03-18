@@ -12,7 +12,7 @@ Summary: A PostScript interpreter and renderer
 Name: ghostscript
 Version: %{gs_ver}
 
-Release: 3%{?dist}
+Release: 4%{?dist}
 
 # Included CMap data is Redistributable, no modification permitted,
 # see http://bugzilla.redhat.com/487510
@@ -149,8 +149,8 @@ export LDFLAGS=" -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 
 # Build IJS
 cd ijs
-./autogen.sh
-configure --enable-shared --disable-static
+autogen.sh
+%configure --enable-shared --disable-static
 make
 cd ..
 
@@ -305,6 +305,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/gs.lib
 
 %changelog
+* Fri Mar 18 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 9.18-4
+- fix wrong generated ijs-config and ijs.pc files
+
 * Mon Mar 14 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 9.18-3
 - fontnames in GS and in the urw package differ, bring inline
 
