@@ -1,6 +1,6 @@
 Name:           lcms2
 Version:        2.7
-Release:        0%{?dist}
+Release:        1%{?dist}
 Summary:        Color Management Engine
 License:        MIT
 URL:            http://www.littlecms.com/
@@ -86,7 +86,7 @@ rm -rf ${RPM_BUILD_ROOT}
 
 %files utils
 %defattr(-,root,root,-)
-%{_bindir}/*
+%{_bindir}/*.exe
 %{_mandir}/man1/*
 
 %files devel
@@ -97,5 +97,8 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_libdir}/pkgconfig/%{name}.pc
 
 %changelog
+* Wed Mar 16 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.7-1
+- remove dbg files from normal packages
+
 * Thu Feb 16 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.7-0
 - First release
