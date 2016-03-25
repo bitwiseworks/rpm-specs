@@ -1,26 +1,38 @@
+# Note: this .spec is borrowed from nspr-4.12.0-1.fc24.src.rpm
+
 Summary:        Netscape Portable Runtime
 Name:           nspr
-Version:        4.8.6
-Release:        3%{?dist}
-License:        MPLv1.1 or GPLv2+ or LGPLv2+
+Version:        4.12.0
+Release:        1%{?dist}
+License:        MPLv2.0
 URL:            http://www.mozilla.org/projects/nspr/
 Group:          System Environment/Libraries
-BuildRoot:      %{_tmppath}/%{name}-%{version}-root
+Conflicts:      filesystem < 3
+Vendor:     bww bitwise works GmbH
+
+%define svn_url     http://svn.netlabs.org/repos/ports/nspr/trunk
+%define svn_rev     1511
+
+Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
+
+BuildRequires: gcc make subversion zip
 
 # Sources available at ftp://ftp.mozilla.org/pub/mozilla.org/nspr/releases/
-# When CVS tag based snapshots are being used, refer to CVS documentation on
+# When hg tag based snapshots are being used, refer to hg documentation on
 # mozilla.org and check out subdirectory mozilla/nsprpub.
-Source0:        %{name}-%{version}.tar.gz
-Source1:        nspr.pc.in
-#Source2:        nspr-config-vars.in
+#Source0:        %{name}-%{version}.tar.gz
 
-Patch0:         nspr-os2.diff
-#Patch1:         nspr-config-pc.patch
+Source1:        nspr-config.xml
+
+# DEF files to create forwarders for the legacy package
+Source10:       nspr4k.def
+Source11:       plc4k.def
+Source12:       plds4k.def
 
 %description
-NSPR provides platform independence for non-GUI operating system 
-facilities. These facilities include threads, thread synchronization, 
-normal file and network I/O, interval timing and calendar time, basic 
+NSPR provides platform independence for non-GUI operating system
+facilities. These facilities include threads, thread synchronization,
+normal file and network I/O, interval timing and calendar time, basic
 memory management (malloc and free) and shared library linking.
 
 %package devel
@@ -28,119 +40,152 @@ Summary:        Development libraries for the Netscape Portable Runtime
 Group:          Development/Libraries
 Requires:       nspr = %{version}-%{release}
 Requires:       pkgconfig
+# @todo We don't have xmlto yet.
+#BuildRequires:  xmlto
+Conflicts:      filesystem < 3
 
 %description devel
 Header files for doing development with the Netscape Portable Runtime.
 
+%package legacy
+Summary:        Legacy libraries for Netscape Portable Runtime
+Group:          System Environment/Libraries
+Requires:       nspr = %{version}-%{release}
+
+%description legacy
+NSPR rorwarder libraries with old DLL names ending with 'k'.
+
+%debug_package
+
+# Makes no sense to provide .dbg files for forwarder DLLs
+%define _strip_opts --debuginfo -x "*k.dll"
+
 %prep
-
+%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
 %setup -q
+%else
+%setup -n "%{name}-%{version}" -Tc
+svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
+rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
+(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
+%endif
 
-# Original nspr-config is not suitable for our distribution,
-# because on different platforms it contains different dynamic content.
-# Therefore we produce an adjusted copy of nspr-config that will be 
-# identical on all platforms.
-# However, we need to use original nspr-config to produce some variables
-# that go into nspr.pc for pkg-config.
-
-#cp ./mozilla/nsprpub/config/nspr-config.in ./mozilla/nsprpub/config/nspr-config-pc.in
-%patch0 -p1
-
-#cp %{SOURCE2} ./mozilla/nsprpub/config/
+# Generate configure.
+autoconf
 
 %build
 
-cd mozilla/nsprpub
-/@unixroot/usr/bin/autoconf
-
-export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
-export MAKESHELL="/@unixroot/usr/bin/sh.exe"
-export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
-./configure \
+%configure \
                  --prefix=%{_prefix} \
                  --libdir=%{_libdir} \
                  --includedir=%{_includedir}/nspr4 \
-%ifarch x86_64 ppc64 ia64 s390x sparc64
-                 --enable-64bit \
-%endif
                  --enable-optimize="$RPM_OPT_FLAGS" \
-                 --disable-debug \
-                 "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
+                 --enable-debug-symbols \
+                 --disable-debug
 
-make
+# Disable MOZ_DEBUG_SYMBOLS to let debug_package do its work
+# (--enable-debug-symbols is still necessary to make sure -g is specified)
+sed -e 's/^MOZ_DEBUG_SYMBOLS = 1$/MOZ_DEBUG_SYMBOLS =/' -i ./config/autoconf.mk
+
+make %{?_smp_mflags}
+
+# @todo We don't have xmlto yet.
+#date +"%e %B %Y" | tr -d '\n' > date.xml
+#echo -n %{version} > version.xml
+#
+#for m in %{SOURCE1}; do
+#  cp ${m} .
+#done
+#for m in nspr-config.xml; do
+#  xmlto man ${m}
+#done
+
+# Generate forwarder DLLs.
+for m in %{SOURCE10} %{SOURCE11} %{SOURCE12}; do
+  cp ${m} .
+done
+for m in nspr4 plc4 plds4; do
+  gcc -Zomf -Zdll ${m}k.def -l./dist/lib/${m}.dll -o ${m}k.dll
+done
+
+%check
+
+# Run test suite.
+# @todo Disable it since it fails so far.
+#perl ./pr/tests/runtests.pl 2>&1 | tee output.log
+#
+#TEST_FAILURES=`grep -c FAILED ./output.log` || :
+#if [ $TEST_FAILURES -ne 0 ]; then
+#  echo "error: test suite returned failure(s)"
+#  exit 1
+#fi
+#echo "test suite completed"
 
 %install
 
 %{__rm} -Rf $RPM_BUILD_ROOT
 
-cd mozilla/nsprpub
-
 DESTDIR=$RPM_BUILD_ROOT \
   make install
 
-NSPR_LIBS=`./config/nspr-config --libs`
-NSPR_CFLAGS=`./config/nspr-config --cflags`
-NSPR_VERSION=`./config/nspr-config --version`
-%{__mkdir_p} $RPM_BUILD_ROOT/%{_libdir}/pkgconfig
+# Install forwarder DLLs.
+cp -p *.dll $RPM_BUILD_ROOT/%{_libdir}/
 
-#cat ./config/nspr-config-vars > \
-#                     $RPM_BUILD_ROOT/%{_libdir}/pkgconfig/nspr.pc
-
-cat %{SOURCE1} | sed -e "s,%%libdir%%,%{_libdir},g" \
-                     -e "s,%%prefix%%,%{_prefix},g" \
-                     -e "s,%%exec_prefix%%,%{_prefix},g" \
-                     -e "s,%%includedir%%,%{_includedir}/nspr4,g" \
-                     -e "s,%%NSPR_VERSION%%,$NSPR_VERSION,g" \
-                     -e "s,%%FULL_NSPR_LIBS%%,$NSPR_LIBS,g" \
-                     -e "s,%%FULL_NSPR_CFLAGS%%,$NSPR_CFLAGS,g" >> \
-                     $RPM_BUILD_ROOT/%{_libdir}/pkgconfig/nspr.pc
-
-%{__mkdir_p} $RPM_BUILD_ROOT/%{_bindir}
-#%{__mkdir_p} $RPM_BUILD_ROOT/%{_lib}
-#%{__cp} ./config/nspr-config-pc $RPM_BUILD_ROOT/%{_bindir}/nspr-config
+# @todo We don't have xmlto yet.
+#mkdir -p $RPM_BUILD_ROOT%{_mandir}/man1
 
 # Get rid of the things we don't want installed (per upstream)
 %{__rm} -rf \
    $RPM_BUILD_ROOT/%{_bindir}/compile-et.pl \
    $RPM_BUILD_ROOT/%{_bindir}/prerr.properties \
-   $RPM_BUILD_ROOT/%{_libdir}/libnspr4.a \
-   $RPM_BUILD_ROOT/%{_libdir}/libplc4.a \
-   $RPM_BUILD_ROOT/%{_libdir}/libplds4.a \
+   $RPM_BUILD_ROOT/%{_libdir}/libnspr4_s.a \
+   $RPM_BUILD_ROOT/%{_libdir}/libplc4_s.a \
+   $RPM_BUILD_ROOT/%{_libdir}/libplds4_s.a \
    $RPM_BUILD_ROOT/%{_datadir}/aclocal/nspr.m4 \
    $RPM_BUILD_ROOT/%{_includedir}/nspr4/md
 
-#for file in libnspr4.so libplc4.so libplds4.so
-#do
-#  mv -f $RPM_BUILD_ROOT/%{_libdir}/$file $RPM_BUILD_ROOT/%{_lib}/$file
-#  ln -sf ../../%{_lib}/$file $RPM_BUILD_ROOT/%{_libdir}/$file
-#done
+# Remove .xqs files (created because MOZ_DEBUG_SYMBOLS was disabled)
+%{__rm} -rf \
+   $RPM_BUILD_ROOT/%{_libdir}/*.xqs
 
+# @todo We don't have xmlto yet.
+#for f in nspr-config; do
+#   install -c -m 644 ${f}.1 $RPM_BUILD_ROOT%{_mandir}/man1/${f}.1
+#done
 
 %clean
 %{__rm} -Rf $RPM_BUILD_ROOT
 
-#%post
-#/sbin/ldconfig >/dev/null 2>/dev/null
-
-#%postun
-#/sbin/ldconfig >/dev/null 2>/dev/null
-
 %files
 %defattr(-,root,root)
-/%{_libdir}/nspr4k.dll
-/%{_libdir}/plc4k.dll
-/%{_libdir}/plds4k.dll
+%{!?_licensedir:%global license %%doc}
+%license LICENSE
+%{_libdir}/nspr4.dll
+%{_libdir}/plc4.dll
+%{_libdir}/plds4.dll
 
 %files devel
 %defattr(-, root, root)
+%{_includedir}/nspr4
+%{_libdir}/pkgconfig/nspr.pc
+%{_libdir}/libnspr4.a
+%{_libdir}/libplc4.a
+%{_libdir}/libplds4.a
+%{_bindir}/nspr-config
+# @todo We don't have xmlto yet.
+#%{_mandir}/man*/*
+
+%files legacy
+%defattr(-,root,root)
 %{_libdir}/nspr4k.dll
 %{_libdir}/plc4k.dll
 %{_libdir}/plds4k.dll
-%{_libdir}/*.a
-%{_includedir}/nspr4
-%{_libdir}/pkgconfig/nspr.pc
-%{_bindir}/nspr-config
 
 %changelog
+* Fri Mar 25 2016 Dmitriy Kuminov <coding@dmik.org> 4.12.0-1
+- Update to version 4.12.
+- Import OS/2-specific NSPR fixes from Mozilla for OS/2 sources.
+- Rebuild with GCC 4.9.2 and LIBC 0.6.6.
+
 * Mon Jan 16 2012 yd
 - rebuild with libc 0.6.4 runtime.
