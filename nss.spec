@@ -24,9 +24,7 @@
 Summary:          Network Security Services
 Name:             nss
 Version:          3.23.0
-# for Rawhide, please always use release >= 2
-# for Fedora release branches, please use release < 2 (1.0, 1.1, ...)
-Release:          1%{?dist}
+Release:          2%{?dist}
 License:          MPLv2.0
 URL:              http://www.mozilla.org/projects/security/pki/nss/
 Group:            System Environment/Libraries
@@ -361,8 +359,12 @@ done
 
 %build
 
-# ecs compatiblity
+# OS/2 compatiblity
 unset PROGRAMS
+
+# Enable high memory support
+MOZ_OS2_HIGH_MEMORY=1
+export MOZ_OS2_HIGH_MEMORY
 
 # Force debug symbols to make debug_package happy
 MOZ_DEBUG_SYMBOLS=1
@@ -1144,6 +1146,9 @@ gcc -Zomf -Zdll freebl3k.def -l$RPM_BUILD_ROOT/%{_libdir}/freebl3.dll -o $RPM_BU
 
 
 %changelog
+* Wed Apr 1 2016 Dmitriy Kuminov <coding@dmik.org> 3.23.0-2
+- Enable high memory support.
+
 * Wed Mar 30 2016 Dmitriy Kuminov <coding@dmik.org> 3.23.0-1
 - Update to version 3.23.
 - Import OS/2-specific NSS fixes from Mozilla for OS/2 sources.
