@@ -1,7 +1,7 @@
 Summary:	PDF rendering library
 Name:		poppler
 Version:	0.42.0
-Release:	1%{?dist}
+Release:	2%{?dist}
 License:	(GPLv2 or GPLv3) and GPLv2+ and LGPLv2+ and MIT
 Group:		Development/Libraries
 Vendor:		bww bitwise works GmbH
@@ -9,11 +9,12 @@ Vendor:		bww bitwise works GmbH
 URL:		http://poppler.freedesktop.org/
 #define svn_url	    e:/trees/poppler/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/poppler/trunk
-%define svn_rev     1468
+%define svn_rev     1530
 
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
 Requires: poppler-data >= 0.4.0
+Requires: nss >= 3.23.0
 BuildRequires: gcc make subversion zip
 
 BuildRequires:	libqt4-devel
@@ -28,7 +29,7 @@ BuildRequires:  libtiff-devel
 BuildRequires:  freetype-devel >= 2.5.3
 BuildRequires:  fontconfig-devel >= 2.11.94
 BuildRequires:  lcms2-devel
-#BuildRequires:  nss-devel
+BuildRequires:  nss-devel >= 3.23.0
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -153,7 +154,6 @@ export POPPLER_QT4_TEST_LIBS
 
 %configure \
 	--enable-poppler-qt4=yes --enable-zlib=yes \
-	--enable-libnss=no \
 	--enable-zlib-uncompress=yes --enable-libopenjpeg=none \
 	--enable-shared --disable-static \
 	--enable-xpdf-headers
@@ -226,6 +226,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Fri Apr 1 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.42.0-2
+- enabled nss for signature handling
+
 * Tue Mar 22 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.42.0-1
 - updated poppler to 0.42.0
 
