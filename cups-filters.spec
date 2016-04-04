@@ -1,11 +1,11 @@
 #define svn_url     e:/trees/cups-filter/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/cups-filter/trunk
-%define svn_rev     1370
+%define svn_rev     1531
 
 Summary: OpenPrinting CUPS filters and backends
 Name:    cups-filters
 Version: 1.8.2
-Release: 2%{?dist}
+Release: 3%{?dist}
 
 # For a breakdown of the licensing, see COPYING file
 # GPLv2:   filters: commandto*, imagetoraster, pdftops, rasterto*,
@@ -133,12 +133,13 @@ rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
 
 # --with-pdftops=pdftops - use Poppler's pdftops instead of Ghostscript
 # --with-rcdir=no - don't install SysV init script
-export LDFLAGS=" -Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+export LDFLAGS=" -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 %configure --disable-static \
            --disable-silent-rules \
            --with-pdftops=pdftops \
            --with-rcdir=no \
            --enable-dbus=no \
+           --enable-braille=no \
            --with-test-font-path=/@system_drive/psfonts/DejaVuSans.ttf
 
 make %{?_smp_mflags}
@@ -225,18 +226,18 @@ fi
 %{_defaultdocdir}/cups-filters/NEWS
 %config(noreplace) %{_sysconfdir}/cups/cups-browsed.conf
 %attr(0755,root,root) %{_cups_serverbin}/filter/*.exe
-%attr(0755,root,root) %{_cups_serverbin}/filter/brftoembosser
+#%attr(0755,root,root) %{_cups_serverbin}/filter/brftoembosser
 %attr(0755,root,root) %{_cups_serverbin}/filter/gstopxl
-%attr(0755,root,root) %{_cups_serverbin}/filter/imagetobrf
+#%attr(0755,root,root) %{_cups_serverbin}/filter/imagetobrf
 %attr(0755,root,root) %{_cups_serverbin}/filter/imagetops
-%attr(0755,root,root) %{_cups_serverbin}/filter/imagetoubrl
-%attr(0755,root,root) %{_cups_serverbin}/filter/imageubrltoindexv3
-%attr(0755,root,root) %{_cups_serverbin}/filter/imageubrltoindexv4
+#%attr(0755,root,root) %{_cups_serverbin}/filter/imagetoubrl
+#%attr(0755,root,root) %{_cups_serverbin}/filter/imageubrltoindexv3
+#%attr(0755,root,root) %{_cups_serverbin}/filter/imageubrltoindexv4
 %attr(0755,root,root) %{_cups_serverbin}/filter/pstopdf
-%attr(0755,root,root) %{_cups_serverbin}/filter/textbrftoindexv3
-%attr(0755,root,root) %{_cups_serverbin}/filter/textbrftoindexv4
+#%attr(0755,root,root) %{_cups_serverbin}/filter/textbrftoindexv3
+#%attr(0755,root,root) %{_cups_serverbin}/filter/textbrftoindexv4
 %attr(0755,root,root) %{_cups_serverbin}/filter/textonly
-%attr(0755,root,root) %{_cups_serverbin}/filter/texttobrf
+#%attr(0755,root,root) %{_cups_serverbin}/filter/texttobrf
 %attr(0755,root,root) %{_cups_serverbin}/filter/texttops
 %attr(0755,root,root) %{_cups_serverbin}/backend/parallel.exe
 # Serial backend needs to run as root (bug #212577#c4).
@@ -244,29 +245,29 @@ fi
 %attr(0755,root,root) %{_cups_serverbin}/backend/implicitclass.exe
 %attr(0755,root,root) %{_cups_serverbin}/backend/beh.exe
 %{_datadir}/cups/banners
-%{_datadir}/cups/braille
+#%{_datadir}/cups/braille
 %{_datadir}/cups/charsets
 %{_datadir}/cups/data/*
 # this needs to be in the main package because of cupsfilters.drv
 %{_datadir}/cups/ppdc/pcl.h
-%{_datadir}/cups/ppdc/braille.defs
-%{_datadir}/cups/ppdc/fr-braille.po
-%{_datadir}/cups/ppdc/imagemagick.defs
-%{_datadir}/cups/ppdc/index.defs
-%{_datadir}/cups/ppdc/liblouis.defs
-%{_datadir}/cups/ppdc/liblouis1.defs
-%{_datadir}/cups/ppdc/liblouis2.defs
-%{_datadir}/cups/ppdc/liblouis3.defs
-%{_datadir}/cups/ppdc/liblouis4.defs
-%{_datadir}/cups/ppdc/media-braille.defs
+#%{_datadir}/cups/ppdc/braille.defs
+#%{_datadir}/cups/ppdc/fr-braille.po
+#%{_datadir}/cups/ppdc/imagemagick.defs
+#%{_datadir}/cups/ppdc/index.defs
+#%{_datadir}/cups/ppdc/liblouis.defs
+#%{_datadir}/cups/ppdc/liblouis1.defs
+#%{_datadir}/cups/ppdc/liblouis2.defs
+#%{_datadir}/cups/ppdc/liblouis3.defs
+#%{_datadir}/cups/ppdc/liblouis4.defs
+#%{_datadir}/cups/ppdc/media-braille.defs
 %{_datadir}/cups/drv/cupsfilters.drv
-%{_datadir}/cups/drv/generic-brf.drv
-%{_datadir}/cups/drv/indexv3.drv
-%{_datadir}/cups/drv/indexv4.drv
+#%{_datadir}/cups/drv/generic-brf.drv
+#%{_datadir}/cups/drv/indexv3.drv
+#%{_datadir}/cups/drv/indexv4.drv
 %{_datadir}/cups/mime/cupsfilters.types
 %{_datadir}/cups/mime/cupsfilters.convs
-%{_datadir}/cups/mime/braille.convs
-%{_datadir}/cups/mime/braille.types
+#%{_datadir}/cups/mime/braille.convs
+#%{_datadir}/cups/mime/braille.types
 %{_datadir}/ppd/cupsfilters
 #{_sbindir}/cups-browsed.exe
 #{_unitdir}/cups-browsed.service
@@ -292,6 +293,9 @@ fi
 %{_libdir}/fontembed*.a
 
 %changelog
+* Fri Apr 1 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.8.2-3
+- remove LDFLAG -Zbin-files
+
 * Thu Mar 17 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.8.2-2
 - remove libaration font req
 
