@@ -1,6 +1,6 @@
 #define svn_url     e:/trees/ghostscript/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/ghostscript/trunk
-%define svn_rev     1356
+%define svn_rev     1532
 
 %define _with_freetype 1
 %define gs_ver 9.18
@@ -12,7 +12,7 @@ Summary: A PostScript interpreter and renderer
 Name: ghostscript
 Version: %{gs_ver}
 
-Release: 4%{?dist}
+Release: 5%{?dist}
 
 # Included CMap data is Redistributable, no modification permitted,
 # see http://bugzilla.redhat.com/487510
@@ -305,6 +305,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/gs.lib
 
 %changelog
+* Fri Apr 8 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 9.18-5
+- add GS_FONTPATH by default
+- exchange \ by / in -sFONTPATH
+- don't use Dos api with libc 
+
 * Fri Mar 18 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 9.18-4
 - fix wrong generated ijs-config and ijs.pc files
 
