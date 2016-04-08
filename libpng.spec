@@ -1,14 +1,14 @@
 Summary: A library of functions for manipulating PNG image format files
 Name: libpng
 Version: 1.6.21
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: zlib
 Group: System Environment/Libraries
 URL: http://www.libpng.org/pub/png/
 Vendor: bww bitwise works GmbH
 #define svn_url	    e:/trees/libpng/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/libpng/trunk
-%define svn_rev     1339
+%define svn_rev     1533
 
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
@@ -73,7 +73,7 @@ rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
 autoreconf -f -i
 
 %build
-export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+export LDFLAGS=" -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 
 %configure
 make %{?_smp_mflags}
@@ -94,6 +94,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files devel
 %{_bindir}/*.exe
+%exclude %{_bindir}/pngfix.exe
 %{_bindir}/*-config
 %{_includedir}/*
 %{_libdir}/png*_dll.a
@@ -109,6 +110,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/pngfix.exe
 
 %changelog
+* Thu Apr 7 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.6.21-3
+- added apng support
+  used patch from https://sourceforge.net/projects/libpng-apng/files
+- removed -Zbin-files, as not needed
+
 * Fri Feb 26 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.6.21-2
 - remove %{?_isa} macro
 
