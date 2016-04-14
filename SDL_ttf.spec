@@ -1,37 +1,41 @@
 %define svn_url http://svn.netlabs.org/repos/ports/sdl_ttf/trunk
 %define svn_rev 1421
 
-%define name sdl_ttf
+%define name SDL_ttf
 %define version 2.0.11
-%define release 1
+%define release 2
 
-Summary: Simple DirectMedia Layer - Sample TrueType Font Library
-Name: %{name}
-Version: %{version}
-Release: %{release}%{?dist}
-Source0: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
-Patch0: sdl_ttf-os2.patch
-License: LGPL
-Group: System Environment/Libraries
-BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
-Prefix: %{_prefix}
-Packager: Hakan Tandogan <hakan@iconsult.com>
-BuildRequires: sdl-devel
-BuildRequires: freetype-devel
+Name:		%{name}
+Version:	%{version}
+Release:	%{release}%{?dist}
+Summary:	Simple DirectMedia Layer TrueType Font library
+
+Group:		System Environment/Libraries
+License:	LGPLv2+
+URL:		http://www.libsdl.org/projects/SDL_ttf/
+#Source0:	http://www.libsdl.org/projects/%{name}/release/%{name}-%{version}.tar.gz
+Source0:        %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
+Patch0:         sdl_ttf-os2.patch
+BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root
+
+BuildRequires:	SDL-devel >= 1.2.4
+BuildRequires:	freetype-devel >= 2.0
+BuildRequires:	zlib-devel
 
 %description
 This library allows you to use TrueType fonts to render text in SDL
 applications.
 
+
 %package devel
-Summary: Libraries, includes and more to develop SDL applications.
-Group: Development/Libraries
-Requires: %{name} = %{version}-%{release}
-Requires: sdl-devel
+Summary:	Development files for %{name}
+Group:		Development/Libraries
+Requires:	%{name} = %{version}-%{release}
+Requires:	SDL-devel >= 1.2.4
 
 %description devel
-This library allows you to use TrueType fonts to render text in SDL
-applications.
+The %{name}-devel package contains libraries and header files for
+developing applications that use %{name}.
 
 %debug_package
 
@@ -54,7 +58,6 @@ libtoolize -fci
 export CFLAGS="-g -DBUILD_SDL" LDFLAGS="-g -Zhigh-mem"
 
 %configure \
-	--prefix=%{prefix} \
 	--disable-static
 
 %{__make} %{?_smp_mflags}
@@ -174,17 +177,20 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root)
 %doc README CHANGES COPYING
-%{prefix}/lib/SDL*.dll
+%{_libdir}/SDL*.dll
 
 %files devel
 %defattr(-,root,root)
-%{prefix}/lib/SDL*.a
-%exclude %{prefix}/lib/lib*.la*
-%{prefix}/lib/SDL*.lib
-%{prefix}/include/SDL/
-%{prefix}/lib/pkgconfig/*.pc
+%{_libdir}/SDL*.a
+%exclude %{_libdir}/lib*.la*
+%{_libdir}/SDL*.lib
+%{_libdir}/pkgconfig/*.pc
+%{_includedir}/SDL/
 
 %changelog
+* Thu Apr 14 2016 Valery V.Sedletski <_valerius@mail.ru> - 2.0.11-2
+- Made the .spec in accordance with Fedora version, renamed to SDL_ttf
+
 * Tue Mar 15 2016 Valery V.Sedletski <_valerius@mail.ru> - 2.0.11-1
 - Initial OS/2 packaging
 
