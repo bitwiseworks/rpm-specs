@@ -1,0 +1,6 @@
+LIBRARY softok3k
+EXPORTS
+    _C_GetFunctionList                          @1
+    _FC_GetFunctionList                         @2
+    _NSC_GetFunctionList                        @3
+    _NSC_ModuleDBFunc                           @4

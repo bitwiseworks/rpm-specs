@@ -1,0 +1,3 @@
+LIBRARY freebl3k
+EXPORTS
+    _FREEBL_GetVector                           @1

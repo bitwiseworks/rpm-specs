@@ -1,0 +1,3 @@
+LIBRARY nssckbik
+EXPORTS
+    _C_GetFunctionList                          @1

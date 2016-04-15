@@ -1,0 +1,9 @@
+LIBRARY nssdbm3k
+EXPORTS
+    _legacy_Open                                @1
+    _legacy_Shutdown                            @2
+    _legacy_ReadSecmodDB                        @3
+    _legacy_ReleaseSecmodDBData                 @4
+    _legacy_AddSecmodDB                         @5
+    _legacy_DeleteSecmodDB                      @6
+    _legacy_SetCryptFunctions                   @7
