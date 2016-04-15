@@ -24,7 +24,7 @@
 Summary:          Network Security Services
 Name:             nss
 Version:          3.23.0
-Release:          2%{?dist}
+Release:          3%{?dist}
 License:          MPLv2.0
 URL:              http://www.mozilla.org/projects/security/pki/nss/
 Group:            System Environment/Libraries
@@ -1146,6 +1146,9 @@ gcc -Zomf -Zdll freebl3k.def -l$RPM_BUILD_ROOT/%{_libdir}/freebl3.dll -o $RPM_BU
 
 
 %changelog
+* Fri Apr 15 2016 Dmitriy Kuminov <coding@dmik.org> 3.23.0-3
+- Remove erroneous -Wl,-rpath-link from nss-config and others.
+
 * Wed Apr 1 2016 Dmitriy Kuminov <coding@dmik.org> 3.23.0-2
 - Enable high memory support.
 

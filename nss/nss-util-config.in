@@ -109,7 +109,7 @@ if test "$echo_cflags" = "yes"; then
 fi
 
 if test "$echo_libs" = "yes"; then
-      libdirs="-Wl,-rpath-link,$libdir -L$libdir"
+      libdirs="-L$libdir"
       if test -n "$lib_nssutil"; then
 	libdirs="$libdirs -lnssutil${major_version}"
       fi
