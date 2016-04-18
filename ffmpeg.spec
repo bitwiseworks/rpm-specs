@@ -21,7 +21,7 @@
 Summary:        Digital VCR and streaming server
 Name:           ffmpeg
 Version:        2.8.6
-Release:        1%{?dist}
+Release:        2%{?dist}
 %if 0%{?_with_amr:1}
 License:        GPLv3+
 %else
@@ -218,6 +218,7 @@ sed -i "s|-O3 -g|$RPM_OPT_FLAGS|" configure
     --enable-runtime-cpudetect \
 %endif
 %endif
+    --extra-ldflags="-Zhigh-mem" \
     --extra-libs="-lpoll -lmmap"
 
 make %{?_smp_mflags} V=1
@@ -268,5 +269,8 @@ install -pm755 tools/qt-faststart.exe $RPM_BUILD_ROOT%{_bindir}
 
 
 %changelog
+* Mon Apr 18 2016 Dmitriy Kuminov <coding@dmik.org> 2.8.6-2
+- Enable high memory support.
+
 * Fri Apr 15 2016 Dmitriy Kuminov <coding@dmik.org> 2.8.6-1
 - Initial release of version 2.8.6.
