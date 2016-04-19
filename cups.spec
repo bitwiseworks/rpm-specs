@@ -3,7 +3,7 @@
 
 #define svn_url     e:/trees/cups/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/cups/trunk
-%define svn_rev     1396
+%define svn_rev     1541
 %define _strip_opts --compress -i "*.cgi" --debuginfo -i "*.cgi"
 
 %define _without_dbus 1
@@ -58,7 +58,7 @@
 Summary: CUPS
 Name: cups
 Version: 2.1.3
-Release: 3%{?dist}
+Release: 4%{?dist}
 Epoch: 1
 
 License: GPL
@@ -75,6 +75,9 @@ Requires: %{name}-libs = %{epoch}:%{version}-%{release}
 Requires: %{name}-client = %{epoch}:%{version}-%{release}
 
 Provides: cupsddk, cupsddk-drivers
+
+# Make sure we have some filters for converting to raster format
+Requires: cups-filters
 
 %if %{?_with_dbus:1}%{!?_with_dbus:0}
 BuildRequires: dbus-devel
@@ -315,10 +318,19 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_datadir}/man
 %dir %{_datadir}/man/man1
 %{_datadir}/man/man1/*.1
+%exclude %{_datadir}/man/man1/ppd*.1
+%exclude %{_datadir}/man/man1/cups-config.1
+%exclude %{_datadir}/man/man1/ipptool*.1
+%exclude %{_datadir}/man/man1/cancel-cups*.1
+%exclude %{_datadir}/man/man1/lp*.1
 %dir %{_datadir}/man/man5
 %{_datadir}/man/man5/*.5
+%exclude %{_datadir}/man/man5/ppdcfile.5
+%exclude %{_datadir}/man/man5/ipptool*.5
 %dir %{_datadir}/man/man8
 %{_datadir}/man/man8/*.8
+%exclude %{_datadir}/man/man8/cups-lpd.8
+%exclude %{_datadir}/man/man8/lpc-cups.8
 
 %dir %{_var}/cache/cups
 %attr(0775,root,root) %dir %{_var}/cache/cups/rss
@@ -419,6 +431,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/man/man5/ipptool*.5
 
 %changelog
+* Tue Apr 19 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.1.3-4
+- add req for cups-filters
+- don't use posix_spawn
+
 * Wed Mar 16 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.1.3-3
 - ship a rpm macro for cups_serverbin
 - removed dbg packages from sbin dir in normal installation
