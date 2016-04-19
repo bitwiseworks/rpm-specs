@@ -1,11 +1,11 @@
 #define svn_url     e:/trees/cups-filter/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/cups-filter/trunk
-%define svn_rev     1531
+%define svn_rev     1542
 
 Summary: OpenPrinting CUPS filters and backends
 Name:    cups-filters
 Version: 1.8.2
-Release: 3%{?dist}
+Release: 4%{?dist}
 
 # For a breakdown of the licensing, see COPYING file
 # GPLv2:   filters: commandto*, imagetoraster, pdftops, rasterto*,
@@ -293,6 +293,10 @@ fi
 %{_libdir}/fontembed*.a
 
 %changelog
+* Tue Apr 19 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.8.2-4
+- more binary read fixes
+- backout setmode
+
 * Fri Apr 1 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.8.2-3
 - remove LDFLAG -Zbin-files
 
