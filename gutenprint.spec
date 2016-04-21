@@ -1,11 +1,11 @@
 #define svn_url     e:/trees/gutenprint/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/gutenprint/trunk
-%define svn_rev     1467
+%define svn_rev     1543
 
 Name:           gutenprint
 Summary:        Printer Drivers Package
 Version:        5.2.11
-Release:        1%{?dist}
+Release:        2%{?dist}
 URL:            http://gimp-print.sourceforge.net/
 License:        GPLv2+
 Vendor:         bww bitwise works GmbH
@@ -101,7 +101,7 @@ rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
 export NOCONFIGURE=1
 autogen.sh
 
-export LDFLAGS=" -Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+export LDFLAGS=" -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 #  --with-foomatic 
 %configure --disable-static --enable-shared  \
             --with-modules=no --with-ghostscript \
@@ -207,5 +207,8 @@ exit 0
 #rm -f /var/cache/foomatic/*
 
 %changelog
+* Thu Apr 21 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 5.2.11-2
+- remove Zbin-files
+
 * Tue Mar 22 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 5.2.11-1
 - first version
