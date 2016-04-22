@@ -1,4 +1,4 @@
-# Note: this .spec is borrowed from fontconfig-2.11.94-5.fc24.src.rpm
+# Note: this .spec is borrowed from git://pkgs.fedoraproject.org/rpms/fontconfig.git
 
 # OS/2 rpm macros don't define this (yet), do it manually:
 %global _fontconfig_masterdir %{_sysconfdir}/fonts
@@ -9,8 +9,8 @@
 
 Summary:	Font configuration and customization library
 Name:		fontconfig
-Version:	2.11.94
-Release:	2%{?dist}
+Version:	2.11.95
+Release:	1%{?dist}
 # src/ftglue.[ch] is in Public Domain
 # src/fccache.c contains Public Domain code
 # fc-case/CaseFolding.txt is in the UCD
@@ -21,19 +21,24 @@ Group:		System Environment/Libraries
 URL:		http://fontconfig.org
 
 %define svn_url     http://svn.netlabs.org/repos/ports/fontconfig/trunk
-%define svn_rev     1221
+%define svn_rev     1551
 
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
 BuildRequires: gcc make subversion zip
 
-BuildRequires:	expat-devel%{?aaa:bbb:ccc}
+Source1: 30-os2-unsupported.conf
+Source2: 80-os2-tnr-fix.conf
+
+BuildRequires:	expat-devel
 BuildRequires:	freetype-devel >= %{freetype_version}
 #BuildRequires:	fontpackages-devel
 BuildRequires:	autoconf automake libtool
 BuildRequires:	python python-lxml
+BuildRequires:  urpo-devel
 
 #Requires:	fontpackages-filesystem
+Requires:	freetype
 Requires(pre):	freetype
 Requires(post):	grep coreutils
 #Requires:	font(:lang=en)
@@ -106,6 +111,11 @@ make install DESTDIR=$RPM_BUILD_ROOT INSTALL="install -p"
 
 find $RPM_BUILD_ROOT -name '*.la' -exec rm -f {} ';'
 
+# install OS/2-specific configs and activate them
+install -p -m 0644 %{SOURCE1} %{SOURCE2} $RPM_BUILD_ROOT%{_fontconfig_templatedir}/
+ln -s %{_fontconfig_templatedir}/30-os2-unsupported.conf $RPM_BUILD_ROOT%{_fontconfig_confdir}/
+ln -s %{_fontconfig_templatedir}/80-os2-tnr-fix.conf $RPM_BUILD_ROOT%{_fontconfig_confdir}/
+
 # move installed doc files back to build directory to package themm
 # in the right place
 # @todo docs mv $RPM_BUILD_ROOT%{_docdir}/fontconfig/* .
@@ -118,16 +128,18 @@ make check
 fi
 
 %post
-#/sbin/ldconfig
 
 umask 0022
 
 mkdir -p %{_localstatedir}/cache/fontconfig
 
 # Force regeneration of all fontconfig cache files
+rm -rf %{_localstatedir}/cache/fontconfig/*
+BEGINLIBPATH="$(echo %{_libdir} | sed -re 's,/@unixroot,'$UNIXROOT',g' -e 's,/,\\,g');$BEGINLIBPATH" \
+LIBPATHSTRICT=T \
 %{_bindir}/fc-cache -f
 
-#%postun -p /sbin/ldconfig
+%postun
 
 #%transfiletriggerin -- %{_prefix}/local/share/fonts %{_datadir}/fonts
 #%{_bindir}/fc-cache -s
@@ -136,9 +148,11 @@ mkdir -p %{_localstatedir}/cache/fontconfig
 #%{_bindir}/fc-cache -s
 
 %files
-%doc README AUTHORS COPYING
+%doc README AUTHORS
 # @todo docs %doc fontconfig-user.txt fontconfig-user.html
 %doc %{_fontconfig_confdir}/README
+%{!?_licensedir:%global license %%doc}
+%license COPYING
 %{_libdir}/fntcnf*.dll
 %{_bindir}/fc-cache.exe
 %{_bindir}/fc-cat.exe
@@ -168,6 +182,14 @@ mkdir -p %{_localstatedir}/cache/fontconfig
 # @todo docs %doc fontconfig-devel.txt fontconfig-devel
 
 %changelog
+* Sat Apr 23 2016 Dmitriy Kuminov <coding@dmik.org> 2.11.95-1
+- Update to version 2.11.95.
+- Fix selecting Type 1 fonts from OS/2 PM font registry.
+- Add aliases for system OS/2 fonts not reconginzed by FreeType
+  (this includes Tms Rmn, Helv and Times New Roman MT 30).
+- Remove trailing space from Times New Roman Type 1 system font.
+- Temporarily disable assertions that sometimes abort Firefox at exit.
+
 * Tue Mar 1 2016 Dmitriy Kuminov <coding@dmik.org> 2.11.94-2
 - Allow loading DLL into high memory.
 
