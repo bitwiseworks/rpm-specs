@@ -3,7 +3,7 @@
 
 #define svn_url     e:/trees/cups/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/cups/trunk
-%define svn_rev     1541
+%define svn_rev     1557
 %define _strip_opts --compress -i "*.cgi" --debuginfo -i "*.cgi"
 
 %define _without_dbus 1
@@ -58,7 +58,7 @@
 Summary: CUPS
 Name: cups
 Version: 2.1.3
-Release: 4%{?dist}
+Release: 5%{?dist}
 Epoch: 1
 
 License: GPL
@@ -193,7 +193,8 @@ export LIBS="-lurpo -lpoll"
 CFLAGS="$RPM_OPT_FLAGS" CXXFLAGS="$RPM_OPT_FLAGS" LDFLAGS="$LDFLAGS $RPM_OPT_FLAGS" \
     %configure %{_dbus} %{_dnssd} %{_libusb1} %{_static} \
      --with-rcdir=no \
-     --with-system_groups=admin
+     --with-system_groups=admin \
+     --with-cupsd_file_perm=755
 
 # If we got this far, all prerequisite libraries must be here.
 make
@@ -431,6 +432,12 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/man/man5/ipptool*.5
 
 %changelog
+* Fri Apr 29 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.1.3-5
+- fix version info in german indeex.html (upstream bug)
+- workaround for the webinterface issues (select() hack)
+- remove .exe in httpSeperateURI
+- don't deliver readonly cupsd
+
 * Tue Apr 19 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.1.3-4
 - add req for cups-filters
 - don't use posix_spawn
