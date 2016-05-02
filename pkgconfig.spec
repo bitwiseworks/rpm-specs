@@ -5,7 +5,7 @@
 Summary: A tool for determining compilation options
 Name: pkgconfig
 Version: 0.29.1
-Release: 1%{?dist}
+Release: 2%{?dist}
 Epoch: 1
 License: GPLv2+
 URL: http://pkgconfig.freedesktop.org
@@ -41,6 +41,7 @@ export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
         --with-installed-glib \
         "--with-pc-path=%{_libdir}/pkgconfig;%{_datadir}/pkgconfig" \
         --with-system-include-path=%{_includedir} \
+        --with-system-library-path=%{_libdir} \
         --enable-host-tool=no
 
 make
@@ -65,6 +66,9 @@ rm -rf $RPM_BUILD_ROOT%{_datadir}/doc/pkg-config
 
 
 %changelog
+* Mon May 2 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.29.1-2
+- ignore /@unixroot/usr/lib as system library path
+
 * Fri Apr 29 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.29.1-1
 - updated to version 0.29.1
 
