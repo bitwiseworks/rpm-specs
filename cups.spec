@@ -3,7 +3,7 @@
 
 #define svn_url     e:/trees/cups/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/cups/trunk
-%define svn_rev     1557
+%define svn_rev     1563
 %define _strip_opts --compress -i "*.cgi" --debuginfo -i "*.cgi"
 
 %define _without_dbus 1
@@ -58,7 +58,7 @@
 Summary: CUPS
 Name: cups
 Version: 2.1.3
-Release: 5%{?dist}
+Release: 6%{?dist}
 Epoch: 1
 
 License: GPL
@@ -432,6 +432,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/man/man5/ipptool*.5
 
 %changelog
+* Wed May 11 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.1.3-6
+- disable the use of poll completely (fixes printing of large pdf)
+
 * Fri Apr 29 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.1.3-5
 - fix version info in german indeex.html (upstream bug)
 - workaround for the webinterface issues (select() hack)
