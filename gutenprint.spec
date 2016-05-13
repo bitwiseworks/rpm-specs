@@ -1,11 +1,11 @@
 #define svn_url     e:/trees/gutenprint/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/gutenprint/trunk
-%define svn_rev     1543
+%define svn_rev     1565
 
 Name:           gutenprint
 Summary:        Printer Drivers Package
 Version:        5.2.11
-Release:        2%{?dist}
+Release:        3%{?dist}
 URL:            http://gimp-print.sourceforge.net/
 License:        GPLv2+
 Vendor:         bww bitwise works GmbH
@@ -207,6 +207,10 @@ exit 0
 #rm -f /var/cache/foomatic/*
 
 %changelog
+* Fri May 13 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 5.2.11-3
+- escape /@unixroot right and add binmode to cups-genppdupdate script
+- fix cups-genppdupdate to find the driver_bin
+
 * Thu Apr 21 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 5.2.11-2
 - remove Zbin-files
 
