@@ -1,6 +1,6 @@
 #define svn_url     e:/trees/sip/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/sip/trunk
-%define svn_rev     1571
+%define svn_rev     1576
 
 # switch this on when we have python3
 #global with_python3 1
@@ -15,7 +15,7 @@
 Summary: SIP - Python/C++ Bindings Generator
 Name: sip
 Version: 4.18
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 # sipgen/parser.{c.h} is GPLv3+ with exceptions (bison)
 License: GPLv2 or GPLv3 and (GPLv3+ with exceptions)
@@ -123,7 +123,7 @@ pushd %{py3dir}
 %{__python3} configure.py \
   -d %{python3_sitearch} \
   --sipdir=%{_datadir}/python3-sip \
-  CXXFLAGS="%{optflags}" CFLAGS="%{optflags}"
+  CXXFLAGS="%{optflags}" CFLAGS="%{optflags}" LFLAGS="$LDFLAGS"
 
 make %{?_smp_mflags} 
 popd
@@ -192,6 +192,9 @@ install -m 0644 %{_builddir}/%{buildsubdir}/macros.sip %{buildroot}%{_rpmconfigd
 
 
 %changelog
+* Fri May 20 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 4.18-2
+- fix the Qt lib names (append the right version)
+- enable GNUMAKE as make generator
+
 * Thu May 19 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 4.18-1
 - initial version
-
