@@ -7,7 +7,7 @@
 Summary:	A 2D graphics library
 Name:		cairo
 Version:	1.12.18
-Release:	1%{?dist}
+Release:	2%{?dist}
 URL:		http://cairographics.org
 #VCS:		git:git://git.freedesktop.org/git/cairo
 #Source0:	http://cairographics.org/releases/%{name}-%{version}.tar.xz
@@ -16,7 +16,7 @@ Group:		System Environment/Libraries
 Vendor:     bww bitwise works GmbH
 
 %define svn_url     http://svn.netlabs.org/repos/ports/cairo/trunk
-%define svn_rev     1345
+%define svn_rev     1578
 
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
@@ -194,6 +194,9 @@ rm $RPM_BUILD_ROOT%{_libdir}/*.la
 #%{_libdir}/cairo/
 
 %changelog
+* Thu May 26 2016 Dmitriy Kuminov <coding@dmik.org> 1.12.18-2
+- Fix assertions and SIGABRT on application termination.
+
 * Sat Feb 26 2016 Dmitriy Kuminov <coding@dmik.org> 1.12.18-1
 - Update to version 1.12.18.
 
