@@ -67,7 +67,7 @@ Summary: Files needed to build other bindings based on Qt4
 %if 0%{?webkit}
 Obsoletes: %{name}-webkit-devel < %{version}-%{release}
 Provides: %{name}-webkit-devel = %{version}-%{release}
-Obsoletes: PyQt4 < 4.11.4-8
+Obsoletes: PyQt4 < %{version}-%{release}
 Requires: %{name}-webkit = %{version}-%{release}
 %endif
 Provides: python-qt4-devel = %{version}-%{release}
@@ -227,7 +227,7 @@ find examples/ -name "*.py" | xargs chmod a-x
 
 export QMAKE_SH=$SHELL
 # do a fast qt build, as runmapsym and wmapsym is not needed here
-export FAST_BUILD
+export FAST_BUILD=1
 LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 
 # Python 2 build:
