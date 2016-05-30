@@ -51,7 +51,7 @@ BuildRequires: python3-sip-devel >= 4.16.8
 %endif # with_python3
 
 #Requires: dbus-python
-Requires: qt4 >= 4.7.3
+Requires: libqt4 >= 4.7.3
 %{?_sip_api:Requires: sip-api(%{_sip_api_major}) >= %{_sip_api}}
 
 Provides: python-qt4 = %{version}-%{release}
@@ -75,7 +75,7 @@ Provides: python2-qt4-doc = %{version}-%{release}
 Provides: python2-PyQt4-doc = %{version}-%{release}
 Provides: pyqt4-devel = %{version}-%{release}
 Requires: %{name} = %{version}-%{release}
-Requires: qt4-devel
+Requires: libqt4-devel
 Requires: sip-devel
 
 %description devel
@@ -156,7 +156,7 @@ Requires:  python3-PyQt4 = %{version}-%{release}
 %package -n python3-%{name}
 Summary: Python 3 bindings for Qt4
 Requires: python3-dbus
-%{?_qt4_version:Requires: qt4 >= %{_qt4_version}}
+%{?_qt4_version:Requires: libqt4 >= %{_qt4_version}}
 %{?_sip_api:Requires: python3-sip-api(%{_sip_api_major}) >= %{_sip_api}}
 Provides: python3-qt4 = %{version}-%{release}
 
