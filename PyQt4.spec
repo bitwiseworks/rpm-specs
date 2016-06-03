@@ -1,6 +1,6 @@
 #define svn_url     e:/trees/pyqt4/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/pyqt4/trunk
-%define svn_rev     1579
+%define svn_rev     1590
 
 %define target os2
 # remove the below 2 settings, as soon as we deliver qt macros
@@ -28,7 +28,7 @@
 Summary: Python bindings for Qt4
 Name: 	 PyQt4
 Version: 4.11.4
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 # GPLv2 exceptions(see GPL_EXCEPTIONS*.txt)
 License: (GPLv3 or GPLv2 with exceptions) and BSD
@@ -301,19 +301,25 @@ diff -u ./sip/QtGui/opengl_types.sip.orig \
 %{python2_sitearch}/PyQt4/QtCore.pyd
 #{python2_sitearch}/PyQt4/QtDBus.pyd
 %{python2_sitearch}/PyQt4/QtDecl.pyd
+%{python2_sitearch}/PyQt4/QtDeclarative.pyd
 %{python2_sitearch}/PyQt4/QtDsgn.pyd
+%{python2_sitearch}/PyQt4/QtDesigner.pyd
 %{python2_sitearch}/PyQt4/QtGui.pyd
 %{python2_sitearch}/PyQt4/QtHelp.pyd
 #%{python2_sitearch}/PyQt4/QtMultimedia.pyd
 %{python2_sitearch}/PyQt4/QtNet.pyd
+%{python2_sitearch}/PyQt4/QtNetwork.pyd
 #%{python2_sitearch}/PyQt4/QtOpenGL.pyd
 %{python2_sitearch}/PyQt4/QtScri.pyd
+%{python2_sitearch}/PyQt4/QtScript.pyd
 %{python2_sitearch}/PyQt4/QtScTl.pyd
+%{python2_sitearch}/PyQt4/QtScriptTools.pyd
 %{python2_sitearch}/PyQt4/QtSql.pyd
 %{python2_sitearch}/PyQt4/QtSvg.pyd
 %{python2_sitearch}/PyQt4/QtTest.pyd
 %{python2_sitearch}/PyQt4/QtXml.pyd
 %{python2_sitearch}/PyQt4/QtXmlP.pyd
+%{python2_sitearch}/PyQt4/QtXmlPatterns.pyd
 %{python2_sitearch}/PyQt4/uic/
 %{_qt4_plugindir}/designer/*
 
@@ -325,6 +331,7 @@ diff -u ./sip/QtGui/opengl_types.sip.orig \
 %if 0%{?webkit}
 %files webkit
 %{python2_sitearch}/PyQt4/QtWebK.pyd
+%{python2_sitearch}/PyQt4/QtWebKit.pyd
 %endif
 
 %files devel
@@ -358,19 +365,25 @@ diff -u ./sip/QtGui/opengl_types.sip.orig \
 %{python3_sitearch}/PyQt4/QtCore.pyd
 %{python3_sitearch}/PyQt4/QtDBus.pyd
 %{python3_sitearch}/PyQt4/QtDecl.pyd
+%{python3_sitearch}/PyQt4/QtDeclarative.pyd
 %{python3_sitearch}/PyQt4/QtDsgn.pyd
+%{python3_sitearch}/PyQt4/QtDesigner.pyd
 %{python3_sitearch}/PyQt4/QtGui.pyd
 %{python3_sitearch}/PyQt4/QtHelp.pyd
 %{python3_sitearch}/PyQt4/QtMultimedia.pyd
 %{python3_sitearch}/PyQt4/QtNet.pyd
+%{python3_sitearch}/PyQt4/QtNetwork.pyd
 %{python3_sitearch}/PyQt4/QtOpenGL.pyd
 %{python3_sitearch}/PyQt4/QtScri.pyd
+%{python3_sitearch}/PyQt4/QtScript.pyd
 %{python3_sitearch}/PyQt4/QtScTl.pyd
+%{python3_sitearch}/PyQt4/QtScriptTools.pyd
 %{python3_sitearch}/PyQt4/QtSql.pyd
 %{python3_sitearch}/PyQt4/QtSvg.pyd
 %{python3_sitearch}/PyQt4/QtTest.pyd
 %{python3_sitearch}/PyQt4/QtXml.pyd
 %{python3_sitearch}/PyQt4/QtXmlP.pyd
+%{python3_sitearch}/PyQt4/QtXmlPatterns.pyd
 %{python3_sitearch}/PyQt4/uic/
 
 %if 0%{?qtassistant}
@@ -392,5 +405,9 @@ diff -u ./sip/QtGui/opengl_types.sip.orig \
 
 
 %changelog
+* Fri Jun 3 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 4.11.4-2
+- add symlink for long names
+- add nameshort tag, as inplemented in sip
+
 * Thu May 26 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 4.11.4-1
 - initial version
