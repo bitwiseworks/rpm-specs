@@ -1,6 +1,6 @@
-%define svn_url     e:/trees/binutils/trunk
-#define svn_url     http://svn.netlabs.org/repos/ports/binutils/trunk
-#define svn_rev     1585
+#define svn_url     e:/trees/binutils/trunk
+%define svn_url     http://svn.netlabs.org/repos/ports/binutils/trunk
+%define svn_rev     1587
 
 # rpmbuild parameters:
 # --define "binutils_target arm-linux-gnu" to create arm-linux-gnu-binutils.
@@ -136,6 +136,7 @@ dynamic libraries.
 Developers starting new projects are strongly encouraged to consider
 using libelf instead of BFD.
 
+%debug_package
 
 %prep
 %if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
@@ -253,7 +254,9 @@ make prefix=%{buildroot}%{_prefix} infodir=%{buildroot}%{_infodir} install-info
 install -m 644 include/libiberty.h %{buildroot}%{_prefix}/include
 #install -m 644 opcodes/libopcodes.a %{buildroot}%{_libdir}
 # Remove Windows/Novell only man pages
-rm -f %{buildroot}%{_mandir}/man1/{dlltool,nlmconv,windres,windmc}*
+rm -f %{buildroot}%{_mandir}/man1/dlltool*
+rm -f %{buildroot}%{_mandir}/man1/nlmconv*
+rm -f %{buildroot}%{_mandir}/man1/windmc*
 
 %if %{enable_shared}
 chmod +x %{buildroot}%{_libdir}/*.dll
@@ -273,7 +276,7 @@ rm -rf %{buildroot}%{_libdir}/libiberty.a
 
 # This one comes from gcc
 rm -f %{buildroot}%{_infodir}/dir
-rm -rf %{buildroot}%{_prefix}/%{binutils_target}
+#rm -rf %{buildroot}%{_prefix}/%{binutils_target}
 
 %find_lang %{?cross}binutils
 %find_lang %{?cross}opcodes
@@ -347,6 +350,7 @@ exit 0
 %defattr(-,root,root,-)
 %doc README
 %{_bindir}/%{?cross}[!l]*
+%{_prefix}/%{binutils_target}/%{?cross}[!l]*
 %if "%{build_gold}" == "both"
 %{_bindir}/%{?cross}ld.*
 %ghost %{_bindir}/%{?cross}ld
