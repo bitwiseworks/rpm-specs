@@ -1,3 +1,7 @@
+#define svn_url     F:/rd/rpm/python/trunk
+%define svn_url     http://svn.netlabs.org/repos/rpm/python/trunk
+%define svn_rev     775
+
 %{!?__python_ver:%global __python_ver EMPTY}
 #global __python_ver 2.7
 %global unicode ucs4
@@ -45,7 +49,7 @@
 Summary: An interpreted, interactive, object-oriented programming language
 Name: %{python}
 Version: 2.7.6
-Release: 12%{?dist}
+Release: 13%{?dist}
 License: Python
 Group: Development/Languages
 Provides: python-abi = %{pybasever}
@@ -209,11 +213,7 @@ never used in production.
 You might want to install the python-test package if you're developing python
 code that uses more than just unittest and/or test_support.py.
 
-%package debug
-Summary: HLL debug data for exception handling support.
-
-%description debug
-HLL debug data for exception handling support.
+%debug_package
 
 %prep
 %if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
@@ -249,13 +249,13 @@ find -name "*~" |xargs rm -f
 autoreconf -fvi
 
 %build
-export CONFIG_SITE="/@unixroot/usr/share/config.legacy"
 export LDFLAGS="-g -Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
-export LIBS="-lssl -lcrypto -lurpo -lmmap -lpthread -lintl"
+export LIBS="-lssl -lcrypto -lurpo -lpthread -lintl"
 %configure \
         --enable-shared \
         --with-system-expat \
-        --with-system-ffi --with-libs='-lmmap'
+        --enable-unicode=ucs4 \
+        --with-system-ffi
 
 make OPT="$CFLAGS" %{?_smp_mflags}
 
@@ -573,13 +573,21 @@ fi
 # (if it doesn't, then the rpmbuild ought to fail since the debug-gdb.py
 # payload file would be unpackaged)
 
-%files debug
-%defattr(-,root,root)
-%{_bindir}/*.dbg
-%{_libdir}/*.dbg
-
 %changelog
-* Fri Dec 12 2015 Dmitriy Kuminov <coding@dmik.org> 2.7.6-12
+* Mon Jun 06 2016 yd <yd@os2power.com> 2.7.6-13
+- enable support for ucs4 unicode set.
+- r775, generate both 8.3 and long names for pyd dynamic libraries. fixes ticket#185.
+- r611, Add dummy plat-os2knix directory.
+- r610, Fix silly typo.
+- r609, Fix a typo in r529.
+- r608, Make os.path.defpath return '$UNIXROOT/usr/bin' on OS/2 when it is set.
+- r607, Replace altsep to sep in paths returned by os.path.join.
+- r606, Add ignore patterns for *.pyc and generated files.
+- r605, configure: Generate correct OS/2 defs and remove pre-built configure.
+- r604, Fix building with no OS/2 Toolkit headers in include paths.
+- r603, Use configured SHELL in subprocess module.
+
+* Sat Dec 12 2015 Dmitriy Kuminov <coding@dmik.org> 2.7.6-12
 - Provide dummy _dlopen in ctypes to make colorama package happy.
 - Use configured SHELL for subprocess.Popen(shell=True) instead of
   hardcoded '/bin/sh'.
@@ -587,6 +595,7 @@ fi
   fix joining names with components of PATH-like env. vars and passing
   the results to a unix shell).
 - Make os.path.defpath return '$UNIXROOT\\usr\\bin'.
+- r568, build mmap module, by psmedley.
 
 * Thu Feb 26 2015 yd <yd@os2power.com> 2.7.6-11
 - r560, -O3 breaks the build, at least for pentium4 march.
