@@ -220,8 +220,8 @@ export LDFLAGS=" -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
   --enable-deterministic-archives=no \
 %endif
   $CARGS \
-  --enable-plugins \
-  --with-bugurl=http://bugzilla.redhat.com/bugzilla/
+  --enable-plugins=no \
+  --with-bugurl=http://trac.netlabs.org/ports/
 make %{_smp_mflags} tooldir=%{_prefix} all
 make %{_smp_mflags} tooldir=%{_prefix} info
 
@@ -349,13 +349,13 @@ exit 0
 %files -f %{?cross}binutils.lang
 %defattr(-,root,root,-)
 %doc README
-%{_bindir}/%{?cross}[!l]*
-%{_prefix}/%{binutils_target}/%{?cross}[!l]*
+%{_bindir}/%{?cross}[!l]*.exe
+%{_prefix}/%{binutils_target}/bin/%{?cross}[!l]*.exe
 %if "%{build_gold}" == "both"
-%{_bindir}/%{?cross}ld.*
+%{_bindir}/%{?cross}ld*.exe
 %ghost %{_bindir}/%{?cross}ld
 %else
-#%{_bindir}/%{?cross}ld*
+#%{_bindir}/%{?cross}ld*.exe
 %endif
 %{_mandir}/man1/*
 %if %{enable_shared}
