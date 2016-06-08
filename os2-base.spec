@@ -2,7 +2,7 @@
 Summary: OS/2 - eComStation 2.0 base
 Name: os2-base
 Version: 0.0.0
-Release: 12%{?dist}
+Release: 13%{?dist}
 
 License: free
 
@@ -303,6 +303,7 @@ fi
 %cube {ADDLINE "SET TERM=os2" (IFNOT "SET TERM")} c:\config.sys > NUL
 %cube {ADDSTRING "%UNIXROOT%\usr\share\os2\book;" IN "SET BOOKSHELF=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
 %cube {ADDSTRING "%UNIXROOT%\usr\share\os2\help;" IN "SET HELP=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
+%cube {ADDSTRING "%UNIXROOT%\usr\share\os2\lang;" IN "SET DPATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
 
 %postun
 if [ "$1" = 0 ] ; then
@@ -313,6 +314,7 @@ if [ "$1" = 0 ] ; then
 %cube {DELLINE "SET TERM="} c:\config.sys > NUL
 %cube {DELSTRING "%UNIXROOT%\usr\share\os2\book;" IN "SET BOOKSHELF=" (FIRST} c:\config.sys > NUL
 %cube {DELSTRING "%UNIXROOT%\usr\share\os2\help;" IN "SET HELP=" (FIRST} c:\config.sys > NUL
+%cube {DELSTRING "%UNIXROOT%\usr\share\os2\lang;" IN "SET DPATH=" (FIRST} c:\config.sys > NUL
 fi
 
 %post fhs
@@ -341,6 +343,9 @@ fi
 
 
 %changelog
+* Wed Jun 08 2016 yd <yd@os2power.com> 0.0.0-13
+- Add special UNIXROOT lang directory to DPATH in config.sys.
+
 * Wed Jan 27 2016 Dmitriy Kuminov <coding@dmik.org> 0.0.0-12
 - Add special UNIXROOT directories to BOOKSHELF and HELP in config.sys.
 
