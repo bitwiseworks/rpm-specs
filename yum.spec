@@ -1,13 +1,13 @@
-#define svn_url     F:/rd/rpm/yum/trunk
-%define svn_url     http://svn.netlabs.org/repos/rpm/yum/trunk
-%define svn_rev     653
+%define svn_url     F:/rd/rpm/yum/trunk
+#define svn_url     http://svn.netlabs.org/repos/rpm/yum/trunk
+#define svn_rev     653
 
 %{!?python_sitelib: %define python_sitelib %(python -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
  
 Summary: RPM installer/updater
 Name: yum
 Version: 3.4.3
-Release: 9%{?dist}
+Release: 10%{?dist}
 License: GPLv2+
 Group: System Environment/Base
 
@@ -159,6 +159,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Thu Jun 09 2016 yd <yd@os2power.com> 3.4.3-10
+- r784, set bugtracker_url to Netlabs trac. ticket#184.
+
 * Wed Feb 10 2016 yd <yd@os2power.com> 3.4.3-9
 - r653, change default file path. fixes ticket#173.
 
