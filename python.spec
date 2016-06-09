@@ -1,6 +1,6 @@
 #define svn_url     F:/rd/rpm/python/trunk
 %define svn_url     http://svn.netlabs.org/repos/rpm/python/trunk
-%define svn_rev     775
+%define svn_rev     780
 
 %{!?__python_ver:%global __python_ver EMPTY}
 #global __python_ver 2.7
@@ -55,9 +55,6 @@ Group: Development/Languages
 Provides: python-abi = %{pybasever}
 Provides: python(abi) = %{pybasever}
 
-%define svn_url     http://svn.netlabs.org/repos/rpm/python/trunk
-%define svn_rev     611
-
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
 BuildRequires: gcc make subversion zip
@@ -77,6 +74,11 @@ Provides: python-hashlib = 20081120
 Obsoletes: python-uuid < 1.31
 Provides: python-uuid = 1.31
 %endif
+
+# YD because of ucs4
+Obsoletes: python-pycurl <= 7.19.5.1-1
+Obsoletes: rpm <= 4.13.0-7
+Obsoletes: yum-metadata-parser <= 1.1.4-5
 
 # YD unix adds this automatically by parsing elf binaries
 Requires: %{name}-libs = %{version}-%{release}
@@ -378,79 +380,11 @@ fi
 %dir %{pylibdir}
 %dir %{dynload_dir}
 %{dynload_dir}/Python-%{version}-py%{pybasever}.egg-info
-%{dynload_dir}/_bisect.pyd
-%{dynload_dir}/_bsddb.pyd
-#%{dynload_dir}/_bytesio.pyd
-%{dynload_dir}/_codecs_.pyd
-#%{dynload_dir}/_codecs_hk.pyd
-#%{dynload_dir}/_codecs_iso2022.pyd
-#%{dynload_dir}/_codecs_jp.pyd
-#%{dynload_dir}/_codecs_kr.pyd
-#%{dynload_dir}/_codecs_tw.pyd
-%{dynload_dir}/_collect.pyd
-%{dynload_dir}/_csv.pyd
-%{dynload_dir}/_ctypes.pyd
-%{dynload_dir}/_curses.pyd
-%{dynload_dir}/_curses_.pyd
-%{dynload_dir}/_element.pyd
-#%{dynload_dir}/_fileio.pyd
-#%{dynload_dir}/_functoo.pyd
-%{dynload_dir}/_hashlib.pyd
-%{dynload_dir}/_heapq.pyd
-%{dynload_dir}/_hotshot.pyd
-%{dynload_dir}/_io.pyd
-%{dynload_dir}/_json.pyd
-#%{dynload_dir}/_locale.pyd
-%{dynload_dir}/_lsprof.pyd
-#%{dynload_dir}/_md5.pyd
-%{dynload_dir}/_multiby.pyd
-%{dynload_dir}/_multipr.pyd
-%{dynload_dir}/_random.pyd
-#%{dynload_dir}/_sha256.pyd
-#%{dynload_dir}/_sha512.pyd
-#%{dynload_dir}/_sha.pyd
-%{dynload_dir}/_socket.pyd
-%{dynload_dir}/_sqlite3.pyd
-%{dynload_dir}/_ssl.pyd
-%{dynload_dir}/_struct.pyd
-#%{dynload_dir}/_weakref.pyd
-%{dynload_dir}/array.pyd
-%{dynload_dir}/audioop.pyd
-%{dynload_dir}/binascii.pyd
-%{dynload_dir}/bz2.pyd
-%{dynload_dir}/cPickle.pyd
-%{dynload_dir}/cStringI.pyd
-%{dynload_dir}/cmath.pyd
-%{dynload_dir}/crypt.pyd
-%{dynload_dir}/datetime.pyd
-%{dynload_dir}/dbm.pyd
-%{dynload_dir}/dl.pyd
-%{dynload_dir}/fcntl.pyd
-%{dynload_dir}/future_b.pyd
-#%{dynload_dir}/gdbm.pyd
-%{dynload_dir}/grp.pyd
-%{dynload_dir}/imageop.pyd
-%{dynload_dir}/itertool.pyd
-#%{dynload_dir}/linuxaudiodev.pyd
-%{dynload_dir}/math.pyd
-%{dynload_dir}/mmap.pyd
-#%{dynload_dir}/nis.pyd
-#%{dynload_dir}/operator.pyd
-#%{dynload_dir}/ossaudiodev.pyd
-%{dynload_dir}/parser.pyd
-%{dynload_dir}/pyexpat.pyd
-%{dynload_dir}/readline.pyd
-%{dynload_dir}/resource.pyd
-%{dynload_dir}/select.pyd
-#%{dynload_dir}/spwd.pyd
-%{dynload_dir}/strop.pyd
-%{dynload_dir}/syslog.pyd
-%{dynload_dir}/termios.pyd
-%{dynload_dir}/time.pyd
-#%{dynload_dir}/timing.pyd
-%{dynload_dir}/unicoded.pyd
-#%{dynload_dir}/xxsubtype.pyd
-%{dynload_dir}/zlib.pyd
+%{dynload_dir}/*.pyd
+%exclude %{dynload_dir}/_ctypes_test.pyd
+%exclude %{dynload_dir}/_ct3574.pyd
+%exclude %{dynload_dir}/_testcapi.pyd
+%exclude %{dynload_dir}/_te3228.pyd
 
 %dir %{site_packages}
 %{site_packages}/README
@@ -557,8 +491,10 @@ fi
 # These two are shipped in the main subpackage:
 %exclude %{pylibdir}/test/test_support.py*
 %exclude %{pylibdir}/test/__init__.py*
-%{dynload_dir}/_ctypes_.pyd
-%{dynload_dir}/_testcap.pyd
+%{dynload_dir}/_ctypes_test.pyd
+%{dynload_dir}/_ct3574.pyd
+%{dynload_dir}/_testcapi.pyd
+%{dynload_dir}/_te3228.pyd
 
 # We put the debug-gdb.py file inside /usr/lib/debug to avoid noise from
 # ldconfig (rhbz:562980).
@@ -574,9 +510,13 @@ fi
 # payload file would be unpackaged)
 
 %changelog
-* Mon Jun 06 2016 yd <yd@os2power.com> 2.7.6-13
-- enable support for ucs4 unicode set.
+* Thu Jun 09 2016 yd <yd@os2power.com> 2.7.6-13
+- enable support for ucs4 unicode set. ticket#182.
+- r780, fix file deletion. ticket#185.
+- r779, remove 8.3 file name truncation, use opendir() to avoid resolving symlinks. ticket#185.
 - r775, generate both 8.3 and long names for pyd dynamic libraries. fixes ticket#185.
+
+* Sat Dec 12 2015 Dmitriy Kuminov <coding@dmik.org> 2.7.6-12
 - r611, Add dummy plat-os2knix directory.
 - r610, Fix silly typo.
 - r609, Fix a typo in r529.
@@ -586,8 +526,6 @@ fi
 - r605, configure: Generate correct OS/2 defs and remove pre-built configure.
 - r604, Fix building with no OS/2 Toolkit headers in include paths.
 - r603, Use configured SHELL in subprocess module.
-
-* Sat Dec 12 2015 Dmitriy Kuminov <coding@dmik.org> 2.7.6-12
 - Provide dummy _dlopen in ctypes to make colorama package happy.
 - Use configured SHELL for subprocess.Popen(shell=True) instead of
   hardcoded '/bin/sh'.
