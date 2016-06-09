@@ -28,7 +28,7 @@
 Summary: The RPM package management system
 Name: rpm
 Version: %{rpmver}
-Release: 7%{?dist}
+Release: 8%{?dist}
 Group: System Environment/Base
 Url: http://www.rpm.org/
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
@@ -74,7 +74,8 @@ BuildRequires: file-devel
 BuildRequires: gettext-devel
 BuildRequires: ncurses-devel
 BuildRequires: bzip2-devel >= 0.9.0c-2
-BuildRequires: python-devel >= 2.6
+# YD because of ucs4
+BuildRequires: python-devel >= 2.7.6-13
 BuildRequires: libpoll-devel
 #BuildRequires: lua-devel >= 5.1
 %if ! %{without xz}
@@ -142,7 +143,8 @@ that are used to build packages using the RPM Package Manager.
 Summary: Python bindings for apps which will manipulate RPM packages
 Group: Development/Libraries
 Requires: rpm = %{version}-%{release}
-#Requires: python
+# YD because of ucs4
+Requires: python >= 2.7.6-13
 
 %description python
 The rpm-python package contains a module that permits applications
@@ -403,6 +405,9 @@ rm -rf $RPM_BUILD_ROOT
 %doc COPYING doc/librpm/html/*
 
 %changelog
+* Thu Jun 09 2016 yd <yd@os2power.com> 4.13.0-8
+- rebuild for ucs4, ticket#182.
+
 * Thu Mar 17 2016 yd <yd@os2power.com> 4.13.0-7
 - r706, fix full paths in rpmbuild command line.
 

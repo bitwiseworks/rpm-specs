@@ -2,7 +2,7 @@
 
 Name:           python-pycurl
 Version:        7.19.5.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        A Python interface to libcurl
 
 Group:          Development/Languages
@@ -25,6 +25,9 @@ BuildRequires:  openssl-devel
 #BuildRequires:  vsftpd
 
 Requires:       libcurl >= 7.37
+
+# YD because of ucs4
+Requires:       python >= 2.7.6-13
 
 Provides:       pycurl = %{version}-%{release}
 
@@ -93,5 +96,8 @@ rm -rf %{buildroot}%{_datadir}/doc/pycurl
 #%{python3_sitearch}/*
 
 %changelog
+* Thu Jun 09 2016 yd <yd@os2power.com> 7.19.5.1-2
+- rebuild for ucs4, ticket#182.
+
 * Thu Feb 05 2015 yd <yd@os2power.com> 7.19.5.1-1
 - initial build.
