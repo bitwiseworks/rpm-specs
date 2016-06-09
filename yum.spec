@@ -1,6 +1,6 @@
-%define svn_url     F:/rd/rpm/yum/trunk
-#define svn_url     http://svn.netlabs.org/repos/rpm/yum/trunk
-#define svn_rev     653
+#define svn_url     F:/rd/rpm/yum/trunk
+%define svn_url     http://svn.netlabs.org/repos/rpm/yum/trunk
+%define svn_rev     783
 
 %{!?python_sitelib: %define python_sitelib %(python -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
  
