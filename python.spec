@@ -49,7 +49,7 @@
 Summary: An interpreted, interactive, object-oriented programming language
 Name: %{python}
 Version: 2.7.6
-Release: 13%{?dist}
+Release: 14%{?dist}
 License: Python
 Group: Development/Languages
 Provides: python-abi = %{pybasever}
@@ -76,9 +76,9 @@ Provides: python-uuid = 1.31
 %endif
 
 # YD because of ucs4
-Obsoletes: python-pycurl <= 7.19.5.1-1
-Obsoletes: rpm <= 4.13.0-7
-Obsoletes: yum-metadata-parser <= 1.1.4-5
+Conflicts: python-pycurl <= 7.19.5.1-1
+Conflicts: rpm <= 4.13.0-7
+Conflicts: yum-metadata-parser <= 1.1.4-5
 
 # YD unix adds this automatically by parsing elf binaries
 Requires: %{name}-libs = %{version}-%{release}
@@ -175,7 +175,7 @@ Requires: %{name} = %{version}-%{release}
 Requires: %{tkinter} = %{version}-%{release}
 %if %{main_python}
 Obsoletes: python2-tools
-Provides: python2-tools = %{version}
+Provides: python2-tools = %{version}-%{release}
 %endif
 
 %description tools
@@ -190,7 +190,7 @@ Group: Development/Languages
 Requires: %{name} = %{version}-%{release}
 %if %{main_python}
 Obsoletes: tkinter2
-Provides: tkinter2 = %{version}
+Provides: tkinter2 = %{version}-%{release}
 %endif
 
 %description -n %{tkinter}
@@ -510,6 +510,10 @@ fi
 # payload file would be unpackaged)
 
 %changelog
+* Fri Jun 10 2016 yd <yd@os2power.com> 2.7.6-14
+- fixed Obsoletes vs Conflicts.
+- fixed python2-devel and -tools version.
+
 * Thu Jun 09 2016 yd <yd@os2power.com> 2.7.6-13
 - enable support for ucs4 unicode set. ticket#182.
 - r780, fix file deletion. ticket#185.
