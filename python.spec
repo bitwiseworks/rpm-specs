@@ -76,9 +76,9 @@ Provides: python-uuid = 1.31
 %endif
 
 # YD because of ucs4
-Conflicts: python-pycurl <= 7.19.5.1-1
-Conflicts: rpm <= 4.13.0-7
-Conflicts: yum-metadata-parser <= 1.1.4-5
+Conflicts: python-pycurl < 7.19.5.1-2
+Conflicts: rpm < 4.13.0-8
+Conflicts: yum-metadata-parser < 1.1.4-6
 
 # YD unix adds this automatically by parsing elf binaries
 Requires: %{name}-libs = %{version}-%{release}
