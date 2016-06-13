@@ -1,13 +1,17 @@
+%define svn_url     F:/rd/ports/yum-utils/trunk
+#define svn_url     http://svn.netlabs.org/repos/ports/yum-utils/trunk
+#define svn_rev     1598
+
 %{!?python_sitelib: %define python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
 
 Summary: Utilities based around the yum package manager
 Name: yum-utils
 Version: 1.1.31
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv2+
 Group: Development/Tools
-Source: http://yum.baseurl.org/download/yum-utils/%{name}-%{version}.tar.gz
-Patch0: yum-utils-os2.patch
+
+Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
 URL: http://yum.baseurl.org/download/yum-utils/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -16,7 +20,8 @@ Requires: yum >= 3.2.27
 Requires: python(abi) = 2.7
 
 #Requires: python-kitchen
-BuildRequires: python-devel >= 2.4
+BuildRequires: python-devel
+BuildRequires: rpm-build
 BuildRequires: gettext
 BuildRequires: intltool
 Provides: yum-utils-translations = %{version}-%{release}
@@ -383,15 +388,21 @@ Requires: puppet
 Supplies checksums for files in packages from puppet's state file. 
 
 %prep
+%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
 %setup -q
-%patch0 -p1
+%else
+%setup -n "%{name}-%{version}" -Tc
+svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
+rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
+(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
+%endif
 
 %install
 rm -rf $RPM_BUILD_ROOT
 make DESTDIR=$RPM_BUILD_ROOT install
 #make -C updateonboot DESTDIR=$RPM_BUILD_ROOT install
 
-#%find_lang %name
+%find_lang %name
 
 # Plugins to install
 plugins="\
@@ -442,8 +453,7 @@ touch $RPM_BUILD_ROOT%{_sysconfdir}/yum.repos.d/_local.repo
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%files
-# -f %{name}.lang
+%files -f %{name}.lang
 %defattr(-, root, root)
 %doc README yum-util-cli-template
 %doc COPYING
@@ -472,7 +482,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/show-changed-rco
 %{_sbindir}/yum-complete-transaction
 %{_sbindir}/yumdb
-%{_libdir}/
+%{python_sitelib}/yumutils/
 %{_mandir}/man1/yum-utils.1
 %{_mandir}/man1/debuginfo-install.1
 %{_mandir}/man1/package-cleanup.1
@@ -488,7 +498,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/yum-groups-manager.1
 %{_mandir}/man8/yumdb.8
 %{_mandir}/man1/yumdownloader.1
-%{_datadir}/locale/*
 
 %files -n yum-updateonboot
 %defattr(-, root, root)
@@ -675,6 +684,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/yum-plugins/puppetverify.*
 
 %changelog
+* Mon Jun 13 2016 yd <yd@os2power.com> 1.1.31-3
+- r1598, hardcode install path until ticket#71 gets fixed.
+- use correct set of files for installation, fixes ticket#92.
+- added macros to allow building from svn
+
 * Mon Apr 07 2014 yd
 - build for python 2.7.
 
