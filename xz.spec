@@ -1,3 +1,7 @@
+#define svn_url     F:/rd/ports/xz/trunk
+%define svn_url     http://svn.netlabs.org/repos/ports/xz/trunk
+%define svn_rev     193
+
 #
 # spec file for package xz (Version 4.999.9beta)
 #
@@ -20,15 +24,12 @@
 Name:           xz
 Summary:        A Program for Compressing Files
 Version:        4.999.9beta
-Release:        4%{?dist}
+Release:        5%{?dist}
 Group:          Productivity/Archiving/Compression
 License:        LGPLv2.1+
 Url:            http://tukaani.org/lzma/
 
-Source:         %{name}-4.999.9beta.tar.bz2
-#Source2:        baselibs.conf
-
-Patch0:         %{name}-os2.diff
+Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 BuildRequires:  pkgconfig
@@ -78,20 +79,27 @@ Obsoletes:      lzma-alpha-devel < %version
 This package contains the header files and libraries needed for
 compiling programs using the LZMA library.
 
+%debug_package
+
 %prep
-%setup -q -n %{name}-4.999.9beta
-%patch0 -p1 -b .os2~
+%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
+%setup -q
+%else
+%setup -n "%{name}-%{version}" -Tc
+svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
+rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
+(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
+%endif
 
 %build
 #AUTOPOINT=true autoreconf -fi
 #configure --libdir=/%{_lib} --disable-static --with-pic --docdir=%_docdir/%name
 
-export CONFIG_SHELL="/bin/sh"
+export CONFIG_SITE="/@unixroot/usr/share/config.legacy"
 export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 export LIBS="-lurpo -lmmap -lpthread"
 %configure \
-    --enable-shared --disable-static \
-    "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
+    --enable-shared --disable-static
 
 make %{?_smp_mflags}
 
@@ -138,3 +146,6 @@ rm -fr $RPM_BUILD_ROOT
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
+* Mon Jun 13 2016 yd <yd@os2power.com> 4.999.9beta-5
+- rebuild package, fixes ticket#183.
+- added debug package.
