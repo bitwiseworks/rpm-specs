@@ -1,6 +1,6 @@
-%define svn_url     F:/rd/ports/yum-utils/trunk
-#define svn_url     http://svn.netlabs.org/repos/ports/yum-utils/trunk
-#define svn_rev     1598
+#define svn_url     F:/rd/ports/yum-utils/trunk
+%define svn_url     http://svn.netlabs.org/repos/ports/yum-utils/trunk
+%define svn_rev     1598
 
 %{!?python_sitelib: %define python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
 
