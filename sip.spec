@@ -15,7 +15,7 @@
 Summary: SIP - Python/C++ Bindings Generator
 Name: sip
 Version: 4.18
-Release: 3%{?dist}
+Release: 4%{?dist}
 
 # sipgen/parser.{c.h} is GPLv3+ with exceptions (bison)
 License: GPLv2 or GPLv3 and (GPLv3+ with exceptions)
@@ -192,6 +192,9 @@ install -m 0644 %{_builddir}/%{buildsubdir}/macros.sip %{buildroot}%{_rpmconfigd
 
 
 %changelog
+* Tue Jun 14 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 4.18.3-4
+- rebuilt because of python ucs2/ucs4 change
+
 * Fri Jun 3 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 4.18-3
 - truncate pyd files to max 8 char, if longer
 - create a symlink, if the original pyd file is larger than 8 char
