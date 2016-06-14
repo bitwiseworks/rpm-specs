@@ -28,7 +28,7 @@
 Summary: Python bindings for Qt4
 Name: 	 PyQt4
 Version: 4.11.4
-Release: 2%{?dist}
+Release: 3%{?dist}
 
 # GPLv2 exceptions(see GPL_EXCEPTIONS*.txt)
 License: (GPLv3 or GPLv2 with exceptions) and BSD
@@ -405,6 +405,9 @@ diff -u ./sip/QtGui/opengl_types.sip.orig \
 
 
 %changelog
+* Tue Jun 14 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 4.11.4-3
+- rebuilt because of python ucs2/ucs4 change
+
 * Fri Jun 3 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 4.11.4-2
 - add symlink for long names
 - add nameshort tag, as inplemented in sip
