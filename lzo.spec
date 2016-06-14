@@ -1,15 +1,16 @@
 Name:           lzo
 Version:        2.09
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Data compression library with very fast (de)compression
 Group:          System Environment/Libraries
 License:        GPLv2+
 URL:            http://www.oberhumer.com/opensource/lzo/
+Vendor: bww bitwise works GmbH
 
 %define minilzo     mlzo22
-#define svn_url	    e:/trees/liblzo/trunk
-%define svn_url     http://svn.netlabs.org/repos/ports/lzo/trunk
-%define svn_rev     1084
+%define svn_url     e:/trees/liblzo/trunk
+#define svn_url     http://svn.netlabs.org/repos/ports/lzo/trunk
+#define svn_rev     1084
 
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
@@ -44,11 +45,8 @@ LZO is a portable lossless data compression library written in ANSI C.
 It offers pretty fast compression and very fast decompression.
 This package contains development files needed for lzo.
 
-%package debug
-Summary: HLL debug data for exception handling support
 
-%description debug
-%{summary}.
+%debug_package
 
 
 %prep
@@ -64,9 +62,11 @@ rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
 # hammer to nuke rpaths, recheck on new releases
 autoreconf -f -i
 
+
 %build
 export LDFLAGS=" -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 %configure --disable-static --enable-shared
+
 make %{?_smp_mflags}
 # build minilzo too (bz 439979)
 gcc -g -O2 -Iinclude/lzo -o minilzo/minilzo.o -c minilzo/minilzo.c
@@ -77,6 +77,7 @@ emxexp minilzo/minilzo.o >> %{minilzo}.def
 gcc -g -Zhigh-mem -Zomf -Zdll %{minilzo}.def -o %{minilzo}.dll minilzo/minilzo.o
 emximp -o %{minilzo}.a %{minilzo}.def
 
+
 %install
 rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT INSTALL="install -p"
@@ -84,9 +85,9 @@ find $RPM_BUILD_ROOT -name '*.la' -exec rm -f {} ';'
 install -m 755 %{minilzo}.dll $RPM_BUILD_ROOT%{_libdir}
 install -p -m 644 minilzo/minilzo.h $RPM_BUILD_ROOT%{_includedir}/lzo
 
-
 #Remove doc
 rm -rf $RPM_BUILD_ROOT%{_datadir}/doc/lzo
+
 
 %check
 export BEGINLIBPATH="$RPM_BUILD_ROOT%{_libdir};$BEGINLIBPATH"
@@ -117,11 +118,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/lzo
 %{_libdir}/*lzo*.a
 
-%files debug
-%defattr(-,root,root)
-%{_libdir}/*.dbg
-
-
 %changelog
+* Tue Jun 14 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.09-2
+- changed debug package to new scheme
+
 * Fri Feb 27 2015 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.09-1
 - Initial version
