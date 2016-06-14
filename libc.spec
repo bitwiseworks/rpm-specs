@@ -6,7 +6,7 @@ License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Standard Shared Libraries
 Group:          System/Libraries
 Version:        0.6.6
-Release:        26%{?dist}
+Release:        27%{?dist}
 Url:            http://svn.netlabs.org/libc
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -153,6 +153,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/*.dbg
 
 %changelog
+* Tue Jun 14 2016 yd <yd@os2power.com> 0.6.6-27
+- removed libiberty.h since it is already in binutils-devel. ticket#103 and ticket#188.
+
 * Sat Feb 07 2015 yd 0.6.6-26
 - r3946, readded SafeWinUpper.
 - removed asterisk patch from emxomf.
