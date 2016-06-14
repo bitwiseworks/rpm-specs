@@ -7,7 +7,7 @@
 Summary: Tool Command Language, pronounced tickle
 Name: tcl
 Version: %{vers}
-Release: 2%{?dist}
+Release: 3%{?dist}
 Epoch: 1
 License: TCL
 Group: Development/Languages
@@ -77,7 +77,7 @@ The package contains the static library in aout format.
 %build
 cd unix
 #autoconf
-export CONFIG_SHELL="/bin/sh"
+export CONFIG_SITE="/@unixroot/usr/share/config.legacy"
 export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 export LIBS="-lurpo"
 %configure \
@@ -85,8 +85,7 @@ export LIBS="-lurpo"
     --enable-dtrace \
 %endif
     --disable-shared --enable-static \
-    --enable-load --enable-dll-unloading \
-    "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
+    --enable-load --enable-dll-unloading
 
 make %{?_smp_mflags} TCL_LIBRARY=%{_datadir}/%{name}%{majorver}
 
@@ -163,3 +162,5 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/lib%{name}%{majorver}_s.a
 
 %changelog
+* Tue Jun 14 2016 yd <yd@os2power.com> 8.5.9-3
+- rebuild package, fixes ticket#183.
