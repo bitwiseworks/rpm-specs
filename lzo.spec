@@ -8,9 +8,9 @@ URL:            http://www.oberhumer.com/opensource/lzo/
 Vendor: bww bitwise works GmbH
 
 %define minilzo     mlzo22
-%define svn_url     e:/trees/liblzo/trunk
-#define svn_url     http://svn.netlabs.org/repos/ports/lzo/trunk
-#define svn_rev     1084
+#define svn_url     e:/trees/liblzo/trunk
+%define svn_url     http://svn.netlabs.org/repos/ports/lzo/trunk
+%define svn_rev     1084
 
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
