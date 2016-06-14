@@ -1,6 +1,6 @@
 #define svn_url     F:/rd/rpm/rpm/trunk
 %define svn_url     http://svn.netlabs.org/repos/rpm/rpm/trunk
-%define svn_rev     706
+%define svn_rev     759
 
 %define with_sqlite 1
 %undefine int_bdb
@@ -28,7 +28,7 @@
 Summary: The RPM package management system
 Name: rpm
 Version: %{rpmver}
-Release: 8%{?dist}
+Release: 9%{?dist}
 Group: System Environment/Base
 Url: http://www.rpm.org/
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
@@ -405,6 +405,9 @@ rm -rf $RPM_BUILD_ROOT
 %doc COPYING doc/librpm/html/*
 
 %changelog
+* Tue Jun 14 2016 yd <yd@os2power.com> 4.13.0-9
+- r759, remove read-only flag before unlocking modules. fixes ticket#180.
+
 * Thu Jun 09 2016 yd <yd@os2power.com> 4.13.0-8
 - rebuild for ucs4, ticket#182.
 
