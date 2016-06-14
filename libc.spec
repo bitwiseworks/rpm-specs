@@ -99,6 +99,7 @@ rm -f %{buildroot}%{_includedir}/ansidecl.h
 rm -f %{buildroot}%{_includedir}/bfd.h
 rm -f %{buildroot}%{_includedir}/bfdlink.h
 rm -f %{buildroot}%{_includedir}/dis-asm.h
+rm -f %{buildroot}%{_includedir}/libiberty.h
 rm -f %{buildroot}%{_includedir}/symcat.h
 rm -f %{buildroot}%{_libdir}/libbfd.*
 rm -f %{buildroot}%{_libdir}/libopcodes.*
