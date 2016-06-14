@@ -51,6 +51,8 @@ zip -SrX9 "%{_sourcedir}/wpstk-svn-r%{wpstk_svn_rev}.zip" "wpstk"
 
 cd src/wpstk
 export MAKESHELL=cmd.exe
+export CFG_WARPTK_PATH=D:/usr/dev/Toolkit452
+export CFG_WARPTK=V4
 make -f GNUMakefile lib
 make -f GNUMakefile lib DEBUG=1
 export MAKESHELL=
