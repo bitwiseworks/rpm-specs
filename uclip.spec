@@ -1,5 +1,5 @@
-%define svn_url     F:/rd/AOO/tools/UniClip
-#define svn_url     https://svn.netlabs.org/repos/openoffice/trunk/tools/UniClip
+#define svn_url     F:/rd/AOO/tools/UniClip
+%define svn_url     https://svn.netlabs.org/repos/openoffice/trunk/tools/UniClip
 %define svn_rev     955
 
 %define kmk_dist out/os2.x86/release/dist
@@ -47,12 +47,13 @@ rm -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip"
 
 %build
 export KCFLAGS="%{optflags}"
-kmk -C src
+export ODIN="E:/BuildBot/BUILD/Odin/trunk"
+kmk -C src ODIN="E:/BuildBot/BUILD/Odin/trunk"
 
 %install
 rm -rf %{buildroot}
 
-kmk -C src PATH_INS="%{buildroot}/@unixroot/usr" install
+kmk -C src PATH_INS="%{buildroot}/@unixroot/usr" ODIN="E:/BuildBot/BUILD/Odin/trunk" install
 
 %clean
 rm -rf %{buildroot}
