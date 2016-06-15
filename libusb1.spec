@@ -1,16 +1,18 @@
 Summary: A library which allows userspace access to USB devices
 Name: libusb1
 Version: 1.0.16
-Release: 1%{?dist}
+Release: 2%{?dist}
 Source0: http://downloads.sourceforge.net/libusb/libusb-%{version}.tar.gz
 
 License: LGPLv2+
 Group: System Environment/Libraries
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-URL: http://libusb.wiki.sourceforge.net/Libusb1.0
+URL: http://libusb.info/
 
 Patch0: libusb1-os2.patch
 Patch1: libusb1-os2-src.patch
+
+BuildRequires: usbcalls-devel
+Requires: usbcalls
 
 %description
 This package provides a way for applications to access USB devices. Note that
@@ -45,11 +47,7 @@ Requires: %{name}-devel = %{version}-%{release}
 %description static
 This package contains static libraries to develop applications that use libusb1.
 
-%package debug
-Summary: HLL debug data for exception handling support.
-
-%description debug
-HLL debug data for exception handling support.
+%debug_package
 
 %prep
 %setup -q -n libusb-%{version}
@@ -57,7 +55,7 @@ HLL debug data for exception handling support.
 %patch1 -p1 -b ~os2
 
 %build
-export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
+export CONFIG_SITE="/@unixroot/usr/share/config.legacy"
 %configure
 make CFLAGS="$RPM_OPT_FLAGS"
 
@@ -91,10 +89,10 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root)
 %{_libdir}/*-1.0_s.a
 
-%files debug
-%defattr(-,root,root)
-%{_libdir}/*.dbg
-
 %changelog
+* Wed Jun 15 2016 yd <yd@os2power.com> 0.1.5-2
+- added requirements.
+- added debug package.
+
 * Wed Apr 16 2014 yd
 - first public build.
