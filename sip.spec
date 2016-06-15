@@ -1,6 +1,6 @@
 #define svn_url     e:/trees/sip/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/sip/trunk
-%define svn_rev     1589
+%define svn_rev     1601
 
 # switch this on when we have python3
 #global with_python3 1
@@ -15,7 +15,7 @@
 Summary: SIP - Python/C++ Bindings Generator
 Name: sip
 Version: 4.18
-Release: 4%{?dist}
+Release: 5%{?dist}
 
 # sipgen/parser.{c.h} is GPLv3+ with exceptions (bison)
 License: GPLv2 or GPLv3 and (GPLv3+ with exceptions)
@@ -192,6 +192,9 @@ install -m 0644 %{_builddir}/%{buildsubdir}/macros.sip %{buildroot}%{_rpmconfigd
 
 
 %changelog
+* Wed Jun 14 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 4.18.3-5
+- fix signature handling 
+
 * Tue Jun 14 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 4.18.3-4
 - rebuilt because of python ucs2/ucs4 change
 
