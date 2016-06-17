@@ -1,25 +1,23 @@
-
+#define svn_url     F:/rd/ports/glib/trunk
+%define svn_url     http://svn.netlabs.org/repos/ports/glib/trunk
+%define svn_rev     1604
 
 Name:           glib2
 %define _name glib
-Version:        2.25.15
-Release:        5%{?dist}
+Version:        2.33.12
+Release:        1%{?dist}
 License:        LGPLv2.1+
 Summary:        A Library with Convenient Functions Written in C
 Url:            http://www.gtk.org/
 Group:          Development/Libraries/C and C++
 
-%define svn_url     http://svn.netlabs.org/repos/ports/glib/trunk
-%define svn_rev     508
-
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
+Source1: glib2-legacy.zip
 
 BuildRequires: gcc make subversion zip
 
-# @todo (dmik) later (see below about autogen.sh usage)
-#BuildRequires: autoconf automake
-## @todo (dmik) We need this for the moment, see #93
-#BuildRequires: libtool = 2.4.2
+BuildRequires: autoconf automake
+BuildRequires: libtool > 2.4.5
 
 #BuildRequires:  fam-devel
 #BuildRequires:  fdupes
@@ -37,13 +35,12 @@ BuildRequires:  libffi-devel gettext-devel bind-devel
 #
 Provides:       glib2-doc = 2.19.6
 Obsoletes:      glib2-doc < 2.19.6
+
 # YD this must be added to force dll install
 Requires:       libglib-2_0-0 = %{version}
 Requires:       libgmodule-2_0-0 = %{version}
 Requires:       libgthread-2_0-0 = %{version}
 Requires:       libgobject-2_0-0 = %{version}
-
-BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 
 %description
 This library provides convenient functions, such as lists and hashes,
@@ -112,17 +109,16 @@ Group:          Development/Libraries/C and C++
 This library provides convenient functions, such as lists and hashes,
 to a C programmer and is used by Gtk+ and GNOME.
 
-#%package -n libgio-2_0-0
-#License:        LGPLv2.1+
-#Summary:        A Library with Convenient Functions Written in C
-#Group:          Development/Libraries/C and C++
-#
+%package -n libgio-2_0-0
+License:        LGPLv2.1+
+Summary:        A Library with Convenient Functions Written in C
+Group:          Development/Libraries/C and C++
 # Temporarily disable this, pending further discussion
 # Recommends:     gvfs
 
-#%description -n libgio-2_0-0
-#This library provides convenient functions, such as lists and hashes,
-#to a C programmer and is used by Gtk+ and GNOME.
+%description -n libgio-2_0-0
+This library provides convenient functions, such as lists and hashes,
+to a C programmer and is used by Gtk+ and GNOME.
 
 #%package -n libgio-fam
 #License:        LGPLv2.1+
@@ -156,6 +152,14 @@ Group:          Development/Libraries/C and C++
 This library provides convenient functions, such as lists and hashes,
 to a C programmer and is used by Gtk+ and GNOME.
 
+%package legacy
+Summary: The 2.25 glib2 library.
+
+%description legacy
+The 2.25 glib2 library.
+
+%debug_package
+
 # @todo (dmik) We don't support this macro, put language files into the main package
 #%lang_package
 
@@ -163,36 +167,27 @@ to a C programmer and is used by Gtk+ and GNOME.
 %if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
 %setup -q
 %else
-%setup -n "%{name}-%{version}" -Tc
+%setup -n "%{name}-%{version}" -Tc -a 1
 svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
 rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
 (cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
 %endif
 
-# pick up m4 fix necessary for configure to work (remove when switched to that rev)
-svn export  %{svn_url}/m4macros/glib-gettext.m4@892 m4macros/glib-gettext.m4 --force
-# fix emxexp exports (r904), also to be removed
-sed -e 's/:space:/[:space:]/g' configure.ac -i
+cat > gtk-doc.make <<EOF
+EXTRA_DIST =
+CLEANFILES =
+EOF
+touch README INSTALL
 
-# @todo (dmik) we can't use autogen.sh ATM because a newer trunk revison (2.33 with fixes) is necesary for that,
-# also there are some problems with libtool (see #93) so we also can't use autoreconf -fvi (because we need the
-# fixed ltmain.sh from SVN), and even when it finally works it will rename glib2.dll to glib200.dll so some
-# -legacy package is necessary...
-autoconf
-## Generate configure and friends
-#export NOCONFIGURE=1
-#autogen.sh
+autoreconf -fi
 
 %build
-export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
 export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
-export LIBS="-lurpo -lmmap -lpthread"
+export CFLAGS="%optflags -I/@unixroot/usr/include/bind9"
+export LIBS="-lurpo -lmmap -lpthread -llwres"
 %configure \
+        --disable-modular-tests \
         --enable-shared --disable-static
-
-# YD fix extra CRLF after pass_all and execute it again (libtool hack breaks sed substitutions)
-sed -i "s/pass_all/pass_all\'\n_os2_dummy_var=\'/" config.status
-config.status
 
 make OPT="$CFLAGS" %{?_smp_mflags}
 
@@ -211,20 +206,6 @@ cp COPYING $RPM_BUILD_ROOT%{_datadir}/doc/%{name}-%{version}
 cp README $RPM_BUILD_ROOT%{_datadir}/doc/%{name}-%{version}
 cp NEWS $RPM_BUILD_ROOT%{_datadir}/doc/%{name}-%{version}
 cp ChangeLog $RPM_BUILD_ROOT%{_datadir}/doc/%{name}-%{version}
-
-cp glib/.libs/*.dll $RPM_BUILD_ROOT%{_libdir}
-cp glib/.libs/*.lib $RPM_BUILD_ROOT%{_libdir}
-cp gmodule/.libs/*.dll $RPM_BUILD_ROOT%{_libdir}
-cp gmodule/.libs/*.lib $RPM_BUILD_ROOT%{_libdir}
-cp gthread/.libs/*.dll $RPM_BUILD_ROOT%{_libdir}
-cp gthread/.libs/*.lib $RPM_BUILD_ROOT%{_libdir}
-cp gobject/.libs/*.dll $RPM_BUILD_ROOT%{_libdir}
-cp gobject/.libs/*.lib $RPM_BUILD_ROOT%{_libdir}
-
-rm $RPM_BUILD_ROOT%{_libdir}/charset.alias
-rm $RPM_BUILD_ROOT%{_mandir}/man1/gdbus.1
-rm $RPM_BUILD_ROOT%{_mandir}/man1/gio-querymodules.1
-rm $RPM_BUILD_ROOT%{_mandir}/man1/gsettings.1
 
 #install -D -m0644 glib2.sh $RPM_BUILD_ROOT/etc/profile.d/zzz-glib2.sh
 #install -D -m0644 glib2.csh $RPM_BUILD_ROOT/etc/profile.d/zzz-glib2.csh
@@ -248,6 +229,14 @@ rm $RPM_BUILD_ROOT%{_mandir}/man1/gsettings.1
 #%if %suse_version > 1100
 rm $RPM_BUILD_ROOT%{_libdir}/*.la
 #%endif
+
+# copy legacy files
+cp -p gio2.dll %{buildroot}%{_libdir}
+cp -p glib2.dll %{buildroot}%{_libdir}
+cp -p gmod2.dll %{buildroot}%{_libdir}
+cp -p gobj2.dll %{buildroot}%{_libdir}
+cp -p gthr2.dll %{buildroot}%{_libdir}
+
 %find_lang %{_name}20
 #%fdupes $RPM_BUILD_ROOT
 
@@ -261,7 +250,9 @@ rm -rf $RPM_BUILD_ROOT
 %doc AUTHORS COPYING README NEWS ChangeLog
 #/etc/profile.d/zzz-glib2.*
 #/sbin/conf.d/SuSEconfig.glib2
-#%{_bindir}/gio-querymodules*
+%{_bindir}/gio-querymodules*
+%{_libdir}/charset.alias
+%{_datadir}/bash-completion/completions/*
 
 #%files branding-upstream
 #%defattr(-,root,root)
@@ -270,22 +261,27 @@ rm -rf $RPM_BUILD_ROOT
 %files -n libglib-2_0-0
 %defattr(-, root, root)
 %{_libdir}/glib*.dll
+%exclude %{_libdir}/*2.dll
 
 %files -n libgmodule-2_0-0
 %defattr(-, root, root)
 %{_libdir}/gmod*.dll
+%exclude %{_libdir}/*2.dll
 
 %files -n libgobject-2_0-0
 %defattr(-, root, root)
 %{_libdir}/gobj*.dll
+%exclude %{_libdir}/*2.dll
 
 %files -n libgthread-2_0-0
 %defattr(-, root, root)
 %{_libdir}/gthr*.dll
+%exclude %{_libdir}/*2.dll
 
-#%files -n libgio-2_0-0
-#%defattr(-, root, root)
-#%{_libdir}/libgio*.so.*
+%files -n libgio-2_0-0
+%defattr(-, root, root)
+%{_libdir}/gio*.dll
+%exclude %{_libdir}/*2.dll
 #%dir %{_libdir}/gio
 #%dir %{_libdir}/gio/modules
 #%ghost %{_libdir}/gio/modules/giomodule.cache
@@ -297,40 +293,48 @@ rm -rf $RPM_BUILD_ROOT
 #%defattr(-,root,root)
 #%{_libdir}/gio/modules/libgiofam.so
 
-# @todo (dmik) We don't support this macro, put language files into the main package
-#%files lang -f %{_name}20.lang
-
 %files devel
 %defattr(-,root,root)
 %{_bindir}/glib-*
 %{_bindir}/gobject-*
 %{_bindir}/gtester*
-%doc %{_mandir}/man?/glib-*.*
-%doc %{_mandir}/man?/gobject-*.*
-%doc %{_mandir}/man?/gtester*.*
+%{_bindir}/gresource*
+%{_bindir}/gsettings*
+%{_bindir}/gdbus*
+#%doc %{_mandir}/man?/glib-*.*
+#%doc %{_mandir}/man?/gobject-*.*
+#%doc %{_mandir}/man?/gtester*.*
 %{_datadir}/aclocal/*.m4
 %{_datadir}/glib-2.0
 %{_includedir}/glib-2.0
-#%{_includedir}/gio-unix-2.0
+%{_includedir}/gio-unix-2.0
 %{_libdir}/*.a
-%{_libdir}/*.lib
 %{_libdir}/glib-2.0
 %{_libdir}/pkgconfig/*.pc
-%{_datadir}/gtk-doc/html/gio
-%{_datadir}/gtk-doc/html/glib
-%{_datadir}/gtk-doc/html/gobject
+%{_libdir}/gdbus-2.0/*
+#%{_datadir}/gtk-doc/html/gio
+#%{_datadir}/gtk-doc/html/glib
+#%{_datadir}/gtk-doc/html/gobject
 #%{_datadir}/gdb/auto-load/%{_libdir}/*-gdb.py
 %{_datadir}/gdb/auto-load/*
 # Own these directories to not depend on gtk-doc while building:
-%dir %{_datadir}/gtk-doc
-%dir %{_datadir}/gtk-doc/html
+#%dir %{_datadir}/gtk-doc
+#%dir %{_datadir}/gtk-doc/html
 # Own these directories to not depend on gdb
 %dir %{_datadir}/gdb
 %dir %{_datadir}/gdb/auto-load
 #%dir %{_datadir}/gdb/auto-load/%{_prefix}
 #%dir %{_datadir}/gdb/auto-load/%{_prefix}/%{_lib}
 
+%files legacy
+%defattr(-,root,root)
+%{_libdir}/*2.dll
+
 %changelog
+* Fri Jun 17 2016 yd <yd@os2power.com> 2.33.12-1
+- build public version.
+- add legacy package for 2.25 compatibility.
+
 * Wed Jan 27 2016 Dmitriy Kuminov <coding@dmik.org> 2.25.15-5
 - Remove .la files from distribution.
 - Build with gcc-4.9.2 against libc-0.6.6.
