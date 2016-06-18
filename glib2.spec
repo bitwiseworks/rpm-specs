@@ -1,6 +1,6 @@
 #define svn_url     F:/rd/ports/glib/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/glib/trunk
-%define svn_rev     1604
+%define svn_rev     1605
 
 Name:           glib2
 %define _name glib
@@ -331,9 +331,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/*2.dll
 
 %changelog
-* Fri Jun 17 2016 yd <yd@os2power.com> 2.33.12-1
-- build public version.
+* Sat Jun 18 2016 yd <yd@os2power.com> 2.33.12-1
+- r1605, use ISO8859-1 as default mapping, added _EURO locales.
 - add legacy package for 2.25 compatibility.
+- build public version.
 
 * Wed Jan 27 2016 Dmitriy Kuminov <coding@dmik.org> 2.25.15-5
 - Remove .la files from distribution.
