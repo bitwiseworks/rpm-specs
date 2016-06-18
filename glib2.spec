@@ -10,6 +10,7 @@ License:        LGPLv2.1+
 Summary:        A Library with Convenient Functions Written in C
 Url:            http://www.gtk.org/
 Group:          Development/Libraries/C and C++
+Vendor:         bww bitwise works GmbH
 
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 Source1: glib2-legacy.zip

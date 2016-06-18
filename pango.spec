@@ -11,7 +11,7 @@
 Summary: System for layout and rendering of internationalized text
 Name: pango
 Version: 1.28.4
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: LGPLv2+
 Group: System Environment/Libraries
 #VCS: git:git://git.gnome.org/pango
@@ -110,8 +110,8 @@ rm $RPM_BUILD_ROOT%{_libdir}/pango/*/modules/*.la
 %{_libdir}/pang*.dll
 %{_bindir}/pango-querymodules.exe
 %{_bindir}/pango-view.exe
-%{_mandir}/man1/pango-view.1.gz
-%{_mandir}/man1/pango-querymodules.1.gz
+%{_mandir}/man1/pango-view.1
+%{_mandir}/man1/pango-querymodules.1
 %{_libdir}/pango
 # @todo needs gobject-introspection
 #%{_libdir}/girepository-1.0/Pango-1.0.typelib
@@ -135,5 +135,8 @@ rm $RPM_BUILD_ROOT%{_libdir}/pango/*/modules/*.la
 
 
 %changelog
+* Sat Jun 18 2016 yd <yd@os2power.com> 1.28.4-2
+- rebuild for glib2 2.33.
+
 * Sat Feb 20 2016 Dmitriy Kuminov <coding@dmik.org> 1.28.4-1
 - Initial package for version 1.28.4.

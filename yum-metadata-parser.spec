@@ -2,11 +2,13 @@
 Summary: A fast metadata parser for yum
 Name: yum-metadata-parser
 Version: 1.1.4
-Release: 6%{?dist}
+Release: 7%{?dist}
 Source0: %{name}-%{version}.tar.gz
 License: GPL
 Group: Development/Libraries
 URL: http://devel.linux.duke.edu/cgi-bin/viewcvs.cgi/yum-metadata-parser/
+Vendor:     bww bitwise works GmbH
+
 Requires: yum >= 2.6.2
 BuildRequires: python-devel
 BuildRequires: glib2-devel
@@ -45,6 +47,9 @@ export EMXSHELL="cmd.exe"
 
 
 %changelog
+* Sat Jun 18 2016 yd <yd@os2power.com> 1.1.4-7
+- rebuild for glib2 2.33.
+
 * Thu Jun 09 2016 yd <yd@os2power.com> 1.1.4-6
 - rebuild for ucs4, ticket#182.
 

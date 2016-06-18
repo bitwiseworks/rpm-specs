@@ -23,13 +23,16 @@ Name:           libidl
 %define         _name libIDL
 Url:            http://www.gnome.org
 Version:        0.8.14
-Release:        4%{?dist}
+Release:        5%{?dist}
 #Release:        42.20
 # NOTE: on upgrade to a new upstream version, change the Obsoletes from <= to < (here and in baselibs.conf)
 Summary:        IDL Parsing Library
-Vendor:         Andrew T. Veliath <andrewtv@usa.net>
 License:        LGPL-2.1+
 Group:          System/Libraries
+Vendor:         bww bitwise works GmbH
+
+Source:         %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
+
 Provides:       %{name} = %{version}
 # Note: we keep <= (and a rpmlint warning...) until we get a version higher than 0.8.14 (when this provides/obsoletes was introduced)
 Obsoletes:      %{name} <= %{version}
@@ -38,15 +41,11 @@ Obsoletes:      %{name} <= %{version}
 #Obsoletes:      libidl-64bit
 #%endif
 #
-Source:         %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
-#Source:         http://ftp.gnome.org/pub/GNOME/sources/%{_name}/0.8/%{_name}-%{version}.tar.bz2
-#Source99:       baselibs.conf
 Requires:       glib2 libgcc1
 BuildRequires:  bison
 BuildRequires:  flex
 BuildRequires:  glib2-devel
 BuildRequires:  pkgconfig
-BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 
 %description
 LibIDL is a small library for creating parse trees of CORBA
@@ -90,7 +89,6 @@ export \
 autoreconf -fiv
 
 %configure \
-        --prefix=%{_prefix} \
         --enable-shared \
         --enable-static
 
@@ -111,8 +109,8 @@ mkdir -p $RPM_BUILD_ROOT%{_datadir}
 rm -f %{buildroot}%{_datadir}/info/dir
 # rm -f %{buildroot}%{_libdir}/*.lib
 emxomf -o %{buildroot}%{_libdir}/IDL-2.lib %{buildroot}%{_libdir}/IDL-2.a
-emximp -o %{buildroot}%{_libdir}/IDL-2_dll.lib %{buildroot}%{_libdir}/idl20.dll
-emximp -o %{buildroot}%{_libdir}/IDL-20_dll.lib %{buildroot}%{_libdir}/idl20.dll
+emximp -o %{buildroot}%{_libdir}/IDL-2_dll.lib %{buildroot}%{_libdir}/idl-20.dll
+emximp -o %{buildroot}%{_libdir}/IDL-20_dll.lib %{buildroot}%{_libdir}/idl-20.dll
 # change shell path in libIDL-config-2
 sed -e 's-\#\! \/bin\/sh-#! /@unixroot/usr/bin/sh-g' \
 	<%{buildroot}%{_bindir}/libIDL-config-2 \
@@ -145,7 +143,7 @@ fi
 %files
 %defattr(-,root,root)
 %doc COPYING ChangeLog AUTHORS README* NEWS BUGS tstidl.c
-%{_libdir}/idl*.dll
+%{_libdir}/IDL*.dll
 # generic directory for idl files
 # %dir %{_datadir}/idl
 
@@ -163,6 +161,9 @@ fi
 %{_libdir}/IDL-20_dll.lib
 
 %changelog
+* Sat Jun 18 2016 yd <yd@os2power.com> 0.8.14-5
+- rebuild for glib2 2.33.
+
 * Thu Mar 10 2016 Valery Sedletski <_valerius@mail.ru> - 0.8.14-4
 - fixed permissions for libIDL-config-2 to be 755
 - fixed Requires directive for 'devel' package to depend on %{name} = %{version}-%{release}
