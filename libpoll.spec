@@ -1,5 +1,5 @@
 %define svn_url     http://svn.netlabs.org/repos/ports/libpoll/trunk
-%define svn_rev     1610
+%define svn_rev     1611
 
 # Note: this package should go away (become an alias for libc-devel)
 # once http://trac.netlabs.org/libc/ticket/353 is resolved.
@@ -7,7 +7,7 @@
 Summary: System V poll system call emulation.
 Name: libpoll
 Version: 1.5.1
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: BSD
 Vendor:  bww bitwise works GmbH
 URL: http://software.clapper.org/poll/
@@ -108,6 +108,9 @@ rm -rf %{buildroot}
 %{_libdir}/poll_s.lib
 
 %changelog
+* Sun Jun 19 2016 Valery V. Sedletski <_valerius@mail.ru> 1.5.1-6
+- Added forgotten flags to revents after poll().
+
 * Sun Jun 19 2016 Valery V. Sedletski <_valerius@mail.ru> 1.5.1-5
 - Recognize POLLRDNORM and POLLWRNORM together with POLLIN and POLLOUT.
 - Add the code to Netlabs ports repository.
