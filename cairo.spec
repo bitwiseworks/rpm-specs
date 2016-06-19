@@ -7,7 +7,7 @@
 Summary:	A 2D graphics library
 Name:		cairo
 Version:	1.12.18
-Release:	2%{?dist}
+Release:	3%{?dist}
 URL:		http://cairographics.org
 #VCS:		git:git://git.freedesktop.org/git/cairo
 #Source0:	http://cairographics.org/releases/%{name}-%{version}.tar.xz
@@ -194,6 +194,9 @@ rm $RPM_BUILD_ROOT%{_libdir}/*.la
 #%{_libdir}/cairo/
 
 %changelog
+* Sat Jun 18 2016 yd <yd@os2power.com> 1.12.18-2
+- rebuild for glib2 2.33.
+
 * Thu May 26 2016 Dmitriy Kuminov <coding@dmik.org> 1.12.18-2
 - Fix assertions and SIGABRT on application termination.
 

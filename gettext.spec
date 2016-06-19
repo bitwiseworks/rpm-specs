@@ -10,7 +10,7 @@
 Summary: GNU libraries and utilities for producing multi-lingual messages
 Name: gettext
 Version: 0.18.3.2
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+ and LGPLv2+
 Group: Development/Tools
 URL: http://www.gnu.org/software/gettext/
@@ -117,11 +117,7 @@ Summary: The old gettext library.
 The old gettext library.
 
 
-%package debug
-Summary: HLL debug data for exception handling support.
-
-%description debug
-HLL debug data for exception handling support.
+%debug_package
 
 
 %prep
@@ -229,9 +225,9 @@ rm ${RPM_BUILD_ROOT}%{_libdir}/lib*.la
 #mv ${RPM_BUILD_ROOT}%{_emacs_sitelispdir}/%{name}/start-po.el ${RPM_BUILD_ROOT}%{_emacs_sitestartdir}
 #rm ${RPM_BUILD_ROOT}%{_emacs_sitelispdir}/%{name}/start-po.elc
 
-#%find_lang %{name}-runtime
-#%find_lang %{name}-tools
-#cat %{name}-*.lang > %{name}.lang
+%find_lang %{name}-runtime
+%find_lang %{name}-tools
+cat %{name}-*.lang > %{name}.lang
 
 # cleanup rpaths
 #for i in $RPM_BUILD_ROOT%{_bindir}/* `find $RPM_BUILD_ROOT%{_libdir} -type f`; do
@@ -282,8 +278,7 @@ rm -rf ${RPM_BUILD_ROOT}
 #%post libs -p /sbin/ldconfig
 #%postun libs -p /sbin/ldconfig
 
-%files
-# -f %{name}.lang
+%files -f %{name}.lang
 %defattr(-,root,root,-)
 %doc AUTHORS gettext-runtime/BUGS
 %doc COPYING gettext-tools/misc/DISCLAIM README
@@ -305,7 +300,7 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_datadir}/%{name}/intl
 %{_datadir}/%{name}/po
 %{_datadir}/%{name}/styles
-%{_datadir}/locale/*
+%{_datadir}/locale/locale.alias
 
 %files devel
 %defattr(-,root,root,-)
@@ -350,12 +345,10 @@ rm -rf ${RPM_BUILD_ROOT}
 %defattr(-,root,root)
 %{_libdir}/kintl.dll
 
-%files debug
-%defattr(-,root,root)
-%{_bindir}/*.dbg
-%{_libdir}/*.dbg
-
 %changelog
+* Sat Jun 18 2016 yd <yd@os2power.com> 0.18.3.2-2
+- rebuild for glib2 2.33.
+
 * Fri Feb 13 2015 yd <yd@os2power.com> 0.18.3.2-1
 - r1005 and others, updated source code to 0.18.3.2.
 

@@ -5,7 +5,7 @@
 Summary: A tool for determining compilation options
 Name: pkgconfig
 Version: 0.29.1
-Release: 2%{?dist}
+Release: 3%{?dist}
 Epoch: 1
 License: GPLv2+
 URL: http://pkgconfig.freedesktop.org
@@ -66,6 +66,9 @@ rm -rf $RPM_BUILD_ROOT%{_datadir}/doc/pkg-config
 
 
 %changelog
+* Sat Jun 18 2016 yd <yd@os2power.com> 0.29.1-3
+- rebuild for glib2 2.33.
+
 * Mon May 2 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.29.1-2
 - ignore /@unixroot/usr/lib as system library path
 
