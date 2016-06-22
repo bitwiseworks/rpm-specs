@@ -1,14 +1,15 @@
+#define svn_url     F:/rd/ports/bzip2/trunk
+%define svn_url     http://svn.netlabs.org/repos/ports/bzip2/trunk
+%define svn_rev     192
 
 Summary: A file compression utility
 Name: bzip2
 Version: 1.0.6
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: BSD
 Group: Applications/File
 URL: http://www.bzip.org/
-Source: http://www.bzip.org/%{version}/bzip2-%{version}.tar.gz
-Patch0: bzip2-os2.diff
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
 %description
 Bzip2 is a freely available, patent-free, high quality data compressor.
@@ -27,7 +28,6 @@ Group: Development/Libraries
 Requires: bzip2-libs = %{version}-%{release}
 
 %description devel
-
 Header files and a library of bzip2 functions, for developing apps
 which will use the library.
 
@@ -36,14 +36,20 @@ Summary: Libraries for applications using bzip2
 Group: System Environment/Libraries
 
 %description libs
-
 Libraries for applications using the bzip2 compression format.
 
+%debug_package
+
 %prep
-# -D Do not delete the directory before unpacking.
-# -T Disable the automatic unpacking of the archives.
-%setup
-%patch0 -p1 -b .os2~
+%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
+%setup -q
+%else
+%setup -n "%{name}-%{version}" -Tc
+echo %{svn_rev}
+svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
+rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
+(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
+%endif
 
 %build
 
@@ -109,3 +115,6 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_libdir}/*.a
 
 %changelog
+* Wed Jun 22 2016 yd <yd@os2power.com> 1.0.6-6
+- rebuild package, fixes ticket#183.
+- added debug package.
