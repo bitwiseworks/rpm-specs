@@ -17,13 +17,13 @@
 
 #%define svn_url     n:/src/ports/libidl
 %define svn_url     http://svn.netlabs.org/repos/ports/libidl/trunk
-%define svn_rev     1205
+%define svn_rev     1330
 
 Name:           libidl
 %define         _name libIDL
 Url:            http://www.gnome.org
 Version:        0.8.14
-Release:        5%{?dist}
+Release:        6%{?dist}
 #Release:        42.20
 # NOTE: on upgrade to a new upstream version, change the Obsoletes from <= to < (here and in baselibs.conf)
 Summary:        IDL Parsing Library
@@ -109,8 +109,8 @@ mkdir -p $RPM_BUILD_ROOT%{_datadir}
 rm -f %{buildroot}%{_datadir}/info/dir
 # rm -f %{buildroot}%{_libdir}/*.lib
 emxomf -o %{buildroot}%{_libdir}/IDL-2.lib %{buildroot}%{_libdir}/IDL-2.a
-emximp -o %{buildroot}%{_libdir}/IDL-2_dll.lib %{buildroot}%{_libdir}/idl-20.dll
-emximp -o %{buildroot}%{_libdir}/IDL-20_dll.lib %{buildroot}%{_libdir}/idl-20.dll
+emximp -o %{buildroot}%{_libdir}/IDL-2_dll.lib %{buildroot}%{_libdir}/idl20.dll
+emximp -o %{buildroot}%{_libdir}/IDL-20_dll.lib %{buildroot}%{_libdir}/idl20.dll
 # change shell path in libIDL-config-2
 sed -e 's-\#\! \/bin\/sh-#! /@unixroot/usr/bin/sh-g' \
 	<%{buildroot}%{_bindir}/libIDL-config-2 \
@@ -143,7 +143,7 @@ fi
 %files
 %defattr(-,root,root)
 %doc COPYING ChangeLog AUTHORS README* NEWS BUGS tstidl.c
-%{_libdir}/IDL*.dll
+%{_libdir}/idl*.dll
 # generic directory for idl files
 # %dir %{_datadir}/idl
 
@@ -161,6 +161,9 @@ fi
 %{_libdir}/IDL-20_dll.lib
 
 %changelog
+* Wed Jun 22 2016 yd <yd@os2power.com> 0.8.14-6
+- use correct svn revision for building.
+
 * Sat Jun 18 2016 yd <yd@os2power.com> 0.8.14-5
 - rebuild for glib2 2.33.
 
