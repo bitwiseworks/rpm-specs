@@ -143,11 +143,7 @@ The old gettext library.
 %if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
 %setup -q
 %else
-<<<<<<< .mine
 %setup -n "%{name}-%{version}" -Tc -a 1
-=======
-%setup -n "%{name}-%{version}" -Tc
->>>>>>> .r814
 svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
 rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
 (cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
