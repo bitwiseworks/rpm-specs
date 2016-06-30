@@ -1,13 +1,13 @@
 #define svn_url     F:/rd/ports/urpo/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/urpo/trunk
-%define svn_rev     1149
+%define svn_rev     1639
 
 %define kmk_dist out/os2.x86/release/dist
 
 Summary: unlink rename pending operation
 Name: urpo
-Version: 20150513
-Release: 11%{?dist}
+Version: 20160630
+Release: 12%{?dist}
 License: LGPL
 Group: Development/Libraries
 
@@ -28,12 +28,7 @@ Requires: %{name} = %{version}-%{release}
 Header files and a library of urpo functions, for developing apps
 which will use the library.
 
-%package debug
-Summary: HLL debug data for exception handling support.
-Requires: %{name} = %{version}-%{release}
-
-%description debug
-HLL debug data for exception handling support.
+%debug_package
 
 %prep
 %if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
@@ -73,11 +68,11 @@ rm -rf %{buildroot}
 %{_libdir}/*.a
 %{_includedir}/*.h
 
-%files debug
-%defattr(-,root,root)
-%{_libdir}/*.dbg
-
 %changelog
+* Thu Jun 30 2016 yd <yd@os2power.com> 20160630-12
+- r1639, add remove() export, mapped to existing unlink() code.
+- r1638, updates for build makefile, kmk clean works correctly now.
+
 * Tue Jun 09 2015 yd <yd@os2power.com> 20150513-11
 - force -devel and -debug to depend on main package, see ticket:138.
 
