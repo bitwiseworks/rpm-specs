@@ -1,6 +1,6 @@
 #define svn_url     e:/trees/gettext/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/gettext/trunk
-%define svn_rev     1635
+%define svn_rev     1641
 
 %define with_jar 0
 %define with_java 0
@@ -13,7 +13,7 @@
 Summary: GNU libraries and utilities for producing multi-lingual messages
 Name: gettext
 Version: 0.19.8.1
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv3+ and LGPLv2+
 Group: Development/Tools
 URL: http://www.gnu.org/software/gettext/
@@ -374,6 +374,9 @@ fi
 %{_libdir}/kintl.dll
 
 %changelog
+* Thu Jun 30 2016 yd <yd@os2power.com> 0.19.8.1-3
+- r1641, disable drive letter mapping. ticket#109.
+
 * Thu Jun 30 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.19.8.1-2
 - r1635, remove a ABI break from upstream, fixes ticket #108.
 - r1633, use dll names as in upstream gettext, remove our changes.
