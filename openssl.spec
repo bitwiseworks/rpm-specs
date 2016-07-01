@@ -1,6 +1,6 @@
 #define svn_url     e:/trees/openssl/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/openssl/trunk
-%define svn_rev     1637
+%define svn_rev     1642
 
 
 # Note: this .spec is borrowed from:
@@ -31,7 +31,7 @@
 Summary: A general purpose cryptography library with TLS implementation
 Name: openssl
 Version: 1.0.2h
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 License: OpenSSL
 Group: System Environment/Libraries
@@ -105,6 +105,7 @@ OpenSSL is a toolkit for supporting cryptography. The openssl-perl
 package provides Perl scripts for converting certificates and keys
 from other formats to the formats used by the OpenSSL toolkit.
 
+%debug_package
 
 %prep
 %if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
@@ -214,7 +215,8 @@ install -d $RPM_BUILD_ROOT%{_libdir}
 install -d $RPM_BUILD_ROOT%{_mandir}
 install -d $RPM_BUILD_ROOT%{_libdir}/openssl
 make INSTALL_PREFIX=$RPM_BUILD_ROOT install
-make INSTALL_PREFIX=$RPM_BUILD_ROOT install_docs
+# already done in install above
+# make INSTALL_PREFIX=$RPM_BUILD_ROOT install_docs
 
 cp ssl_s.a $RPM_BUILD_ROOT%{_libdir}
 cp ssl%{soversion}.dll $RPM_BUILD_ROOT%{_libdir}
@@ -363,6 +365,10 @@ rm -rf $RPM_BUILD_ROOT/%{_libdir}/fipscanister.*
 %{_sysconfdir}/pki/tls/misc/tsget
 
 %changelog
+* Wed Jun 29 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.0.2h-2
+- fix recursive symlink
+- added debug package
+
 * Wed Jun 29 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.0.2h-1
 - Update to version 1.0.2h.
 
