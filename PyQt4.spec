@@ -1,6 +1,6 @@
 #define svn_url     e:/trees/pyqt4/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/pyqt4/trunk
-%define svn_rev     1590
+%define svn_rev     1602
 
 %define target os2
 # remove the below 2 settings, as soon as we deliver qt macros
@@ -224,6 +224,12 @@ find examples/ -name "*.py" | xargs chmod a-x
 #        $(if $(DEF_FILE_VENDOR),-vendor \"$(DEF_FILE_VENDOR)\") \
 #        $(if $(DEF_FILE_TEMPLATE),-template \"$(DEF_FILE_TEMPLATE)\")
 #}
+# forth you need to garde QMAKE_MOC with isEmpty(QMAKE_SH) and add the below block
+#} else {
+#QMAKE_MOC       = $$[QT_INSTALL_BINS]/moc.exe
+#QMAKE_UIC       = $$[QT_INSTALL_BINS]/uic.exe
+#QMAKE_IDC       = $$[QT_INSTALL_BINS]/idc.exe
+#}
 
 export QMAKE_SH=$SHELL
 # do a fast qt build, as runmapsym and wmapsym is not needed here
@@ -405,6 +411,9 @@ diff -u ./sip/QtGui/opengl_types.sip.orig \
 
 
 %changelog
+* Fri Jul 01 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 4.11.4-4
+- workaround the absolute path bug in Qt4
+
 * Tue Jun 14 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 4.11.4-3
 - rebuilt because of python ucs2/ucs4 change
 
