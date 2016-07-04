@@ -31,7 +31,7 @@
 Summary: A general purpose cryptography library with TLS implementation
 Name: openssl
 Version: 1.0.2h
-Release: 2%{?dist}
+Release: 3%{?dist}
 
 License: OpenSSL
 Group: System Environment/Libraries
@@ -60,9 +60,8 @@ Summary: A general purpose cryptography library with TLS implementation
 Group: System Environment/Libraries
 Requires: ca-certificates >= 2008-5
 #Requires: crypto-policies
-# Needed obsoletes due to the base/lib subpackage split
-Obsoletes: openssl < 1.0.1-0.3.beta3
-Obsoletes: openssl-fips < 1.0.1e-28
+# Needed requires due to the base/lib subpackage split
+Requires: %{name} = %{version}-%{release}
 Provides: openssl-fips = %{version}-%{release}
 
 %description libs
@@ -365,6 +364,10 @@ rm -rf $RPM_BUILD_ROOT/%{_libdir}/fipscanister.*
 %{_sysconfdir}/pki/tls/misc/tsget
 
 %changelog
+* Mon Jul 04 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.0.2h-3
+- remove obsoletes tags from -libs
+- add a requires tag to -libs
+
 * Wed Jun 29 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.0.2h-2
 - fix recursive symlink
 - added debug package
