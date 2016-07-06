@@ -1,11 +1,11 @@
 #define svn_url     F:/rd/ports/glib/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/glib/trunk
-%define svn_rev     1605
+%define svn_rev     1643
 
 Name:           glib2
 %define _name glib
 Version:        2.33.12
-Release:        1%{?dist}
+Release:        2%{?dist}
 License:        LGPLv2.1+
 Summary:        A Library with Convenient Functions Written in C
 Url:            http://www.gtk.org/
@@ -208,6 +208,8 @@ cp README $RPM_BUILD_ROOT%{_datadir}/doc/%{name}-%{version}
 cp NEWS $RPM_BUILD_ROOT%{_datadir}/doc/%{name}-%{version}
 cp ChangeLog $RPM_BUILD_ROOT%{_datadir}/doc/%{name}-%{version}
 
+rm $RPM_BUILD_ROOT%{_libdir}/charset.alias
+
 #install -D -m0644 glib2.sh $RPM_BUILD_ROOT/etc/profile.d/zzz-glib2.sh
 #install -D -m0644 glib2.csh $RPM_BUILD_ROOT/etc/profile.d/zzz-glib2.csh
 #install -D -m0755 SuSEconfig.glib2 $RPM_BUILD_ROOT/sbin/conf.d/SuSEconfig.glib2
@@ -252,7 +254,6 @@ rm -rf $RPM_BUILD_ROOT
 #/etc/profile.d/zzz-glib2.*
 #/sbin/conf.d/SuSEconfig.glib2
 %{_bindir}/gio-querymodules*
-%{_libdir}/charset.alias
 %{_datadir}/bash-completion/completions/*
 
 #%files branding-upstream
@@ -332,6 +333,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/*2.dll
 
 %changelog
+* Tue Jul 05 2016 yd <yd@os2power.com> 2.33.12-2
+- r1643, use gettext code to embed codepage aliases. ticket#14.
+
 * Sat Jun 18 2016 yd <yd@os2power.com> 2.33.12-1
 - r1605, use ISO8859-1 as default mapping, added _EURO locales.
 - add legacy package for 2.25 compatibility.
