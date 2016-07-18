@@ -1,6 +1,6 @@
 Name: libcx
 Summary: kLIBC Extension Library
-Version: 0.1
+Version: 0.2
 Release: 1%{?dist}
 License: LGPLv2.1+
 Group: System/Libraries
@@ -9,11 +9,14 @@ URL: https://github.com/bitwiseworks/libcx
 
 %define github_name libcx
 %define github_url  https://github.com/bitwiseworks/%{github_name}/archive
-%define github_rev  c00f8621f6a67e8cde3e7cdb84188b66191d8678
+%define github_rev  0.2
 
 Source: %{github_name}-%{github_rev}.zip
 
 BuildRequires: gcc make curl zip
+
+Obsoletes: libpoll
+Provides: libpoll
 
 %description
 The kLIBC Extension Library extends the functionality of the kLIBC library
@@ -24,6 +27,9 @@ Summary: Development package for %{name}
 Requires: %{name} = %{version}-%{release}
 Requires: libc-devel
 Requires: pkgconfig
+
+Obsoletes: libpoll-devel
+Provides: libpoll-devel
 
 %description devel
 Libraries, header files and documentation for %{name}.
@@ -57,21 +63,33 @@ rm -rf %{buildroot}
 %{kmk_env}
 kmk $KMK_FLAGS DESTDIR="%{buildroot}" install
 # Remove tests as we don't need them now
-rm -rf %{buildroot}%{_bindir}
+rm -rf %{buildroot}%{_bindir}/tst-*.exe
+# Copy headers (@todo move it to Makefile.kmk)
+mkdir -p %{buildroot}%{_includedir}/sys
+echo "#include <sys/poll.h>" > nosys_poll.h
+install -m 644 nosys_poll.h %{buildroot}%{_includedir}/poll.h
+install -m 644 src/poll/poll.h %{buildroot}%{_includedir}/sys
 
 %clean
 rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root)
-%doc LICENSE README.md
+%doc LICENSE README.md CHANGELOG.md
 %{_libdir}/libcx*.dll
 
 %files devel
 %defattr(-,root,root)
 %{_libdir}/libcx*.a
+%{_bindir}/libcx-stats.exe
+%{_includedir}/poll.h
+%{_includedir}/sys/poll.h
 
 %changelog
+
+* Mon Jul 18 2016 Dmitriy Kuminov <coding@dmik.org> 0.2-1
+- Release version 0.2
+  (https://github.com/bitwiseworks/libcx/blob/0.2/CHANGELOG.md).
 
 * Fri Jun 10 2016 Dmitriy Kuminov <coding@dmik.org> 0.1-1
 - Initial package for version 0.1.
