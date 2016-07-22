@@ -3,11 +3,11 @@
 
 Summary: Exceptq creates a debugging report.
 Name: exceptq
-Version: 7.11
-Release: 9%{?dist}
+Version: 7.11.2
+Release: 1%{?dist}
 License: custom
 Group: Development/Libraries
-Source: exceptq-7.11-shl-2014-03-03.zip
+Source: exceptq-7.11.2-shl-2015-08-29.zip
 #Source1: exceptq.h
 #Source2: exceptq71-dev.zip
 
@@ -46,7 +46,7 @@ Exceptq developer package
 %prep
 %setup -q -c
 
-%patch1 -p0 -b .bak
+#%patch1 -p0 -b .bak
 [ $? = 0 ] || exit 1
 
 %build
@@ -90,6 +90,10 @@ rm -rf %{buildroot}
 %doc readme.exceptq
 
 %changelog
+* Fri Jul 22 2016 yd <yd@os2power.com> 7.11.2-1
+- update to SHL 2015-08-29 binaries.
+- revert header fix.
+
 * Tue May 20 2014 Dmitriy Kuminov <coding@dmik.org> 7.11-9
 - Patch exceptq.h to fix usage in muptiple sources.
 
