@@ -1,11 +1,7 @@
 # Note: this .spec is borrowed from dash-0.5.8-2.fc23.src.rpm
 
-# Disable debug symbols stuff - makes no sense w/o EXCEPTQ support
-# (also depends on http://trac.netlabs.org/rpm/ticket/134)
-%define _strip_no_debuginfo 1
-
 Name:           dash
-Version:        0.5.8
+Version:        0.5.9
 Release:        1%{?dist}
 Summary:        Small and fast POSIX-compliant shell
 Group:          System Environment/Shells
@@ -18,13 +14,14 @@ URL:            http://gondor.apana.org.au/~herbert/%{name}/
 #Source0:        http://gondor.apana.org.au/~herbert/%{name}/files/%{name}-%{version}.tar.gz
 
 %define svn_url     http://svn.netlabs.org/repos/ports/dash/trunk
-%define svn_rev     1126
+%define svn_rev     1664
 
 Source: %{name}-%{version}-r%{svn_rev}.zip
 
 BuildRequires: gcc make subversion zip
 
 BuildRequires: automake
+BuildRequires: exceptq-devel
 
 %description
 DASH is a POSIX-compliant implementation of /bin/sh that aims to be as small as
@@ -36,9 +33,12 @@ Summary:  Installs DASH as the system default POSIX shell.
 Requires: dash
 # @todo See http://trac.netlabs.org/rpm/ticket/137.
 Provides: /@unixroot/bin/sh
+Obsoletes: ash-sh
 
 %description sh
 Virtual package that installs DASH as the system default POSIX shell.
+
+%debug_package
 
 %prep
 %if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
@@ -96,5 +96,15 @@ ln -s %{_mandir}/man1/%{name}.1 %{buildroot}%{_mandir}/man1/sh.1
 %{_mandir}/man1/sh.1
 
 %changelog
+* Mon Aug 8 2016 Dmitriy Kuminov <coding@dmik.org> 0.5.9-1
+- Update to version 0.5.9.
+- Make cd builtin handle paths like /@unixroot correctly.
+- Convert backslashes to forward ones in PATH-like variables
+  (PATHLIKE_VARS may be used to extend list of recognized ones).
+- Be more verbose on fork failures.
+- Add support for EXCEPTQ and debug info package.
+- The dash-sh package now obsoletes ash-sh for easy update
+  (ash is deprecated from now on).
+
 * Mon Apr 6 2015 Dmitriy Kuminov <coding@dmik.org> 0.5.8-1
 - Initial package for version 0.5.8.
