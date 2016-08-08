@@ -1,4 +1,4 @@
-#disable lxlite strip
+#disable lxlite strip & debug info generation
 %define __os_install_post	%{nil}
 
 Name:           libc
@@ -6,24 +6,28 @@ License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Standard Shared Libraries
 Group:          System/Libraries
 Version:        0.6.6
-Release:        27%{?dist}
+Release:        28%{?dist}
 Url:            http://svn.netlabs.org/libc
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
+
 Source:         libc-%{version}.zip
 Source1:        libc-emxomf.zip
+# This contains binary build of LIBC with patches from tickets #361-365
+Source2:        libc-hotfix.zip
+
 Patch0:         libc.patch
 
 # These patches are not actually applied but they record what
 # needs to be done to the stock LIBC 0.6 source in order to build
-# emxomf.exe contained in libc-emxomf.zip 
+# emxomf.exe contained in libc-emxomf.zip
 Patch101:       libc-dmik-emxomf-02-remove-asterisk.diff
 Patch102:       libc-yuri-emxomf-verbose-warnings-3.patch
 
 BuildRequires:  rexx_exe
 
 %description
-kLIBC is a C runtime library in which the coder is exploring The Single Unix 
+kLIBC is a C runtime library in which the coder is exploring The Single Unix
 Specification (SUS) and various *BSD, Sun and Linux interfaces used in 'portable'
 software. While implementing SUS completely and providing a great range of special
 BSD, Sun and Linux APIs is a kind of ultimate goal, the main focus is on what is
@@ -71,8 +75,8 @@ HLL debug data for exception handling support.
 
 
 %prep
-%setup -q -c -a 1
-%patch0 
+%setup -q -c -a 1 -a 2
+%patch0
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -93,6 +97,9 @@ cp -p -r emxomf.exe %{buildroot}%{_bindir}
 cp -p -r emxomfstrip.exe %{buildroot}%{_bindir}
 cp -p -r os2safe.h %{buildroot}%{_includedir}
 cp -p -r libos2.a %{buildroot}%{_libdir}
+
+# add hotfix DLLs
+cp -p -r libc066.* %{buildroot}%{_libdir}
 
 #remove (old) binutils headers/libs
 rm -f %{buildroot}%{_includedir}/ansidecl.h
@@ -154,6 +161,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/*.dbg
 
 %changelog
+* Mon Aug 8 2016 Dmitriy Kuminov <coding@dmik.org> 0.6.6-28
+- Apply patches from tickets #361-365 to make fork() work in dash
+  and similar cases and other minor improvements.
+
 * Tue Jun 14 2016 yd <yd@os2power.com> 0.6.6-27
 - removed libiberty.h since it is already in binutils-devel. ticket#103 and ticket#188.
 
