@@ -1,6 +1,6 @@
 Name: libcx
 Summary: kLIBC Extension Library
-Version: 0.2
+Version: 0.2.1
 Release: 1%{?dist}
 License: LGPLv2.1+
 Group: System/Libraries
@@ -9,7 +9,7 @@ URL: https://github.com/bitwiseworks/libcx
 
 %define github_name libcx
 %define github_url  https://github.com/bitwiseworks/%{github_name}/archive
-%define github_rev  0.2
+%define github_rev  %{version}
 
 Source: %{github_name}-%{github_rev}.zip
 
@@ -86,6 +86,10 @@ rm -rf %{buildroot}
 %{_includedir}/sys/poll.h
 
 %changelog
+
+* Fri Aug 19 2016 Dmitriy Kuminov <coding@dmik.org> 0.2.1-1
+- Release version 0.2.1
+  (https://github.com/bitwiseworks/libcx/blob/0.2.1/CHANGELOG.md).
 
 * Mon Jul 18 2016 Dmitriy Kuminov <coding@dmik.org> 0.2-1
 - Release version 0.2
