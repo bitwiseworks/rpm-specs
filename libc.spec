@@ -6,7 +6,7 @@ License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Standard Shared Libraries
 Group:          System/Libraries
 Version:        0.6.6
-Release:        28%{?dist}
+Release:        29%{?dist}
 Url:            http://svn.netlabs.org/libc
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -39,6 +39,7 @@ License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Include Files and Libraries Mandatory for Development
 Group:          Development/Libraries/C and C++
 Requires:       libc = %{version}-%{release}
+Obsoletes:      libc-kprofile < %{version}
 
 %description devel
 These libraries are needed to develop programs which use the standard C
@@ -101,6 +102,13 @@ cp -p -r libos2.a %{buildroot}%{_libdir}
 # add hotfix DLLs
 cp -p -r libc066.* %{buildroot}%{_libdir}
 
+# remove ELH and PRF DLLs due to missing kdbglib.dll and kprofile.dll
+# (http://trac.netlabs.org/rpm/ticket/196)
+rm -f %{buildroot}%{_libdir}/libc*.elh
+rm -f %{buildroot}%{_libdir}/libc*.elh.map
+rm -f %{buildroot}%{_libdir}/libc*.prf
+rm -f %{buildroot}%{_libdir}/libc*.prf.map
+
 #remove (old) binutils headers/libs
 rm -f %{buildroot}%{_includedir}/ansidecl.h
 rm -f %{buildroot}%{_includedir}/bfd.h
@@ -161,6 +169,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/*.dbg
 
 %changelog
+* Sat Aug 20 2016 Dmitriy Kuminov <coding@dmik.org> 0.6.6-29
+- Remove libcXXX.elh and libcXXX.prf from libc-devel due to missing
+  dependnencies (klibdbg.dll and kprofile.dll). This also obsoletes
+  the libc-kprofile dummy package.
+
 * Mon Aug 8 2016 Dmitriy Kuminov <coding@dmik.org> 0.6.6-28
 - Apply patches from tickets #361-365 to make fork() work in dash
   and similar cases and other minor improvements.
