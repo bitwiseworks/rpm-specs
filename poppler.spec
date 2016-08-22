@@ -1,7 +1,7 @@
 Summary:	PDF rendering library
 Name:		poppler
-Version:	0.42.0
-Release:	2%{?dist}
+Version:	0.47.0
+Release:	1%{?dist}
 License:	(GPLv2 or GPLv3) and GPLv2+ and LGPLv2+ and MIT
 Group:		Development/Libraries
 Vendor:		bww bitwise works GmbH
@@ -9,7 +9,7 @@ Vendor:		bww bitwise works GmbH
 URL:		http://poppler.freedesktop.org/
 #define svn_url	    e:/trees/poppler/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/poppler/trunk
-%define svn_rev     1530
+%define svn_rev     1667
 
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
@@ -144,6 +144,8 @@ POPPLER_QT4_CFLAGS='-D__OS2__'
 POPPLER_QT4_LIBS='-lQtCore4 -lQtGui4 -lQtNetwork4 -lQtXml4'
 POPPLER_QT4_TEST_CFLAGS=$POPPLER_QT4_CFLAGS
 POPPLER_QT4_TEST_LIBS=$POPPLER_QT4_LIBS
+PATH=$PATH';/@unixroot/usr/lib/qt4/bin'
+
 LDFLAGS=" -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 
 export LDFLAGS
@@ -151,6 +153,7 @@ export POPPLER_QT4_CFLAGS
 export POPPLER_QT4_LIBS
 export POPPLER_QT4_TEST_CFLAGS
 export POPPLER_QT4_TEST_LIBS
+export PATH
 
 %configure \
 	--enable-poppler-qt4=yes --enable-zlib=yes \
@@ -179,7 +182,7 @@ rm -rf $RPM_BUILD_ROOT
 %files devel
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/poppler_dll.a
-%attr(755,root,root) %{_libdir}/poppler59_dll.a
+%attr(755,root,root) %{_libdir}/poppler63_dll.a
 %{_libdir}/pkgconfig/poppler.pc
 %{_libdir}/pkgconfig/poppler-splash.pc
 %dir %{_includedir}/poppler/
@@ -226,6 +229,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Mon Aug 22 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.47.0-1
+- updated poppler to 0.47.0
+
 * Fri Apr 1 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.42.0-2
 - enabled nss for signature handling
 
