@@ -5,7 +5,7 @@
 Summary: OpenPrinting CUPS filters and backends
 Name:    cups-filters
 Version: 1.8.2
-Release: 4%{?dist}
+Release: 5%{?dist}
 
 # For a breakdown of the licensing, see COPYING file
 # GPLv2:   filters: commandto*, imagetoraster, pdftops, rasterto*,
@@ -67,7 +67,7 @@ BuildRequires: libtool
 
 Requires: cups-filesystem
 Requires: poppler-utils >= 0.38.0-2
-Requires: ghostscript >= 9.18
+Requires: ghostscript >= 9.14
 
 # texttopdf
 # not needed, as we have courier installed anyway
@@ -293,6 +293,10 @@ fi
 %{_libdir}/fontembed*.a
 
 %changelog
+* Wed Aug 24 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.8.2-5
+- lower the gs req to 9.14
+- rebuild with new poppler
+
 * Tue Apr 19 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.8.2-4
 - more binary read fixes
 - backout setmode
