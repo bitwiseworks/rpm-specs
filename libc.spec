@@ -6,7 +6,7 @@ License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Standard Shared Libraries
 Group:          System/Libraries
 Version:        0.6.6
-Release:        29%{?dist}
+Release:        30%{?dist}
 Url:            http://svn.netlabs.org/libc
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -78,6 +78,9 @@ HLL debug data for exception handling support.
 %prep
 %setup -q -c -a 1 -a 2
 %patch0
+
+#replace paths.h wrong macros
+sed -i 's,"/@unixroot/bin,"/@unixroot/usr/bin,g' usr/include/paths.h
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -169,6 +172,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/*.dbg
 
 %changelog
+* Fri Sep 02 2016 yd <yd@os2power.com> 0.6.6-30
+- Fix path definitions in paths.h header. ticket#200.
+
 * Sat Aug 20 2016 Dmitriy Kuminov <coding@dmik.org> 0.6.6-29
 - Remove libcXXX.elh and libcXXX.prf from libc-devel due to missing
   dependnencies (klibdbg.dll and kprofile.dll). This also obsoletes
