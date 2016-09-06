@@ -1,12 +1,12 @@
 #define svn_url     e:/trees/djvulibre/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/djvulibre/trunk
-%define svn_rev     1683
+%define svn_rev     1685
 
 
 Summary: DjVu viewers, encoders, and utilities
 Name: djvulibre
 Version: 3.5.27
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv2+
 Group: Applications/Publishing
 URL: http://djvu.sourceforge.net/
@@ -131,5 +131,9 @@ rm -f %{buildroot}%{_libdir}/*.la
 
 
 %changelog
+* Thu Sep 06 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.5.27-2
+- change all #ifdef OS2 to #ifdef __OS2__
+- init pthread structure to prevent a sigsegv
+
 * Fri Sep 02 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.5.27-1
 - first version
