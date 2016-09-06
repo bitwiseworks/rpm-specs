@@ -2,7 +2,7 @@
 
 Name:           dash
 Version:        0.5.9
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Small and fast POSIX-compliant shell
 Group:          System Environment/Shells
 # BSD: DASH in general
@@ -96,6 +96,9 @@ ln -s %{_mandir}/man1/%{name}.1 %{buildroot}%{_mandir}/man1/sh.1
 %{_mandir}/man1/sh.1
 
 %changelog
+* Tue Sep 6 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.5.9-2
+- rebuilt with new libc (paths.h changes)
+
 * Mon Aug 8 2016 Dmitriy Kuminov <coding@dmik.org> 0.5.9-1
 - Update to version 0.5.9.
 - Make cd builtin handle paths like /@unixroot correctly.
