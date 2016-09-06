@@ -1,11 +1,11 @@
 #define svn_url     e:/trees/coreutils/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/coreutils/trunk
-%define svn_rev     1655
+%define svn_rev     1686
 
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.25
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -199,18 +199,18 @@ rm -rf $RPM_BUILD_ROOT
 # We must deinstall these info files since they're merged in
 # coreutils.info. else their postun'll be run too late
 # and install-info will fail badly because of duplicates
-for file in sh-utils textutils fileutils; do
+#for file in sh-utils textutils fileutils; do
 #  if [ -f %{_infodir}/$file.info.gz ]; then
 #    /sbin/install-info --delete %{_infodir}/$file.info.gz --dir=%{_infodir}/dir &> /dev/null || :
 #  fi
-done
+#done
 
 %preun
-if [ $1 = 0 ]; then
+#if [ $1 = 0 ]; then
 #  if [ -f %{_infodir}/%{name}.info.gz ]; then
 #    /sbin/install-info --delete %{_infodir}/%{name}.info.gz %{_infodir}/dir || :
 #  fi
-fi
+#fi
 
 %post
 #%{_bindir}/grep -v '(sh-utils)\|(fileutils)\|(textutils)' %{_infodir}/dir > \
@@ -239,6 +239,9 @@ fi
 %doc ABOUT-NLS COPYING NEWS README THANKS TODO
 
 %changelog
+* Tue Sep 06 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 8.25-2
+- fix scriplet errors when using dash as shell
+
 * Tue Jul 12 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 8.25-1
 - updated coreutils to version 8.25
 - changed debug handling
