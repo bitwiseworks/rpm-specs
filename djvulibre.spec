@@ -6,7 +6,7 @@
 Summary: DjVu viewers, encoders, and utilities
 Name: djvulibre
 Version: 3.5.27
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv2+
 Group: Applications/Publishing
 URL: http://djvu.sourceforge.net/
@@ -20,6 +20,7 @@ BuildRequires: libtiff-devel
 #BuildRequires: xdg-utils chrpath
 #BuildRequires: hicolor-icon-theme
 #BuildRequires: inkscape 
+Requires: %{name}-libs = %{version}-%{release}
 
 #Provides: %{name}-mozplugin = %{version}
 #Obsoletes: %{name}-mozplugin < 3.5.24
@@ -71,7 +72,9 @@ rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
 
 
 %build 
-export LDFLAGS=" -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+export CFLAGS="$RPM_OPT_FLAGS -mstackrealign"
+export CXXFLAGS="$RPM_OPT_FLAGS -mstackrealign"
+export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 export LIBS="-lcx0"
 export NOCONFIGURE=1
 autogen.sh
@@ -131,7 +134,11 @@ rm -f %{buildroot}%{_libdir}/*.la
 
 
 %changelog
-* Thu Sep 06 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.5.27-2
+* Thu Sep 08 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.5.27-3
+- fix a crash in the P4 build
+- djvulibre also requires djvulibre-libs
+
+* Tue Sep 06 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.5.27-2
 - change all #ifdef OS2 to #ifdef __OS2__
 - init pthread structure to prevent a sigsegv
 
