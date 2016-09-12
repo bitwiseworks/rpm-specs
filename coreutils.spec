@@ -5,7 +5,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.25
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -83,8 +83,8 @@ rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
 %build
 
 export CFLAGS="$RPM_OPT_FLAGS -fno-strict-aliasing"
-export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf"
-export LIBS="-lintl -lurpo"
+export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+export LIBS="-lintl"
 %{expand:%%global optflags %{optflags} -D_GNU_SOURCE=1}
 # we do autoreconf even fedora doesn't do it
 autoreconf -i -v
@@ -239,6 +239,9 @@ rm -rf $RPM_BUILD_ROOT
 %doc ABOUT-NLS COPYING NEWS README THANKS TODO
 
 %changelog
+* Mon Sep 12 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 8.25-3
+- remove -ZBin-files
+
 * Tue Sep 06 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 8.25-2
 - fix scriplet errors when using dash as shell
 
