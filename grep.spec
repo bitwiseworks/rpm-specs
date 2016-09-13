@@ -1,11 +1,11 @@
 #define svn_url     e:/trees/grep/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/grep/trunk
-%define svn_rev     1697
+%define svn_rev     1699
 
 Summary: Pattern matching utilities
 Name: grep
 Version: 2.25
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 URL: http://www.gnu.org/software/grep/
 Group: Applications/Text
@@ -78,6 +78,9 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_mandir}/*/*
 
 %changelog
+* Tue Sep 13 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.25-2
+- fix a sigabrt due to blindely source copy :(
+
 * Mon Sep 12 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.25-1
 - update to version 2.25
 
