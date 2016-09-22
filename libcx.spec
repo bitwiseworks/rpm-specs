@@ -1,6 +1,6 @@
 Name: libcx
 Summary: kLIBC Extension Library
-Version: 0.2.1
+Version: 0.3
 Release: 1%{?dist}
 License: LGPLv2.1+
 Group: System/Libraries
@@ -25,7 +25,7 @@ by adding a number of high demand features required by modern applications.
 %package devel
 Summary: Development package for %{name}
 Requires: %{name} = %{version}-%{release}
-Requires: libc-devel
+Requires: libc-devel exceptq-devel
 Requires: pkgconfig
 
 Obsoletes: libpoll-devel
@@ -69,6 +69,7 @@ mkdir -p %{buildroot}%{_includedir}/sys
 echo "#include <sys/poll.h>" > nosys_poll.h
 install -m 644 nosys_poll.h %{buildroot}%{_includedir}/poll.h
 install -m 644 src/poll/poll.h %{buildroot}%{_includedir}/sys
+install -m 644 src/mmap/sys/mman.h %{buildroot}%{_includedir}/sys
 
 %clean
 rm -rf %{buildroot}
@@ -84,8 +85,12 @@ rm -rf %{buildroot}
 %{_bindir}/libcx-stats.exe
 %{_includedir}/poll.h
 %{_includedir}/sys/poll.h
+%{_includedir}/sys/mman.h
 
 %changelog
+* Thu Sep 22 2016 Dmitriy Kuminov <coding@dmik.org> 0.3-1
+- Release version 0.3
+  (https://github.com/bitwiseworks/libcx/blob/0.3/CHANGELOG.md).
 
 * Fri Aug 19 2016 Dmitriy Kuminov <coding@dmik.org> 0.2.1-1
 - Release version 0.2.1
