@@ -6,7 +6,7 @@ License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Standard Shared Libraries
 Group:          System/Libraries
 Version:        0.6.6
-Release:        30%{?dist}
+Release:        31%{?dist}
 Url:            http://svn.netlabs.org/libc
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -127,6 +127,9 @@ rm -f %{buildroot}%{_libdir}/libstdc++.*
 rm -f %{buildroot}%{_libdir}/libsupc++.*
 rm -f %{buildroot}%{_libdir}/libiberty.*
 
+#remove sys/mman.h (provided by libcx-devel)
+rm -f %{buildroot}%{_includedir}/sys/mman.h
+
 rexx2vio $RPM_BUILD_ROOT%{_bindir}/dllar.cmd $RPM_BUILD_ROOT%{_bindir}/dllar.exe
 
 # build omf libraries
@@ -172,6 +175,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/*.dbg
 
 %changelog
+* Thu Sep 22 2016 Dmitriy Kuminov <coding@dmik.org> 0.6.6-31
+- Remove sys/mman.h which is now provided by libcx-devel.
+
 * Fri Sep 02 2016 yd <yd@os2power.com> 0.6.6-30
 - Fix path definitions in paths.h header. ticket#200.
 
