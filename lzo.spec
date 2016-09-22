@@ -1,6 +1,6 @@
 Name:           lzo
 Version:        2.09
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Data compression library with very fast (de)compression
 Group:          System Environment/Libraries
 License:        GPLv2+
@@ -10,7 +10,7 @@ Vendor: bww bitwise works GmbH
 %define minilzo     mlzo22
 #define svn_url     e:/trees/liblzo/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/lzo/trunk
-%define svn_rev     1084
+%define svn_rev     1708
 
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
@@ -64,7 +64,7 @@ autoreconf -f -i
 
 
 %build
-export LDFLAGS=" -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 %configure --disable-static --enable-shared
 
 make %{?_smp_mflags}
@@ -90,7 +90,7 @@ rm -rf $RPM_BUILD_ROOT%{_datadir}/doc/lzo
 
 
 %check
-export BEGINLIBPATH="$RPM_BUILD_ROOT%{_libdir};$BEGINLIBPATH"
+export BEGINLIBPATH=%{_builddir}/%{buildsubdir}/.libs
 make check test
 
 
@@ -119,6 +119,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/*lzo*.a
 
 %changelog
+* Thu Sep 22 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.09-3
+- fix a alignment bug in lzotest
+
 * Tue Jun 14 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.09-2
 - changed debug package to new scheme
 
