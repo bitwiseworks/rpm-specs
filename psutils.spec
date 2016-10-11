@@ -1,11 +1,11 @@
 #define svn_url     e:/trees/psutils/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/psutils/trunk
-%define svn_rev     1725
+%define svn_rev     1733
 
 Summary: PostScript Utilities
 Name:    psutils
 Version: 1.23
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: psutils
 Group:   Development/Libraries
 
@@ -24,6 +24,7 @@ BuildRequires:	automake
 #BuildRequires:  perl(Getopt::Long)
 #BuildRequires:  perl(strict)
 #BuildRequires:  perl(warnings)
+Requires: libpaper
 
 
 %description
@@ -100,5 +101,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Tue Oct 11 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.23-2
+- adapt psutils to paperconf
+- libpaper is a requirement now
+
 * Tue Oct 11 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.23-1
 - initial version
