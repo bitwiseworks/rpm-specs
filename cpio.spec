@@ -1,6 +1,6 @@
 #define svn_url     e:/trees/cpio/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/cpio/trunk
-%define svn_rev     1747
+%define svn_rev     1750
 
 Summary: A GNU archiving program
 Name: cpio
@@ -98,6 +98,8 @@ rm -rf ${RPM_BUILD_ROOT}
 * Fri Oct 14 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.11-5
 - add debug package
 - adapt to latest toolchain
+- fixed utimes usage
+- rolled back r164 partially
 
 * Mon Dec 03 2012 yd
 - remove file name ending \r due to binary stdin. fixes ticket:16.
