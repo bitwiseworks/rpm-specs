@@ -1,18 +1,15 @@
 Summary:    A GNU tool for automatically configuring source code
 Name:       autoconf
 Version:    2.69
-Release:    2%{?dist}
+Release:    3%{?dist}
 License:    GPLv2+ and GFDL
 Group:      Development/Tools
-#Source:     http://ftp.gnu.org/gnu/autoconf/autoconf-%{version}.tar.xz
-#Source1:    filter-provides-automake.sh
-#Source2:    filter-requires-automake.sh
 URL:        http://www.gnu.org/software/autoconf/
 BuildArch: noarch
 BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %define svn_url     http://svn.netlabs.org/repos/ports/autoconf/trunk
-%define svn_rev     845
+%define svn_rev     1758
 
 Source: %{name}-%{version}-r%{svn_rev}.zip
 
@@ -22,31 +19,19 @@ BuildRequires: gcc make subversion zip
 BuildRequires:      m4 >= 1.4.13
 Requires:           m4 >= 1.4.13
 #BuildRequires:      emacs
-#Requires(post):     /sbin/install-info
-#Requires(preun):    /sbin/install-info
+
+%info_requires
 
 # for autoreconf
 Requires: autoconf
 
 # for check only:
 #BuildRequires: automake libtool gcc-gfortran
-#%if 0%{?fedora}
-#BuildRequires: erlang
-#%endif
-
-# Make AC_FUNC_MMAP work with C++ again.
-# Committed to Autoconf git soon after 2.65.
-#Patch1: autoconf_ac_func_mmap.patch
-
-# filter out bogus perl(Autom4te*) dependencies
-#define _use_internal_dependency_generator 0
-#define __find_provides %{SOURCE1}
-#define __find_requires %{SOURCE2}
 
 %description
 GNU's Autoconf is a tool for configuring source code and Makefiles.
 Using Autoconf, programmers can create portable and configurable
-packages, since the person building the package is allowed to 
+packages, since the person building the package is allowed to
 specify various configuration options.
 
 You should install Autoconf if you are developing software and
@@ -74,10 +59,6 @@ rm -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip"
 # make sure configure is updated to properly support OS/2
 autoreconf --verbose --install
 
-# we don't have makeinfo/help2man yet; fake them (this will wipe docs out)
-export MAKEINFO=:
-export HELP2MAN=:
-
 %configure
 
 # not parallel safe
@@ -99,18 +80,16 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 %clean
 rm -rf ${RPM_BUILD_ROOT}
 
-#%post
-#/sbin/install-info %{_infodir}/autoconf.info %{_infodir}/dir || :
+%post
+%info_post autoconf.info
 
-#%preun
-#if [ "$1" = 0 ]; then
-#    /sbin/install-info --del %{_infodir}/autoconf.info %{_infodir}/dir || :
-#fi
+%preun
+info_preun autoconf.info
 
 %files
 %defattr(-,root,root,-)
 %{_bindir}/*
-#%{_infodir}/autoconf.info*
+%{_infodir}/autoconf.info*
 # don't include standards.info, because it comes from binutils...
 %exclude %{_infodir}/standards*
 %{_datadir}/autoconf/
@@ -120,6 +99,12 @@ rm -rf ${RPM_BUILD_ROOT}
 %doc AUTHORS COPYING ChangeLog NEWS README THANKS TODO
 
 %changelog
+* Tue Oct 18 2016 Dmitriy Kuminov <coding@dmik.org> 2.69-3
+- Disable too strict MAP_FIXED test on OS/2. Note that in order to let autoconf
+  detect mmap presense, LIBCx must be installed and used (LIBS="-lcx").
+- Install documentation in INFO format.
+- Rebuild against LIBC 0.6.6 and GCC 4.9.2.
+
 * Wed Sep 3 2014 Dmitriy Kuminov <coding@dmik.org> 2.69-2
 - Use /@unixroot in generated files instead of absolute paths to programs.
 
