@@ -1,11 +1,11 @@
 #define svn_url     e:/trees/less/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/less/trunk
-%define svn_rev     1745
+%define svn_rev     1757
 
 Summary: A text file browser similar to more, but better
 Name: less
 Version: 481
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+ or BSD
 Group: Applications/Text
 URL: http://www.greenwoodsoftware.com/less/
@@ -67,5 +67,8 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Wed Oct 19 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 481-2
+- bring more keys to work 
+
 * Thu Oct 13 2016 Herwig Bauernfeind <herwig.bauernfeind@bitwiseworks.com> - 481-1
 - initial build
