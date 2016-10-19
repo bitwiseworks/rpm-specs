@@ -1,6 +1,6 @@
 #define svn_url     e:/trees/less/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/less/trunk
-%define svn_rev     1757
+%define svn_rev     1759
 
 Summary: A text file browser similar to more, but better
 Name: less
@@ -69,6 +69,7 @@ rm -rf $RPM_BUILD_ROOT
 %changelog
 * Wed Oct 19 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 481-2
 - bring more keys to work 
+- fix a charset issue
 
 * Thu Oct 13 2016 Herwig Bauernfeind <herwig.bauernfeind@bitwiseworks.com> - 481-1
 - initial build
