@@ -1,7 +1,7 @@
 Summary:    A GNU tool for automatically configuring source code
 Name:       autoconf
 Version:    2.69
-Release:    3%{?dist}
+Release:    4%{?dist}
 License:    GPLv2+ and GFDL
 Group:      Development/Tools
 URL:        http://www.gnu.org/software/autoconf/
@@ -9,7 +9,7 @@ BuildArch: noarch
 BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %define svn_url     http://svn.netlabs.org/repos/ports/autoconf/trunk
-%define svn_rev     1758
+%define svn_rev     1760
 
 Source: %{name}-%{version}-r%{svn_rev}.zip
 
@@ -99,6 +99,9 @@ info_preun autoconf.info
 %doc AUTHORS COPYING ChangeLog NEWS README THANKS TODO
 
 %changelog
+* Wed Oct 19 2016 Dmitriy Kuminov <coding@dmik.org> 2.69-4
+- Overcome 32k command line limit on OS/2 in autom4te.
+
 * Tue Oct 18 2016 Dmitriy Kuminov <coding@dmik.org> 2.69-3
 - Disable too strict MAP_FIXED test on OS/2. Note that in order to let autoconf
   detect mmap presense, LIBCx must be installed and used (LIBS="-lcx").
