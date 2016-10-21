@@ -1,11 +1,11 @@
 #define svn_url     e:/trees/less/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/less/trunk
-%define svn_rev     1759
+%define svn_rev     1763
 
 Summary: A text file browser similar to more, but better
 Name: less
 Version: 481
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv3+ or BSD
 Group: Applications/Text
 URL: http://www.greenwoodsoftware.com/less/
@@ -67,6 +67,11 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Fri Oct 21 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 481-3
+- fix to the below bring more keys to work
+- enable ctrl-c by default
+- workaround ticket 124
+
 * Wed Oct 19 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 481-2
 - bring more keys to work 
 - fix a charset issue
