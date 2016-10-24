@@ -1,11 +1,11 @@
 #define svn_url     e:/trees/findutils/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/findutils/trunk
-%define svn_rev     1720
+%define svn_rev     1746
 
 Summary: The GNU versions of find utilities (find and xargs)
 Name: findutils
 Version: 4.6.0
-Release: 1%{?dist}
+Release: 2%{?dist}
 Epoch: 1
 License: GPLv3+
 Group: Applications/File
@@ -105,6 +105,10 @@ rm -rf $RPM_BUILD_ROOT
 %exclude %{_libexecdir}/bin/*.dbg
 
 %changelog
+* Mon Oct 24 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 4.6.0-2
+- fix locate --statistics
+- use ; as path seperator
+
 * Wed Oct 05 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 4.6.0-1
 - udated version to 4.6.0
 - adjusted spec to latest toolset
