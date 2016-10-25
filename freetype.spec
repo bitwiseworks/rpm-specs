@@ -1,6 +1,10 @@
+#define svn_url	    e:/trees/freetype/trunk
+%define svn_url     http://svn.netlabs.org/repos/ports/freetype2/trunk
+%define svn_rev     1768
+
 Summary: A free and portable font rendering engine
 Name: freetype
-Version: 2.6.3
+Version: 2.7.0
 Release: 1%{?dist}
 License: (FTL or GPLv2+) and BSD and MIT and Public Domain and zlib with acknowledgement
 Group: System Environment/Libraries
@@ -9,9 +13,6 @@ Vendor: bww bitwise works GmbH
 #Source:  http://download.savannah.gnu.org/releases/freetype/freetype-%{version}.tar.bz2
 #Source1: http://download.savannah.gnu.org/releases/freetype/freetype-doc-%{version}.tar.bz2
 #Source2: http://download.savannah.gnu.org/releases/freetype/ft2demos-%{version}.tar.bz2
-#define svn_url	    e:/trees/freetype/trunk
-%define svn_url     http://svn.netlabs.org/repos/ports/freetype2/trunk
-%define svn_rev     1338
 
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
@@ -95,6 +96,7 @@ rm -rf $RPM_BUILD_ROOT
 %doc README
 %doc docs/LICENSE.TXT docs/FTL.TXT docs/GPLv2.TXT
 %doc docs/CHANGES docs/formats.txt
+%doc docs/VERSIONS.TXT
 
 
 #%files demos
@@ -120,16 +122,19 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/freetype-config
 %{_libdir}/pkgconfig/freetype2.pc
 %doc docs/reference
-%doc docs/VERSION.DLL
 %{_mandir}/man1/*
 
 
 %changelog
+* Tue Oct 25 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.7.0-1
+- updated source to 2.7.0
+- as VERSION.DLL is renamed to VERSIONS.TXT its moved to primary package again
+
 * Fri Feb 26 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.6.3-1
 - updated source to 2.6.3
 - added -Zhigh-mem
 
-* Thu Dec 29 2015 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.6.2-1
+* Tue Dec 29 2015 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.6.2-1
 - updated source to 2.6.2
 - moved docs/version.dll to -devel
 - adjusted debug package creation to latest rpm macros
