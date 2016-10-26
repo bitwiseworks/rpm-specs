@@ -1,6 +1,6 @@
 #define svn_url     e:/trees/openssl/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/openssl/trunk
-%define svn_rev     1642
+%define svn_rev     1774
 
 
 # Note: this .spec is borrowed from:
@@ -30,8 +30,8 @@
 
 Summary: A general purpose cryptography library with TLS implementation
 Name: openssl
-Version: 1.0.2h
-Release: 3%{?dist}
+Version: 1.0.2j
+Release: 1%{?dist}
 
 License: OpenSSL
 Group: System Environment/Libraries
@@ -364,6 +364,9 @@ rm -rf $RPM_BUILD_ROOT/%{_libdir}/fipscanister.*
 %{_sysconfdir}/pki/tls/misc/tsget
 
 %changelog
+* Wed Oct 26 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.0.2j-1
+- Update to version 1.0.2j.
+
 * Mon Jul 04 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.0.2h-3
 - remove obsoletes tags from -libs
 - add a requires tag to -libs
