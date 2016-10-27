@@ -2,11 +2,11 @@
 
 Summary:	kLIBC User Management
 Name:		kLIBCum
-Version:	1.0.3
-Release:        1%{?dist}
+Version:	1.0.4
+Release:	1%{?dist}
 License:	proprietary
 Group:		Applications/System
-URL:		http://www.clamav.net
+URL:		http://www.netlabs.org/vxapps
 Vendor:		bww bitwise works GmbH
 
 Source:		%{name}-%{version}.zip
@@ -37,7 +37,7 @@ cp usr/bin/*.EXE $RPM_BUILD_ROOT%{_bindir}
 mkdir -p $RPM_BUILD_ROOT%{_libdir}
 cp usr/lib/*.dll $RPM_BUILD_ROOT%{_libdir}
 mkdir -p $RPM_BUILD_ROOT%{_defaultdocdir}/%{name}-%{version}
-cp usr/doc/klibcum/readme.txt $RPM_BUILD_ROOT%{_defaultdocdir}/%{name}-%{version}
+cp usr/share/doc/klibcum/readme.txt $RPM_BUILD_ROOT%{_defaultdocdir}/%{name}-%{version}
 mkdir -p $RPM_BUILD_ROOT%{_datadir}/os2/lang
 cp usr/share/os2/lang/*.msg $RPM_BUILD_ROOT%{_datadir}/os2/lang
 
@@ -66,5 +66,7 @@ KLINCUM_CLAMD:WPProgram|User Management|<KLIBCUM_FOLDER>|EXENAME=((%_bindir/klib
 
 
 %changelog
-* Mon Oct 24 2016 yd <yd@os2power.com> 1.0.3-1
+* Thu Oct 27 2016 hb <herwig.bauernfeind@bitwiseworks.com> 1.0.4-1
+- bigger buttons, shortened strings for EN, ES
+* Mon Oct 24 2016 yd <silvan.scherrer@bitwiseworks.com> 1.0.3-1
 - first public version
