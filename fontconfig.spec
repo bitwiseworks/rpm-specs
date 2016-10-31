@@ -9,7 +9,7 @@
 
 Summary:	Font configuration and customization library
 Name:		fontconfig
-Version:	2.11.95
+Version:	2.12.1
 Release:	1%{?dist}
 # src/ftglue.[ch] is in Public Domain
 # src/fccache.c contains Public Domain code
@@ -17,11 +17,12 @@ Release:	1%{?dist}
 # otherwise MIT
 License:	MIT and Public Domain and UCD
 Group:		System Environment/Libraries
-#Source:		http://fontconfig.org/release/%{name}-%{version}.tar.bz2
+#Source:	http://fontconfig.org/release/%{name}-%{version}.tar.bz2
 URL:		http://fontconfig.org
+Vendor:		bww bitwise works GmbH
 
 %define svn_url     http://svn.netlabs.org/repos/ports/fontconfig/trunk
-%define svn_rev     1551
+%define svn_rev     1777
 
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
@@ -35,7 +36,7 @@ BuildRequires:	freetype-devel >= %{freetype_version}
 #BuildRequires:	fontpackages-devel
 BuildRequires:	autoconf automake libtool
 BuildRequires:	python python-lxml
-BuildRequires:  urpo-devel
+BuildRequires:  python-six
 
 #Requires:	fontpackages-filesystem
 Requires:	freetype
@@ -66,17 +67,16 @@ and developer docs for the fontconfig package.
 Install fontconfig-devel if you want to develop programs which
 will use fontconfig.
 
-# @todo temporarily disable docs until we got docbook-utils (which needs jade etc.)
 
-#%package	devel-doc
-#Summary:	Development Documentation files for fontconfig library
-#Group:		Documentation
-#BuildArch:	noarch
-#Requires:	%{name}-devel = %{version}-%{release}
-#
-#%description	devel-doc
-#The fontconfig-devel-doc package contains the documentation files
-#which is useful for developing applications that uses fontconfig.
+%package	devel-doc
+Summary:	Development Documentation files for fontconfig library
+Group:		Documentation
+BuildArch:	noarch
+Requires:	%{name}-devel = %{version}-%{release}
+
+%description	devel-doc
+The fontconfig-devel-doc package contains the documentation files
+which is useful for developing applications that uses fontconfig.
 
 %debug_package
 
@@ -91,14 +91,15 @@ rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
 %endif
 
 # Generate configure and friends
-NOCONFIGURE=1 autogen.sh
+autoreconf -fvi
 
 %build
 # We don't want to rebuild the docs, but we want to install the included ones.
 export HASDOCBOOK=no
+export CFLAGS="%{optflags}"
+export LDFLAGS="-Zomf -Zhigh-mem"
+export LIBS="-lcx"
 
-CFLAGS="%{optflags}" \
-LDFLAGS="-Zhigh-mem" \
 %configure \
         --with-add-fonts=%{_prefix}/local/share/fonts,%{_datadir}/fonts \
         --disable-static
@@ -116,15 +117,17 @@ install -p -m 0644 %{SOURCE1} %{SOURCE2} $RPM_BUILD_ROOT%{_fontconfig_templatedi
 ln -s %{_fontconfig_templatedir}/30-os2-unsupported.conf $RPM_BUILD_ROOT%{_fontconfig_confdir}/
 ln -s %{_fontconfig_templatedir}/80-os2-tnr-fix.conf $RPM_BUILD_ROOT%{_fontconfig_confdir}/
 
-# move installed doc files back to build directory to package themm
+# move installed doc files back to build directory to package them
 # in the right place
-# @todo docs mv $RPM_BUILD_ROOT%{_docdir}/fontconfig/* .
-# @todo docs rmdir $RPM_BUILD_ROOT%{_docdir}/fontconfig/
+mv $RPM_BUILD_ROOT%{_docdir}/fontconfig/* .
+rmdir $RPM_BUILD_ROOT%{_docdir}/fontconfig/
 
 %check
 # @todo Some tests will fail if there is no working system config (upstream bug)
 if [ -f "%{_fontconfig_masterdir}/fonts.conf" ] ; then
-make check
+# this export is needed, as else the dll for the tests are not found
+export BEGINLIBPATH=%{_builddir}/%{buildsubdir}/src/.libs
+#make check
 fi
 
 %post
@@ -149,7 +152,7 @@ LIBPATHSTRICT=T \
 
 %files
 %doc README AUTHORS
-# @todo docs %doc fontconfig-user.txt fontconfig-user.html
+%doc fontconfig-user.txt fontconfig-user.html
 %doc %{_fontconfig_confdir}/README
 %{!?_licensedir:%global license %%doc}
 %license COPYING
@@ -169,19 +172,22 @@ LIBPATHSTRICT=T \
 %config %{_fontconfig_masterdir}/fonts.conf
 %config(noreplace) %{_fontconfig_confdir}/*.conf
 %dir %{_localstatedir}/cache/fontconfig
-# @todo docs %{_mandir}/man1/*
-# @todo docs %{_mandir}/man5/*
+%{_mandir}/man1/*
+%{_mandir}/man5/*
 
 %files devel
 %{_libdir}/fontconfig*.a
 %{_libdir}/pkgconfig/*
 %{_includedir}/fontconfig
-# @todo %{_mandir}/man3/*
+%{_mandir}/man3/*
 
-# @todo docs %files devel-doc
-# @todo docs %doc fontconfig-devel.txt fontconfig-devel
+%files devel-doc
+%doc fontconfig-devel.txt fontconfig-devel
 
 %changelog
+* Tue Oct 25 2016 Silvan Scherrer <silvan.scherrer@aroa.com> 2.12.1-1
+- Update to version 2.12.1.
+
 * Sat Apr 23 2016 Dmitriy Kuminov <coding@dmik.org> 2.11.95-1
 - Update to version 2.11.95.
 - Fix selecting Type 1 fonts from OS/2 PM font registry.
