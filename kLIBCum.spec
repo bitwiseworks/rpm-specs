@@ -2,7 +2,7 @@
 
 Summary:	kLIBC User Management
 Name:		kLIBCum
-Version:	1.0.4
+Version:	1.0.5
 Release:	1%{?dist}
 License:	proprietary
 Group:		Applications/System
@@ -49,7 +49,7 @@ rm -rf "$RPM_BUILD_ROOT"
 %wps_object_create_begin
 KLIBCUM_FOLDER:WPFolder|kLIBCum|<WP_DESKTOP>|TITLE=kLIBC User Management;
 KLIBCUM_README:WPShadow|Readme|<KLIBCUM_FOLDER>|SHADOWID=((%_defaultdocdir/%{name}-%{version}/readme.txt))
-KLINCUM_CLAMD:WPProgram|User Management|<KLIBCUM_FOLDER>|EXENAME=((%_bindir/klibcum.exe));STARTUPDIR=((%_bindir));TITLE=User Management;
+KLIBCUM_EXE:WPProgram|User Management|<KLIBCUM_FOLDER>|EXENAME=((%_bindir/klibcum.exe));STARTUPDIR=((%_bindir));TITLE=User Management;
 %wps_object_create_end
 
 %postun
@@ -66,6 +66,8 @@ KLINCUM_CLAMD:WPProgram|User Management|<KLIBCUM_FOLDER>|EXENAME=((%_bindir/klib
 
 
 %changelog
+* Fri Nov 04 2016 hb <herwig.bauernfeind@bitwiseworks.com> 1.0.5-1
+- Add some hints, fix wrong hints
 * Thu Oct 27 2016 hb <herwig.bauernfeind@bitwiseworks.com> 1.0.4-1
 - bigger buttons, shortened strings for EN, ES
 * Mon Oct 24 2016 yd <silvan.scherrer@bitwiseworks.com> 1.0.3-1
