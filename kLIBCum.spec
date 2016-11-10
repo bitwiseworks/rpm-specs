@@ -2,7 +2,7 @@
 
 Summary:	kLIBC User Management
 Name:		kLIBCum
-Version:	1.0.5
+Version:	1.0.6
 Release:	1%{?dist}
 License:	proprietary
 Group:		Applications/System
@@ -66,6 +66,8 @@ KLIBCUM_EXE:WPProgram|User Management|<KLIBCUM_FOLDER>|EXENAME=((%_bindir/klibcu
 
 
 %changelog
+* Fri Nov 10 2016 hb <herwig.bauernfeind@bitwiseworks.com> 1.0.6-1
+- Add "Remove user from group" functionality, fix missing NLV translations
 * Fri Nov 04 2016 hb <herwig.bauernfeind@bitwiseworks.com> 1.0.5-1
 - Add some hints, fix wrong hints
 * Thu Oct 27 2016 hb <herwig.bauernfeind@bitwiseworks.com> 1.0.4-1
