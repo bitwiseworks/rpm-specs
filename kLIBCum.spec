@@ -3,7 +3,7 @@
 Summary:	kLIBC User Management
 Name:		kLIBCum
 Version:	1.0.7
-Release:	1%{?dist}
+Release:	2%{?dist}
 License:	proprietary
 Group:		Applications/System
 URL:		http://www.netlabs.org/vxapps
@@ -66,6 +66,8 @@ KLIBCUM_EXE:WPProgram|User Management|<KLIBCUM_FOLDER>|EXENAME=((%_bindir/klibcu
 
 
 %changelog
+* Thu Nov 11 2016 hb <herwig.bauernfeind@bitwiseworks.com> 1.0.7-2
+- fix minor bug 
 * Thu Nov 11 2016 hb <herwig.bauernfeind@bitwiseworks.com> 1.0.7-1
 - Add smbusers.exe check, fix missing NLV translations, 
 - add NL, IT and RU language files
