@@ -2,8 +2,8 @@
 
 Summary:	kLIBC User Management
 Name:		kLIBCum
-Version:	1.0.7
-Release:	2%{?dist}
+Version:	1.0.8
+Release:	1%{?dist}
 License:	proprietary
 Group:		Applications/System
 URL:		http://www.netlabs.org/vxapps
@@ -66,9 +66,12 @@ KLIBCUM_EXE:WPProgram|User Management|<KLIBCUM_FOLDER>|EXENAME=((%_bindir/klibcu
 
 
 %changelog
-* Thu Nov 11 2016 hb <herwig.bauernfeind@bitwiseworks.com> 1.0.7-2
+* Tue Nov 15 2016 hb <herwig.bauernfeind@bitwiseworks.com> 1.0.8
+- add functionality to add/remove multiple user from/to groups
+- double click on user open user properties to edit
+* Fri Nov 11 2016 hb <herwig.bauernfeind@bitwiseworks.com> 1.0.7-2
 - fix minor bug 
-* Thu Nov 11 2016 hb <herwig.bauernfeind@bitwiseworks.com> 1.0.7-1
+* Fri Nov 11 2016 hb <herwig.bauernfeind@bitwiseworks.com> 1.0.7-1
 - Add smbusers.exe check, fix missing NLV translations, 
 - add NL, IT and RU language files
 * Thu Nov 10 2016 hb <herwig.bauernfeind@bitwiseworks.com> 1.0.6-1
