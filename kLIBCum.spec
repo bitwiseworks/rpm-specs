@@ -2,7 +2,7 @@
 
 Summary:	kLIBC User Management
 Name:		kLIBCum
-Version:	1.0.8
+Version:	1.0.9
 Release:	1%{?dist}
 License:	proprietary
 Group:		Applications/System
@@ -46,6 +46,9 @@ cp usr/share/os2/lang/*.msg $RPM_BUILD_ROOT%{_datadir}/os2/lang
 rm -rf "$RPM_BUILD_ROOT"
 
 %post
+if [ "$1" -ge 1 ]; then # (upon update)
+    %wps_object_delete_all
+fi
 %wps_object_create_begin
 KLIBCUM_FOLDER:WPFolder|kLIBCum|<WP_DESKTOP>|TITLE=kLIBC User Management;
 KLIBCUM_README:WPShadow|Readme|<KLIBCUM_FOLDER>|SHADOWID=((%_defaultdocdir/%{name}-%{version}/readme.txt))
@@ -53,8 +56,9 @@ KLIBCUM_EXE:WPProgram|User Management|<KLIBCUM_FOLDER>|EXENAME=((%_bindir/klibcu
 %wps_object_create_end
 
 %postun
-%wps_object_delete_all
-
+if [ "$1" -eq 0 ]; then # (upon removal)
+    %wps_object_delete_all
+fi
 
 %files
 %defattr(-,root,root,-)
@@ -66,6 +70,13 @@ KLIBCUM_EXE:WPProgram|User Management|<KLIBCUM_FOLDER>|EXENAME=((%_bindir/klibcu
 
 
 %changelog
+* Thu Nov 17 2016 hb <herwig.bauernfeind@bitwiseworks.com> 1.0.9
+- Limited group editing
+- bigger buttons, new icons
+- fix Ticket #125 (Unix ports)
+- fix new user bug
+- add ignore root shell error warning
+- make debug stick across sessions
 * Tue Nov 15 2016 hb <herwig.bauernfeind@bitwiseworks.com> 1.0.8
 - add functionality to add/remove multiple user from/to groups
 - double click on user open user properties to edit
