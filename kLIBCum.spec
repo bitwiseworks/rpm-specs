@@ -2,8 +2,8 @@
 
 Summary:	kLIBC User Management
 Name:		kLIBCum
-Version:	1.0.9
-Release:	2%{?dist}
+Version:	1.0.10
+Release:	1%{?dist}
 License:	proprietary
 Group:		Applications/System
 URL:		http://www.netlabs.org/vxapps
@@ -70,7 +70,11 @@ fi
 
 
 %changelog
-* Fri Nov 17 2016 hb <herwig.bauernfeind@bitwiseworks.com> 1.0.9-2
+* Fri Nov 18 2016 hb <herwig.bauernfeind@bitwiseworks.com> 1.0.10
+- fix Ticket #7
+- fix minor bugs in user properties page
+- rework and simplify join/leave dialogue
+* Thu Nov 17 2016 hb <herwig.bauernfeind@bitwiseworks.com> 1.0.9-2
 - fix minor bug 
 * Thu Nov 17 2016 hb <herwig.bauernfeind@bitwiseworks.com> 1.0.9
 - Limited group editing
