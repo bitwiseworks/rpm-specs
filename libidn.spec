@@ -9,7 +9,7 @@
 Summary: Internationalized Domain Name support library
 Name: libidn
 Version: 1.33
-Release: 1%{?dist}
+Release: 2%{?dist}
 URL: http://www.gnu.org/software/libidn/
 License: LGPLv2+ and GPLv3+ and GFDL
 
@@ -22,7 +22,7 @@ BuildRequires: pkgconfig gettext
 #Requires(post): /sbin/install-info /sbin/ldconfig
 #Requires(preun): /sbin/install-info
 #Requires(postun): /sbin/ldconfig
-Requires: libcx >= 0.4.0
+Requires: libcx >= 0.4
 
 %if 0%{?with_emacs}
 # emacs-libidn merged with main package in 1.30-4
@@ -178,5 +178,8 @@ rm -rf $RPM_BUILD_ROOT%{_javadir}/libidn*.jar
 %endif
 
 %changelog
+* Thu Nov 24 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.33-2
+- libcx req is 0.4 and not 0.4.0
+
 * Tue Nov 15 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.33-1
 - first version
