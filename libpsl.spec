@@ -5,7 +5,7 @@
 
 Name:           libpsl
 Version:        0.15.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        C library for the Publix Suffix List
 License:        MIT
 URL:            https://rockdaboot.github.io/libpsl
@@ -17,7 +17,7 @@ BuildRequires:  glib2-devel
 BuildRequires:  libicu-devel
 BuildRequires:  libxslt
 #BuildRequires:  publicsuffix-list
-Requires:       libcx >= 0.4.0
+Requires:       libcx >= 0.4
 
 %description
 libpsl is a C library to handle the Public Suffix List. A "public suffix" is a
@@ -122,5 +122,8 @@ find %{buildroot} -name '*.la' -delete -print
 %{_mandir}/man1/psl.1*
 
 %changelog
+* Thu Nov 24 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.15.0-2
+- libcx req is 0.4 and not 0.4.0
+
 * Tue Nov 15 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.15.0-1
 - first version
