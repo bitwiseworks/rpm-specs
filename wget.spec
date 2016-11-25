@@ -6,7 +6,7 @@
 Summary: A utility for retrieving files using the HTTP or FTP protocols
 Name: wget
 Version: 1.18
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Group: Applications/Internet
 Url: http://www.gnu.org/software/wget/
@@ -15,14 +15,15 @@ Source:  %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
 
 Provides: webclient
+Requires: libcx >= 0.4
 #Requires(post): /sbin/install-info
 #Requires(preun): /sbin/install-info
 # needed for test suite
 #BuildRequires: perl-HTTP-Daemon, python2
 BuildRequires: openssl-devel, pkgconfig, texinfo
 BuildRequires: gettext >= 0.19, autoconf
-#BuildRequires: libidn-devel, libuuid-devel, libpsl-devel, libmetalink-devel
-#BuildRequires: perl-podlators
+BuildRequires: libidn-devel, libpsl-devel
+#BuildRequires: libuuid-devel, libmetalink-devel, perl-podlators
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %description
@@ -54,11 +55,11 @@ autoreconf -fvi
 %build
 export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 export LIBS="-lcx"
-#    --with-libpsl \
 #    --with-metalink
 %configure \
     --with-ssl=openssl \
     --with-openssl \
+    --with-libpsl \
     --enable-largefile \
     --enable-opie \
     --enable-digest \
@@ -103,5 +104,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_infodir}/*
 
 %changelog
+* Fri Nov 25 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.18-2
+- enable libidn and libpsl
+
 * Mon Nov 14 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.18-1
 - Initial version 1.18
