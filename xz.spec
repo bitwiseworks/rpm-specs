@@ -1,83 +1,82 @@
 #define svn_url     F:/rd/ports/xz/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/xz/trunk
-%define svn_rev     193
+%define svn_rev     1831
 
-#
-# spec file for package xz (Version 4.999.9beta)
-#
-# Copyright (c) 2010 SUSE LINUX Products GmbH, Nuernberg, Germany.
-#
-# All modifications and additions to the file contributed by third parties
-# remain the property of their copyright owners, unless otherwise agreed
-# upon. The license for this file, and modifications and additions to the
-# file, is the same license as for the pristine package itself (unless the
-# license for the pristine package is not an Open Source License, in which
-# case the license is the MIT License). An "Open Source License" is a
-# license that conforms to the Open Source Definition (Version 1.9)
-# published by the Open Source Initiative.
+# enable the forwarder section if needed
+%global with_forwarder 0
 
-# Please submit bugfixes or comments via http://bugs.opensuse.org/
-#
-
-
+# Not needed for f21+ and probably RHEL8+
+%{!?_licensedir:%global license %%doc}
 
 Name:           xz
-Summary:        A Program for Compressing Files
-Version:        4.999.9beta
-Release:        5%{?dist}
-Group:          Productivity/Archiving/Compression
-License:        LGPLv2.1+
-Url:            http://tukaani.org/lzma/
+Summary:	LZMA compression utilities
+Version:        5.2.2
+Release:        1%{?dist}
+Group:          Applications/File
+
+# Scripts xz{grep,diff,less,more} and symlinks (copied from gzip) are
+# GPLv2+, binaries are Public Domain (linked against LGPL getopt_long but its
+# OK), documentation is Public Domain.
+License:        GPLv2+ and Public Domain
+URL:		http://tukaani.org/%{name}/
+Vendor:         bww bitwise works GmbH
 
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
+# DEF files to create forwarders for the legacy package
+Source10:       lzma.def
+
+Requires:	%{name}-libs%{?_isa} = %{version}-%{release}
+Requires:       libcx >= 0.4
+
+# For /usr/libexec/grepconf.sh (RHBZ#1189120).
+# Unfortunately F21 has a newer version of grep which doesn't
+# have grepconf, but we're only concerned with F22 here.
+Requires:	grep >= 2.20-5
+
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
-BuildRequires:  pkgconfig
-Provides:       lzma = %version
-Obsoletes:      lzma < %version
-Requires:       liblzma0 = %{version}
-# avoid bootstrapping problem
-%define _binary_payload w9.bzdio
 
 %description
-The xz command is a very powerful program for compressing files.
+XZ Utils are an attempt to make LZMA compression easy to use on free (as in
+freedom) operating systems. This is achieved by providing tools and libraries
+which are similar to use than the equivalents of the most popular existing
+compression algorithms.
 
-* Average compression ratio of LZMA is about 30% better than that of
-   gzip, and 15% better than that of bzip2.
+LZMA is a general purpose compression algorithm designed by Igor Pavlov as
+part of 7-Zip. It provides high compression ratio while keeping the
+decompression speed fast.
 
-* Decompression speed is only little slower than that of gzip, being
-   two to five times faster than bzip2.
+%package 	libs
+Summary:	Libraries for decoding LZMA compression
+Group:		System Environment/Libraries
+License:	Public Domain
+Obsoletes:	%{name}-compat-libs < %{version}-%{release}
 
-* In fast mode, compresses faster than bzip2 with a comparable
-   compression ratio.
+%description 	libs
+Libraries for decoding files compressed with LZMA or XZ utils.
 
-* Achieving the best compression ratios takes four to even twelve
-   times longer than with bzip2. However. this doesn't affect
-   decompressing speed.
+%package 	devel
+Summary:	Devel libraries & headers for liblzma
+Group:		Development/Libraries
+License:	Public Domain
+Requires:	%{name}-libs%{?_isa} = %{version}-%{release}
+Requires:	pkgconfig
 
-* Very similar command line interface to what gzip and bzip2 have.
+%description	devel
+Devel libraries and headers for liblzma.
 
-%package -n liblzma0
-License:        LGPLv2.1+
-Summary:        LZMA library
-Group:          System/Libraries
+%package 	lzma-compat
+Summary:	Older LZMA format compatibility binaries
+Group:		Development/Libraries
+# Just a set of symlinks to 'xz' + two Public Domain binaries.
+License:	Public Domain
+Requires:	%{name}%{?_isa} = %{version}-%{release}
+Obsoletes:	lzma < %{version}
+Provides:	lzma = %{version}
 
-%description -n liblzma0
-Library for encoding/decoding LZMA files.
-
-%package devel
-License:        LGPLv2.1+
-Summary:        Development package for the LZMA library
-Group:          Development/Libraries/C and C++
-Requires:       liblzma0 = %{version}
-Provides:       lzma-devel = %version
-Obsoletes:      lzma-devel < %version
-Provides:       lzma-alpha-devel = %version
-Obsoletes:      lzma-alpha-devel < %version
-
-%description devel
-This package contains the header files and libraries needed for
-compiling programs using the LZMA library.
+%description	lzma-compat
+The lzma-compat package contains compatibility links for older
+commands that deal with the older LZMA format.
 
 %debug_package
 
@@ -91,61 +90,72 @@ rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
 (cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
 %endif
 
-%build
-#AUTOPOINT=true autoreconf -fi
-#configure --libdir=/%{_lib} --disable-static --with-pic --docdir=%_docdir/%name
+# Prepare forwarder DLLs.
+for m in %{SOURCE10}; do
+  cp ${m} .
+done
 
-export CONFIG_SITE="/@unixroot/usr/share/config.legacy"
-export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
-export LIBS="-lurpo -lmmap -lpthread"
-%configure \
-    --enable-shared --disable-static
+autoreconf -fvi
+
+%build
+
+export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+export LIBS="-lcx -lpthread"
+export VENDOR="%{vendor}"
+%configure --enable-shared --disable-static
 
 make %{?_smp_mflags}
 
-#%check
-#LD_LIBRARY_PATH=$PWD/src/liblzma/.libs make check
-
 %install
-make install DESTDIR=$RPM_BUILD_ROOT
-#%{__mkdir_p} %{buildroot}%{_libdir}
-#%{__ln_s} -v /%{_lib}/$(readlink %{buildroot}/%{_lib}/liblzma.so) %{buildroot}%{_libdir}/liblzma.so
-#%{__mv} -v  %{buildroot}/%{_lib}/pkgconfig %{buildroot}%{_libdir}
-#%{__rm} -v %{buildroot}/%{_lib}/liblzma.{so,la}
-cp src/liblzma/*.dll $RPM_BUILD_ROOT%{_libdir}
-cp src/liblzma/.libs/*.lib $RPM_BUILD_ROOT%{_libdir}
-# fix exe installation
-cp src/lzmainfo/*.exe $RPM_BUILD_ROOT%{_bindir}
-cp src/xz/*.exe $RPM_BUILD_ROOT%{_bindir}
-cp src/xzdec/*.exe $RPM_BUILD_ROOT%{_bindir}
+make install DESTDIR=%{buildroot}
+rm -f %{buildroot}%{_libdir}/*.la
+
+%if 0%{?with_forwarder}
+# Generate & install forwarder DLLs.
+gcc -Zomf -Zdll lzma.def -l$RPM_BUILD_ROOT/%{_libdir}/lzma5.dll -o $RPM_BUILD_ROOT/%{_libdir}/lzma.dll
+%endif
+
+%find_lang %name
 
 %clean
 rm -fr $RPM_BUILD_ROOT
 
-#%post -n liblzma0 -p /sbin/ldconfig
+%check
+#LD_LIBRARY_PATH=$PWD/src/liblzma/.libs make check
 
-#%postun -n liblzma0 -p /sbin/ldconfig
+#%post libs -p /sbin/ldconfig
 
-%files
-%defattr(-, root, root)
-%_docdir/%name
-%{_bindir}/*
-%{_mandir}/man?/*
+#%postun libs -p /sbin/ldconfig
 
-%files -n liblzma0
-%defattr(-, root, root)
+%files -f %{name}.lang
+%license %{_docdir}/xz/COPYING*
+%doc %{_docdir}/xz
+%exclude %{_docdir}/xz/examples*
+%{_bindir}/*xz*
+%exclude %{_bindir}/*.dbg
+%{_mandir}/man1/*xz*
+
+%files libs
+%license %{_docdir}/xz/COPYING
 %{_libdir}/*.dll
 
 %files devel
-%defattr(-, root, root)
-%{_includedir}/*.h
-%{_includedir}/lzma
-%{_libdir}/*.a
-%{_libdir}/*.la
-%{_libdir}/*.lib
-%{_libdir}/pkgconfig/*.pc
+%dir %{_includedir}/lzma
+%{_includedir}/lzma/*.h
+%{_includedir}/lzma.h
+%{_libdir}/*_dll.a
+%{_libdir}/pkgconfig/liblzma.pc
+%doc %{_docdir}/xz/examples*
+
+%files lzma-compat
+%{_bindir}/*lz*
+%exclude %{_bindir}/*.dbg
+%{_mandir}/man1/*lz*
 
 %changelog
+* Fri Nov 25 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 5.2.2-1
+- update to version 5.2.2
+
 * Mon Jun 13 2016 yd <yd@os2power.com> 4.999.9beta-5
 - rebuild package, fixes ticket#183.
 - added debug package.
