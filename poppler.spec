@@ -1,6 +1,6 @@
 Summary:	PDF rendering library
 Name:		poppler
-Version:	0.47.0
+Version:	0.49.0
 Release:	1%{?dist}
 License:	(GPLv2 or GPLv3) and GPLv2+ and LGPLv2+ and MIT
 Group:		Development/Libraries
@@ -9,9 +9,12 @@ Vendor:		bww bitwise works GmbH
 URL:		http://poppler.freedesktop.org/
 #define svn_url	    e:/trees/poppler/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/poppler/trunk
-%define svn_rev     1667
+%define svn_rev     1827
 
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
+
+# DEF files to create forwarders for the legacy package
+Source10:       poppler63.def
 
 Requires: poppler-data >= 0.4.0
 Requires: nss >= 3.23.0
@@ -134,8 +137,13 @@ rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
 (cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
 %endif
 
+# Prepare forwarder DLLs.
+for m in %{SOURCE10}; do
+  cp ${m} .
+done
+
 # hammer to nuke rpaths, recheck on new releases
-autoreconf -f -i
+autoreconf -fvi
 
 %build
 
@@ -146,7 +154,7 @@ POPPLER_QT4_TEST_CFLAGS=$POPPLER_QT4_CFLAGS
 POPPLER_QT4_TEST_LIBS=$POPPLER_QT4_LIBS
 PATH=$PATH';/@unixroot/usr/lib/qt4/bin'
 
-LDFLAGS=" -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+LDFLAGS=" -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp -lcx"
 
 export LDFLAGS
 export POPPLER_QT4_CFLAGS
@@ -154,6 +162,7 @@ export POPPLER_QT4_LIBS
 export POPPLER_QT4_TEST_CFLAGS
 export POPPLER_QT4_TEST_LIBS
 export PATH
+export VENDOR="%{vendor}"
 
 %configure \
 	--enable-poppler-qt4=yes --enable-zlib=yes \
@@ -171,6 +180,9 @@ rm -rf $RPM_BUILD_ROOT
 
 rm -rf $RPM_BUILD_ROOT%{_libdir}/lib*.la
 
+# Generate & install forwarder DLLs.
+gcc -Zomf -Zdll poppler63.def -l$RPM_BUILD_ROOT/%{_libdir}/popple65.dll -o $RPM_BUILD_ROOT/%{_libdir}/popple63.dll
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -182,7 +194,7 @@ rm -rf $RPM_BUILD_ROOT
 %files devel
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/poppler_dll.a
-%attr(755,root,root) %{_libdir}/poppler63_dll.a
+%attr(755,root,root) %{_libdir}/poppler65_dll.a
 %{_libdir}/pkgconfig/poppler.pc
 %{_libdir}/pkgconfig/poppler-splash.pc
 %dir %{_includedir}/poppler/
@@ -225,10 +237,16 @@ rm -rf $RPM_BUILD_ROOT
 %files utils
 %defattr(644,root,root,755)
 %{_bindir}/pdf*.exe
+%{_bindir}/text2pdf.exe
 %{_mandir}/man1/*
 
 
 %changelog
+* Mon Nov 21 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.49.0-1
+- added text2pdf utility to poppler-utils
+- updated poppler to 0.49.0
+- added a forwarder dll for version 0.47
+
 * Mon Aug 22 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.47.0-1
 - updated poppler to 0.47.0
 
