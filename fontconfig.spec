@@ -10,7 +10,7 @@
 Summary:	Font configuration and customization library
 Name:		fontconfig
 Version:	2.12.1
-Release:	1%{?dist}
+Release:	2%{?dist}
 # src/ftglue.[ch] is in Public Domain
 # src/fccache.c contains Public Domain code
 # fc-case/CaseFolding.txt is in the UCD
@@ -22,7 +22,7 @@ URL:		http://fontconfig.org
 Vendor:		bww bitwise works GmbH
 
 %define svn_url     http://svn.netlabs.org/repos/ports/fontconfig/trunk
-%define svn_rev     1777
+%define svn_rev     1839
 
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
@@ -99,6 +99,7 @@ export HASDOCBOOK=no
 export CFLAGS="%{optflags}"
 export LDFLAGS="-Zomf -Zhigh-mem"
 export LIBS="-lcx"
+export VENDOR="%{vendor}"
 
 %configure \
         --with-add-fonts=%{_prefix}/local/share/fonts,%{_datadir}/fonts \
@@ -185,6 +186,9 @@ LIBPATHSTRICT=T \
 %doc fontconfig-devel.txt fontconfig-devel
 
 %changelog
+* Fri Nov 25 2016 Silvan Scherrer <silvan.scherrer@aroa.com> 2.12.1-2
+- add buildlevel information to the dll
+
 * Tue Oct 25 2016 Silvan Scherrer <silvan.scherrer@aroa.com> 2.12.1-1
 - Update to version 2.12.1.
 
