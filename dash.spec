@@ -1,8 +1,8 @@
 # Note: this .spec is borrowed from dash-0.5.8-2.fc23.src.rpm
 
 Name:           dash
-Version:        0.5.9
-Release:        2%{?dist}
+Version:        0.5.9.1
+Release:        1%{?dist}
 Summary:        Small and fast POSIX-compliant shell
 Group:          System Environment/Shells
 # BSD: DASH in general
@@ -14,7 +14,7 @@ URL:            http://gondor.apana.org.au/~herbert/%{name}/
 #Source0:        http://gondor.apana.org.au/~herbert/%{name}/files/%{name}-%{version}.tar.gz
 
 %define svn_url     http://svn.netlabs.org/repos/ports/dash/trunk
-%define svn_rev     1664
+%define svn_rev     1846
 
 Source: %{name}-%{version}-r%{svn_rev}.zip
 
@@ -56,11 +56,14 @@ autogen.sh
 %build
 
 # Disable job control, OS/2 tty doesn't allow this
-export CFLAGS='-DJOBS=0'
+export CFLAGS="$RPM_OPT_FLAGS -DJOBS=0"
 
 # Usual link options
-export LDFLAGS='-Zomf -Zmap -Zhigh-mem -Zargs-wild -Zargs-resp' # -Zbin-files
+export LDFLAGS="-Zomf -Zmap -Zhigh-mem -Zargs-wild -Zargs-resp"
 export LD=emxomfld
+
+# Use LIBCx for EXCEPTQ handler
+export LIBS="-lcx"
 
 # We install dash into /usr/bin, so no --bindir=/bin
 %configure
@@ -96,6 +99,13 @@ ln -s %{_mandir}/man1/%{name}.1 %{buildroot}%{_mandir}/man1/sh.1
 %{_mandir}/man1/sh.1
 
 %changelog
+* Mon Nov 28 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.5.9.1-1
+- Update to version 0.5.9.1.
+- Increase stack size to 8 MB to fix crashes with too big here-docs.
+- Link against LIBCx 0.4.
+- Build with standard platform-specific optimization (also improves
+  debug symbols due to -g when compiling).
+
 * Tue Sep 6 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.5.9-2
 - rebuilt with new libc (paths.h changes)
 
