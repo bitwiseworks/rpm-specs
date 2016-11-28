@@ -1,21 +1,31 @@
+#define svn_url     e:/trees/libxml2/trunk
+%define svn_url     http://svn.netlabs.org/repos/ports/xslt/trunk
+%define svn_rev     1829
+
 Summary: Library providing the Gnome XSLT engine
 Name: libxslt
-Version: 1.1.26
-Release: 2%{?dist}%{?extra_release}
+Version: 1.1.29
+Release: 1%{?dist}%{?extra_release}
 License: MIT
 Group: Development/Libraries
-Source: ftp://xmlsoft.org/XSLT/libxslt-%{version}.tar.gz
-Patch1: libxslt-os2.diff
+URL: http://xmlsoft.org/XSLT/
+Vendor: bww bitwise works GmbH
+
+Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
+
+# DEF files to create forwarders for the legacy package
+Source10:       libxslt.def
+Source11:       libexslt.def
+
+Requires: libxml2 >= 2.6.27
+Requires: libcx >= 0.4
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
-URL: http://xmlsoft.org/XSLT/
-Requires: libxml2 >= 2.6.27
 BuildRequires: libxml2-devel >= 2.6.27
-BuildRequires: python python-devel
+BuildRequires: python2-devel
 BuildRequires: libxml2-python
 #BuildRequires: libgcrypt-devel
-Prefix: %{_prefix}
-Docdir: %{_docdir}
+BuildRequires: automake autoconf
 
 %description
 This C library allows to transform XML files into other XML files
@@ -32,10 +42,8 @@ Requires: libxml2-devel >= 2.6.27
 Requires: pkgconfig
 
 %description devel
-This C library allows to transform XML files into other XML files
-(or HTML, text, ...) using the standard XSLT stylesheet transformation
-mechanism. To use it you need to have a version of libxml2 >= 2.6.27
-installed.
+The %{name}-devel package contains libraries and header files for
+developing applications that use %{name}.
 
 %package python
 Summary: Python bindings for the libxslt library
@@ -54,54 +62,65 @@ to load and save XML and HTML files. Direct access to XPath and
 the XSLT transformation context are possible to extend the XSLT language
 with XPath functions written in Python.
 
-%package debug
-Summary: HLL debug data for exception handling support.
-
-%description debug
-HLL debug data for exception handling support.
+%debug_package
 
 %prep
+%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{?!svn_rev):0}
 %setup -q
-%patch1 -p1 -b .os2~
+%else
+%setup -n "%{name}-%{version}" -Tc
+svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
+rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
+(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
+%endif
 
-%build
-export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
-export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
-export LIBS="-lurpo -lmmap -lpthread"
-%configure \
-    --enable-shared --disable-static \
-    "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
+# Prepare forwarder DLLs.
+for m in %{SOURCE10} %{SOURCE11}; do
+  cp ${m} .
+done
 
-make %{?smp_mflags}
+autoreconf -fvi
 
 gzip -9 ChangeLog
 
+%build
+export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+export LIBS="-lcx"
+export VENDOR="%{vendor}"
+%configure --disable-static
+make %{?_smp_mflags}
+
 %install
-rm -fr %{buildroot}
-
-%makeinstall
-
-rm -fr $RPM_BUILD_ROOT%{_libdir}/*.la \
-       $RPM_BUILD_ROOT%{_libdir}/python*/site-packages/libxsltmod*a
+make install DESTDIR=$RPM_BUILD_ROOT INSTALL="install -p"
+find $RPM_BUILD_ROOT -name '*.la' -exec rm -f {} ';'
 
 # multiarch crazyness on timestamp differences
-touch -m --reference=$RPM_BUILD_ROOT/%{prefix}/include/libxslt/xslt.h $RPM_BUILD_ROOT/%{prefix}/bin/xslt-config
+touch -m --reference=$RPM_BUILD_ROOT/%{_includedir}/libxslt/xslt.h $RPM_BUILD_ROOT/%{_bindir}/xslt-config
 
-cp libxslt/*.dll $RPM_BUILD_ROOT%{_libdir}
-cp libxslt/.libs/xslt.a $RPM_BUILD_ROOT%{_libdir}
+rm -rf $RPM_BUILD_ROOT%{_datadir}/doc/%{name}-%{version}
+rm -rf $RPM_BUILD_ROOT%{_datadir}/doc/%{name}-python-%{version}
+rm -f $RPM_BUILD_ROOT%{python_sitearch}/*.a
 
-cp libexslt/*.dll $RPM_BUILD_ROOT%{_libdir}
-cp libexslt/.libs/exslt.a $RPM_BUILD_ROOT%{_libdir}
+# Generate & install forwarder DLLs.
+gcc -Zomf -Zdll libxslt.def -l$RPM_BUILD_ROOT/%{_libdir}/xslt1.dll -o $RPM_BUILD_ROOT/%{_libdir}/xslt.dll
+gcc -Zomf -Zdll libexslt.def -l$RPM_BUILD_ROOT/%{_libdir}/exslt0.dll -o $RPM_BUILD_ROOT/%{_libdir}/exslt.dll
+
+# create a symlink for the python binding, as the dll itself is named xml2mod.dll
+ln -s %{python_sitearch}/xsltmod.dll $RPM_BUILD_ROOT%{python_sitearch}/libxsltmod.pyd
 
 %clean
 rm -fr %{buildroot}
 
+%check
+#make tests
+
+#post -p /sbin/ldconfig
+
+#postun -p /sbin/ldconfig
+
 %files
 %defattr(-, root, root)
-
-%doc AUTHORS ChangeLog.gz NEWS README Copyright TODO FEATURES
-%doc doc/*.html doc/html doc/tutorial doc/tutorial2 doc/*.gif
-%doc doc/EXSLT
+%doc AUTHORS ChangeLog.gz NEWS README Copyright FEATURES
 %doc %{_mandir}/man1/xsltproc.1*
 %{_libdir}/*.dll
 %{_libdir}/libxslt-plugins
@@ -109,8 +128,6 @@ rm -fr %{buildroot}
 
 %files devel
 %defattr(-, root, root)
-
-%doc AUTHORS ChangeLog.gz NEWS README Copyright TODO FEATURES
 %doc doc/libxslt-api.xml
 %doc doc/libxslt-refs.xml
 %doc doc/EXSLT/libexslt-api.xml
@@ -122,33 +139,29 @@ rm -fr %{buildroot}
 %doc doc/tutorial
 %doc doc/tutorial2
 %doc doc/EXSLT
-%{_libdir}/*.dll
-%{_libdir}/*a
+%{_libdir}/*_dll.a
 %{_libdir}/*.sh
-%{prefix}/share/aclocal/libxslt.m4
-%{prefix}/include/*
-%{prefix}/bin/xslt-config
+%{_datadir}/aclocal/libxslt.m4
+%{_includedir}/*
+%{_bindir}/xslt-config
 %{_libdir}/pkgconfig/libxslt.pc
 %{_libdir}/pkgconfig/libexslt.pc
 
 %files python
 %defattr(-, root, root)
-
-%doc AUTHORS ChangeLog.gz NEWS README Copyright FEATURES
-%{_libdir}/python*/site-packages/libxslt.py*
-%{_libdir}/python*/site-packages/xsltmod*
-%doc python/TODO
+%{python_sitearch}/libxslt.py*
+%{python_sitearch}/libxsltmod*
+%{python_sitearch}/xsltmod.dll
 %doc python/libxsltclass.txt
 %doc python/tests/*.py
 %doc python/tests/*.xml
 %doc python/tests/*.xsl
 
-%files debug
-%defattr(-,root,root)
-%{_bindir}/*.dbg
-%{_libdir}/*.dbg
-
 %changelog
+* Fri Nov 25 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.1.29-1
+- update to version 1.1.29
+- adjust to the current toolchain
+
 * Mon Apr 07 2014 yd
 - build for python 2.7.
 - added debug package with symbolic info for exceptq.

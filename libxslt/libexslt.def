@@ -1,0 +1,22 @@
+;
+; libexslt.def (created by emximp)
+;
+LIBRARY exslt INITINSTANCE TERMINSTANCE
+EXPORTS
+  "_exsltLibraryVersion"
+  "_exsltRegisterAll"
+  "_exsltLibxmlVersion"
+  "_exsltLibxsltVersion"
+  "_exsltLibexsltVersion"
+  "_exsltCommonRegister"
+  "_exsltMathRegister"
+  "_exsltMathXpathCtxtRegister"
+  "_exsltSetsRegister"
+  "_exsltSetsXpathCtxtRegister"
+  "_exsltFuncRegister"
+  "_exsltStrRegister"
+  "_exsltStrXpathCtxtRegister"
+  "_exsltDateRegister"
+  "_exsltDateXpathCtxtRegister"
+  "_exsltSaxonRegister"
+  "_exsltDynRegister"
