@@ -5,16 +5,14 @@
 Summary: The GNU Portable Library Tool
 Name:    libtool
 Version: 2.4.6
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv2+ and LGPLv2+ and GFDL
 URL:     http://www.gnu.org/software/libtool/
 Group:   Development/Tools
 Vendor:  bww bitwise works GmbH
 
-#Source:  http://ftp.gnu.org/gnu/libtool/libtool-%{version}.tar.xz
-
 %define svn_url     http://svn.netlabs.org/repos/ports/libtool/trunk
-%define svn_rev     1283
+%define svn_rev     1847
 
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
@@ -97,6 +95,9 @@ mv ChangeLog~ ChangeLog
 
 %build
 
+# These are for LTDL DLL
+export LDFLAGS="-Zomf -Zmap -Zhigh-mem"
+
 %configure  --prefix=%{_prefix}                 \
             --exec-prefix=%{_prefix}            \
             --bindir=%{_bindir}                 \
@@ -111,7 +112,7 @@ mv ChangeLog~ ChangeLog
             --infodir=%{_infodir}
 
 ## build not smp safe:
-make # %%{?_smp_mflags}
+make V=1 # %%{?_smp_mflags}
 
 #for i in ChangeLog.1997 ChangeLog.1998 ChangeLog.1999 ChangeLog.2002; do
 #  iconv -f ISO_8859-15 -t UTF8 $i > $i.tmp
@@ -132,6 +133,9 @@ rm -f %{buildroot}%{_infodir}/dir
 # `./configure --disable-static' breaks testsuite)
 rm -f %{buildroot}%{_libdir}/libltdl.la
 rm -f %{buildroot}%{_libdir}/ltdl.a
+
+%clean
+rm -rf $RPM_BUILD_ROOT
 
 %post
 %info_post %{name}.info
@@ -166,6 +170,12 @@ rm -f %{buildroot}%{_libdir}/ltdl.a
 %{_libdir}/ltdl*_dll.a
 
 %changelog
+* Mon Nov 28 2016 Dmitriy Kuminov <coding@dmik.org> 2.4.6-3
+- Add -buildlevel command line option to pass BUILDLEVEL signature
+  for DLL creation.
+- Fix NEED_USCORE detection in ltdl (LT_FUNC_DLSYM_USCORE) on OS/2.
+- Build LTDL DLL with high memory support (-Zhigh-mem).
+
 * Tue Feb 2 2016 Dmitriy Kuminov <coding@dmik.org> 2.4.6-2
 - Fix missing DLL exports when -export-symbols-regex is given.
 - Fix broken -os2dllname compatiblity.
@@ -175,7 +185,7 @@ rm -f %{buildroot}%{_libdir}/ltdl.a
 * Tue Feb 17 2015 Dmitriy Kuminov <coding@dmik.org> 2.4.6-1
 - Update to version 2.4.6 from vendor.
 
-* Tue Jan 23 2015 yd
+* Fri Jan 23 2015 yd
 - rebuild for gcc 4.9.2.
 
 * Tue Jan 13 2015 Dmitriy Kuminov <coding@dmik.org> 2.4.2-8
