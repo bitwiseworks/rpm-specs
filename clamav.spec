@@ -1,19 +1,17 @@
 #define svn_url     F:/rd/ports/clamav/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/clamav/trunk
-%define svn_rev     1001
+%define svn_rev     1841
 
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
-Version:	0.98.6
-Release:        6%{?dist}
+Version:	0.99.2
+Release:        1%{?dist}
 
 License:	proprietary
 Group:		Applications/File
 URL:		http://www.clamav.net
 
 Source:		%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
-Source1:	clamd.ico
-Source2:	ClamAV_ReadMe.txt
 
 BuildRoot:	%_tmppath/%name-%version-%release-root
 
@@ -23,6 +21,8 @@ Requires:	clamav-lib = %version-%release
 BuildRequires:	curl-devel
 BuildRequires:	zlib-devel bzip2-devel
 BuildRequires:	ncurses-devel
+BuildRequires:	json-c-devel pcre-devel openssl-devel libxml2-devel
+BuildRequires:	libtool libtool-ltdl-devel
 #BuildRequires:	bc
 
 %package lib
@@ -164,11 +164,7 @@ e.g. used by the clamav-milter package.
 The SysV initscripts for clamav-scanner.
 
 
-%package debug
-Summary: HLL debug data for exception handling support.
-
-%description debug
-HLL debug data for exception handling support.
+%debug_package
 
 
 ## ------------------------------------------------------------
@@ -183,13 +179,9 @@ rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
 (cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
 %endif
 
-sed -e 's!_VERSION_!%version!g;' \
+sed -i -e 's!_VERSION_!%version!g;' \
     -e 's!_BUILD_!%release!g;' \
-    %{SOURCE2} > ReadMe.txt
-
-# restore symlinks
-ln -sf ../libclamav/getaddrinfo.c clamdscan/getaddrinfo.c
-ln -sf ../libclamav/getaddrinfo.c clamdtop/getaddrinfo.c
+    ReadMe.txt
 
 #sed -ri \
 #    -e 's!^#?(LogFile ).*!#\1/var/log/clamd.<SERVICE>!g' \
@@ -210,10 +202,12 @@ ln -sf ../libclamav/getaddrinfo.c clamdtop/getaddrinfo.c
 
 %build
 export CFLAGS="$RPM_OPT_FLAGS -Wall -W -Wmissing-prototypes -Wmissing-declarations"
-export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
-export LIBS="-lurpo -lmmap -lpthread"
+export LDFLAGS="-Zomf -Zmap -Zbin-files -Zhigh-mem -Zargs-wild -Zargs-resp"
+export LIBS="-lurpo -lcx0 -lpthread"
+# YD this is required for make llvm configure to work...
+export PATH_SEPARATOR=";"
 
-export CONFIG_SITE=/@unixroot/usr/share/config.legacy
+autoreconf -fvi
 
 %configure \
     --disable-milter \
@@ -241,8 +235,8 @@ make %{?_smp_mflags}
 rm -rf "$RPM_BUILD_ROOT" _doc*
 make DESTDIR="$RPM_BUILD_ROOT" install
 
-cp libclamav/clamav.dll $RPM_BUILD_ROOT%{_libdir}
-cp %{SOURCE1} $RPM_BUILD_ROOT%{_sbindir}
+#cp libclamav/clamav.dll $RPM_BUILD_ROOT%{_libdir}
+cp clamd/clamd.ico $RPM_BUILD_ROOT%{_sbindir}
 
 #LogFile must be readable to submit stats
 sed -i 's!#LogFileUnlock yes!LogFileUnlock yes!g;' \
@@ -455,13 +449,11 @@ CLAMAV_FRESHCLAM_CONF:WPShadow|freshclam.conf|<CLAMAV_FOLDER>|SHADOWID=((%_sysco
 %config(noreplace) %_sysconfdir/init/clamd.scan*
 %endif
 
-%files debug
-%defattr(-,root,root)
-%{_bindir}/*.dbg
-%{_libdir}/*.dbg
-%{_sbindir}/*.dbg
-
 %changelog
+* Mon Nov 28 2016 yd <yd@os2power.com> 0.99.2-1
+- use libcx0 mmap code, new libtool generation.
+- r1834, update of source code to 0.99.21.
+
 * Thu Feb 05 2015 yd <yd@os2power.com> 0.98.6-6
 - r1001, update of source code to 0.98.6.
 
