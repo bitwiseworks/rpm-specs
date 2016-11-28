@@ -11,7 +11,7 @@
 
 Name:           python-%{pypi_name}
 Version:        3.6.4
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Powerful and Pythonic XML processing library combining libxml2/libxslt with the ElementTree API
 
 Group:          Development/Libraries
@@ -78,11 +78,11 @@ CFLAGS="%{optflags}" %{__python} setup.py build
 %endif
 
 %install
-%{__python} setup.py install --skip-build --no-compile --root %{buildroot}
-
 %if 0%{?with_python3}
 %py3_install
 %endif
+%{__python} setup.py install --skip-build --no-compile --root %{buildroot}
+
 
 %check
 # @todo enable once we got python-unittest
@@ -95,7 +95,6 @@ CFLAGS="%{optflags}" %{__python} setup.py build
 
 %files -n python2-%{pypi_name}
 %{!?_licensedir:%global license %%doc}
-%license LICENSES.txt
 %license doc/licenses/ZopePublicLicense.txt LICENSES.txt
 %doc README.rst src/lxml/isoschematron/resources/xsl/iso-schematron-xslt1/readme.txt
 %{python_sitearch}/%{pypi_name}
@@ -110,6 +109,10 @@ CFLAGS="%{optflags}" %{__python} setup.py build
 %endif
 
 %changelog
+* Fri Nov 25 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.6.4-2
+- small spec cleanup
+- rebuilt with latest libxslt and libxml2
+
 * Wed Oct 26 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.6.4-1
 - Update package to version 3.6.4.
 
