@@ -5,7 +5,7 @@
 Summary:	End-user tools for the Clam Antivirus scanner
 Name:		clamav
 Version:	0.99.2
-Release:        1%{?dist}
+Release:        2%{?dist}
 
 License:	proprietary
 Group:		Applications/File
@@ -218,10 +218,10 @@ autoreconf -fvi
     --with-libcurl=/@unixroot/usr \
     --with-zlib=/@unixroot/usr \
     --with-libjson=/@unixroot/usr \
-    --enable-languages=c --disable-ltdl-install --disable-fdpassing \
+    --enable-languages=c,c++ --disable-ltdl-install --disable-fdpassing \
     --disable-clamav \
     --disable-check \
-    --disable-llvm \
+    --enable-llvm \
     --enable-shared --disable-static
 
 # TODO: check periodically that CLAMAVUSER is used for freshclam only
@@ -450,6 +450,9 @@ CLAMAV_FRESHCLAM_CONF:WPShadow|freshclam.conf|<CLAMAV_FOLDER>|SHADOWID=((%_sysco
 %endif
 
 %changelog
+* Tue Nov 29 2016 yd <yd@os2power.com> 0.99.2-2
+- enable c++ interface, llvm engine.
+
 * Mon Nov 28 2016 yd <yd@os2power.com> 0.99.2-1
 - use libcx0 mmap code, new libtool generation.
 - r1834, update of source code to 0.99.21.
