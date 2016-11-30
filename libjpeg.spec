@@ -1,11 +1,11 @@
 #define svn_url     e:/trees/libjpeg/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/libjpeg/trunk
-%define svn_rev     1707
+%define svn_rev     1848
 
 Summary: A library for manipulating JPEG image format files
 Name: libjpeg
 Version: 8d
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: IJG
 Group: System Environment/Libraries
 URL: http://www.ijg.org/
@@ -76,6 +76,7 @@ autoreconf -vif
 
 %build
 export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+export VENDOR="%{vendor}"
 %configure \
      --enable-shared --enable-static
 
@@ -97,7 +98,7 @@ rm -rf $RPM_BUILD_ROOT
 rm $RPM_BUILD_ROOT%{_libdir}/*.la
 
 # Generate & install forwarder DLLs.
-gcc -Zomf -Zdll jpeg.def -l$RPM_BUILD_ROOT/%{_libdir}/jpeg8.dll -o $RPM_BUILD_ROOT/%{_libdir}/jpeg.dll
+gcc -Zomf -Zdll -nostdlib jpeg.def -l$RPM_BUILD_ROOT/%{_libdir}/jpeg8.dll -lend -o $RPM_BUILD_ROOT/%{_libdir}/jpeg.dll
 
 %files
 %defattr(-,root,root)
@@ -120,6 +121,9 @@ gcc -Zomf -Zdll jpeg.def -l$RPM_BUILD_ROOT/%{_libdir}/jpeg8.dll -o $RPM_BUILD_RO
 rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Wed Nov 30 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 8d-2
+- add -nostdlib to forwarders, to need less heap
+
 * Wed Sep 21 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 8d-1
 - update to version 8d
 - change build part
