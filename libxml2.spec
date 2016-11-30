@@ -8,7 +8,7 @@
 Summary: Library providing XML and HTML support
 Name: libxml2
 Version: 2.9.4
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: MIT
 Group: Development/Libraries
 URL: http://xmlsoft.org/
@@ -163,7 +163,7 @@ rm -rf $RPM_BUILD_ROOT%{_datadir}/doc/libxml2-python-%{version}/*
 gzip -9 -c doc/libxml2-api.xml > doc/libxml2-api.xml.gz
 
 # Generate & install forwarder DLLs.
-gcc -Zomf -Zdll libxml2.def -l$RPM_BUILD_ROOT/%{_libdir}/xml22.dll -o $RPM_BUILD_ROOT/%{_libdir}/libxml2.dll
+gcc -Zomf -Zdll -nostdlib libxml2.def -l$RPM_BUILD_ROOT/%{_libdir}/xml22.dll -lend -o $RPM_BUILD_ROOT/%{_libdir}/libxml2.dll
 
 # create a symlink for the python binding, as the dll itself is named xml2mod.dll
 ln -s %{_libdir}/python2.7/site-packages/xml2mod.dll $RPM_BUILD_ROOT%{_libdir}/python2.7/site-packages/libxml2mod.pyd
@@ -248,6 +248,9 @@ rm -fr %{buildroot}
 %endif # with_python3
 
 %changelog
+* Wed Nov 30 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.9.4-2
+- add -nostdlib to forwarders, to need less heap
+
 * Fri Nov 25 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.9.4-1
 - update to version 2.9.4
 - adjust to the current toolchain
