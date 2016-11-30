@@ -112,7 +112,7 @@ rm -f %{buildroot}%{_libdir}/*.la
 
 %if 0%{?with_forwarder}
 # Generate & install forwarder DLLs.
-gcc -Zomf -Zdll lzma.def -l$RPM_BUILD_ROOT/%{_libdir}/lzma5.dll -o $RPM_BUILD_ROOT/%{_libdir}/lzma.dll
+gcc -Zomf -Zdll -nostdlib lzma.def -l$RPM_BUILD_ROOT/%{_libdir}/lzma5.dll -lend -o $RPM_BUILD_ROOT/%{_libdir}/lzma.dll
 %endif
 
 %find_lang %name
