@@ -5,7 +5,7 @@
 Summary: Library providing the Gnome XSLT engine
 Name: libxslt
 Version: 1.1.29
-Release: 1%{?dist}%{?extra_release}
+Release: 2%{?dist}%{?extra_release}
 License: MIT
 Group: Development/Libraries
 URL: http://xmlsoft.org/XSLT/
@@ -102,8 +102,8 @@ rm -rf $RPM_BUILD_ROOT%{_datadir}/doc/%{name}-python-%{version}
 rm -f $RPM_BUILD_ROOT%{python_sitearch}/*.a
 
 # Generate & install forwarder DLLs.
-gcc -Zomf -Zdll libxslt.def -l$RPM_BUILD_ROOT/%{_libdir}/xslt1.dll -o $RPM_BUILD_ROOT/%{_libdir}/xslt.dll
-gcc -Zomf -Zdll libexslt.def -l$RPM_BUILD_ROOT/%{_libdir}/exslt0.dll -o $RPM_BUILD_ROOT/%{_libdir}/exslt.dll
+gcc -Zomf -Zdll -nostdlib libxslt.def -l$RPM_BUILD_ROOT/%{_libdir}/xslt1.dll -lend -o $RPM_BUILD_ROOT/%{_libdir}/xslt.dll
+gcc -Zomf -Zdll -nostdlib libexslt.def -l$RPM_BUILD_ROOT/%{_libdir}/exslt0.dll -lend -o $RPM_BUILD_ROOT/%{_libdir}/exslt.dll
 
 # create a symlink for the python binding, as the dll itself is named xml2mod.dll
 ln -s %{python_sitearch}/xsltmod.dll $RPM_BUILD_ROOT%{python_sitearch}/libxsltmod.pyd
@@ -158,6 +158,9 @@ rm -fr %{buildroot}
 %doc python/tests/*.xsl
 
 %changelog
+* Wed Nov 30 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.1.29-2
+- add -nostdlib to forwarders, to need less heap
+
 * Fri Nov 25 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.1.29-1
 - update to version 1.1.29
 - adjust to the current toolchain
