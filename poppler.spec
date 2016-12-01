@@ -1,7 +1,7 @@
 Summary:	PDF rendering library
 Name:		poppler
 Version:	0.49.0
-Release:	1%{?dist}
+Release:	2%{?dist}
 License:	(GPLv2 or GPLv3) and GPLv2+ and LGPLv2+ and MIT
 Group:		Development/Libraries
 Vendor:		bww bitwise works GmbH
@@ -181,7 +181,7 @@ rm -rf $RPM_BUILD_ROOT
 rm -rf $RPM_BUILD_ROOT%{_libdir}/lib*.la
 
 # Generate & install forwarder DLLs.
-gcc -Zomf -Zdll poppler63.def -l$RPM_BUILD_ROOT/%{_libdir}/popple65.dll -o $RPM_BUILD_ROOT/%{_libdir}/popple63.dll
+gcc -Zomf -Zdll -nostdlib poppler63.def -l$RPM_BUILD_ROOT/%{_libdir}/popple65.dll -lend -o $RPM_BUILD_ROOT/%{_libdir}/popple63.dll
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -242,6 +242,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Wed Nov 30 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.49.0-2
+- add -nostdlib to forwarders, to need less heap
+
 * Mon Nov 21 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.49.0-1
 - added text2pdf utility to poppler-utils
 - updated poppler to 0.49.0
