@@ -1,11 +1,11 @@
 #define svn_url     e:/trees/coreutils/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/coreutils/trunk
-%define svn_rev     1686
+%define svn_rev     1862
 
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.25
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -239,6 +239,9 @@ rm -rf $RPM_BUILD_ROOT
 %doc ABOUT-NLS COPYING NEWS README THANKS TODO
 
 %changelog
+* Mon Dec 05 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 8.25-4
+- fix a rm break with deep directories
+
 * Mon Sep 12 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 8.25-3
 - remove -ZBin-files
 
