@@ -1,11 +1,11 @@
 #define svn_url     e:/trees/pkgconfig/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/pkgconfig/trunk
-%define svn_rev     1562
+%define svn_rev     1873
 
 Summary: A tool for determining compilation options
 Name: pkgconfig
 Version: 0.29.1
-Release: 3%{?dist}
+Release: 4%{?dist}
 Epoch: 1
 License: GPLv2+
 URL: http://pkgconfig.freedesktop.org
@@ -66,6 +66,9 @@ rm -rf $RPM_BUILD_ROOT%{_datadir}/doc/pkg-config
 
 
 %changelog
+* Fri Dec 09 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.29.1-4
+- set stdout to unbuffered
+
 * Sat Jun 18 2016 yd <yd@os2power.com> 0.29.1-3
 - rebuild for glib2 2.33.
 
