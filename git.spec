@@ -1,26 +1,29 @@
-# Note: this .spec is borrowed from git-2.1.0-1.fc22.src.rpm
+# Note: this .spec is borrowed from http://pkgs.fedoraproject.org/cgit/rpms/git.git
 
 # Pass --without docs to rpmbuild if you don't want the documentation (force it for now)
 %define _without_docs 1
 
 %global gitcoredir          %{_libexecdir}/git-core
+%global noarch_sub          1
 %global libcurl_devel       libcurl-devel
 %global docbook_suppress_sp 0
 %global enable_ipv6         0
+%global use_prebuilt_docs   0
 
+%global bashcompdir         %{_sysconfdir}/bash_completion.d
+%global bashcomproot        %{bashcompdir}
 %global use_systemd         0
 
 Name:           git
-Version:        2.0.0
-Release:        2%{?dist}
+Version:        2.11.0
+Release:        1%{?dist}
 Summary:        Fast Version Control System
 License:        GPLv2
 Group:          Development/Tools
-URL:            http://git-scm.com/
-#Source0:        http://www.kernel.org/pub/software/scm/git/%{name}-%{version}.tar.gz
+URL:            https://git-scm.com/
 
-%define svn_url     http://svn.netlabs.org/repos/ports/git/branches/2.0
-%define svn_rev     864
+%define svn_url     http://svn.netlabs.org/repos/ports/git/trunk
+%define svn_rev     1885
 
 Source: %{name}-%{version}-r%{svn_rev}.zip
 
@@ -28,27 +31,31 @@ BuildRequires: gcc make subversion zip
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-%if ! 0%{?_without_docs}
+%if ! %{use_prebuilt_docs} && ! 0%{?_without_docs}
 BuildRequires:  asciidoc >= 8.4.1
 BuildRequires:  xmlto
 %endif
 #BuildRequires:  emacs
 BuildRequires:  expat-devel
 BuildRequires:  gettext
-BuildRequires:  libcurl-devel
+BuildRequires:  %{libcurl_devel}
 #BuildRequires:  pcre-devel
+#BuildRequires:  perl-generators
+#BuildRequires:  perl(Test)
 BuildRequires:  openssl-devel
 BuildRequires:  zlib-devel >= 1.2
+%if %{use_systemd}
+# For macros
+BuildRequires:  systemd
+%endif
 
-#Requires:       less
-#Requires:       openssh-clients
+Requires:       git-core = %{version}-%{release}
+Requires:       git-core-doc = %{version}-%{release}
 #Requires:       perl(Error)
+%if ! %{defined perl_bootstrap}
 #Requires:       perl(Term::ReadKey)
+%endif
 Requires:       perl-Git = %{version}-%{release}
-#Requires:       rsync
-Requires:       zlib >= 1.2
-
-Provides:       git-core = %{version}-%{release}
 
 # Obsolete git-arch
 Obsoletes:      git-arch < %{version}-%{release}
@@ -58,22 +65,27 @@ Git is a fast, scalable, distributed revision control system with an
 unusually rich command set that provides both high-level operations
 and full access to internals.
 
-The git rpm installs the core tools with minimal dependencies.  To
-install all git packages, including tools for integrating with other
-SCMs, install the git-all meta-package.
+The git rpm installs common set of tools which are usually using with
+small amount of dependencies. To install all git packages, including
+tools for integrating with other SCMs, install the git-all meta-package.
 
 %package all
 Summary:        Meta-package to pull in all git tools
 Group:          Development/Tools
+%if %{noarch_sub}
 BuildArch:      noarch
+%endif
 Requires:       git = %{version}-%{release}
 Requires:       git-cvs = %{version}-%{release}
 Requires:       git-email = %{version}-%{release}
-#Requires:       git-gui = %{version}-%{release}
+Requires:       git-gui = %{version}-%{release}
 Requires:       git-svn = %{version}-%{release}
 Requires:       git-p4 = %{version}-%{release}
-#Requires:       gitk = %{version}-%{release}
+Requires:       gitk = %{version}-%{release}
 Requires:       perl-Git = %{version}-%{release}
+%if ! %{defined perl_bootstrap}
+#Requires:       perl(Term::ReadKey)
+%endif
 #Requires:       emacs-git = %{version}-%{release}
 Obsoletes:      git <= 1.5.4.3
 
@@ -84,28 +96,43 @@ and full access to internals.
 
 This is a dummy package which brings in all subpackages.
 
-%package bzr
-Summary:        Git tools for working with bzr repositories
+%package core
+Summary:        Core package of git with minimal funcionality
 Group:          Development/Tools
-BuildArch:      noarch
-Requires:       git = %{version}-%{release}
-Requires:       bzr
+Requires:       less
+#Requires:       openssh-clients
+#Requires:       rsync
+Requires:       zlib >= 1.2
+%description core
+Git is a fast, scalable, distributed revision control system with an
+unusually rich command set that provides both high-level operations
+and full access to internals.
 
-%description bzr
-%{summary}.
+The git-core rpm installs really the core tools with minimal
+dependencies. Install git package for common set of tools.
+To install all git packages, including tools for integrating with
+other SCMs, install the git-all meta-package.
+
+%package core-doc
+Summary:        Documentation files for git-core
+Group:          Development/Tools
+Requires:       git-core = %{version}-%{release}
+
+%description core-doc
+Documentation files for git-core package including man pages.
 
 %package daemon
 Summary:        Git protocol dæmon
 Group:          Development/Tools
 Requires:       git = %{version}-%{release}
-#%if %{use_systemd}
-#Requires:	systemd
-#Requires(post): systemd
-#Requires(preun): systemd
-#Requires(postun): systemd
-#%else
+%if %{use_systemd}
+Requires:       systemd
+Requires(post): systemd
+Requires(preun):  systemd
+Requires(postun): systemd
+%else
 #Requires:       xinetd
-#%endif
+%endif
 %description daemon
 The git dæmon for supporting git:// access to git repositories
 
@@ -113,27 +140,21 @@ The git dæmon for supporting git:// access to git repositories
 %package -n gitweb
 Summary:        Simple web interface to git repositories
 Group:          Development/Tools
+%if %{noarch_sub}
 BuildArch:      noarch
+%endif
 Requires:       git = %{version}-%{release}
 
 %description -n gitweb
 Simple web interface to track changes in git repositories
 %endif
 
-%package hg
-Summary:        Git tools for working with mercurial repositories
-Group:          Development/Tools
-BuildArch:      noarch
-Requires:       git = %{version}-%{release}
-Requires:       mercurial >= 1.8
-
-%description hg
-%{summary}.
-
 %package p4
 Summary:        Git tools for working with Perforce depots
 Group:          Development/Tools
+%if %{noarch_sub}
 BuildArch:      noarch
+%endif
 BuildRequires:  python
 Requires:       git = %{version}-%{release}
 %description p4
@@ -142,25 +163,32 @@ Requires:       git = %{version}-%{release}
 %package svn
 Summary:        Git tools for importing Subversion repositories
 Group:          Development/Tools
-Requires:       git = %{version}-%{release}, subversion, subversion-perl
+Requires:       git = %{version}-%{release}, subversion
+Requires:       perl(Digest::MD5)
+%if ! %{defined perl_bootstrap}
 #Requires:       perl(Term::ReadKey)
+%endif
 %description svn
 Git tools for importing Subversion repositories.
 
 %package cvs
 Summary:        Git tools for importing CVS repositories
 Group:          Development/Tools
+%if %{noarch_sub}
 BuildArch:      noarch
+%endif
 Requires:       git = %{version}-%{release}, cvs
 Requires:       cvsps
-Requires:	perl-DBD-SQLite
+Requires:       perl(DBD::SQLite)
 %description cvs
 Git tools for importing CVS repositories.
 
 %package email
 Summary:        Git tools for sending email
 Group:          Development/Tools
+%if %{noarch_sub}
 BuildArch:      noarch
+%endif
 Requires:       git = %{version}-%{release}, perl-Git = %{version}-%{release}
 Requires:       perl(Authen::SASL)
 Requires:       perl(Net::SMTP::SSL)
@@ -172,7 +200,9 @@ Git tools for sending email.
 %package gui
 Summary:        Git GUI tool
 Group:          Development/Tools
+%if %{noarch_sub}
 BuildArch:      noarch
+%endif
 Requires:       git = %{version}-%{release}, tk >= 8.4
 Requires:       gitk = %{version}-%{release}
 %description gui
@@ -181,7 +211,9 @@ Git GUI tool.
 %package -n gitk
 Summary:        Git revision tree visualiser
 Group:          Development/Tools
+%if %{noarch_sub}
 BuildArch:      noarch
+%endif
 Requires:       git = %{version}-%{release}, tk >= 8.4
 %description -n gitk
 Git revision tree visualiser.
@@ -191,7 +223,9 @@ Git revision tree visualiser.
 %package -n perl-Git
 Summary:        Perl interface to Git
 Group:          Development/Libraries
+%if %{noarch_sub}
 BuildArch:      noarch
+%endif
 Requires:       git = %{version}-%{release}
 #BuildRequires:  perl(Error)
 BuildRequires:  perl(ExtUtils::MakeMaker)
@@ -204,7 +238,9 @@ Perl interface to Git.
 %package -n perl-Git-SVN
 Summary:        Perl interface to Git::SVN
 Group:          Development/Libraries
+%if %{noarch_sub}
 BuildArch:      noarch
+%endif
 Requires:       git = %{version}-%{release}
 Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 
@@ -217,8 +253,12 @@ Perl interface to Git.
 Summary:        Git version control system support for Emacs
 Group:          Applications/Editors
 Requires:       git = %{version}-%{release}
+%if %{noarch_sub}
 BuildArch:      noarch
 Requires:       emacs(bin) >= %{_emacs_version}
+%else
+Requires:       emacs-common
+%endif
 
 %description -n emacs-git
 %{summary}.
@@ -226,7 +266,9 @@ Requires:       emacs(bin) >= %{_emacs_version}
 %package -n emacs-git-el
 Summary:        Elisp source files for git version control system support for Emacs
 Group:          Applications/Editors
+%if %{noarch_sub}
 BuildArch:      noarch
+%endif
 Requires:       emacs-git = %{version}-%{release}
 
 %description -n emacs-git-el
@@ -234,12 +276,7 @@ Requires:       emacs-git = %{version}-%{release}
 
 %endif
 
-%package debug
-Summary: HLL debug data for exception handling support.
-
-%description debug
-HLL debug data for exception handling support.
-
+%debug_package
 
 %prep
 %if %(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')
@@ -256,12 +293,13 @@ rm -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip"
 cat << \EOF > config.mak
 V = 1
 CFLAGS = %{optflags}
+#LDFLAGS = %{__global_ldflags}
 #BLK_SHA1 = 1
 #NEEDS_CRYPTO_WITH_SSL = 1
 #USE_LIBPCRE = 1
 ETC_GITCONFIG = %{_sysconfdir}/gitconfig
 DESTDIR = %{buildroot}
-INSTALL = install -p
+INSTALL = %{_bindir}/install -p
 GITWEB_PROJECTROOT = %{_var}/lib/git
 GNU_ROFF = 1
 htmldir = %{?_pkgdocdir}%{!?_pkgdocdir:%{_docdir}/%{name}-%{version}}
@@ -280,8 +318,8 @@ echo DOCBOOK_SUPPRESS_SP = 1 >> config.mak
 
 %build
 make %{?_smp_mflags} all
-%if ! 0%{?_without_docs}
-make doc
+%if ! %{use_prebuilt_docs} && ! 0%{?_without_docs}
+make %{?_smp_mflags} doc
 %endif
 
 %if 0
@@ -295,9 +333,14 @@ sed -i '/^#!bash/,+1 d' contrib/completion/git-completion.bash
 
 %install
 rm -rf %{buildroot}
-make INSTALLDIRS=vendor install
-%if ! 0%{?_without_docs}
-make INSTALLDIRS=vendor install-doc
+make %{?_smp_mflags} INSTALLDIRS=vendor install
+%if ! %{use_prebuilt_docs} && ! 0%{?_without_docs}
+make %{?_smp_mflags} INSTALLDIRS=vendor install-doc
+%else
+%if %{use_prebuilt_docs}
+cp -a prebuilt_docs/man/* %{buildroot}%{_mandir}
+cp -a prebuilt_docs/html/* Documentation/
+%endif
 %endif
 
 %if 0
@@ -309,21 +352,24 @@ for elc in %{buildroot}%{elispdir}/*.elc ; do
     install -pm 644 contrib/emacs/$(basename $elc .elc).el \
     %{buildroot}%{elispdir}
 done
-install -Dpm 644 %{SOURCE2} \
+install -Dpm 644 %{SOURCE10} \
     %{buildroot}%{_emacs_sitestartdir}/git-init.el
 
 %endif
 
 make -C contrib/subtree install
-%if ! 0%{?_without_docs}
+%if ! %{use_prebuilt_docs} && ! 0%{?_without_docs}
 make -C contrib/subtree install-doc
 %endif
+# it's ugly hack, but this file don't need to be copied to this directory
+# it's already part of git-core-doc and it's alone here
+rm -f %{buildroot}%{?_pkgdocdir}%{!?_pkgdocdir:%{_docdir}/%{name}-%{version}}/git-subtree.html
 
 %if 0
 mkdir -p %{buildroot}%{_sysconfdir}/httpd/conf.d
-install -pm 0644 %{SOURCE4} %{buildroot}%{_sysconfdir}/httpd/conf.d/git.conf
+install -pm 0644 %{SOURCE12} %{buildroot}%{_sysconfdir}/httpd/conf.d/git.conf
 sed "s|@PROJECTROOT@|%{_var}/lib/git|g" \
-    %{SOURCE6} > %{buildroot}%{_sysconfdir}/gitweb.conf
+    %{SOURCE14} > %{buildroot}%{_sysconfdir}/gitweb.conf
 %else
 rm -rf %{buildroot}%{_var}/www/git/
 %endif
@@ -350,11 +396,11 @@ rm -rf %{buildroot}%{_mandir}
 %endif
 
 mkdir -p %{buildroot}%{_var}/lib/git
-%if 0
 %if %{use_systemd}
 mkdir -p %{buildroot}%{_unitdir}
-cp -a %{SOURCE12} %{SOURCE13} %{buildroot}%{_unitdir}
+cp -a %{SOURCE15} %{SOURCE16} %{buildroot}%{_unitdir}
 %else
+%if 0
 mkdir -p %{buildroot}%{_sysconfdir}/xinetd.d
 # On EL <= 5, xinetd does not enable IPv6 by default
 enable_ipv6="        # xinetd does not enable IPv6 by default
@@ -365,16 +411,13 @@ perl -p \
 %if %{enable_ipv6}
     -e "s|^}|$enable_ipv6\n$&|;" \
 %endif
-    %{SOURCE3} > %{buildroot}%{_sysconfdir}/xinetd.d/git
+    %{SOURCE11} > %{buildroot}%{_sysconfdir}/xinetd.d/git
 %endif
 %endif
-
-# Install bzr and hg remote helpers from contrib
-install -pm 755 contrib/remote-helpers/git-remote-* %{buildroot}%{gitcoredir}
 
 # Setup bash completion
-mkdir -p %{buildroot}%{_sysconfdir}/bash_completion.d
-install -pm 644 contrib/completion/git-completion.bash %{buildroot}%{_sysconfdir}/bash_completion.d/git
+install -Dpm 644 contrib/completion/git-completion.bash %{buildroot}%{bashcompdir}/git
+ln -s git %{buildroot}%{bashcompdir}/gitk
 
 # Install tcsh completion
 mkdir -p %{buildroot}%{_datadir}/git-core/contrib/completion
@@ -385,27 +428,42 @@ install -pm 644 contrib/completion/git-completion.tcsh \
 mkdir -p %{buildroot}%{_datadir}/git-core/contrib
 mv contrib/hooks %{buildroot}%{_datadir}/git-core/contrib
 chmod +x %{buildroot}%{_datadir}/git-core/contrib/hooks/*
-ln -s ../../../git-core/contrib/hooks contrib/
+ln -s %{buildroot}%{_datadir}/git-core/contrib/hooks contrib/
 
 # Install git-prompt.sh
 mkdir -p %{buildroot}%{_datadir}/git-core/contrib/completion
 install -pm 644 contrib/completion/git-prompt.sh \
     %{buildroot}%{_datadir}/git-core/contrib/completion/
 
-# find translations
 %if 0
+# install git-gui .desktop file
+desktop-file-install \
+%if %{desktop_vendor_tag}
+  --vendor fedora \
+%endif
+  --dir=%{buildroot}%{_datadir}/applications %{SOURCE13}
+%endif
+
+# find translations
 %find_lang %{name} %{name}.lang
 cat %{name}.lang >> bin-man-doc-files
-%else
-find %{buildroot}%{_datadir}/locale/* -type f | sed -e s@^%{buildroot}@@ >> bin-man-doc-files
-%endif
 
 # quiet some rpmlint complaints
 chmod -R g-w %{buildroot}
 find %{buildroot} -name git-mergetool--lib | xargs chmod a-x
-rm -f {Documentation/technical,contrib/emacs,contrib/credential/gnome-keyring}/.gitignore
+# rm -f {Documentation/technical,contrib/emacs,contrib/credential/gnome-keyring}/.gitignore
+# These files probably are not needed
+find . -name .gitignore -delete
 chmod a-x Documentation/technical/api-index.sh
 find contrib -type f | xargs chmod -x
+
+# Split core files
+not_core_re="git-(add--interactive|am|credential-netrc|difftool|instaweb|relink|request-pull|send-mail|submodule)|gitweb|prepare-commit-msg|pre-rebase"
+grep -vE "$not_core_re|\/man\/" bin-man-doc-files > bin-files-core
+%if %{use_prebuilt_docs} || ! 0%{?_without_docs}
+grep -vE "$not_core_re" bin-man-doc-files | grep "\/man\/" > man-doc-files-core
+%endif
+grep -E "$not_core_re" bin-man-doc-files > bin-man-doc-git-files
 
 
 %clean
@@ -413,30 +471,50 @@ rm -rf %{buildroot}
 
 %if %{use_systemd}
 %post daemon
-%systemd_post git.service
+%systemd_post git@.service
 
 %preun daemon
-%systemd_preun git.service
+%systemd_preun git@.service
 
 %postun daemon
-%systemd_postun_with_restart git.service
+%systemd_postun_with_restart git@.service
 %endif
 
-%files -f bin-man-doc-files
+%files -f bin-man-doc-git-files
 %defattr(-,root,root)
+%if 0
+%{elispdir}
+%{_emacs_sitestartdir}/git-init.el
+%endif
+%{_datadir}/git-core/contrib/hooks/update-paranoid
+%{_datadir}/git-core/contrib/hooks/setgitperms.perl
+#%{_datadir}/git-core/*
+#%doc Documentation/*.txt
+#%{!?_without_docs: %doc Documentation/*.html}
+#%{!?_without_docs: %doc Documentation/howto/* Documentation/technical/*}
+
+%files core -f bin-files-core
+%defattr(-,root,root)
+%{!?_licensedir:%global license %doc}
+%license COPYING
+# exlude is best way here because of troubels with symlinks inside git-core/
+%exclude %{_datadir}/git-core/contrib/hooks/update-paranoid
+%exclude %{_datadir}/git-core/contrib/hooks/setgitperms.perl
+%{bashcomproot}
 %{_datadir}/git-core/
-%doc README COPYING Documentation/*.txt Documentation/RelNotes contrib/
+
+%if %{use_prebuilt_docs} || ! 0%{?_without_docs}
+%files core-doc -f man-doc-files-core
+%else
+%files core-doc
+%endif
+%defattr(-,root,root)
+%doc README.md Documentation/*.txt Documentation/RelNotes contrib/
 %{!?_without_docs: %doc Documentation/*.html Documentation/docbook-xsl.css}
 %{!?_without_docs: %doc Documentation/howto Documentation/technical}
-%{_sysconfdir}/bash_completion.d
-
-%files bzr
-%defattr(-,root,root)
-%{gitcoredir}/git-remote-bzr
-
-%files hg
-%defattr(-,root,root)
-%{gitcoredir}/git-remote-hg
+%if ! %{use_prebuilt_docs}
+%{!?_without_docs: %doc contrib/subtree/git-subtree.html}
+%endif
 
 %files p4
 %defattr(-,root,root)
@@ -456,7 +534,9 @@ rm -rf %{buildroot}
 %files cvs
 %defattr(-,root,root)
 %doc Documentation/*git-cvs*.txt
+%if "%{gitcoredir}" != "%{_bindir}"
 %{_bindir}/git-cvsserver
+%endif
 %{gitcoredir}/*cvs*
 %{!?_without_docs: %{_mandir}/man1/*cvs*.1*}
 %{!?_without_docs: %doc Documentation/*git-cvs*.html }
@@ -520,7 +600,7 @@ rm -rf %{buildroot}
 %doc Documentation/*daemon*.txt
 %if %{use_systemd}
 %{_unitdir}/git.socket
-%{_unitdir}/git.service
+%{_unitdir}/git@.service
 %else
 %if 0
 %config(noreplace)%{_sysconfdir}/xinetd.d/git
@@ -543,12 +623,14 @@ rm -rf %{buildroot}
 %files all
 # No files for you!
 
-%files debug
-%defattr(-,root,root)
-%{_bindir}/*.dbg
-%{gitcoredir}/*.dbg
-
 %changelog
+* Tue Dec 13 2016 Dmitriy Kuminov <coding@dmik.org> 2.11.0-1
+- Update git to version 2.11.0.
+- Increase stack size to 8 MB to fix crashes when cloning huge repos.
+- Link against LIBCx 0.4 (this brings EXCEPTQ TRP report generator).
+- Rebuild against LIBC 0.6.6 and GCC 4.9.2.
+- Enable %lang definitions.
+
 * Wed Sep 10 2014 yd
 - added debug package with symbolic info for exceptq.
 
