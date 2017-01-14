@@ -1,17 +1,19 @@
+#define svn_url     e:/trees/ncurses/trunk
+%define svn_url     http://svn.netlabs.org/repos/ports/ncurses/trunk
+%define svn_rev     1917
 
 Summary: Ncurses support utilities
 Name: ncurses
-Version: 5.7
-Release: 4%{?dist}
+Version: 5.9
+Release: 1%{?dist}
 License: MIT
 Group: System Environment/Base
 URL: http://invisible-island.net/ncurses/ncurses.html
-Source0: ftp://invisible-island.net/ncurses/ncurses-%{version}.tar.gz
+Vendor: bww bitwise works GmbH
+Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
-Patch1: ncurses-5.7-os2.diff
-
-#BuildRequires: gpm-devel pkgconfig
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+#BuildRequires: gpm-devel
+BuildRequires: pkgconfig
 
 Requires: %{name}-libs = %{version}-%{release}
 
@@ -77,18 +79,25 @@ the ncurses terminal handling library.
 Install the ncurses-devel package if you want to develop applications
 which will use ncurses.
 
-#%package static
-#Summary: Static libraries for the ncurses library
-#Group: Development/Libraries
-#Requires: %{name}-devel = %{version}-%{release}
+%package static
+Summary: Static libraries for the ncurses library
+Group: Development/Libraries
+Requires: %{name}-devel = %{version}-%{release}
 
-#%description static
-#The ncurses-static package includes static libraries of the ncurses library.
+%description static
+The ncurses-static package includes static libraries of the ncurses library.
+
+%debug_package
 
 %prep
+%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
 %setup -q
-
-%patch1 -p1 -b .os2~
+%else
+%setup -n "%{name}-%{version}" -Tc
+svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
+rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
+(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
+%endif
 
 # this will be in documentation, drop executable bits
 #cp -p install-sh test
@@ -110,26 +119,22 @@ which will use ncurses.
     --with-termlib=tinfo \\\
     --with-chtype=long
 
-#export PKG_CONFIG_LIBDIR=%{_libdir}/pkgconfig
-
-export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
-export AWK="awk" ; \
-export CC="gcc" ; \
-export CXX="gcc" ; \
+export CC="gcc" ;
+export CXX="g++" ; \
+export CXXCPP="g++ -E" ; \
 export AR_OPTS="cru" ; \
 export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp" ; \
-export LIBS="-lurpo -lmmap -lpthread" ; \
+export LIBS="-lcx -lpthread" ; \
+export PKG_CONFIG_LIBDIR=%{_libdir}/pkgconfig
 %configure \
-    --with-shared --without-normal --without-debug \
-    --without-cxx-binding \
+    --with-shared --without-debug \
     --without-ada --with-ospeed=unsigned \
     --enable-hard-tabs --enable-xmc-glitch --enable-colorfgbg \
     --with-default-terminfo-dir=/@unixroot/usr/share/terminfo \
     --enable-overwrite \
     --enable-pc-files \
     --with-termlib=tinfo \
-    --with-chtype=long \
-    "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
+    --with-chtype=long
 
 make %{_smp_mflags}
 
@@ -223,7 +228,9 @@ mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/terminfo
 #echo "INPUT(-ltinfo)" > $RPM_BUILD_ROOT%{_libdir}/libtermcap.so
 
 rm -f $RPM_BUILD_ROOT%{_libdir}/terminfo
-#rm -f $RPM_BUILD_ROOT%{_libdir}/pkgconfig/{*_g,ncurses++*}.pc
+rm -f $RPM_BUILD_ROOT%{_libdir}/pkgconfig/*_g.pc
+rm -f $RPM_BUILD_ROOT%{_libdir}/pkgconfig/ncurses++*.pc
+rm -f $RPM_BUILD_ROOT%{_libdir}/pkgconfig/*_dll.pc
 
 #bzip2 NEWS
 
@@ -234,7 +241,7 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/terminfo
 %files
 %defattr(-,root,root)
 %doc ANNOUNCE AUTHORS NEWS README TO-DO
-%{_bindir}/[cirt]*
+%{_bindir}/[cirt]*.exe
 %{_mandir}/man1/*
 %{_mandir}/man5/*
 %{_mandir}/man7/*
@@ -258,15 +265,16 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/terminfo
 %files devel
 %defattr(-,root,root)
 #%doc test
-#%doc doc/html/hackguide.html
-#%doc doc/html/ncurses-intro.html
-#%doc c++/README*
+%doc doc/html/hackguide.html
+%doc doc/html/ncurses-intro.html
+%doc c++/README*
 #%doc misc/ncurses.supp
 %{_bindir}/ncurses*-config
-%{_libdir}/*.dll
-%{_libdir}/*.a
+%{_libdir}/*_dll.a
+%{_libdir}/libcurses*
 %{_libdir}/*.lib
-#%{_libdir}/pkgconfig/*.pc
+%{_libdir}/pkgconfig/*.pc
+%{_libdir}/ncurses++.a
 #%dir %{_includedir}/ncurses
 #%dir %{_includedir}/ncursesw
 #%{_includedir}/ncurses/*.h
@@ -274,13 +282,21 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/terminfo
 %{_includedir}/*.h
 %{_mandir}/man3/*
 
-#%files static
-#%defattr(-,root,root)
-#%{_libdir}/lib*.a
+%files static
+%defattr(-,root,root)
+%{_libdir}/ncurses.a
+%{_libdir}/form.a
+%{_libdir}/menu.a
+%{_libdir}/panel.a
+%{_libdir}/tinfo.a
 
 %clean
 rm -rf ${RPM_BUILD_ROOT}
 
 %changelog
+* Sat Jan 14 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 5.9-1
+- update to version 5.9
+- add correct keyboard and mouse handling (borrowed from KO Myung-Hun)
+
 * Mon Jan 16 2012 yd
 - rebuild with libc 0.6.4 runtime.
