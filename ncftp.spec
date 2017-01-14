@@ -1,11 +1,11 @@
 #define svn_url     g:/ncftp/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/Ncftp/trunk
-%define svn_rev     1903
+%define svn_rev     1918
 
 Summary: Improved console FTP client
 Name: ncftp
 Version: 3.2.6
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: Artistic clarified
 Group: Applications/Internet
 URL: http://www.ncftp.com/ncftp/
@@ -14,7 +14,8 @@ Source:  %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
-BuildRequires: autoconf, automake, libtool, ncurses
+BuildRequires: autoconf, automake, libtool, ncurses-devel
+Requires: ncurses >= 5.9
 
 %description
 Ncftp is an improved FTP client. Ncftp's improvements include support
@@ -33,7 +34,7 @@ rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
 (cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
 %endif
 
-autoreconf -ifvd -I autoconf_local
+autoreconf -ifv -I autoconf_local
 
 %build
 
@@ -70,5 +71,10 @@ rm -rf %{buildroot}
 %{_mandir}/man1/ncftpspooler.1*
 
 %changelog
-* Thu Dec 29 2016 Elbert Pol <elbert.pol@gmail.com> 3.2.6
+* Sat Jan 14 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.2.6-2
+- fixed lpage issue (ticket #216)
+- fixed case sensitivity (ticket #218)
+- fixed ncftpbookmarks flaw (ticket #217), needs ncurses >=5.9
+
+* Thu Dec 29 2016 Elbert Pol <elbert.pol@gmail.com> 3.2.6-1
 - Initial package for version 3.2.6
