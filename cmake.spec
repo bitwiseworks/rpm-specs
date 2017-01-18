@@ -6,6 +6,9 @@
 # Set to bcond_with or use --without gui to disable qt4 gui build
 %bcond_without gui
 
+# Set to bcond_without or use --with desktop to enable desktopn stuff
+%bcond_with desktop
+
 # Place rpm-macros into proper location
 %global rpm_macros_dir %(d=%{_rpmconfigdir}/macros.d; [ -d $d ] || d=%{_sysconfdir}/rpm; echo $d)
 
@@ -119,7 +122,7 @@ rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
 %build
 export CFLAGS="%{optflags}"
 export CXXFLAGS="%{optflags}"
-export LDFLAGS="-Zomf -Zhigh-mem %{?__global_ldflags}"
+export LDFLAGS="-Zomf -Zhigh-mem -lcx %{?__global_ldflags}"
 mkdir build
 cd build
 #             --%{?with_bootstrap:no-}system-libs \
@@ -171,7 +174,7 @@ mv %{buildroot}%{_pkgdocdir}/Help %{buildroot}%{_pkgdocdir}/rst
 mv html %{buildroot}%{_pkgdocdir}
 %endif
 
-%if %{with gui}
+%if %{with desktop}
 # Desktop file
 desktop-file-install --delete-original \
   --dir=%{buildroot}%{_datadir}/applications \
@@ -186,7 +189,7 @@ desktop-file-install --delete-original \
 #cd ..
 
 
-%if %{with gui}
+%if %{with desktop}
 %post gui
 update-desktop-database &> /dev/null || :
 /bin/touch --no-create %{_datadir}/mime || :
@@ -241,9 +244,11 @@ update-mime-database %{?fedora:-n} %{_datadir}/mime &> /dev/null || :
 %if %{with gui}
 %files gui
 %{_bindir}/%{name}-gui.exe
+%if %{with desktop}
 %{_datadir}/applications/CMake%{?name_suffix}.desktop
 %{_datadir}/mime/packages/
 %{_datadir}/icons/hicolor/*/apps/CMake%{?name_suffix}Setup.png
+%endif
 %if 0%{?with_sphinx:1}
 %{_mandir}/man1/%{name}-gui.1.*
 %endif
