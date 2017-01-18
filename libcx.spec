@@ -1,6 +1,6 @@
 Name: libcx
 Summary: kLIBC Extension Library
-Version: 0.4
+Version: 0.4.1
 Release: 1%{?dist}
 License: LGPLv2.1+
 Group: System/Libraries
@@ -88,7 +88,11 @@ rm -rf %{buildroot}
 %{_includedir}/sys/mman.h
 
 %changelog
-* Mon Sep 26 2016 Dmitriy Kuminov <coding@dmik.org> 0.4-1
+* Wed Jan 18 2017 Dmitriy Kuminov <coding@dmik.org> 0.4.1-1
+- Release version 0.4.1
+  (https://github.com/bitwiseworks/libcx/blob/0.4.1/CHANGELOG.md).
+
+* Thu Nov 24 2016 Dmitriy Kuminov <coding@dmik.org> 0.4-1
 - Release version 0.4
   (https://github.com/bitwiseworks/libcx/blob/0.4/CHANGELOG.md).
 
