@@ -1,6 +1,6 @@
 #define svn_url     e:/trees/doxygen/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/doxygen/trunk
-%define svn_rev     1894
+%define svn_rev     1937
 
 # set this to 1 to enable
 %global with_docs 0
@@ -9,7 +9,7 @@
 
 Summary: A documentation system for C/C++
 Name:    doxygen
-Version: 1.8.12
+Version: 1.8.13
 Release: 1%{?dist}
 
 # No version is specified.
@@ -53,7 +53,7 @@ source files.
 
 %package doxywizard
 Summary: A GUI for creating and editing configuration files
-Requires: %{name} = %{epoch}:%{version}-%{release}
+Requires: %{name} = %{version}-%{release}
 BuildRequires: libqt4-devel
 %description doxywizard
 Doxywizard is a GUI for creating and editing configuration files that
@@ -139,5 +139,9 @@ rm -rf %{buildroot}/%{_docdir}/packages
 
 
 %changelog
+* Tue Jan 19 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.8.13-1
+- fix doxywizzard rpm
+- update to version 1.8.13
+
 * Tue Dec 13 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.8.12-1
 - initial port
