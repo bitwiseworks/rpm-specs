@@ -1,107 +1,155 @@
-Summary: The zlib compression and decompression library.
+#define svn_url     e:/trees/zlib/trunk
+%define svn_url     http://svn.netlabs.org/repos/ports/zlib/trunk
+%define svn_rev     1948
+
+Summary: The compression and decompression library
 Name: zlib
-Version: 1.2.5
-Release: 6%{?dist}
-License: BSD
+Version: 1.2.11
+Release: 1%{?dist}
+License: zlib and Boost
 Group: System Environment/Libraries
 URL: http://www.zlib.net
-Source: %url/zlib-%version.tar.bz2
-Patch0: zlib-os2.diff
-Prefix: %_prefix
-BuildRoot: /override/%name-%version
+Vendor:  bww bitwise works GmbH
+Source:  %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
+
+# DEF files to create forwarders for the legacy package
+Source10:       z.def
+
+BuildRequires: automake, autoconf, libtool
 
 %description
-The zlib compression library provides in-memory compression and
-decompression functions, including integrity checks of the uncompressed
-data.  This version of the library supports only one compression method
-(deflation), but other algorithms may be added later, which will have
-the same stream interface.  The zlib library is used by many different
-system programs.
+Zlib is a general-purpose, patent-free, lossless data compression
+library which is used by many different programs.
 
 %package devel
-Summary: Header files and libraries for developing apps which will use zlib.
+Summary: Header files and libraries for Zlib development
 Group: Development/Libraries
-Requires: %name = %version-%release
+Requires: %{name} = %{version}-%{release}
 
 %description devel
-The zlib-devel package contains the header files and libraries needed to
-develop programs that use the zlib compression and decompression library.
+The zlib-devel package contains the header files and libraries needed
+to develop programs that use the zlib compression and decompression
+library.
 
-%package debug
-Summary: HLL debug data for exception handling support.
+%package static
+Summary: Static libraries for Zlib development
+Group: Development/Libraries
+Requires: %{name}-devel = %{version}-%{release}
 
-%description debug
-HLL debug data for exception handling support.
+%description static
+The zlib-static package includes static libraries needed
+to develop programs that use the zlib compression and
+decompression library.
+
+%package -n minizip
+Summary: Library for manipulation with .zip archives
+Group: System Environment/Libraries
+Requires: %{name} = %{version}-%{release}
+
+%description -n minizip
+Minizip is a library for manipulation with files from .zip archives.
+
+%package -n minizip-devel
+Summary: Development files for the minizip library
+Group: Development/Libraries
+Requires: minizip = %{version}-%{release}
+Requires: %{name}-devel = %{version}-%{release}
+Requires: pkgconfig
+
+%description -n minizip-devel
+This package contains the libraries and header files needed for
+developing applications which use minizip.
 
 %debug_package
 
 %prep
+%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
 %setup -q
-%patch0 -p0 -b .os2~
+%else
+%setup -n "%{name}-%{version}" -Tc
+svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
+rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
+(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
+%endif
 
-# Use optflags_lib for this package if defined.
-%{expand:%%define optflags %{?optflags_lib:%optflags_lib}%{!?optflags_lib:%optflags} -Wall}
+# Prepare forwarder DLLs.
+for m in %{SOURCE10}; do
+  cp ${m} .
+done
 
 %build
-# first build and test static zlib
-export TEST_LDFLAGS="-Zomf"
-CFLAGS="%optflags" \
-./configure --prefix=/@unixroot/usr --static
+export CFLAGS="$RPM_OPT_FLAGS"
+export LDFLAGS="$LDFLAGS -Zomf -Zhigh-mem -lcx"
+export VENDOR="%{vendor}"
+./configure --libdir=%{_libdir} --includedir=%{_includedir} --prefix=%{_prefix}
+make %{?_smp_mflags}
 
-! grep -wE 'NO_vsnprintf|HAS_vsprintf_void|HAS_vsnprintf_void|NO_snprintf|HAS_sprintf_void|HAS_snprintf_void' Makefile
-%__make
-%__make z.dll
+cd contrib/minizip
+autoreconf -fvi
+%configure --enable-static=no
+make %{?_smp_mflags}
 
-%{!?_without_check:%{!?_without_test:%__make test}}
-rm -f *.s *.o
-
-# next build and test shared zlib
-#CFLAGS="%optflags -fPIC" ./configure --prefix=%_prefix --shared
-#! grep -wE 'NO_vsnprintf|HAS_vsprintf_void|HAS_vsnprintf_void|NO_snprintf|HAS_sprintf_void|HAS_snprintf_void' Makefile
-#%__make
-#%{!?_without_check:%{!?_without_test:%__make test}}
-
-#bzip2 -9fk ChangeLog FAQ algorithm.txt
+%check
+make test
 
 %install
-rm -rf %buildroot
-mkdir -p %buildroot%_libdir
-mkdir -p %buildroot%_libdir/pkgconfig
-mkdir -p %buildroot%_includedir
-mkdir -p %buildroot%_mandir/man3
+make install DESTDIR=$RPM_BUILD_ROOT
 
-cp -a libz.a %buildroot%_libdir/
-cp -a libz_s.a %buildroot%_libdir/
-cp -a z.dll %buildroot%_libdir/
-cp -a zlib.pc %buildroot%_libdir/pkgconfig/
+cd contrib/minizip
+make install DESTDIR=$RPM_BUILD_ROOT
+# we need to get back to root, as else the debugfile list is created at
+# the wrong location
+cd ..
+cd ..
 
-install -p -m644 zlib.h zconf.h %buildroot%_includedir/
-install -p -m644 zlib.3 %buildroot%_mandir/man3/
+rm -f $RPM_BUILD_ROOT%{_libdir}/*.la
 
-%define docdir %_docdir/%name-%version
-mkdir -p %buildroot%docdir
-install -p -m644 README \
-	example.c minigzip.c %buildroot%docdir/
-# License {FAQ,ChangeLog,algorithm.txt}.bz2
+# Generate & install forwarder DLLs.
+gcc -Zomf -Zdll -nostdlib z.def -l$RPM_BUILD_ROOT/%{_libdir}/z1.dll -lend -o $RPM_BUILD_ROOT/%{_libdir}/z.dll
+
+#post -p /sbin/ldconfig
+
+#postun -p /sbin/ldconfig
+
+#post -n minizip -p /sbin/ldconfig
+
+#postun -n minizip -p /sbin/ldconfig
 
 %files
-%defattr(-,root,root)
-%_libdir/z.dll
-%dir %docdir
-#docdir/License
-%docdir/README
+%{!?_licensedir:%global license %%doc}
+%license README
+%doc ChangeLog FAQ
+%{_libdir}/z*.dll
 
 %files devel
-%defattr(-,root,root)
-%_libdir/*.a
-%_includedir/*
-%_mandir/man?/*
-%dir %docdir
-%docdir/*.c
-#docdir/*.bz2
-%{_libdir}/pkgconfig/*.pc
+%{!?_licensedir:%global license %%doc}
+%license README
+%doc doc/algorithm.txt test/example.c
+%{_libdir}/libz_dll.a
+%{_libdir}/pkgconfig/zlib.pc
+%{_includedir}/zlib.h
+%{_includedir}/zconf.h
+%{_mandir}/man3/zlib.3*
+
+%files static
+%{!?_licensedir:%global license %%doc}
+%license README
+%{_libdir}/libz.a
+
+%files -n minizip
+%doc contrib/minizip/MiniZip64_info.txt contrib/minizip/MiniZip64_Changes.txt
+%{_libdir}/minizip*.dll
+
+%files -n minizip-devel
+%dir %{_includedir}/minizip
+%{_includedir}/minizip/*.h
+%{_libdir}/minizip*_dll.a
+%{_libdir}/pkgconfig/minizip.pc
 
 %changelog
+* Tue Jan 24 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.2.11-1
+- update to version 1.2.11
+
 * Thu Feb 18 2016 yd <yd@os2power.com> 1.2.5-6
 - added .pc file to distribution.
 - use new debug macros.
