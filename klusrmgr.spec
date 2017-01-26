@@ -3,7 +3,7 @@
 Summary:	kLIBC User Management
 Name:		klusrmgr
 Version:	1.1.0
-Release:	0%{?dist}
+Release:	1%{?dist}
 License:	proprietary
 Group:		Applications/System
 URL:		http://www.netlabs.org/vxapps
