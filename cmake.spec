@@ -1,6 +1,6 @@
 #define svn_url     e:/trees/cmake/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/cmake/trunk
-%define svn_rev     1874
+%define svn_rev     1949
 
 
 # Set to bcond_with or use --without gui to disable qt4 gui build
@@ -25,7 +25,7 @@
 
 Name:           %{orig_name}%{?name_suffix}
 Version:        %{major_version}.%{minor_version}.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Cross-platform make system
 
 # most sources are BSD
@@ -123,6 +123,7 @@ rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
 export CFLAGS="%{optflags}"
 export CXXFLAGS="%{optflags}"
 export LDFLAGS="-Zomf -Zhigh-mem -lcx %{?__global_ldflags}"
+export VENDOR="%{vendor}"
 mkdir build
 cd build
 #             --%{?with_bootstrap:no-}system-libs \
@@ -256,5 +257,8 @@ update-mime-database %{?fedora:-n} %{_datadir}/mime &> /dev/null || :
 
 
 %changelog
+* Wed Jan 25 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.7.0-2
+- adjust def file creation
+
 * Mon Dec 05 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.7.0-1
 - initial rpm version
