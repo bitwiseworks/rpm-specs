@@ -1,11 +1,11 @@
 #define svn_url     e:/trees/coreutils/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/coreutils/trunk
-%define svn_rev     1862
+%define svn_rev     1954
 
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
-Version: 8.25
-Release: 4%{?dist}
+Version: 8.26
+Release: 1%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -84,7 +84,7 @@ rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
 
 export CFLAGS="$RPM_OPT_FLAGS -fno-strict-aliasing"
 export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
-export LIBS="-lintl"
+export LIBS="-lintl -lcx"
 %{expand:%%global optflags %{optflags} -D_GNU_SOURCE=1}
 # we do autoreconf even fedora doesn't do it
 autoreconf -i -v
@@ -239,6 +239,10 @@ rm -rf $RPM_BUILD_ROOT
 %doc ABOUT-NLS COPYING NEWS README THANKS TODO
 
 %changelog
+* Fri Jan 27 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 8.26-1
+- update coreutils to version 8.26
+- set stdout to binary in base64
+
 * Mon Dec 05 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 8.25-4
 - fix a rm break with deep directories
 
