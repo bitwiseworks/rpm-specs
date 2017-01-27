@@ -1,6 +1,6 @@
 #define svn_url     e:/trees/doxygen/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/doxygen/trunk
-%define svn_rev     1937
+%define svn_rev     1956
 
 # set this to 1 to enable
 %global with_docs 0
@@ -10,7 +10,7 @@
 Summary: A documentation system for C/C++
 Name:    doxygen
 Version: 1.8.13
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 # No version is specified.
 License: GPL+
@@ -76,6 +76,7 @@ rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
 
 %build
 export LDFLAGS="-Zhigh-mem -Zomf -lcx"
+export VENDOR="%{vendor}"
 
 mkdir -p build
 cd build
@@ -139,7 +140,10 @@ rm -rf %{buildroot}/%{_docdir}/packages
 
 
 %changelog
-* Tue Jan 19 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.8.13-1
+* Fri Jan 27 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.8.13-2
+- add buildlevel to the exe
+
+* Thu Jan 19 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.8.13-1
 - fix doxywizzard rpm
 - update to version 1.8.13
 
