@@ -3,14 +3,14 @@
 Summary:    kLIBC User Management
 Name:       klusrmgr
 Version:    1.1.0
-Release:    1%{?dist}
+Release:    2%{?dist}
 License:    proprietary
 Group:      Applications/System
 URL:        http://www.netlabs.org/vxapps
 Vendor:     bww bitwise works GmbH
 Source:     %{name}-%{version}.zip
 BuildRoot:  %_tmppath/%name-%version-%release-root
-Requires:   wpi4rpm >= 0.9.0
+Requires:   wpi4rpm >= 0.9.2
 Obsoletes:  kLIBCum <= 1.0.10
 
 %description
@@ -48,18 +48,19 @@ rm -rf "$RPM_BUILD_ROOT"
 %post
 if [ "$1" -ge 1 ]; then # (upon update)
     %wps_object_delete_all
+    wpi4rpm del %{vendor}/%{name}/binaries %{version}-%{release}
 fi
 %wps_object_create_begin
 klusrmgr_FOLDER:WPFolder|klusrmgr|<WP_DESKTOP>|TITLE=kLIBC User Management;
 klusrmgr_README:WPShadow|Readme|<klusrmgr_FOLDER>|SHADOWID=((%_defaultdocdir/%{name}-%{version}/readme.txt))
 klusrmgr_EXE:WPProgram|User Management|<klusrmgr_FOLDER>|EXENAME=((%_bindir/klusrmgr.exe));STARTUPDIR=((%_bindir));TITLE=User Management;
 %wps_object_create_end
-wpi4rpm add "%{name}" %{version}-%{release}
+wpi4rpm add %{vendor}/%{name}/binaries %{version}-%{release}
 
 %postun
 if [ "$1" -eq 0 ]; then # (upon removal)
     %wps_object_delete_all
-    wpi4rpm del "%{name}" %{version}-%{release}
+    wpi4rpm del %{vendor}/%{name}/binaries %{version}-%{release}
 fi
 
 %files
