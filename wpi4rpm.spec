@@ -3,7 +3,7 @@
 
 Summary:	WarpIN package entry for rpms
 Name:		wpi4rpm
-Version:	0.9.1
+Version:	0.9.2
 Release:	1%{?dist}
 License:	proprietary
 Group:		Applications/System
@@ -39,6 +39,8 @@ rm -rf "$RPM_BUILD_ROOT"
 %_bindir/*.exe
 
 %changelog
+* Sat Jan 28 2017 hb <herwig.bauernfeind@bitwiseworks.com> 0.9.2
+- Add support for vendor and package
 * Fri Jan 27 2017 hb <herwig.bauernfeind@bitwiseworks.com> 0.9.1
 - Initial release
 * Thu Jan 26 2017 hb <herwig.bauernfeind@bitwiseworks.com> 0.9.0
