@@ -4,10 +4,10 @@
 Summary:	WarpIN package entry for rpms
 Name:		wpi4rpm
 Version:	0.9.2
-Release:	1%{?dist}
+Release:	2%{?dist}
 License:	proprietary
 Group:		Applications/System
-URL:		http://www.netlabs.org/vxapps
+URL:		http://trac.netlabs.org/rpm
 Vendor:		bww bitwise works GmbH
 Source:		%{name}-%{version}.zip
 BuildRequires: rexx_exe
