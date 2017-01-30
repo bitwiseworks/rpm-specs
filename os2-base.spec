@@ -2,7 +2,7 @@
 Summary: OS/2 - eComStation 2.0 base
 Name: os2-base
 Version: 0.0.0
-Release: 13%{?dist}
+Release: 14%{?dist}
 
 License: free
 
@@ -91,7 +91,7 @@ Provides: minxmri.dll
 Provides: minxobj.dll
 Provides: mipmini.dll
 Provides: mirrors.dll
-Provides: mmioi.dll
+Provides: mmio.dll
 Provides: mmpmcrts.dll
 Provides: mmpmini.dll
 Provides: mmsniff.dll
@@ -343,6 +343,9 @@ fi
 
 
 %changelog
+* Mon Jan 30 2017 hb <herwig,bauernfeind@bitwiseworks.com> 0.0.0-14
+- Correct typo from mmioi.dll to mmio.dll
+
 * Wed Jun 08 2016 yd <yd@os2power.com> 0.0.0-13
 - Add special UNIXROOT lang directory to DPATH in config.sys.
 
