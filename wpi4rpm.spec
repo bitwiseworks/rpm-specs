@@ -3,8 +3,8 @@
 
 Summary:	WarpIN package entry for rpms
 Name:		wpi4rpm
-Version:	0.9.2
-Release:	2%{?dist}
+Version:	0.9.3
+Release:	1%{?dist}
 License:	proprietary
 Group:		Applications/System
 URL:		http://trac.netlabs.org/rpm
@@ -39,6 +39,9 @@ rm -rf "$RPM_BUILD_ROOT"
 %_bindir/*.exe
 
 %changelog
+* Mon Jan 30 2017 hb <herwig.bauernfeind@bitwiseworks.com> 0.9.3
+- Add errorhandler
+- Allow all kind of help switches
 * Sat Jan 28 2017 hb <herwig.bauernfeind@bitwiseworks.com> 0.9.2
 - Add support for vendor and package
 * Fri Jan 27 2017 hb <herwig.bauernfeind@bitwiseworks.com> 0.9.1
