@@ -3,7 +3,7 @@
 
 Summary:	WarpIN package entry for rpms
 Name:		wpi4rpm
-Version:	0.9.3
+Version:	0.9.4
 Release:	1%{?dist}
 License:	proprietary
 Group:		Applications/System
@@ -14,7 +14,7 @@ BuildRequires: rexx_exe
 BuildRoot:	%_tmppath/%name-%version-%release-root
 
 %description
-The purpose of this utility is to create fake WarpIH database entries
+The purpose of this utility is to create fake WarpIN database entries
 for rpm/yum packages.
 
 %prep
@@ -39,6 +39,9 @@ rm -rf "$RPM_BUILD_ROOT"
 %_bindir/*.exe
 
 %changelog
+* Thu Feb 02 2017 hb <herwig.bauernfeind@bitwiseworks.com> 0.9.4
+- Write proper install date/time
+- Fix cosmetic error on package removal
 * Mon Jan 30 2017 hb <herwig.bauernfeind@bitwiseworks.com> 0.9.3
 - Add errorhandler
 - Allow all kind of help switches
