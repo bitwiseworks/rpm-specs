@@ -1,41 +1,14 @@
-# Add *.mymod files to the default list of files to be processed
-%define _strip_opts --debuginfo -i "libvpx2.dll"
-# whether to use Github, or Netlabs's svn
-%define _github      0
+%define svn_url     http://svn.netlabs.org/repos/ports/libvpx/trunk
+%define svn_rev     1355
 
-# define _version     1.5.0
-%define _version     1.4.0
-%define github_name  libvpx
-
-%if %_github
-%define github_url   https://github.com/webmproject/%{github_name}/archive
-%define github_rev   %{_version}
-%else
-%define github_url     http://svn.netlabs.org/repos/ports/libvpx/trunk
-%define github_rev     1355
-%endif
-
-Name: %{github_name}
+Name: libvpx
 Summary: VP8 Video Codec SDK
-Version: %{_version}
-Release: 1%{?dist}
+Version: 1.4.0
+Release: 2%{?dist}
 License: BSD
 Group: System Environment/Libraries
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
-%if %_github
-Source0: %{github_name}-%{github_rev}.zip
-#Source0: http://webm.googlecode.com/files/%{name}-%{version}.tar.bz2
-%else
-Source0: %{name}-%{version}%{?github_rev:-r%{github_rev}}.zip
-%endif
-# Thanks to debian.
-#Source2: libvpx.ver
-Source1: donation.txt
-Source2: libvpx-1.4.0.txt
-Patch0: %{name}-rtcd.patch
-# uncomment for version 1.4.0 or below
-Patch1: %{name}-komh.patch
-Patch2: %{name}-conf.patch
+Source0: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 URL: http://www.webmproject.org/tools/vp8-sdk/
 BuildRequires:  nasm
 BuildRequires:  libgcc1, pthread-devel
@@ -60,40 +33,13 @@ libvpx.
 %prep
 # %setup -q
 
-%if %_github
-
-%if %(sh -c 'if test -f "%{_sourcedir}/%{github_name}-%{github_rev}.zip" ; then echo 1 ; else echo 0 ; fi')
-%setup -n "%{github_name}-%{github_rev}" -q
-%else
-%setup -n "%{github_name}-%{github_rev}" -Tc
-rm -f "%{_sourcedir}/%{github_name}-%{github_rev}.zip"
-curl -sSL "%{github_url}/v%{github_rev}.zip" -o "%{_sourcedir}/%{github_name}-%{github_rev}.zip"
-unzip -oC "%{_sourcedir}/%{github_name}-%{github_rev}.zip" -d ..
-%endif
-
-%else
-
-%if %{?github_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{github_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?github_rev):0}
+%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
 %setup -q
 %else
 %setup -n "%{name}-%{version}" -Tc
-svn export %{?github_rev:-r %{github_rev}} %{github_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}%{?github_rev:-r%{github_rev}}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?github_rev:-r%{github_rev}}.zip" "%{name}-%{version}")
-%endif
-
-%endif
-
-#autoreconf -fi
-
-%if %_github
-
-%patch0 -p1
-# uncomment for version 1.4.0 or below
-%patch1 -p1
-
-%patch2 -p1
-
+svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
+rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
+(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
 %endif
 
 %build
@@ -107,10 +53,11 @@ rm -f "%{_sourcedir}/%{name}-%{version}%{?github_rev:-r%{github_rev}}.zip"
 %endif
 %endif
 
-export LDFLAGS="-Zhigh-mem -lsocket -lmmap -g" \
-       CFLAGS="-g" CXXFLAGS="-g" ASFLAGS="-g -f aout" AS=nasm
+export LDFLAGS="-Zomf -Zhigh-mem" \
+       ASFLAGS="-g -f aout" AS=nasm
 
 ./configure \
+	--extra-cflags="%{optflags}" \
 	--prefix=%{_prefix} \
 	--libdir=%{_libdir} \
 	--target=%{vpxtarget} \
@@ -129,55 +76,17 @@ export LDFLAGS="-Zhigh-mem -lsocket -lmmap -g" \
 	--enable-shared \
 	--enable-small
 
-# Hack our optflags in.
-#sed -i "s|\"vpx_config.h\"|\"vpx_config.h\" %{optflags} -fPIC|g" libs-%{vpxtarget}.mk
-##sed -i "s|\"vpx_config.h\"|\"vpx_config.h\" %{optflags} -fPIC|g" examples-%{vpxtarget}.mk
-#sed -i "s|\"vpx_config.h\"|\"vpx_config.h\" %{optflags} -fPIC|g" docs-%{vpxtarget}.mk
-
 %{__make} %{?_smp_mflags} verbose=true target=libs
-
-# Really? You couldn't make this a shared library? Ugh.
-# Oh well, I'll do it for you.
-#mkdir tmp
-#cd tmp
-#ar x ../libvpx_g.a
-#cd ..
-# gcc -fPIC -shared -pthread -lm -Wl,--no-undefined -Wl,-soname,libvpx.so.0 -Wl,--version-script,%{SOURCE2} -Wl,-z,noexecstack -o libvpx.so.0.0.0 tmp/*.o
-#rm -rf tmp
-# Temporarily dance the static libs out of the way
-#mv libvpx.a libNOTvpx.a
-#mv libvpx_g.a libNOTvpx_g.a
-# We need to do this so the examples can link against it.
-#ln -sf libvpx.so.0.0.0 libvpx.so
-##make %{?_smp_mflags} verbose=true target=examples
-#make %{?_smp_mflags} verbose=true target=docs
-# Put them back so the install doesn't fail
-#mv libNOTvpx.a libvpx.a
-#mv libNOTvpx_g.a libvpx_g.a
 
 %install
 rm -rf $RPM_BUILD_ROOT
 %{__make} DIST_DIR=%{buildroot}%{_prefix} install
 mkdir -p %{buildroot}%{_includedir}/vpx/
-#install -p libvpx.so.0.0.0 %{buildroot}%{_libdir}
-#pushd %{buildroot}%{_libdir}
-#ln -sf libvpx.so.0.0.0 libvpx.so
-#ln -sf libvpx.so.0.0.0 libvpx.so.0
-#ln -sf libvpx.so.0.0.0 libvpx.so.0.0
-#popd
-#pushd %{buildroot}
-# Stuff we don't need.
-rm -rf usr/build/ usr/md5sums.txt usr/lib*/*.a usr/CHANGELOG usr/README
-#popd
-emxomf -o %{buildroot}%{_libdir}/libvpx.lib %{buildroot}%{_libdir}/libvpx.a
-emximp -o %{buildroot}%{_libdir}/libvpx_dll.lib %{buildroot}%{_libdir}/libvpx2.dll
+# No static library
+rm -rf %{buildroot}%{_libdir}/libvpx.a
 
 %clean
 rm -rf $RPM_BUILD_ROOT
-
-#%post -p /sbin/ldconfig
-
-#%postun -p /sbin/ldconfig
 
 %files
 %defattr(-,root,root,-)
@@ -191,9 +100,12 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/vpx/
 %{_libdir}/pkgconfig/vpx.pc
 %{_libdir}/libvpx*.a
-%{_libdir}/libvpx*.lib
-#%{_libdir}/libvpx*.dbg
 
 %changelog
-* Tue Nov 17 2015 Valery Sedletski <_valerius@mail.ru> - 1.4.0 OS/2 initial build
+* Fri Feb 3 2017 Dmitriy Kuminov <coding@dmik.org> 1.4.0-2
+- Use -Zomf to preserve HLL debug info and significantly reduce DLL size.
+- Use per-platform optimization flags.
+- Remove static library and OMF libraries.
+
+* Tue Nov 17 2015 Valery Sedletski <_valerius@mail.ru> 1.4.0-1
 - initial OS/2 build
