@@ -1,19 +1,19 @@
 #define svn_url     e:/trees/cpio/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/cpio/trunk
-%define svn_rev     1750
+%define svn_rev     1967
 
 Summary: A GNU archiving program
 Name: cpio
-Version: 2.11
-Release: 5%{?dist}
+Version: 2.12
+Release: 1%{?dist}
 License: GPLv3+
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
 Vendor:  bww bitwise works GmbH
 Source:  %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
-#Requires(post): /sbin/install-info
-#Requires(preun): /sbin/install-info
+Requires(post): %{_sbindir}/install-info.exe
+Requires(preun): %{_sbindir}/install-info.exe
 BuildRequires: texinfo, autoconf, gettext
 #BuildRequires: rmt
 Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -74,17 +74,17 @@ rm -rf ${RPM_BUILD_ROOT}
 #make check
 
 
-#%post
-#if [ -f %{_infodir}/cpio.info.gz ]; then
-#	/sbin/install-info %{_infodir}/cpio.info.gz %{_infodir}/dir || :
-#fi
+%post
+if [ -f %{_infodir}/cpio.info.gz ]; then
+  %{_sbindir}/install-info.exe %{_infodir}/cpio.info.gz %{_infodir}/dir || :
+fi
 
-#%preun
-#if [ $1 = 0 ]; then
-#	if [ -f %{_infodir}/cpio.info.gz ]; then
-#		/sbin/install-info --delete %{_infodir}/cpio.info.gz %{_infodir}/dir || :
-#	fi
-#fi
+%preun
+if [ $1 = 0 ]; then
+  if [ -f %{_infodir}/cpio.info.gz ]; then
+    %{_sbindir}/install-info.exe --delete %{_infodir}/cpio.info.gz %{_infodir}/dir || :
+  fi
+fi
 
 %files -f %{name}.lang
 %defattr(-,root,root,0755)
@@ -95,6 +95,10 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_usr}/share/locale/*
 
 %changelog
+* Fri Feb 03 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.12-1
+- update to vendor version 2.12
+- update some gnulib tool to latest gnulib
+
 * Fri Oct 14 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.11-5
 - add debug package
 - adapt to latest toolchain
