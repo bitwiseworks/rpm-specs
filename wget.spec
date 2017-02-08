@@ -1,23 +1,20 @@
-#define svn_url     e:/trees/wget/trunk
-%define svn_url     http://svn.netlabs.org/repos/ports/wget/trunk
-%define svn_rev     1807
+%scm_source  svn http://svn.netlabs.org/repos/ports/wget/trunk 1982
 
 
 Summary: A utility for retrieving files using the HTTP or FTP protocols
 Name: wget
 Version: 1.18
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv3+
 Group: Applications/Internet
 Url: http://www.gnu.org/software/wget/
 Vendor:  bww bitwise works GmbH
-Source:  %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
 
 Provides: webclient
 Requires: libcx >= 0.4
-#Requires(post): /sbin/install-info
-#Requires(preun): /sbin/install-info
+Requires(post): %{_sbindir}/install-info.exe
+Requires(preun): %{_sbindir}/install-info.exe
 # needed for test suite
 #BuildRequires: perl-HTTP-Daemon, python2
 BuildRequires: openssl-devel, pkgconfig, texinfo
@@ -40,14 +37,7 @@ support for Proxy servers, and configurability.
 
 
 %prep
-%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc
-svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
-%endif
+%scm_setup
 
 autoreconf -fvi
 
@@ -82,13 +72,16 @@ rm -f $RPM_BUILD_ROOT/%{_infodir}/dir
 
 
 %post
-#/sbin/install-info %{_infodir}/wget.info.gz %{_infodir}/dir || :
-
+if [ -f %{_infodir}/wget.info.gz ]; then
+  %{_sbindir}/install-info.exe %{_infodir}/wget.info.gz %{_infodir}/dir || :
+fi
 
 %preun
-#if [ "$1" = 0 ]; then
-#    /sbin/install-info --delete %{_infodir}/wget.info.gz %{_infodir}/dir || :
-#fi
+if [ "$1" = 0 ]; then
+  if [ -f %{_infodir}/wget.info.gz ]; then
+    %{_sbindir}/install-info.exe --delete %{_infodir}/wget.info.gz %{_infodir}/dir || :
+  fi
+fi
 
 
 %clean
@@ -104,6 +97,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_infodir}/*
 
 %changelog
+* Wed Feb 08 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.18-3
+- workaround libc ticket #310 pathconf()
+
 * Fri Nov 25 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.18-2
 - enable libidn and libpsl
 
