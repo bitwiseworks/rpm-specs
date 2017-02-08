@@ -1,6 +1,3 @@
-%scm_source  svn http://svn.netlabs.org/repos/ports/libpng/trunk 1984
-
-
 Summary: A library of functions for manipulating PNG image format files
 Name: libpng
 Version: 1.6.28
@@ -8,7 +5,9 @@ Release: 1%{?dist}
 License: zlib
 Group: System Environment/Libraries
 URL: http://www.libpng.org/pub/png/
+
 Vendor: bww bitwise works GmbH
+%scm_source  svn http://svn.netlabs.org/repos/ports/libpng/trunk 1984
 
 BuildRequires: zlib-devel, pkgconfig
 BuildRequires: libtool, autoconf >= 2.65
@@ -111,6 +110,7 @@ rm -rf $RPM_BUILD_ROOT
 %changelog
 * Mon Feb 06 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.6.28-1
 - updated libpng to 1.6.28
+- use new scm_source and scm_setup macro
 - add bldlevel info to the dll
 
 * Thu Apr 7 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.6.21-3
