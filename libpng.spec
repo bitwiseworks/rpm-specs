@@ -65,6 +65,7 @@ autoreconf -fvi
 
 %build
 export LDFLAGS=" -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+export VENDOR="%{vendor}"
 
 %configure
 make %{?_smp_mflags}
