@@ -1,6 +1,3 @@
-%scm_source  svn http://svn.netlabs.org/repos/ports/wget/trunk 1982
-
-
 Summary: A utility for retrieving files using the HTTP or FTP protocols
 Name: wget
 Version: 1.18
@@ -8,7 +5,9 @@ Release: 3%{?dist}
 License: GPLv3+
 Group: Applications/Internet
 Url: http://www.gnu.org/software/wget/
+
 Vendor:  bww bitwise works GmbH
+%scm_source  svn http://svn.netlabs.org/repos/ports/wget/trunk 1982
 
 
 Provides: webclient
@@ -99,6 +98,7 @@ rm -rf $RPM_BUILD_ROOT
 %changelog
 * Wed Feb 08 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.18-3
 - workaround libc ticket #310 pathconf()
+- use the new scm_source and scm_setup macros
 
 * Fri Nov 25 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.18-2
 - enable libidn and libpsl
