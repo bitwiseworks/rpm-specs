@@ -1,16 +1,14 @@
+%scm_source  svn http://svn.netlabs.org/repos/ports/libpng/trunk 1979
+
+
 Summary: A library of functions for manipulating PNG image format files
 Name: libpng
-Version: 1.6.21
-Release: 3%{?dist}
+Version: 1.6.28
+Release: 1%{?dist}
 License: zlib
 Group: System Environment/Libraries
 URL: http://www.libpng.org/pub/png/
 Vendor: bww bitwise works GmbH
-#define svn_url	    e:/trees/libpng/trunk
-%define svn_url     http://svn.netlabs.org/repos/ports/libpng/trunk
-%define svn_rev     1533
-
-Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
 BuildRequires: zlib-devel, pkgconfig
 BuildRequires: libtool, autoconf >= 2.65
@@ -61,16 +59,9 @@ The libpng-tools package contains tools used by the authors of libpng.
 %debug_package
 
 %prep
-%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{?!svn_rev):0}
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc
-svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
-%endif
+%scm_setup
 
-autoreconf -f -i
+autoreconf -fvi
 
 %build
 export LDFLAGS=" -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
@@ -87,12 +78,18 @@ rm -rf $RPM_BUILD_ROOT%{_libdir}/*.la
 %clean
 rm -rf $RPM_BUILD_ROOT
 
+#post -p /sbin/ldconfig
+
+#postun -p /sbin/ldconfig
+
 %files
-%doc libpng-manual.txt example.c README TODO CHANGES LICENSE
+%{!?_licensedir:%global license %%doc}
+%license LICENSE
 %{_libdir}/png*.dll
 %{_mandir}/man5/*
 
 %files devel
+%doc libpng-manual.txt example.c TODO CHANGES
 %{_bindir}/*.exe
 %exclude %{_bindir}/pngfix.exe
 %{_bindir}/*-config
@@ -103,13 +100,17 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man3/*
 
 %files static
-%{_libdir}/png??.a
+%{_libdir}/png*.a
+%exclude %{_libdir}/png*_dll.a
 %{_libdir}/libpng.a
 
 %files tools
 %{_bindir}/pngfix.exe
 
 %changelog
+* Mon Feb 06 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.6.28-1
+- updated libpng to 1.6.28
+
 * Thu Apr 7 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.6.21-3
 - added apng support
   used patch from https://sourceforge.net/projects/libpng-apng/files
