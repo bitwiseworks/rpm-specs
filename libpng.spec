@@ -1,4 +1,4 @@
-%scm_source  svn http://svn.netlabs.org/repos/ports/libpng/trunk 1979
+%scm_source  svn http://svn.netlabs.org/repos/ports/libpng/trunk 1984
 
 
 Summary: A library of functions for manipulating PNG image format files
@@ -110,6 +110,7 @@ rm -rf $RPM_BUILD_ROOT
 %changelog
 * Mon Feb 06 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.6.28-1
 - updated libpng to 1.6.28
+- add bldlevel info to the dll
 
 * Thu Apr 7 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.6.21-3
 - added apng support
