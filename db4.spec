@@ -1,3 +1,7 @@
+#define svn_url     F:/rd/ports/bdb/trunk
+%define svn_url     http://svn.netlabs.org/repos/ports/bdb/trunk
+%define svn_rev     1981
+
 # the set of arches on which libgcj provides gcj and libgcj-javac-placeholder.sh
 #%define java_arches __%{ix86} alpha ia64 ppc sparc sparcv9 x86_64 s390 s390x
 %define java_arches 0
@@ -11,10 +15,10 @@
 Summary: The Berkeley DB database library (version 4) for C
 Name: db4
 Version: 4.8.30
-Release: 6%{?dist}
-Source0: http://download.oracle.com/berkeley-db/db-%{version}.tar.gz
+Release: 7%{?dist}
 
-Patch0: db-os2.diff
+Vendor:  bww bitwise works GmbH
+Source:  %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
 URL: http://www.oracle.com/database/berkeley-db/
 License: BSD
@@ -116,9 +120,17 @@ Berkeley DB.
 #client/server applications. This package contains the libraries
 #for building programs which use the Berkeley DB in Java.
 
+%debug_package
+
 %prep
-%setup -q -n db-%{version}
-%patch0 -p1 -b .os2~
+%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
+%setup -q
+%else
+%setup -n "%{name}-%{version}" -Tc
+svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
+rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
+(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
+%endif
 
 # avoid hpfs386 unpacking issues (see http://svn.netlabs.org/libc/ticket/230)
 chmod +w LICENSE README
@@ -168,29 +180,33 @@ mkdir dist/os2
 %build
 export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
 export LDFLAGS="-Zexe -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp" 
-export LIBS="-lurpo -lmmap -lpthread" 
+export LIBS="-lurpo -lcx -lpthread" 
 export CFLAGS="$RPM_OPT_FLAGS -fno-strict-aliasing"
 
 # Build the old db-185 libraries.
 #make -C db.1.85/PORT/%{_os} OORG="$CFLAGS"
 
-cd dist/os2
-ln -sf ../configure .
+cd dist
+s_config
+
+cd os2
+#ln -sf ../configure .
+cp ../configure .
 
 	# XXX --enable-diagnostic should be disabled for production (but is
 	# useful).
 	# XXX --enable-debug_{r,w}op should be disabled for production.
+
 %configure -C \
-    --enable-tcl --with-tcl=/@unixroot/usr/lib \
     --disable-shared --enable-static \
     --enable-cxx \
+    --disable-tcl \
     --disable-java \
 %ifarch %{java_arches}
 		--enable-java \
 %else
 		--disable-java \
 %endif
-    "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache" \
 		# --enable-diagnostic \
 		# --enable-debug --enable-debug_rop --enable-debug_wop \
 
@@ -305,8 +321,8 @@ rm -rf ${RPM_BUILD_ROOT}
 
 %files devel
 %defattr(-,root,root)
-%doc	docs/*
-%doc	examples_c examples_cxx
+#%doc	docs/*
+#%doc	examples_c examples_cxx
 %{_libdir}/db*.dll
 %{_libdir}/libdb-%{__soversion}.a
 %{_libdir}/libdb.a
@@ -343,6 +359,12 @@ rm -rf ${RPM_BUILD_ROOT}
 #%endif
 
 %changelog
+* Wed Feb 08 2017 yd <yd@os2power.com> 4.8.30-7
+- r1981, disable docs.
+- r1980, remove mmap hack.
+- build with libcx memory mapping.
+- update build scripts.
+
 * Wed Jan 11 2012 yd
 - avoid hpfs386 unpacking issues.
 
