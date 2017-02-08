@@ -1,25 +1,16 @@
-Summary: Library of functions for manipulating TIFF format image files
-Name: libtiff
-Version: 4.0.6
-Release: 1%{?dist}
+Summary:       Library of functions for manipulating TIFF format image files
+Name:          libtiff
+Version:       4.0.7
+Release:       1%{?dist}
+License:       libtiff
+Group:         System Environment/Libraries
+URL:           http://www.simplesystems.org/libtiff/
 
-License: libtiff
-Group: System Environment/Libraries
-URL: http://www.remotesensing.org/libtiff/
-Vendor:	bww bitwise works GmbH
+Vendor:        bww bitwise works GmbH
+%scm_source  svn http://svn.netlabs.org/repos/ports/libtiff/trunk 1989
 
-#define svn_url	    e:/trees/libtiff/trunk
-%define svn_url     http://svn.netlabs.org/repos/ports/libtiff/trunk
-%define svn_rev     1251
-
-Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
-
-BuildRequires: zlib-devel libjpeg-devel pkgconfig
-BuildRequires: libtool automake autoconf
-
-# @todo Temporary enforce dependency on the legacy package 
-# to have it installed. This should be dropped at some point.
-Requires: libtiff-legacy
+BuildRequires: zlib-devel libjpeg-devel 
+BuildRequires: libtool automake autoconf pkgconfig
 
 %description
 The libtiff package contains a library of functions for manipulating
@@ -31,10 +22,10 @@ The libtiff package should be installed if you need to manipulate TIFF
 format image files.
 
 %package devel
-Summary: Development tools for programs which will use the libtiff library
-Group: Development/Libraries
-Requires: %{name} = %{version}-%{release}
-Requires: pkgconfig
+Summary:       Development tools for programs which will use the libtiff library
+Group:         Development/Libraries
+Requires:      %{name} = %{version}-%{release}
+Requires:      pkgconfig
 
 %description devel
 This package contains the header files and documentation necessary for
@@ -46,9 +37,9 @@ image files, you should install this package.  You'll also need to
 install the libtiff package.
 
 %package static
-Summary: Static TIFF image format file library
-Group: Development/Libraries
-Requires: %{name}-devel = %{version}-%{release}
+Summary:       Static TIFF image format file library
+Group:         Development/Libraries
+Requires:      %{name}-devel = %{version}-%{release}
 
 %description static
 The libtiff-static package contains the statically linkable version of libtiff.
@@ -56,25 +47,20 @@ Linking to static libraries is discouraged for most applications, but it is
 necessary for some boot packages.
 
 %package tools
-Summary: Command-line utility programs for manipulating TIFF files
-Group: Development/Libraries
-Requires: %{name} = %{version}-%{release}
+Summary:       Command-line utility programs for manipulating TIFF files
+Group:         Development/Libraries
+Requires:      %{name} = %{version}-%{release}
 
 %description tools
 This package contains command-line programs for manipulating TIFF format
 image files using the libtiff library.
 
+%legacy_runtime_packages
+
 %debug_package
 
 %prep
-%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{?!svn_rev):0}
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc
-svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
-%endif
+%scm_setup
 
 # Use build system's libtool.m4, not the one in the package.
 autogen.sh
@@ -82,12 +68,11 @@ autogen.sh
 %build
 export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 export CFLAGS="%{optflags} -fno-strict-aliasing"
+export VENDOR="%{vendor}"
 %configure
 make %{?_smp_mflags}
 
 %install
-rm -rf $RPM_BUILD_ROOT
-
 make DESTDIR=$RPM_BUILD_ROOT install
 
 # remove what we didn't want installed
@@ -107,28 +92,34 @@ rm -f $RPM_BUILD_ROOT%{_bindir}/tiffsv
 rm -f $RPM_BUILD_ROOT%{_mandir}/man1/tiffsv.1
 rm -f html/man/tiffsv.1.html
 
-
 %clean
 rm -rf $RPM_BUILD_ROOT
 
+#post -p /sbin/ldconfig
+
+#postun -p /sbin/ldconfig
+
+%check
+#LD_LIBRARY_PATH=$PWD:$LD_LIBRARY_PATH make check
 
 %files
 %defattr(-,root,root,0755)
 %doc COPYRIGHT README RELEASE-DATE VERSION
 %{_libdir}/tiff*.dll
+%exclude %{_libdir}/tiff.dll
 
 %files devel
 %defattr(-,root,root,0755)
 %doc TODO ChangeLog html
 %{_includedir}/*
 %{_libdir}/tiff*_dll.a
-%{_libdir}/tiffxx*_dll.a
 %{_libdir}/pkgconfig/libtiff-4.pc
 %{_mandir}/man3/*
 
 %files static
 %defattr(-,root,root,0755)
 %{_libdir}/*.a
+%exclude %{_libdir}/*_dll.a
 
 %files tools
 %defattr(-,root,root,0755)
@@ -136,6 +127,12 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/*
 
 %changelog
+* Wed Feb 08 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.0.7-1
+- updated source to 4.0.7 version
+- join legazy package to the main with our new macro
+- use the new scm_source and scm_setup macros
+- add bldlevel info to the dll
+
 * Wed Jan 13 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.0.6-1
 - updated source to 4.0.6 version
 - adjusted debug package creation to latest rpm macros
