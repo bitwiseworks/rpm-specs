@@ -1,6 +1,6 @@
 #define svn_url     F:/rd/rpm/rpm/trunk
 %define svn_url     http://svn.netlabs.org/repos/rpm/rpm/trunk
-%define svn_rev     759
+%define svn_rev     972
 
 %define with_sqlite 1
 %undefine int_bdb
@@ -28,7 +28,7 @@
 Summary: The RPM package management system
 Name: rpm
 Version: %{rpmver}
-Release: 9%{?dist}
+Release: 10%{?dist}
 Group: System Environment/Base
 Url: http://www.rpm.org/
 Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
@@ -196,7 +196,7 @@ ln -s db-%{bdbver} db
 export RPM_MKDIR="/@unixroot/usr/bin/mkdir.exe"; \
 export CONFIG_SITE="/@unixroot/usr/share/config.legacy";
 export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"; \
-export LIBS="-lintl -lurpo -lmmap"; \
+export LIBS="-lintl -lurpo -lcx"; \
 CFLAGS="%{optflags} -I/@unixroot/usr/include/nss3 -I/@unixroot/usr/include/nspr4" ; \
 %configure \
     --enable-shared --disable-static --without-lua \
@@ -405,6 +405,13 @@ rm -rf $RPM_BUILD_ROOT
 %doc COPYING doc/librpm/html/*
 
 %changelog
+* Thu Feb 09 2017 yd <yd@os2power.com> 4.13.0-10
+- r957,969, Auto setup macros for SCM-hosted sources. ticket#232.
+- r954, make brp-strip.os2 always create debugfiles.list in top build directory. ticket#230.
+- r953,956,972 add legacy runtime packages support. ticket#228.
+- r951, replace $RPM_BUILD_NCPUS macro with a better version. fixes ticket#201.
+- link with libcx for memory mapping support.
+
 * Tue Jun 14 2016 yd <yd@os2power.com> 4.13.0-9
 - r759, remove read-only flag before unlocking modules. fixes ticket#180.
 
