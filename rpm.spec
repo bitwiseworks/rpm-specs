@@ -1,6 +1,6 @@
 #define svn_url     F:/rd/rpm/rpm/trunk
 %define svn_url     http://svn.netlabs.org/repos/rpm/rpm/trunk
-%define svn_rev     972
+%define svn_rev     978
 
 %define with_sqlite 1
 %undefine int_bdb
@@ -405,7 +405,8 @@ rm -rf $RPM_BUILD_ROOT
 %doc COPYING doc/librpm/html/*
 
 %changelog
-* Thu Feb 09 2017 yd <yd@os2power.com> 4.13.0-10
+* Fri Feb 10 2017 yd <yd@os2power.com> 4.13.0-10
+- r978, need scriptlet to run upon uninstall to remove WPS objects. ticket#227.
 - r957,969, Auto setup macros for SCM-hosted sources. ticket#232.
 - r954, make brp-strip.os2 always create debugfiles.list in top build directory. ticket#230.
 - r953,956,972 add legacy runtime packages support. ticket#228.
@@ -455,7 +456,6 @@ rm -rf $RPM_BUILD_ROOT
 - r558, add support for macros.d directory, fixes ticket#119. 
 - r536, Make %find_lang macro work on OS/2.
 
-Make %find_lang macro work on OS/2.
 * Fri Jan 30 2015 yd <yd@os2power.com> 4.8.1-22
 - r505, define SHELL/CONFIG_SHELL/MAKESHELL automatically for every build.
 - r504, ignore colors, they are only used for X86_64 elf linux to mix 32/64 bit code.
