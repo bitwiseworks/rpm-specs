@@ -1,6 +1,6 @@
 #define svn_url     F:/rd/rpm/python/trunk
 %define svn_url     http://svn.netlabs.org/repos/rpm/python/trunk
-%define svn_rev     780
+%define svn_rev     977
 
 %{!?__python_ver:%global __python_ver EMPTY}
 #global __python_ver 2.7
@@ -49,7 +49,7 @@
 Summary: An interpreted, interactive, object-oriented programming language
 Name: %{python}
 Version: 2.7.6
-Release: 14%{?dist}
+Release: 15%{?dist}
 License: Python
 Group: Development/Languages
 Provides: python-abi = %{pybasever}
@@ -251,8 +251,13 @@ find -name "*~" |xargs rm -f
 autoreconf -fvi
 
 %build
+
+export SHELL=""
+export MAKESHELL=""
+export CONFIG_SHELL=""
+
 export LDFLAGS="-g -Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
-export LIBS="-lssl -lcrypto -lurpo -lpthread -lintl"
+export LIBS="-lcx -lssl -lcrypto -lurpo -lpthread -lintl"
 %configure \
         --enable-shared \
         --with-system-expat \
@@ -510,6 +515,9 @@ fi
 # payload file would be unpackaged)
 
 %changelog
+* Thu Feb 09 2017 yd <yd@os2power.com> 2.7.6-15
+- link with libcx for memory mapping support.
+
 * Fri Jun 10 2016 yd <yd@os2power.com> 2.7.6-14
 - fixed Obsoletes vs Conflicts.
 - fixed python2-devel and -tools version.
