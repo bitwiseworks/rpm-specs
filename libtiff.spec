@@ -1,7 +1,7 @@
 Summary:       Library of functions for manipulating TIFF format image files
 Name:          libtiff
 Version:       4.0.7
-Release:       1%{?dist}
+Release:       2%{?dist}
 License:       libtiff
 Group:         System Environment/Libraries
 URL:           http://www.simplesystems.org/libtiff/
@@ -127,6 +127,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/*
 
 %changelog
+* Tue Feb 14 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.0.7-2
+- rebuild with changed legacy_runtime_packages macro
+
 * Wed Feb 08 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.0.7-1
 - updated source to 4.0.7 version
 - join legazy package to the main with our new macro
