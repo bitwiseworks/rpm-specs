@@ -4,7 +4,7 @@
 Name:           xz
 Summary:        LZMA compression utilities
 Version:        5.2.3
-Release:        1%{?dist}
+Release:        2%{?dist}
 Group:          Applications/File
 
 # Scripts xz{grep,diff,less,more} and symlinks (copied from gzip) are
@@ -129,6 +129,9 @@ rm -fr $RPM_BUILD_ROOT
 %{_mandir}/man1/*lz*
 
 %changelog
+* Tue Feb 14 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 5.2.3-2
+- rebuild with changed legacy_runtime_packages macro
+
 * Wed Feb 08 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 5.2.3-1
 - update to version 5.2.3
 - use the new scm_source and scm_setup macros
