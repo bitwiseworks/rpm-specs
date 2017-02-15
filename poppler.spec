@@ -1,43 +1,39 @@
 Summary:	PDF rendering library
 Name:		poppler
-Version:	0.49.0
-Release:	2%{?dist}
+Version:	0.51.0
+Release:	1%{?dist}
 License:	(GPLv2 or GPLv3) and GPLv2+ and LGPLv2+ and MIT
 Group:		Development/Libraries
-Vendor:		bww bitwise works GmbH
-# Source0:	http://poppler.freedesktop.org/%{name}-%{version}.tar.xz
 URL:		http://poppler.freedesktop.org/
-#define svn_url	    e:/trees/poppler/trunk
-%define svn_url     http://svn.netlabs.org/repos/ports/poppler/trunk
-%define svn_rev     1827
 
-Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
-
-# DEF files to create forwarders for the legacy package
-Source10:       poppler63.def
+Vendor:		bww bitwise works GmbH
+%scm_source svn http://svn.netlabs.org/repos/ports/poppler/trunk 2020
 
 Requires: poppler-data >= 0.4.0
 Requires: nss >= 3.23.0
 BuildRequires: gcc make subversion zip
 
+BuildRequires:  gettext-devel
+BuildRequires:  libjpeg-devel
+#BuildRequires:  openjpeg2-devel
+BuildRequires:  cairo-devel
+BuildRequires:  lcms2-devel
 BuildRequires:	libqt4-devel
+#BuildRequires:	libqt5-devel
+BuildRequires:  libtiff-devel
+BuildRequires:  libpng-devel
+BuildRequires:  nss-devel >= 3.23.0
+BuildRequires:  freetype-devel >= 2.5.3
+BuildRequires:  fontconfig-devel >= 2.11.94
+
 BuildRequires:	autoconf
 BuildRequires:	automake
 BuildRequires:	libtool
 BuildRequires:  pkgconfig
 BuildRequires:	zlib-devel
-BuildRequires:  libjpeg-devel
-BuildRequires:  libpng-devel
-BuildRequires:  libtiff-devel
-BuildRequires:  freetype-devel >= 2.5.3
-BuildRequires:  fontconfig-devel >= 2.11.94
-BuildRequires:  lcms2-devel
-BuildRequires:  nss-devel >= 3.23.0
-BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
-Poppler, a PDF rendering library, is a fork of the xpdf PDF
-viewer developed by Derek Noonburg of Glyph and Cog, LLC.
+%{name} is a PDF rendering library.
 
 %package devel
 Summary:	Libraries and headers for poppler
@@ -57,7 +53,7 @@ Obsoletes:	poppler-qt4 < 0.16.0-3
 Provides:	poppler-qt4 = %{version}-%{release}
 
 %description qt
-Qt4 wrapper for poppler.
+%{summary}.
 
 %package qt-devel
 Summary:	Development files for Qt4 wrapper
@@ -69,7 +65,7 @@ Provides:	poppler-qt4-devel = %{version}-%{release}
 Requires:	qt4-devel-kit
 
 %description qt-devel
-Header files for Qt4 wrapper for poppler.
+%{summary}.
 
 #%package qt5
 #Summary: Qt5 wrapper for poppler
@@ -111,11 +107,8 @@ Group:		Applications/Text
 Requires:	%{name} = %{version}-%{release}
 
 %description utils
-Poppler, a PDF rendering library, is a fork of the xpdf PDF
-viewer developed by Derek Noonburg of Glyph and Cog, LLC.
-
-This utils package installs a number of command line tools for
-converting PDF files to a number of other formats.
+Command line tools for manipulating PDF files and converting them to
+other formats.
 
 %package demos
 Summary:	Demos for poppler
@@ -125,22 +118,12 @@ Requires:	%{name}-glib = %{version}-%{release}
 %description demos
 %{summary}.
 
+%legacy_runtime_packages
+
 %debug_package
 
 %prep
-%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{?!svn_rev):0}
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc
-svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
-%endif
-
-# Prepare forwarder DLLs.
-for m in %{SOURCE10}; do
-  cp ${m} .
-done
+%scm_setup
 
 # hammer to nuke rpaths, recheck on new releases
 autoreconf -fvi
@@ -180,23 +163,20 @@ rm -rf $RPM_BUILD_ROOT
 
 rm -rf $RPM_BUILD_ROOT%{_libdir}/lib*.la
 
-# Generate & install forwarder DLLs.
-gcc -Zomf -Zdll -nostdlib poppler63.def -l$RPM_BUILD_ROOT/%{_libdir}/popple65.dll -lend -o $RPM_BUILD_ROOT/%{_libdir}/popple63.dll
-
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %files
-%defattr(644,root,root,755)
-%doc COPYING README
+%doc README
+%license COPYING
 %attr(755,root,root) %{_libdir}/popple*.dll
 
 %files devel
-%defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/poppler_dll.a
-%attr(755,root,root) %{_libdir}/poppler65_dll.a
+%attr(755,root,root) %{_libdir}/poppler66_dll.a
 %{_libdir}/pkgconfig/poppler.pc
 %{_libdir}/pkgconfig/poppler-splash.pc
+%{_libdir}/pkgconfig/poppler-cairo.pc
 %dir %{_includedir}/poppler/
 # xpdf headers
 %{_includedir}/poppler/*.h
@@ -205,43 +185,41 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/poppler/splash/
 
 %files qt
-%defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/poppq4*.dll
 
 %files qt-devel
-%defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/poppler-qt4*_dll.a
 %{_libdir}/pkgconfig/poppler-qt4.pc
 %{_includedir}/poppler/qt4/
 
 #%files qt5
-#%defattr(644,root,root,755)
 #%attr(755,root,root) %{_libdir}/poppq5*.dll
 
 #%files qt5-devel
-#%defattr(644,root,root,755)
 #%attr(755,root,root) %{_libdir}/poppler-qt5*_dll.a
 #%{_libdir}/pkgconfig/poppler-qt5.pc
 #%{_includedir}/poppler/qt5/
 
 %files cpp
-%defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/popplc*.dll
 
 %files cpp-devel
-%defattr(644,root,root,755)
 %{_libdir}/pkgconfig/poppler-cpp.pc
 %attr(755,root,root) %{_libdir}/poppler-cpp*_dll.a
 %{_includedir}/poppler/cpp
 
 %files utils
-%defattr(644,root,root,755)
 %{_bindir}/pdf*.exe
 %{_bindir}/text2pdf.exe
 %{_mandir}/man1/*
 
 
 %changelog
+* Tue Feb 14 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.51.0-1
+- remove forwarders and use the legacy_runtime_package macro instead
+- adjust spec to scm_ macros usage
+- update to vendor version 0.51.0
+
 * Wed Nov 30 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.49.0-2
 - add -nostdlib to forwarders, to need less heap
 
