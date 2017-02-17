@@ -49,7 +49,7 @@
 Summary: An interpreted, interactive, object-oriented programming language
 Name: %{python}
 Version: 2.7.6
-Release: 15%{?dist}
+Release: 16%{?dist}
 License: Python
 Group: Development/Languages
 Provides: python-abi = %{pybasever}
@@ -74,6 +74,9 @@ Provides: python-hashlib = 20081120
 Obsoletes: python-uuid < 1.31
 Provides: python-uuid = 1.31
 %endif
+
+# YD because of libcx
+Requires: db4 > 4.8.30-6
 
 # YD because of ucs4
 Conflicts: python-pycurl < 7.19.5.1-2
@@ -515,6 +518,9 @@ fi
 # payload file would be unpackaged)
 
 %changelog
+* Fri Feb 17 2017 yd <yd@os2power.com> 2.7.6-16
+- force db4 minimal version (libcx req).
+
 * Thu Feb 09 2017 yd <yd@os2power.com> 2.7.6-15
 - link with libcx for memory mapping support.
 
