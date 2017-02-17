@@ -1,7 +1,7 @@
 Summary:       Library of functions for manipulating TIFF format image files
 Name:          libtiff
 Version:       4.0.7
-Release:       2%{?dist}
+Release:       3%{?dist}
 License:       libtiff
 Group:         System Environment/Libraries
 URL:           http://www.simplesystems.org/libtiff/
@@ -26,6 +26,7 @@ Summary:       Development tools for programs which will use the libtiff library
 Group:         Development/Libraries
 Requires:      %{name} = %{version}-%{release}
 Requires:      pkgconfig
+Obsoletes:     %{name}-legacy-devel
 
 %description devel
 This package contains the header files and documentation necessary for
@@ -40,6 +41,7 @@ install the libtiff package.
 Summary:       Static TIFF image format file library
 Group:         Development/Libraries
 Requires:      %{name}-devel = %{version}-%{release}
+Obsoletes:     %{name}-legacy-static
 
 %description static
 The libtiff-static package contains the statically linkable version of libtiff.
@@ -50,6 +52,7 @@ necessary for some boot packages.
 Summary:       Command-line utility programs for manipulating TIFF files
 Group:         Development/Libraries
 Requires:      %{name} = %{version}-%{release}
+Obsoletes:     %{name}-legacy-tools
 
 %description tools
 This package contains command-line programs for manipulating TIFF format
@@ -127,6 +130,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/*
 
 %changelog
+* Wed Feb 15 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.0.7-3
+- obsolete devel, static and tools legacy rpm
+
 * Tue Feb 14 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.0.7-2
 - rebuild with changed legacy_runtime_packages macro
 
