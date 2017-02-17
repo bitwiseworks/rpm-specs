@@ -1,13 +1,13 @@
 Summary:	PDF rendering library
 Name:		poppler
-Version:	0.51.0
+Version:	0.52.0
 Release:	1%{?dist}
 License:	(GPLv2 or GPLv3) and GPLv2+ and LGPLv2+ and MIT
 Group:		Development/Libraries
 URL:		http://poppler.freedesktop.org/
 
 Vendor:		bww bitwise works GmbH
-%scm_source svn http://svn.netlabs.org/repos/ports/poppler/trunk 2020
+%scm_source svn http://svn.netlabs.org/repos/ports/poppler/trunk 2028
 
 Requires: poppler-data >= 0.4.0
 Requires: nss >= 3.23.0
@@ -169,7 +169,7 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %doc README
 %license COPYING
-%attr(755,root,root) %{_libdir}/popple*.dll
+%attr(755,root,root) %{_libdir}/popple66.dll
 
 %files devel
 %attr(755,root,root) %{_libdir}/poppler_dll.a
@@ -215,6 +215,10 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Fri Feb 17 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.52.0-1
+- fix inclusion of dll in main package
+- update to vendor version 0.52.0
+
 * Tue Feb 14 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.51.0-1
 - remove forwarders and use the legacy_runtime_package macro instead
 - adjust spec to scm_ macros usage
