@@ -1,6 +1,6 @@
 #define svn_url     F:/rd/rpm/rpm/trunk
 %define svn_url     http://svn.netlabs.org/repos/rpm/rpm/trunk
-%define svn_rev     978
+%define svn_rev     987
 
 %define with_sqlite 1
 %undefine int_bdb
@@ -58,6 +58,9 @@ BuildRequires: rexx_exe
 %if %{without int_bdb}
 BuildRequires: db4-devel
 %endif
+
+# YD because of libcx
+Requires: db4 > 4.8.30-6
 
 %if %{with check}
 #BuildRequires: fakechroot
