@@ -1,8 +1,8 @@
 
-Summary: OS/2 - eComStation 2.0 base
+Summary: OS/2 - eComStation 2.0 - ArcaOS 5.0 base
 Name: os2-base
 Version: 0.0.0
-Release: 14%{?dist}
+Release: 15%{?dist}
 
 License: free
 
@@ -300,7 +300,13 @@ if [ "$1" = 1 ] ; then
 %cube {DELLINE "SET UNIXROOT="} c:\config.sys > NUL
 %cube {ADDLINE "SET UNIXROOT=%UNIXROOT%" (ALWAYS)} c:\config.sys > NUL
 fi
-%cube {ADDLINE "SET TERM=os2" (IFNOT "SET TERM")} c:\config.sys > NUL
+%cube {ADDLINE "SET TERM=os2" (IFNOT "SET TERM=")} c:\config.sys > NUL
+%cube {ADDLINE "REM [ Default shell values ]" (IFNOT "REM [ Default shell values]")} c:\config.sys > NUL
+%cube {ADDLINE "SET SHELL=%UNIXROOT%/usr/bin/sh.exe" (IFNOT "SET SHELL=")} c:\config.sys > NUL
+%cube {ADDLINE "SET EMXSHELL=%UNIXROOT%/usr/bin/sh.exe" (IFNOT "SET EMXSHELL=")} c:\config.sys > NUL
+%cube {ADDLINE "SET CONFIG_SHELL=%UNIXROOT%/usr/bin/sh.exe" (IFNOT "SET CONFIG_SHELL=")} c:\config.sys > NUL
+%cube {ADDLINE "SET MAKESHELL=%UNIXROOT%/usr/bin/sh.exe" (IFNOT "SET MAKESHELL=")} c:\config.sys > NUL
+%cube {ADDLINE "SET EXECSHELL=%UNIXROOT%/usr/bin/sh.exe" (IFNOT "SET EXECSHELL=")} c:\config.sys > NUL
 %cube {ADDSTRING "%UNIXROOT%\usr\share\os2\book;" IN "SET BOOKSHELF=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
 %cube {ADDSTRING "%UNIXROOT%\usr\share\os2\help;" IN "SET HELP=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
 %cube {ADDSTRING "%UNIXROOT%\usr\share\os2\lang;" IN "SET DPATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
@@ -312,6 +318,12 @@ if [ "$1" = 0 ] ; then
 %cube {DELSTRING "%UNIXROOT%\usr\lib;" IN "LIBPATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
 %cube {DELLINE "SET UNIXROOT="} c:\config.sys > NUL
 %cube {DELLINE "SET TERM="} c:\config.sys > NUL
+%cube {DELLINE "REM [ Default shell values ]"} c:\config.sys > NUL
+%cube {DELLINE "SET SHELL="} c:\config.sys > NUL
+%cube {DELLINE "SET EMXSHELL="} c:\config.sys > NUL
+%cube {DELLINE "SET CONFIG_SHELL="} c:\config.sys > NUL
+%cube {DELLINE "SET MAKESHELL="} c:\config.sys > NUL
+%cube {DELLINE "SET EXECSHELL="} c:\config.sys > NUL
 %cube {DELSTRING "%UNIXROOT%\usr\share\os2\book;" IN "SET BOOKSHELF=" (FIRST} c:\config.sys > NUL
 %cube {DELSTRING "%UNIXROOT%\usr\share\os2\help;" IN "SET HELP=" (FIRST} c:\config.sys > NUL
 %cube {DELSTRING "%UNIXROOT%\usr\share\os2\lang;" IN "SET DPATH=" (FIRST} c:\config.sys > NUL
@@ -343,6 +355,10 @@ fi
 
 
 %changelog
+* Mon Feb 20 2017 scs, hb  <herwig,bauernfeind@bitwiseworks.com> 0.0.0-15
+- Add SHELL statements
+- Add ArcaOS to summary
+
 * Mon Jan 30 2017 hb <herwig,bauernfeind@bitwiseworks.com> 0.0.0-14
 - Correct typo from mmioi.dll to mmio.dll
 
