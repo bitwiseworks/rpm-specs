@@ -317,13 +317,6 @@ if [ "$1" = 0 ] ; then
 %cube {DELSTRING "%UNIXROOT%\usr\sbin;%UNIXROOT%\usr\bin;" IN "SET PATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
 %cube {DELSTRING "%UNIXROOT%\usr\lib;" IN "LIBPATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
 %cube {DELLINE "SET UNIXROOT="} c:\config.sys > NUL
-%cube {DELLINE "SET TERM="} c:\config.sys > NUL
-%cube {DELLINE "REM [ Default shell values ]"} c:\config.sys > NUL
-%cube {DELLINE "SET SHELL="} c:\config.sys > NUL
-%cube {DELLINE "SET EMXSHELL="} c:\config.sys > NUL
-%cube {DELLINE "SET CONFIG_SHELL="} c:\config.sys > NUL
-%cube {DELLINE "SET MAKESHELL="} c:\config.sys > NUL
-%cube {DELLINE "SET EXECSHELL="} c:\config.sys > NUL
 %cube {DELSTRING "%UNIXROOT%\usr\share\os2\book;" IN "SET BOOKSHELF=" (FIRST} c:\config.sys > NUL
 %cube {DELSTRING "%UNIXROOT%\usr\share\os2\help;" IN "SET HELP=" (FIRST} c:\config.sys > NUL
 %cube {DELSTRING "%UNIXROOT%\usr\share\os2\lang;" IN "SET DPATH=" (FIRST} c:\config.sys > NUL
