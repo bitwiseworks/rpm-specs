@@ -301,12 +301,16 @@ if [ "$1" = 1 ] ; then
 %cube {ADDLINE "SET UNIXROOT=%UNIXROOT%" (ALWAYS)} c:\config.sys > NUL
 fi
 %cube {ADDLINE "SET TERM=os2" (IFNOT "SET TERM=")} c:\config.sys > NUL
-%cube {ADDLINE "REM [ Default shell values ]" (IFNOT "REM [ Default shell values]")} c:\config.sys > NUL
+%cube {ADDLINE "REM [ Default shell values ]" (IFNOT "REM [ Default shell values ]")} c:\config.sys > NUL
 %cube {ADDLINE "SET SHELL=%UNIXROOT%/usr/bin/sh.exe" (IFNOT "SET SHELL=")} c:\config.sys > NUL
 %cube {ADDLINE "SET EMXSHELL=%UNIXROOT%/usr/bin/sh.exe" (IFNOT "SET EMXSHELL=")} c:\config.sys > NUL
 %cube {ADDLINE "SET CONFIG_SHELL=%UNIXROOT%/usr/bin/sh.exe" (IFNOT "SET CONFIG_SHELL=")} c:\config.sys > NUL
 %cube {ADDLINE "SET MAKESHELL=%UNIXROOT%/usr/bin/sh.exe" (IFNOT "SET MAKESHELL=")} c:\config.sys > NUL
 %cube {ADDLINE "SET EXECSHELL=%UNIXROOT%/usr/bin/sh.exe" (IFNOT "SET EXECSHELL=")} c:\config.sys > NUL
+%cube {ADDLINE "REM [ Temporary directory ]" (IFNOT "REM [ Temporary directory ]")} c:\config.sys > NUL
+%cube {ADDLINE "SET TMP=%UNIXROOT%\var\tmp" (IFNOT "SET TMP=")} c:\config.sys > NUL
+%cube {ADDLINE "SET TEMP=%UNIXROOT%\var\tmp" (IFNOT "SET TEMP=")} c:\config.sys > NUL
+%cube {ADDLINE "SET TMPDIR=%UNIXROOT%\var\tmp" (IFNOT "SET TMPDIR=")} c:\config.sys > NUL
 %cube {ADDSTRING "%UNIXROOT%\usr\share\os2\book;" IN "SET BOOKSHELF=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
 %cube {ADDSTRING "%UNIXROOT%\usr\share\os2\help;" IN "SET HELP=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
 %cube {ADDSTRING "%UNIXROOT%\usr\share\os2\lang;" IN "SET DPATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
