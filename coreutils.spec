@@ -1,17 +1,14 @@
-#define svn_url     e:/trees/coreutils/trunk
-%define svn_url     http://svn.netlabs.org/repos/ports/coreutils/trunk
-%define svn_rev     1954
-
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.26
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
 
 Vendor:  bww bitwise works GmbH
-Source:  %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
+
+%scm_source svn http://svn.netlabs.org/repos/ports/coreutils/trunk 2048
 
 #BuildRequires: libselinux-devel
 #BuildRequires: libacl-devel
@@ -64,14 +61,7 @@ including documentation and translations.
 %debug_package
 
 %prep
-%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc
-svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
-%endif
+%scm_setup
 
 #chmod a+x tests/misc/sort-mb-tests.sh tests/df/direct.sh || :
 
@@ -239,6 +229,10 @@ rm -rf $RPM_BUILD_ROOT
 %doc ABOUT-NLS COPYING NEWS README THANKS TODO
 
 %changelog
+* Thu Feb 23 2017 Dmitriy Kuminov <coding@dmik.org> - 8.26-2
+- Use scm_source and friends.
+- Work around sort stdn close failure (#145).
+
 * Fri Jan 27 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 8.26-1
 - update coreutils to version 8.26
 - set stdout to binary in base64
