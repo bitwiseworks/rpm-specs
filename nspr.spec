@@ -3,17 +3,14 @@
 Summary:        Netscape Portable Runtime
 Name:           nspr
 Version:        4.12.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 License:        MPLv2.0
 URL:            http://www.mozilla.org/projects/nspr/
 Group:          System Environment/Libraries
 Conflicts:      filesystem < 3
 Vendor:     bww bitwise works GmbH
 
-%define svn_url     http://svn.netlabs.org/repos/ports/nspr/trunk
-%define svn_rev     1511
-
-Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
+%scm_source svn http://svn.netlabs.org/repos/ports/nspr/trunk 2052
 
 BuildRequires: gcc make subversion zip
 
@@ -61,14 +58,7 @@ NSPR rorwarder libraries with old DLL names ending with 'k'.
 %define _strip_opts --debuginfo -x "*k.dll"
 
 %prep
-%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc
-svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
-%endif
+%scm_setup
 
 # Generate configure.
 autoconf
@@ -182,6 +172,10 @@ cp -p *.dll $RPM_BUILD_ROOT/%{_libdir}/
 %{_libdir}/plds4k.dll
 
 %changelog
+* Thu Feb 23 2017 Dmitriy Kuminov <coding@dmik.org> - 4.12.0-2
+- Use scm_source and friends.
+- Make PR_LoadLibrary and PR_UnloadLibrary kLIBC fork-friendly.
+
 * Fri Mar 25 2016 Dmitriy Kuminov <coding@dmik.org> 4.12.0-1
 - Update to version 4.12.
 - Import OS/2-specific NSPR fixes from Mozilla for OS/2 sources.

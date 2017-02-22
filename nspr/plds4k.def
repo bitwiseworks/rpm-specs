@@ -1,0 +1,27 @@
+LIBRARY plds4k
+EXPORTS
+    _PL_ArenaAllocate                           @1
+    _PL_ArenaFinish                             @2
+    _PL_ArenaGrow                               @3
+    _PL_ArenaRelease                            @4
+    _PL_CompactArenaPool                        @5
+    _PL_CompareStrings                          @6
+    _PL_CompareValues                           @7
+    _PL_FinishArenaPool                         @8
+    _PL_FreeArenaPool                           @9
+    _PL_HashString                              @10
+    _PL_HashTableAdd                            @11
+    _PL_HashTableDestroy                        @12
+    _PL_HashTableDump                           @13
+    _PL_HashTableEnumerateEntries               @14
+    _PL_HashTableLookup                         @15
+    _PL_HashTableRawAdd                         @16
+    _PL_HashTableRawLookup                      @17
+    _PL_HashTableRawRemove                      @18
+    _PL_HashTableRemove                         @19
+    _PL_InitArenaPool                           @20
+    _PL_NewHashTable                            @21
+    _libVersionPoint                            @22
+    _PL_HashTableLookupConst                    @23
+    _PL_HashTableRawLookupConst                 @24
+    _PL_ClearArenaPool                          @25
