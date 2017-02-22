@@ -1,14 +1,5 @@
-#define svn_url     F:/rd/rpm/rpm/trunk
-%define svn_url     http://svn.netlabs.org/repos/rpm/rpm/trunk
-%define svn_rev     987
-
-%define with_sqlite 1
-%undefine int_bdb
-
 # build against xz?
 %bcond_without xz
-# sqlite backend is pretty useless
-%bcond_with sqlite
 # just for giggles, option to build with internal Berkeley DB
 %bcond_with int_bdb
 # run internal testsuite?
@@ -28,13 +19,14 @@
 Summary: The RPM package management system
 Name: rpm
 Version: %{rpmver}
-Release: 10%{?dist}
+Release: 11%{?dist}
 Group: System Environment/Base
 Url: http://www.rpm.org/
-Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
+
+%scm_source svn http://svn.netlabs.org/repos/rpm/rpm/trunk 1020
 
 # Partially GPL/LGPL dual-licensed and some bits with BSD
-# SourceLicense: (GPLv2+ and LGPLv2+ with exceptions) and BSD 
+# SourceLicense: (GPLv2+ and LGPLv2+ with exceptions) and BSD
 License: GPLv2+
 
 Requires: coreutils
@@ -50,6 +42,9 @@ Requires: cpio
 Requires: cube
 Requires: sed
 
+# We need a fork-friendly PR_LoadLibrary on OS/2
+Requires: nspr >= 4.12.0-2
+
 Provides: rpm-macros-warpin
 Provides: rpm-macros-wps
 
@@ -58,9 +53,6 @@ BuildRequires: rexx_exe
 %if %{without int_bdb}
 BuildRequires: db4-devel
 %endif
-
-# YD because of libcx
-Requires: db4 > 4.8.30-6
 
 %if %{with check}
 #BuildRequires: fakechroot
@@ -74,7 +66,7 @@ BuildRequires: nss-devel
 # The popt version here just documents an older known-good version
 BuildRequires: popt-devel >= 1.10.2
 BuildRequires: file-devel
-BuildRequires: gettext-devel
+BuildRequires: gettext-devel gettext-common-devel
 BuildRequires: ncurses-devel
 BuildRequires: bzip2-devel >= 0.9.0c-2
 # YD because of ucs4
@@ -84,11 +76,6 @@ BuildRequires: libpoll-devel
 %if ! %{without xz}
 BuildRequires: xz-devel >= 4.999.8
 %endif
-%if %{with sqlite}
-BuildRequires: sqlite-devel
-%endif
-
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %description
 The RPM Package Manager (RPM) is a powerful command line driven
@@ -179,14 +166,7 @@ packages on a system.
 %debug_package
 
 %prep
-%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc
-svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
-%endif
+%scm_setup
 
 %if %{with int_bdb}
 ln -s db-%{bdbver} db
@@ -194,55 +174,65 @@ ln -s db-%{bdbver} db
 
 %build
 
+# Make default paths to tools start with /@unixroot on OS/2
+sed -i \
+  -e '/AC_PATH_PROGS\?(/ {
+    s#, \?/usr/#, /@unixroot/usr/# ;
+    s#, \?/bin/#, /@unixroot/usr/bin/# ;
+    s#, \?/sbin/#, /@unixroot/usr/sbin/# ;
+  }' \
+  configure.ac
+
+autoreconf -i -f
+
+# Make tools we don't yet have in OS/2 RPMs pathless
+export ac_cv_path___SSH=ssh
+
 # Using configure macro has some unwanted side-effects on rpm platform
 # setup, use the old-fashioned way for now only defining minimal paths.
-export RPM_MKDIR="/@unixroot/usr/bin/mkdir.exe"; \
-export CONFIG_SITE="/@unixroot/usr/share/config.legacy";
-export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"; \
-export LIBS="-lintl -lurpo -lcx"; \
-CFLAGS="%{optflags} -I/@unixroot/usr/include/nss3 -I/@unixroot/usr/include/nspr4" ; \
+export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+export LIBS="-lintl -lcx"
+export CPPFLAGS="$CPPFLAGS `pkg-config --cflags nss`"
 %configure \
     --enable-shared --disable-static --without-lua \
     %{!?with_int_bdb: --with-external-db} \
-    %{?with_sqlite: --enable-sqlite3} \
     --without-archive \
     --enable-python
 
-make %{?_smp_mflags}
+make %{?_smp_mflags} V=1
 
 %install
 rm -rf $RPM_BUILD_ROOT
 
 make DESTDIR="$RPM_BUILD_ROOT" install
 
-# YD skip pkcconfig requirement
-#rm ${RPM_BUILD_ROOT}%{_libdir}/pkgconfig/rpm.pc
+# Remove OS/2 import libraries from plugins
+rm ${RPM_BUILD_ROOT}%{_libdir}/rpm-plugins/*_dll.a
+
+# No /bin on OS/2
 mv ${RPM_BUILD_ROOT}/@unixroot/bin/rpm.exe ${RPM_BUILD_ROOT}%{_bindir}/rpm.exe
 
-# YD remove elf attr magic
+# Remove elf attr magic (makes no sense on OS/2)
 rm ${RPM_BUILD_ROOT}%{rpmhome}/fileattrs/elf.attr
 
-# YD remove paths from macros
-sed -i 's#.:/usr/bin/#/@unixroot/usr/bin/#gi' ${RPM_BUILD_ROOT}%{rpmhome}/macros
-sed -i 's#.:/bin/#/@unixroot/bin/#gi' ${RPM_BUILD_ROOT}%{rpmhome}/macros
-sed -i 's#.:/tcpip/bin/#/@bootroot/tcpip/bin/#gi' ${RPM_BUILD_ROOT}%{rpmhome}/macros
-sed -i 's#.:/bin/tool/##gi' ${RPM_BUILD_ROOT}%{rpmhome}/macros
+# Replace OS/2 paths with /@unixroot and /@system_drive
+sed -i \
+  -e 's#[^a-zA-Z][a-zA-Z]:/ecs/#/@system_drive/ecs/#gi' \
+  -e 's#[^a-zA-Z][a-zA-Z]:/tcpip/bin/#/@system_drive/tcpip/bin/#gi' \
+  ${RPM_BUILD_ROOT}%{rpmhome}/macros
 
-# YD install dll
-install -D -m0755 build/.libs/rpmbuild.dll $RPM_BUILD_ROOT/%{_libdir}/
-install -D -m0755 build/.libs/rpmbuild.a $RPM_BUILD_ROOT/%{_libdir}/
-install -D -m0755 build/.libs/rpmbuild_s.a $RPM_BUILD_ROOT/%{_libdir}/
-install -D -m0755 build/.libs/rpmbuild.lib $RPM_BUILD_ROOT/%{_libdir}/
+# Check there are no paths starting with drive letter or having usr/local
+! grep -q \
+  -e '[^a-zA-Z][a-zA-Z]:/' \
+  -e '/usr/local' \
+  ${RPM_BUILD_ROOT}%{rpmhome}/macros
 
-install -D -m0755 lib/.libs/rpm.dll $RPM_BUILD_ROOT/%{_libdir}/
-install -D -m0755 lib/.libs/rpm.a $RPM_BUILD_ROOT/%{_libdir}/
-install -D -m0755 lib/.libs/rpm_s.a $RPM_BUILD_ROOT/%{_libdir}/
-install -D -m0755 lib/.libs/rpm.lib $RPM_BUILD_ROOT/%{_libdir}/
-
-install -D -m0755 rpmio/.libs/rpmio.dll $RPM_BUILD_ROOT/%{_libdir}/
-install -D -m0755 rpmio/.libs/rpmio.a $RPM_BUILD_ROOT/%{_libdir}/
-install -D -m0755 rpmio/.libs/rpmio_s.a $RPM_BUILD_ROOT/%{_libdir}/
-install -D -m0755 rpmio/.libs/rpmio.lib $RPM_BUILD_ROOT/%{_libdir}/
+# Pack OS/2 Rexx scripts
+for f in wps-object warpin-conflicts ; do
+  rexx2vio "${RPM_BUILD_ROOT}%{rpmhome}/$f.cmd" "${RPM_BUILD_ROOT}%{rpmhome}/$f.exe"
+  rm "${RPM_BUILD_ROOT}%{rpmhome}/$f.cmd"
+  sed -i "s#$f.cmd#$f.exe#gi" ${RPM_BUILD_ROOT}%{rpmhome}/macros
+done
 
 # Save list of packages through cron
 mkdir -p ${RPM_BUILD_ROOT}%{_sysconfdir}/cron.daily
@@ -301,7 +291,7 @@ rm -rf $RPM_BUILD_ROOT
 #dbstat=/usr/lib/rpm/rpmdb_stat
 #if [ -x "$dbstat" ]; then
 #    if "$dbstat" -e -h %{_var}/lib/rpm 2>&1 | grep -q "doesn't match environment version \| Invalid argument"; then
-#        rm -f %{_var}/lib/rpm/__db.* 
+#        rm -f %{_var}/lib/rpm/__db.*
 #    fi
 #fi
 #exit 0
@@ -355,7 +345,8 @@ rm -rf $RPM_BUILD_ROOT
 %files libs
 %defattr(-,root,root)
 %{_libdir}/rpm*.dll
-%{_libdir}/rpm-plugins
+%dir %{_libdir}/rpm-plugins
+%{_libdir}/rpm-plugins/*.dll
 
 %files build
 %defattr(-,root,root)
@@ -372,16 +363,16 @@ rm -rf $RPM_BUILD_ROOT
 
 %{rpmhome}/brp-*
 %{rpmhome}/check-*
-#%{rpmhome}/debugedit
-#%{rpmhome}/find-debuginfo.sh
+#{rpmhome}/debugedit
+#{rpmhome}/find-debuginfo.sh
 %{rpmhome}/find-lang.sh
+%{rpmhome}/find-legacy-runtime.sh
 %{rpmhome}/*provides*
 %{rpmhome}/*requires*
 %{rpmhome}/*deps*
 %{rpmhome}/*.prov
 %{rpmhome}/*.req
 %{rpmhome}/config.*
-%{rpmhome}/mkinstalldirs
 %{rpmhome}/macros.p*
 %{rpmhome}/fileattrs
 
@@ -393,7 +384,6 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root)
 %_includedir/*
 %{_libdir}/rp*[a-z].a
-%{_libdir}/rp*[a-z].lib
 %{_mandir}/man8/rpmgraph.8*
 %{_bindir}/rpmgraph.exe
 %{_libdir}/pkgconfig/rpm.pc
@@ -408,6 +398,16 @@ rm -rf $RPM_BUILD_ROOT
 %doc COPYING doc/librpm/html/*
 
 %changelog
+* Thu Feb 23 2017 Dmitriy Kuminov <coding@dmik.org> - 4.13.0-11
+- Use scm_source and friends.
+- Use OS/2 autoconf instead of pre-generated configure (this also adds ABI suffix to all DLLs).
+- Restore using fork (that was replaced by popen) to reduce the number of OS/2-specific hacks.
+- Fix executing popt aliases with --pipe (like rpm -qa --last).
+- Use common check-files instead of check-files.os2.
+- Remove URPO dependency.
+- Fix a lot of compiler warnings.
+- Fix paths to Tools defined in macros.
+
 * Fri Feb 10 2017 yd <yd@os2power.com> 4.13.0-10
 - r978, need scriptlet to run upon uninstall to remove WPS objects. ticket#227.
 - r957,969, Auto setup macros for SCM-hosted sources. ticket#232.
@@ -451,12 +451,12 @@ rm -rf $RPM_BUILD_ROOT
 - r589, set DB_PRIVATE flag to avoid issues with BDB and incomplete mmapping support.
 
 * Thu Nov 12 2015 yd <yd@os2power.com> 4.8.1-24
-- r582, allow use of platform specific macros file. fixes ticket#135. 
+- r582, allow use of platform specific macros file. fixes ticket#135.
 - r581, standardize debug package creation. fixes ticket#134.
 
 * Wed Feb 25 2015 yd <yd@os2power.com> 4.8.1-23
 - r557, backport r536, Make %find_lang macro work on OS/2.
-- r558, add support for macros.d directory, fixes ticket#119. 
+- r558, add support for macros.d directory, fixes ticket#119.
 - r536, Make %find_lang macro work on OS/2.
 
 * Fri Jan 30 2015 yd <yd@os2power.com> 4.8.1-22
