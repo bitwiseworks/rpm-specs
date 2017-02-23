@@ -1,3 +1,5 @@
+# Note: http://pkgs.fedoraproject.org/cgit/rpms/rpm.git/tree/rpm.spec?id=cef3bf822054a87f8f8ae53a31f4af9b3d88359b
+
 # build against xz?
 %bcond_without xz
 # just for giggles, option to build with internal Berkeley DB
@@ -19,7 +21,7 @@
 Summary: The RPM package management system
 Name: rpm
 Version: %{rpmver}
-Release: 11%{?dist}
+Release: 12%{?dist}
 Group: System Environment/Base
 Url: http://www.rpm.org/
 
@@ -41,9 +43,6 @@ Requires: pthread >= 20151207
 Requires: cpio
 Requires: cube
 Requires: sed
-
-# We need a fork-friendly PR_LoadLibrary on OS/2
-Requires: nspr >= 4.12.0-2
 
 Provides: rpm-macros-warpin
 Provides: rpm-macros-wps
@@ -89,6 +88,9 @@ Summary:  Libraries for manipulating RPM packages
 Group: Development/Libraries
 License: GPLv2+ and LGPLv2+ with exceptions
 Requires: rpm = %{version}-%{release}
+
+# We need a fork-friendly PR_LoadLibrary on OS/2
+Requires: nspr >= 4.12.0-2
 
 %description libs
 This package contains the RPM shared libraries.
@@ -398,6 +400,10 @@ rm -rf $RPM_BUILD_ROOT
 %doc COPYING doc/librpm/html/*
 
 %changelog
+* Fri Feb 24 2017 Dmitriy Kuminov <coding@dmik.org> - 4.13.0-12
+- Fix install/uninstall scriptlet execution (regression of previous release).
+- Make brp-compress support OS/2 (enables compression of man files).
+
 * Thu Feb 23 2017 Dmitriy Kuminov <coding@dmik.org> - 4.13.0-11
 - Use scm_source and friends.
 - Use OS/2 autoconf instead of pre-generated configure (this also adds ABI suffix to all DLLs).
