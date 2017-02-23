@@ -24,7 +24,7 @@
 Summary:          Network Security Services
 Name:             nss
 Version:          3.23.0
-Release:          3%{?dist}
+Release:          4%{?dist}
 License:          MPLv2.0
 URL:              http://www.mozilla.org/projects/security/pki/nss/
 Group:            System Environment/Libraries
@@ -43,12 +43,7 @@ BuildRequires:    gawk
 #BuildRequires:    psmisc
 BuildRequires:    perl
 
-%define svn_url     http://svn.netlabs.org/repos/ports/nss/trunk
-%define svn_rev     1529
-
-Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
-
-BuildRequires: gcc make subversion zip
+%scm_source svn http://svn.netlabs.org/repos/ports/nss/trunk 1529
 
 #Source0:          %{name}-%{version}.tar.gz
 Source1:          nss.pc.in
@@ -306,14 +301,7 @@ NSS Freebl forwarder libraries with old DLL names ending with 'k'.
 %define _strip_opts --debuginfo -x "*k.dll"
 
 %prep
-%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc
-svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
-%endif
+%scm_setup
 
 #%patch2 -p0 -b .relro
 #%patch3 -p0 -b .transitional
@@ -856,14 +844,12 @@ install -c -m 644 ./dist/docs/nroff/pp.1 $RPM_BUILD_ROOT%{_datadir}/doc/nss-tool
 #done
 
 # Generate & install forwarder DLLs.
-gcc -Zomf -Zdll nss3k.def -l$RPM_BUILD_ROOT/%{_libdir}/nss3.dll -o $RPM_BUILD_ROOT/%{_libdir}/nss3k.dll
-gcc -Zomf -Zdll nssckbik.def -l$RPM_BUILD_ROOT/%{_libdir}/nssckbi.dll -o $RPM_BUILD_ROOT/%{_libdir}/nssckbik.dll
-gcc -Zomf -Zdll smime3k.def -l$RPM_BUILD_ROOT/%{_libdir}/smime3.dll -o $RPM_BUILD_ROOT/%{_libdir}/smime3k.dll
-gcc -Zomf -Zdll ssl3k.def -l$RPM_BUILD_ROOT/%{_libdir}/ssl3.dll -o $RPM_BUILD_ROOT/%{_libdir}/ssl3k.dll
-gcc -Zomf -Zdll nssuti3k.def -l$RPM_BUILD_ROOT/%{_libdir}/nssutil3.dll -o $RPM_BUILD_ROOT/%{_libdir}/nssuti3k.dll
-gcc -Zomf -Zdll nssdbm3k.def -l$RPM_BUILD_ROOT/%{_libdir}/nssdbm3.dll -o $RPM_BUILD_ROOT/%{_libdir}/nssdbm3k.dll
-gcc -Zomf -Zdll softok3k.def -l$RPM_BUILD_ROOT/%{_libdir}/softokn3.dll -o $RPM_BUILD_ROOT/%{_libdir}/softok3k.dll
-gcc -Zomf -Zdll freebl3k.def -l$RPM_BUILD_ROOT/%{_libdir}/freebl3.dll -o $RPM_BUILD_ROOT/%{_libdir}/freebl3k.dll
+for m in nss3 nssckbi smime3 ssl3 nssdbm3 freebl3 ; do
+  gcc -Zomf -Zdll -nostdlib ${m}k.def -l${RPM_BUILD_ROOT}%{_libdir}/${m}.dll -lend -o ${RPM_BUILD_ROOT}%{_libdir}/${m}k.dll
+done
+# These are special due to one letter less
+gcc -Zomf -Zdll -nostdlib nssuti3k.def -l${RPM_BUILD_ROOT}%{_libdir}/nssutil3.dll -lend -o ${RPM_BUILD_ROOT}%{_libdir}/nssuti3k.dll
+gcc -Zomf -Zdll -nostdlib softok3k.def -l${RPM_BUILD_ROOT}%{_libdir}/softokn3.dll -lend -o ${RPM_BUILD_ROOT}%{_libdir}/softok3k.dll
 
 %clean
 %{__rm} -rf $RPM_BUILD_ROOT
@@ -1146,10 +1132,14 @@ gcc -Zomf -Zdll freebl3k.def -l$RPM_BUILD_ROOT/%{_libdir}/freebl3.dll -o $RPM_BU
 
 
 %changelog
+* Thu Feb 23 2017 Dmitriy Kuminov <coding@dmik.org> - 3.23.0-4
+- Use scm_source and friends.
+- Generate more compact forwarder DLLs with better memory footprint.
+
 * Fri Apr 15 2016 Dmitriy Kuminov <coding@dmik.org> 3.23.0-3
 - Remove erroneous -Wl,-rpath-link from nss-config and others.
 
-* Wed Apr 1 2016 Dmitriy Kuminov <coding@dmik.org> 3.23.0-2
+* Fri Apr 1 2016 Dmitriy Kuminov <coding@dmik.org> 3.23.0-2
 - Enable high memory support.
 
 * Wed Mar 30 2016 Dmitriy Kuminov <coding@dmik.org> 3.23.0-1
