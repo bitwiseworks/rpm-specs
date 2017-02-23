@@ -3,7 +3,7 @@
 Summary:        Netscape Portable Runtime
 Name:           nspr
 Version:        4.12.0
-Release:        2%{?dist}
+Release:        3%{?dist}
 License:        MPLv2.0
 URL:            http://www.mozilla.org/projects/nspr/
 Group:          System Environment/Libraries
@@ -95,7 +95,7 @@ for m in %{SOURCE10} %{SOURCE11} %{SOURCE12}; do
   cp ${m} .
 done
 for m in nspr4 plc4 plds4; do
-  gcc -Zomf -Zdll ${m}k.def -l./dist/lib/${m}.dll -o ${m}k.dll
+  gcc -Zomf -Zdll -nostdlib ${m}k.def -l./dist/lib/${m}.dll -lend -o ${m}k.dll
 done
 
 %check
@@ -172,6 +172,9 @@ cp -p *.dll $RPM_BUILD_ROOT/%{_libdir}/
 %{_libdir}/plds4k.dll
 
 %changelog
+* Thu Feb 23 2017 Dmitriy Kuminov <coding@dmik.org> - 4.12.0-3
+- Generate more compact forwarder DLLs with better memory footprint.
+
 * Thu Feb 23 2017 Dmitriy Kuminov <coding@dmik.org> - 4.12.0-2
 - Use scm_source and friends.
 - Make PR_LoadLibrary and PR_UnloadLibrary kLIBC fork-friendly.
