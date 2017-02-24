@@ -21,11 +21,11 @@
 Summary: The RPM package management system
 Name: rpm
 Version: %{rpmver}
-Release: 12%{?dist}
+Release: 13%{?dist}
 Group: System Environment/Base
 Url: http://www.rpm.org/
 
-%scm_source svn http://svn.netlabs.org/repos/rpm/rpm/trunk 1020
+%scm_source svn http://svn.netlabs.org/repos/rpm/rpm/trunk 1027
 
 # Partially GPL/LGPL dual-licensed and some bits with BSD
 # SourceLicense: (GPLv2+ and LGPLv2+ with exceptions) and BSD
@@ -70,7 +70,7 @@ BuildRequires: ncurses-devel
 BuildRequires: bzip2-devel >= 0.9.0c-2
 # YD because of ucs4
 BuildRequires: python-devel >= 2.7.6-13
-BuildRequires: libpoll-devel
+BuildRequires: libcx-devel
 #BuildRequires: lua-devel >= 5.1
 %if ! %{without xz}
 BuildRequires: xz-devel >= 4.999.8
@@ -400,6 +400,9 @@ rm -rf $RPM_BUILD_ROOT
 %doc COPYING doc/librpm/html/*
 
 %changelog
+* Fri Feb 24 2017 Dmitriy Kuminov <coding@dmik.org> - 4.13.0-13
+- Use proper SVN revision for the build.
+
 * Fri Feb 24 2017 Dmitriy Kuminov <coding@dmik.org> - 4.13.0-12
 - Fix install/uninstall scriptlet execution (regression of previous release).
 - Make brp-compress support OS/2 (enables compression of man files).
