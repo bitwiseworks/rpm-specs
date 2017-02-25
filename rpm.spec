@@ -5,27 +5,40 @@
 # just for giggles, option to build with internal Berkeley DB
 %bcond_with int_bdb
 # run internal testsuite?
-%bcond_without check
-
-%{!?python_sitearch: %global python_sitearch %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)")}
+%bcond_with check
+# build with plugins?
+%bcond_without plugins
+# build with sanitizers?
+%bcond_with sanitizer
+# build with libarchive? (needed for rpm2archive)
+%bcond_with libarchive
+# build with libimaevm.so
+%bcond_with libimaevm
+# build with new db format
+%bcond_with ndb
 
 %define rpmhome %{_libdir}/rpm
 
-%define rpmver 4.13.0
-%define snapver %{nil}
-%define srcver %{rpmver}
+%global rpmver 4.13.0
+#global snapver rc2
+%global srcver %{version}%{?snapver:-%{snapver}}
 
-%define bdbver 4.8.24
+%define bdbname db4
+%define bdbver 5.3.15
 %define dbprefix db
 
 Summary: The RPM package management system
 Name: rpm
 Version: %{rpmver}
-Release: 13%{?dist}
+Release: %{?snapver:0.%{snapver}.}14%{?dist}
 Group: System Environment/Base
 Url: http://www.rpm.org/
 
-%scm_source svn http://svn.netlabs.org/repos/rpm/rpm/trunk 1027
+%scm_source svn http://svn.netlabs.org/repos/rpm/rpm/trunk 1035
+
+%if %{with int_bdb}
+Source1: db-%{bdbver}.tar.gz
+%endif
 
 # Partially GPL/LGPL dual-licensed and some bits with BSD
 # SourceLicense: (GPLv2+ and LGPLv2+ with exceptions) and BSD
@@ -34,15 +47,14 @@ License: GPLv2+
 Requires: coreutils
 %if %{without int_bdb}
 # db recovery tools, rpmdb_util symlinks
-Requires: db4-utils
+Requires: %{bdbname}-utils
 %endif
 Requires: popt >= 1.10.2.1
 Requires: curl
+
 Requires: rpm-libs = %{version}-%{release}
 Requires: pthread >= 20151207
-Requires: cpio
 Requires: cube
-Requires: sed
 
 Provides: rpm-macros-warpin
 Provides: rpm-macros-wps
@@ -50,11 +62,11 @@ Provides: rpm-macros-wps
 BuildRequires: rexx_exe
 
 %if %{without int_bdb}
-BuildRequires: db4-devel
+BuildRequires: %{bdbname}-devel
 %endif
 
 %if %{with check}
-#BuildRequires: fakechroot
+BuildRequires: fakechroot
 %endif
 
 # XXX generally assumed to be installed but make it explicit as rpm
@@ -62,6 +74,7 @@ BuildRequires: db4-devel
 #BuildRequires: gawk
 BuildRequires: readline-devel zlib-devel
 BuildRequires: nss-devel
+BuildRequires: nss-softokn-freebl-devel
 # The popt version here just documents an older known-good version
 BuildRequires: popt-devel >= 1.10.2
 BuildRequires: file-devel
@@ -75,6 +88,26 @@ BuildRequires: libcx-devel
 %if ! %{without xz}
 BuildRequires: xz-devel >= 4.999.8
 %endif
+%if ! %{without libarchive}
+BuildRequires: libarchive-devel
+%endif
+BuildRequires: autoconf automake libtool
+
+%if %{with plugins}
+#BuildRequires: dbus-devel
+%endif
+
+%if %{with sanitizer}
+BuildRequires: libasan
+BuildRequires: libubsan
+#BuildRequires: liblsan
+#BuildRequires: libtsan
+%global sanitizer_flags -fsanitize=address -fsanitize=undefined
+%endif
+
+%if %{with libimaevm}
+BuildRequires: ima-evm-utils
+%endif
 
 %description
 The RPM Package Manager (RPM) is a powerful command line driven
@@ -87,7 +120,7 @@ the package like its version, a description, etc.
 Summary:  Libraries for manipulating RPM packages
 Group: Development/Libraries
 License: GPLv2+ and LGPLv2+ with exceptions
-Requires: rpm = %{version}-%{release}
+Requires: %{name} = %{version}-%{release}
 
 # We need a fork-friendly PR_LoadLibrary on OS/2
 Requires: nspr >= 4.12.0-2
@@ -95,11 +128,24 @@ Requires: nspr >= 4.12.0-2
 %description libs
 This package contains the RPM shared libraries.
 
+%package build-libs
+Summary:  Libraries for building and signing RPM packages
+Group: Development/Libraries
+License: GPLv2+ and LGPLv2+ with exceptions
+Requires: %{name}-libs = %{version}-%{release}
+#Requires: %{_bindir}/gpg2
+
+%description build-libs
+This package contains the RPM shared libraries for building and signing
+packages.
+
 %package devel
 Summary:  Development files for manipulating RPM packages
 Group: Development/Libraries
 License: GPLv2+ and LGPLv2+ with exceptions
-Requires: rpm = %{version}-%{release}
+Requires: %{name} = %{version}-%{release}
+Requires: %{name}-libs = %{version}-%{release}
+Requires: %{name}-build-libs = %{version}-%{release}
 Requires: popt-devel
 Requires: file-devel
 
@@ -118,33 +164,68 @@ will manipulate RPM packages and databases.
 Summary: Scripts and executable programs used to build packages
 Group: Development/Tools
 Requires: rpm = %{version}-%{release}
-#Requires: elfutils >= 0.128 binutils
-Requires: findutils sed grep gawk diffutils
-Requires: file patch >= 2.5
-Requires: unzip xz
-Requires: gzip bzip2 cpio
+Requires: binutils
+Requires: findutils sed grep gawk diffutils file patch >= 2.5
+Requires: tar unzip gzip bzip2 cpio xz
 Requires: pkgconfig >= 1:0.24
-Requires: tar
-#Conflicts: ocaml-runtime < 3.11.1-7
+# Technically rpmbuild doesn't require any external configuration, but
+# creating distro-compatible packages does. To make the common case
+# "just work" while allowing for alternatives, depend on a virtual
+# provide, typically coming from redhat-rpm-config.
+#Requires: system-rpm-config
+# Techincally rpmbuild doesn't require python3 (and setuptools), but
+# pythondistdeps generator expects it.
+# See: https://bugzilla.redhat.com/show_bug.cgi?id=1410631
+#Requires: python3-setuptools
 
 %description build
 The rpm-build package contains the scripts and executable programs
 that are used to build packages using the RPM Package Manager.
 
-%package python
-Summary: Python bindings for apps which will manipulate RPM packages
+%package sign
+Summary: Package signing support
+Group: System Environment/Base
+Requires: rpm-build-libs = %{version}-%{release}
+
+%description sign
+This package contains support for digitally signing RPM packages.
+
+%package -n python2-%{name}
+Summary: Python 2 bindings for apps which will manipulate RPM packages
 Group: Development/Libraries
-Requires: rpm = %{version}-%{release}
+BuildRequires: python2-devel
+%{?python_provide:%python_provide python2-%{name}}
+Requires: %{name}-libs = %{version}-%{release}
+Provides: %{name}-python = %{version}-%{release}
+Obsoletes: %{name}-python < %{version}-%{release}
 # YD because of ucs4
 Requires: python >= 2.7.6-13
 
-%description python
-The rpm-python package contains a module that permits applications
+%description -n python2-%{name}
+The python2-rpm package contains a module that permits applications
 written in the Python programming language to use the interface
 supplied by RPM Package Manager libraries.
 
-This package should be installed if you want to develop Python
+This package should be installed if you want to develop Python 2
 programs that will manipulate RPM packages and databases.
+
+#package -n python3-%{name}
+#Summary: Python 3 bindings for apps which will manipulate RPM packages
+#Group: Development/Libraries
+#BuildRequires: python3-devel
+#{?python_provide:%python_provide python3-%{name}}
+#{?system_python_abi}
+#Requires: %{name}-libs%{?_isa} = %{version}-%{release}
+#Provides: %{name}-python3 = %{version}-%{release}
+#Obsoletes: %{name}-python3 < %{version}-%{release}
+
+#description -n python3-%{name}
+#the python3-rpm package contains a module that permits applications
+#written in the Python programming language to use the interface
+#supplied by RPM Package Manager libraries.
+#
+#This package should be installed if you want to develop Python 3
+#programs that will manipulate RPM packages and databases.
 
 %package apidocs
 Summary: API documentation for RPM libraries
@@ -167,6 +248,26 @@ packages on a system.
 
 %debug_package
 
+%if %{with plugins}
+
+%package plugin-syslog
+Summary: Rpm plugin for syslog functionality
+Group: System Environment/Base
+Requires: rpm-libs%{_isa} = %{version}-%{release}
+
+%description plugin-syslog
+%{summary}
+
+%package plugin-ima
+Summary: Rpm plugin ima file signatures
+Group: System Environment/Base
+Requires: rpm-libs%{_isa} = %{version}-%{release}
+
+%description plugin-ima
+%{summary}
+
+%endif
+
 %prep
 %scm_setup
 
@@ -185,28 +286,44 @@ sed -i \
   }' \
   configure.ac
 
+CPPFLAGS="`pkg-config --cflags nss`" # -DLUA_COMPAT_APIINTCASTS"
+CFLAGS="$RPM_OPT_FLAGS %{?sanitizer_flags}" # -DLUA_COMPAT_APIINTCASTS"
+LDFLAGS="%{?__global_ldflags} -Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+LIBS="-lintl -lcx"
+export CPPFLAGS CFLAGS LDFLAGS LIBS
+
 autoreconf -i -f
 
 # Make tools we don't yet have in OS/2 RPMs pathless
 export ac_cv_path___SSH=ssh
 
-# Using configure macro has some unwanted side-effects on rpm platform
-# setup, use the old-fashioned way for now only defining minimal paths.
-export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
-export LIBS="-lintl -lcx"
-export CPPFLAGS="$CPPFLAGS `pkg-config --cflags nss`"
 %configure \
-    --enable-shared --disable-static --without-lua \
+    --enable-shared --disable-static \
     %{!?with_int_bdb: --with-external-db} \
-    --without-archive \
+    %{!?with_plugins: --disable-plugins} \
+    %{!?with_lua: --without-lua} \
+    %{!?with_libarchive: --without-archive} \
+    %{?with_ndb: --with-ndb} \
     --enable-python
 
-make %{?_smp_mflags} V=1
+make %{?_smp_mflags}
+
+#pushd python
+#{__python2} setup.py build
+#{__python3} setup.py build
+#popd
 
 %install
 rm -rf $RPM_BUILD_ROOT
 
 make DESTDIR="$RPM_BUILD_ROOT" install
+
+# We need to build with --enable-python for the self-test suite, but we
+# actually package the bindings built with setup.py (#531543#c26)
+#pushd python
+#{__python2} setup.py install --skip-build --root $RPM_BUILD_ROOT
+#{__python3} setup.py install --skip-build --root $RPM_BUILD_ROOT
+#popd
 
 # Remove OS/2 import libraries from plugins
 rm ${RPM_BUILD_ROOT}%{_libdir}/rpm-plugins/*_dll.a
@@ -243,13 +360,16 @@ install -m 755 scripts/rpm.daily ${RPM_BUILD_ROOT}%{_sysconfdir}/cron.daily/rpm
 mkdir -p ${RPM_BUILD_ROOT}%{_sysconfdir}/logrotate.d
 install -m 644 scripts/rpm.log ${RPM_BUILD_ROOT}%{_sysconfdir}/logrotate.d/rpm
 
+#mkdir -p ${RPM_BUILD_ROOT}/usr/lib/tmpfiles.d
+#echo "r /var/lib/rpm/__db.*" > ${RPM_BUILD_ROOT}/usr/lib/tmpfiles.d/rpm.conf
+
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/rpm
+mkdir -p $RPM_BUILD_ROOT%{rpmhome}/macros.d
 
 mkdir -p $RPM_BUILD_ROOT%{_var}/lib/rpm
 for dbi in \
-    Basenames Conflictname Dirnames Group Installtid Name Packages \
-    Providename Provideversion Requirename Requireversion Triggername \
-    Filedigests Pubkeys Sha1header Sigmd5 Obsoletename \
+    Basenames Conflictname Dirnames Group Installtid Name Obsoletename \
+    Packages Providename Requirename Triggername Sha1header Sigmd5 \
     __db.001 __db.002 __db.003 __db.004 __db.005 __db.006 __db.007 \
     __db.008 __db.009
 do
@@ -270,37 +390,26 @@ done
 
 find $RPM_BUILD_ROOT -name "*.la"|xargs rm -f
 
-# avoid dragging in tonne of perl libs for an unused script
-#chmod 0644 $RPM_BUILD_ROOT/%{rpmhome}/perldeps.pl
-
-# compress our ChangeLog, it's fairly big...
-bzip2 -9 ChangeLog
+# These live in perl-generators now
+#rm -f $RPM_BUILD_ROOT/%{rpmhome}/{perldeps.pl,perl.*}
+#rm -f $RPM_BUILD_ROOT/%{_fileattrsdir}/perl*
+# Axe unused cruft
+rm -f $RPM_BUILD_ROOT/%{rpmhome}/{tcl.req,osgideps.pl}
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-#%if %{with check}
-#%check
-#make check
-#[ "$(ls -A tests/rpmtests.dir)" ] && cat tests/rpmtests.log
-#%endif
-
-#%post libs -p /sbin/ldconfig
-#%postun libs -p /sbin/ldconfig
-
-#%posttrans
-# XXX this is klunky and ugly, rpm itself should handle this
-#dbstat=/usr/lib/rpm/rpmdb_stat
-#if [ -x "$dbstat" ]; then
-#    if "$dbstat" -e -h %{_var}/lib/rpm 2>&1 | grep -q "doesn't match environment version \| Invalid argument"; then
-#        rm -f %{_var}/lib/rpm/__db.*
-#    fi
-#fi
-#exit 0
+%if %{with check}
+%check
+make check
+[ "$(ls -A tests/rpmtests.dir)" ] && cat tests/rpmtests.log
+%endif
 
 %files -f %{name}.lang
-%defattr(-,root,root,-)
-%doc GROUPS COPYING CREDITS ChangeLog.bz2 doc/manual/[a-z]*
+%license COPYING
+%doc GROUPS CREDITS doc/manual/[a-z]*
+
+#/usr/lib/tmpfiles.d/rpm.conf
 %dir %{_sysconfdir}/rpm
 
 %attr(0755, root, root) %dir %{_var}/lib/rpm
@@ -308,10 +417,10 @@ rm -rf $RPM_BUILD_ROOT
 %attr(0755, root, root) %dir %{rpmhome}
 
 %{_bindir}/rpm.exe
+%{?with_libarchive: %{_bindir}/rpm2archive.exe}
 %{_bindir}/rpm2cpio.exe
 %{_bindir}/rpmdb.exe
 %{_bindir}/rpmkeys.exe
-%{_bindir}/rpmsign.exe
 %{_bindir}/rpmquery
 %{_bindir}/rpmverify
 
@@ -328,7 +437,9 @@ rm -rf $RPM_BUILD_ROOT
 %lang(ru) %{_mandir}/ru/man[18]/*.[18]*
 %lang(sk) %{_mandir}/sk/man[18]/*.[18]*
 
+%attr(0755, root, root) %dir %{rpmhome}
 %{rpmhome}/macros
+%{rpmhome}/macros.d
 %{rpmhome}/rpmpopt*
 %{rpmhome}/rpmrc
 
@@ -341,31 +452,42 @@ rm -rf $RPM_BUILD_ROOT
 
 %{rpmhome}/platform
 
+%dir %{rpmhome}/fileattrs
+
 %{rpmhome}/wps-object.exe
 %{rpmhome}/warpin-conflicts.exe
 
 %files libs
-%defattr(-,root,root)
-%{_libdir}/rpm*.dll
+%{_libdir}/rpmio[0-9].dll
+%{_libdir}/rpm[0-9].dll
+%if %{with plugins}
 %dir %{_libdir}/rpm-plugins
-%{_libdir}/rpm-plugins/*.dll
+
+%files plugin-syslog
+%{_libdir}/rpm-plugins/syslog.dll
+
+%files plugin-ima
+%{_libdir}/rpm-plugins/ima.dll
+%endif
+
+%files build-libs
+%{_libdir}/rpmbuil[0-9].dll
+%{_libdir}/rpmsign[0-9].dll
 
 %files build
-%defattr(-,root,root)
 %{_bindir}/rpmbuild.exe
 %{_bindir}/gendiff
 %{_bindir}/rpmspec.exe
-%{_bindir}/rpmsign.exe
 
 %{_mandir}/man1/gendiff.1*
 %{_mandir}/man8/rpmbuild.8*
 %{_mandir}/man8/rpmdeps.8*
 %{_mandir}/man8/rpmspec.8*
-%{_mandir}/man8/rpmsign.8*
 
 %{rpmhome}/brp-*
 %{rpmhome}/check-*
 #{rpmhome}/debugedit
+#{rpmhome}/sepdebugcrcfix
 #{rpmhome}/find-debuginfo.sh
 %{rpmhome}/find-lang.sh
 %{rpmhome}/find-legacy-runtime.sh
@@ -376,30 +498,42 @@ rm -rf $RPM_BUILD_ROOT
 %{rpmhome}/*.req
 %{rpmhome}/config.*
 %{rpmhome}/macros.p*
-%{rpmhome}/fileattrs
+%{rpmhome}/fileattrs/*
 
-%files python
-%defattr(-,root,root)
-%{_usr}/lib/python*.*/*
+%files sign
+%{_bindir}/rpmsign.exe
+%{_mandir}/man8/rpmsign.8*
+
+%files -n python2-%{name}
+%{python_sitearch}/%{name}/
+#{python_sitearch}/%{name}_python-*.egg-info
+
+#files -n python3-%{name}
+#{python3_sitearch}/%{name}/
+#{python3_sitearch}/%{name}_python-*.egg-info
 
 %files devel
-%defattr(-,root,root)
-%_includedir/*
-%{_libdir}/rp*[a-z].a
 %{_mandir}/man8/rpmgraph.8*
 %{_bindir}/rpmgraph.exe
-%{_libdir}/pkgconfig/rpm.pc
+%{_libdir}/rp*[a-z].a
+%{_libdir}/pkgconfig/%{name}.pc
+%{_includedir}/%{name}/
 
 %files cron
-%defattr(-,root,root)
 %{_sysconfdir}/cron.daily/rpm
 %config(noreplace) %{_sysconfdir}/logrotate.d/rpm
 
 %files apidocs
-%defattr(-,root,root)
-%doc COPYING doc/librpm/html/*
+%license COPYING
+%doc doc/librpm/html/*
 
 %changelog
+* Sat Feb 25 2017 Dmitriy Kuminov <coding@dmik.org> - 4.13.0-14
+- Update to version 4.13.0 GA.
+- Fix sed warnings in find-lang.sh due to ':' in pats on OS/2.
+- Bring .spec in sync with current Fedora .spec (this renames some packages
+  and adds some more).
+
 * Fri Feb 24 2017 Dmitriy Kuminov <coding@dmik.org> - 4.13.0-13
 - Use proper SVN revision for the build.
 
