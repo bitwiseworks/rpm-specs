@@ -1,8 +1,3 @@
-#define svn_url     e:/trees/openssl/trunk
-%define svn_url     http://svn.netlabs.org/repos/ports/openssl/trunk
-%define svn_rev     1774
-
-
 # Note: this .spec is borrowed from:
 # http://pkgs.fedoraproject.org/cgit/rpms/openssl.git/tree/openssl.spec
 
@@ -30,7 +25,7 @@
 
 Summary: A general purpose cryptography library with TLS implementation
 Name: openssl
-Version: 1.0.2j
+Version: 1.0.2k
 Release: 1%{?dist}
 
 License: OpenSSL
@@ -47,7 +42,7 @@ BuildRequires: gcc, make, subversion, zip
 Requires: coreutils
 Requires: %{name}-libs = %{version}-%{release}
 
-Source: %{name}-%{version}-r%{svn_rev}.zip
+%scm_source svn http://svn.netlabs.org/repos/ports/openssl/trunk 2112
 
 %description
 The OpenSSL toolkit provides support for secure communications between
@@ -107,14 +102,7 @@ from other formats to the formats used by the OpenSSL toolkit.
 %debug_package
 
 %prep
-%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc
-svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
-%endif
+%scm_setup
 
 sed -i 's/SHLIB_VERSION_NUMBER "1.0.0"/SHLIB_VERSION_NUMBER "%{version}"/' crypto/opensslv.h
 
@@ -136,6 +124,7 @@ sslarch=OS2-KNIX
 # RPM_OPT_FLAGS, so we can skip specifiying them here.
 
 export CFLAGS="${CFLAGS:-%optflags}"
+export VENDOR="%{vendor}"
 export PERL="%{__perl}"
 
 ./Configure \
@@ -364,6 +353,10 @@ rm -rf $RPM_BUILD_ROOT/%{_libdir}/fipscanister.*
 %{_sysconfdir}/pki/tls/misc/tsget
 
 %changelog
+* Wed Mar 01 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.0.2k-1
+- Update to version 1.0.2k.
+- use new scm_ macros
+
 * Wed Oct 26 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.0.2j-1
 - Update to version 1.0.2j.
 
