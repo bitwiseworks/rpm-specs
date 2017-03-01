@@ -1,20 +1,17 @@
-#define svn_url	    e:/trees/freetype/trunk
-%define svn_url     http://svn.netlabs.org/repos/ports/freetype2/trunk
-%define svn_rev     1768
 
 Summary: A free and portable font rendering engine
 Name: freetype
-Version: 2.7.0
+Version: 2.7.1
 Release: 1%{?dist}
 License: (FTL or GPLv2+) and BSD and MIT and Public Domain and zlib with acknowledgement
 Group: System Environment/Libraries
 URL: http://www.freetype.org
+
 Vendor: bww bitwise works GmbH
+%scm_source  svn http://svn.netlabs.org/repos/ports/freetype2/trunk 2109
 #Source:  http://download.savannah.gnu.org/releases/freetype/freetype-%{version}.tar.bz2
 #Source1: http://download.savannah.gnu.org/releases/freetype/freetype-doc-%{version}.tar.bz2
 #Source2: http://download.savannah.gnu.org/releases/freetype/ft2demos-%{version}.tar.bz2
-
-Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
 BuildRoot: %{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
@@ -60,19 +57,13 @@ FreeType.
 %debug_package
 
 %prep
-%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{?!svn_rev):0}
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc
-svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
-%endif
+%scm_setup
 autogen.sh
 
 %build
 rm -f config.mk 
 export LDFLAGS=" -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+export VENDOR="%{vendor}"
 %configure --disable-static
 make %{?_smp_mflags}
 
@@ -126,6 +117,11 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Wed Mar 01 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.7.1-1
+- updated source to 2.7.1
+- use new scm_ macros
+- add bldlevel info
+
 * Tue Oct 25 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.7.0-1
 - updated source to 2.7.0
 - as VERSION.DLL is renamed to VERSIONS.TXT its moved to primary package again
