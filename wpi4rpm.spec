@@ -3,7 +3,7 @@
 
 Summary:	WarpIN package entry for rpms
 Name:		wpi4rpm
-Version:	0.9.5
+Version:	0.9.6
 Release:	1%{?dist}
 License:	proprietary
 Group:		Applications/System
@@ -38,6 +38,8 @@ rm -rf "$RPM_BUILD_ROOT"
 %_bindir/*.exe
 
 %changelog
+* Fri Mar 03 2017 hb <herwig.bauernfeind@bitwiseworks.com> 0.9.6-1
+- Check if more than 1 DATBAS_?.INI is present (not supported yet)
 * Tue Feb 07 2017 hb <herwig.bauernfeind@bitwiseworks.com> 0.9.5-1
 - Dummy path changed to DEV\NULL 
   (prevents WarpIN from "updating" a fake package).
