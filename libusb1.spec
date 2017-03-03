@@ -1,96 +1,108 @@
-Summary: A library which allows userspace access to USB devices
-Name: libusb1
-Version: 1.0.16
-Release: 2%{?dist}
-Source0: http://downloads.sourceforge.net/libusb/libusb-%{version}.tar.gz
+Summary:        A library which allows userspace access to USB devices
+Name:           libusb1
+Version:        1.0.21
+Release:        1%{?dist}
 
-License: LGPLv2+
-Group: System Environment/Libraries
-URL: http://libusb.info/
+License:        LGPLv2+
+Group:          System Environment/Libraries
+URL:            http://libusb.info/
 
-Patch0: libusb1-os2.patch
-Patch1: libusb1-os2-src.patch
+Vendor:         bww bitwise works GmbH
+%scm_source  svn http://svn.netlabs.org/repos/ports/libusb1/trunk 1938
 
-BuildRequires: usbcalls-devel
-Requires: usbcalls
+BuildRequires:  usbcalls-devel
+BuildRequires:  doxygen libtool
+Requires:       usbcalls
 
 %description
 This package provides a way for applications to access USB devices. Note that
 this library is not compatible with the original libusb-0.1 series.
 
-%package devel
-Summary: Development files for libusb
-Group: Development/Libraries
-Requires: %{name} = %{version}-%{release}
-Requires: %{name}-devel-doc = %{version}-%{release}
-Requires: pkgconfig
 
-%description devel
-This package contains the header files and libraries needed to develop
-applications that use libusb1.
+%package        devel
+Summary:        Development files for %{name}
+Group:          Development/Libraries
+Requires:       %{name} = %{version}-%{release}
+Requires:       %{name}-devel-doc = %{version}-%{release}
+Requires:       pkgconfig
 
-%package devel-doc
-Summary: Development files for libusb
-Group: Development/Libraries
-Requires: %{name}-devel = %{version}-%{release}
-BuildArch: noarch
+%description    devel
+The %{name}-devel package contains libraries and header files for
+developing applications that use %{name}.
 
-%description devel-doc
-This package contains documentation needed to develop applications that
-use libusb1.
 
-%package static
-Summary: Static development files for libusb
-Group: Development/Libraries
-Requires: %{name}-devel = %{version}-%{release}
+%package        devel-doc
+Summary:        Development files for %{name}
+Group:          Development/Libraries
+Requires:       %{name}-devel = %{version}-%{release}
+BuildArch:      noarch
 
-%description static
-This package contains static libraries to develop applications that use libusb1.
+%description    devel-doc
+This package contains API documentation for %{name}.
+
+%legacy_runtime_packages
 
 %debug_package
 
+
 %prep
-%setup -q -n libusb-%{version}
-%patch0 -p1 -b ~os2
-%patch1 -p1 -b ~os2
+%scm_setup
+
+autoreconf -ifv
+
 
 %build
-export CONFIG_SITE="/@unixroot/usr/share/config.legacy"
-%configure
-make CFLAGS="$RPM_OPT_FLAGS"
+export LDFLAGS="-Zhigh-mem -Zomf"
+export VENDOR="%{vendor}"
+
+%configure --disable-static
+make
+
+cd doc
+make docs
+cd ..
+
 
 %install
-rm -rf $RPM_BUILD_ROOT
-make install DESTDIR=$RPM_BUILD_ROOT
+%make_install
 rm -f $RPM_BUILD_ROOT/%{_libdir}/*.la
 
-cp -p libusb/*.dll %{buildroot}%{_libdir}
-cp -p libusb/.libs/usb-*_s.a %{buildroot}%{_libdir}
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
+
+#post -p /sbin/ldconfig
+#postun -p /sbin/ldconfig
+
+
 %files
 %defattr(-,root,root)
-%doc AUTHORS COPYING README NEWS ChangeLog
+%license COPYING
+%doc AUTHORS README ChangeLog
 %{_libdir}/*.dll
+%exclude %{_libdir}/libusb10.dll
+
 
 %files devel
 %defattr(-,root,root)
-%{_includedir}/*
-%{_libdir}/*-1.0.a
+%{_includedir}/libusb-1.0
+%{_libdir}/*_dll.a
 %{_libdir}/pkgconfig/libusb-1.0.pc
+
 
 %files devel-doc
 %defattr(-,root,root)
-%doc examples/*.c
+%doc doc/html examples/*.c
 
-%files static
-%defattr(-,root,root)
-%{_libdir}/*-1.0_s.a
 
 %changelog
-* Wed Jun 15 2016 yd <yd@os2power.com> 0.1.5-2
+* Mon Dec 12 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.0.21-1
+- update to version 1.0.21
+- add the documention
+- use the new scm_source and scm_setup macros
+
+* Wed Jun 15 2016 yd <yd@os2power.com> 1.0.16-2
 - added requirements.
 - added debug package.
 
