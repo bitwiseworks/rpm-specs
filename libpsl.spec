@@ -1,16 +1,13 @@
-#define svn_url     e:/trees/libpsl/trunk
-%define svn_url     http://svn.netlabs.org/repos/ports/libpsl/trunk
-%define svn_rev     1823
-
-
 Name:           libpsl
-Version:        0.15.0
-Release:        2%{?dist}
+Version:        0.17.0
+Release:        1%{?dist}
 Summary:        C library for the Publix Suffix List
 License:        MIT
 URL:            https://rockdaboot.github.io/libpsl
+
 Vendor:         bww bitwise works GmbH
-Source:         %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
+%scm_source svn http://svn.netlabs.org/repos/ports/libpsl/trunk 2118
+
 BuildRequires:  gettext-devel
 BuildRequires:  glib2-devel
 #BuildRequires:  gtk-doc
@@ -64,14 +61,7 @@ is acceptable for domains and so on.
 
 
 %prep
-%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc
-svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
-%endif
+%scm_setup
 
 autoreconf -fiv
 
@@ -122,6 +112,10 @@ find %{buildroot} -name '*.la' -delete -print
 %{_mandir}/man1/psl.1*
 
 %changelog
+* Fri Mar 03 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.17.0-1
+- update to version 0.17.0
+- use the new scm_source and scm_setup macros
+
 * Thu Nov 24 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.15.0-2
 - libcx req is 0.4 and not 0.4.0
 
