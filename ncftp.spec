@@ -1,20 +1,19 @@
-#define svn_url     g:/ncftp/trunk
-%define svn_url     http://svn.netlabs.org/repos/ports/Ncftp/trunk
-%define svn_rev     1918
-
 Summary: Improved console FTP client
 Name: ncftp
 Version: 3.2.6
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: Artistic clarified
 Group: Applications/Internet
 URL: http://www.ncftp.com/ncftp/
+
 Vendor:  bww bitwise works GmbH
-Source:  %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
+%scm_source  svn http://svn.netlabs.org/repos/ports/Ncftp/trunk 1925
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
 BuildRequires: autoconf, automake, libtool, ncurses-devel
+BuildRequires: bwwres
+Requires: bwwres
 Requires: ncurses >= 5.9
 
 %description
@@ -25,14 +24,7 @@ anonymous logins, and more.
 %debug_package
 
 %prep
-%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc
-svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
-%endif
+%scm_setup
 
 autoreconf -ifv -I autoconf_local
 
@@ -50,6 +42,18 @@ make install DESTDIR=%{buildroot}
 
 %clean
 rm -rf %{buildroot}
+
+%post
+if [ "$1" -ge 1 ]; then # (upon update)
+    %wps_object_delete_all
+fi
+%bww_folder -e %{name} -r README.txt -s Y
+%bww_folder -e ncftpbookmarks
+
+%postun
+if [ "$1" -eq 0 ]; then # (upon removal)
+    %wps_object_delete_all
+fi
 
 %files
 %defattr(-,root,root,-)
@@ -71,6 +75,11 @@ rm -rf %{buildroot}
 %{_mandir}/man1/ncftpspooler.1*
 
 %changelog
+* Fri Feb 17 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.2.6-3
+- add icon to ncftp.exe
+- use new scm_source and scm_setup macro
+- add wps objects
+
 * Sat Jan 14 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.2.6-2
 - fixed lpage issue (ticket #216)
 - fixed case sensitivity (ticket #218)
