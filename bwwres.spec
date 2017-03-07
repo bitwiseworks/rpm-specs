@@ -1,17 +1,19 @@
 %define debug_package %{nil}
 %define _strip_opts --no-compress --no-debuginfo
 
-
-
 Summary:    bitwiseworks icons and folders
 Name:       bwwres
 Version:    1.0.0
-Release:    1%{?dist}
+Release:    2%{?dist}
 License:    Proprietory
 Group:      Applications/System
 URL:        http://www.bitwiseworks.com
 Vendor:     bww bitwiseworks GmbH
-Source:     %{name}-%{version}.zip
+Source1:    bwwres.dll
+Source2:    macros.bww
+Source10:   bwwfbkg.bmp
+Source11:   bwwfldrc.ico
+Source12:   bwwfldro.ico
 BuildRoot:  %_tmppath/%name-%version-%release-root
 
 %description
@@ -19,19 +21,16 @@ This package provides bitwiseworks icons and folder background
 
 %prep
 %setup -n "%{name}-%{version}" -Tc
-unzip -q %{_sourcedir}/%{name}-%{version}.zip
 
 %build
 
 
 %install
-mkdir -p $RPM_BUILD_ROOT%{_libdir}
-cp usr/lib/bwwres.dll $RPM_BUILD_ROOT%{_libdir}
-mkdir -p $RPM_BUILD_ROOT%{_libdir}/rpm/macros.d
-cp usr/lib/rpm/macros.d/macros.bww $RPM_BUILD_ROOT%{_libdir}/rpm/macros.d
-mkdir -p $RPM_BUILD_ROOT%{_datadir}/os2/bww
-cp usr/share/os2/bww/bwwfbkg.bmp $RPM_BUILD_ROOT%{_datadir}/os2/bww
-cp usr/share/os2/bww/*.ico $RPM_BUILD_ROOT%{_datadir}/os2/bww
+install -p -m0644 -D %{SOURCE1}  $RPM_BUILD_ROOT%{_libdir}/bwwres.dll
+install -p -m0644 -D %{SOURCE2}  $RPM_BUILD_ROOT%{_rpmconfigdir}/macros.d/macros.bww
+install -p -m0644 -D %{SOURCE10} $RPM_BUILD_ROOT%{_datadir}/os2/bww/bwwfbkg.bmp 
+install -p -m0644 -D %{SOURCE11} $RPM_BUILD_ROOT%{_datadir}/os2/bww/bwwfldrc.ico
+install -p -m0644 -D %{SOURCE12} $RPM_BUILD_ROOT%{_datadir}/os2/bww/bwwfldro.ico
 
 %clean
 rm -rf "$RPM_BUILD_ROOT"
@@ -54,5 +53,8 @@ fi
 %_datadir/os2/bww/*.ico
 
 %changelog
+* Mon Mar 06 2017 hb <herwig.bauernfeind@bitwiseworks.com> 1.0.0-2
+- fix exe shadow
+- heavily modified specfile (diver)
 * Fri Mar 03 2017 hb <herwig.bauernfeind@bitwiseworks.com> 1.0.0-1
 - first release of bitwiseworks icons, bitmaps and macros
