@@ -1,0 +1,38 @@
+#
+# Macro for bitwiseworks default WPS object structure
+#
+# 1. Create bitwiseworks Help Center
+# 2. Create shadow of the apps doc dir in the bitwise help Center
+# 3. Create bitwiseworks Apps and Ports folder
+# 4. Create shadow of the bitwise help Center in the Apps and ports folder
+# 5. Create folder for the installed app
+# 6. (-e) Create program object for the installed app in the app folder
+# 7. (-r) Create shadow of readme.txt for the installed app in the app folder
+# 8. (-s) Create shadow of the installed app on the desktop
+
+%__bww_wpsobjects\
+%if %{undefined __bww_folder_done}\
+%global __bww_folder_done 1\
+%wps_object_create WP_BWWHELP:WPFolder|bww Help|<WP_ASSISTANCE>|TITLE=bitwiseworks Help Center;SHOWALLINTREEVIEW=YES;ICONRESOURCE=60,PMWP.DLL;ICONNRESOURCE=83,PMWP.DLL;BACKGROUND=((/@unixroot/usr/share/os2/bww/bwwfbkg.bmp));\
+%wps_object_create %{name}_BWWHELP:WPShadow|Readme|<WP_BWWHELP>|SHADOWID=((%_defaultdocdir/%{name}-%{version}));\
+%wps_object_create WP_BWWAPPS:WPFolder|bww Apps|<WP_PROGRAMSFOLDER>|TITLE=bitwiseworks Apps and Ports;ICONRESOURCE=1,BWWRES.DLL;ICONNFILE=((/@unixroot/usr/share/os2/bww/bwwfldro.ico));BACKGROUND=((/@unixroot/usr/share/os2/bww/bwwfbkg.bmp));ICONVIEW=FLOWED; \
+%wps_object_create WP_BWWHELPSHADOW:WPShadow|bitwiseworks Help Center|<WP_BWWAPPS>|SHADOWID=<WP_BWWHELP>;\
+%wps_object_create %{name}_FOLDER:WPFolder|%{name}|<WP_BWWAPPS>|TITLE=%{summary};\
+%endif\
+%if %{defined __bww_exe}\
+%wps_object_create %{__bww_exe}_EXE:WPProgram|%{summary}|<%{name}_FOLDER>|EXENAME=((%_bindir/%{__bww_exe}.exe));STARTUPDIR=((%_bindir));TITLE=%{summary};\
+%endif\
+%if %{defined __bww_readme}\
+%wps_object_create %{name}_README:WPShadow|Readme|<%{name}_FOLDER>|SHADOWID=((%_defaultdocdir/%{name}-%{version}/%{__bww_readme}))\
+%endif\
+%if %{defined __bww_shadow} && %{defined __bww_exe}\
+%wps_object_create %{name}_SHADOW:WPShadow|%{summary}|<WP_DESKTOP>|SHADOWID=<%{__bww_exe}_EXE>;\
+%endif\
+%{nil}
+
+%bww_folder(e:r:s:)\
+%{-e:%global __bww_exe %{-e*}}\
+%{-r:%global __bww_readme %{-r*}}\
+%{-s:%global __bww_shadow %{-s*}}\
+%__bww_wpsobjects\
+%{nil}
