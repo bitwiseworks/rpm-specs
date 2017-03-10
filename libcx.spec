@@ -1,19 +1,13 @@
 Name: libcx
 Summary: kLIBC Extension Library
-Version: 0.4.1
+Version: 0.5.0
 Release: 1%{?dist}
 License: LGPLv2.1+
 Group: System/Libraries
 Vendor: bww bitwise works GmbH
 URL: https://github.com/bitwiseworks/libcx
 
-%define github_name libcx
-%define github_url  https://github.com/bitwiseworks/%{github_name}/archive
-%define github_rev  %{version}
-
-Source: %{github_name}-%{github_rev}.zip
-
-BuildRequires: gcc make curl zip
+%scm_source github https://github.com/bitwiseworks/libcx %{version}
 
 Obsoletes: libpoll
 Provides: libpoll
@@ -37,14 +31,7 @@ Libraries, header files and documentation for %{name}.
 %debug_package
 
 %prep
-%if %(sh -c 'if test -f "%{_sourcedir}/%{github_name}-%{github_rev}.zip" ; then echo 1 ; else echo 0 ; fi')
-%setup -n "%{github_name}-%{github_rev}" -q
-%else
-%setup -n "%{github_name}-%{github_rev}" -Tc
-rm -f "%{_sourcedir}/%{github_name}-%{github_rev}.zip"
-curl -sSL "%{github_url}/%{github_rev}.zip" -o "%{_sourcedir}/%{github_name}-%{github_rev}.zip"
-unzip "%{_sourcedir}/%{github_name}-%{github_rev}.zip" -d ..
-%endif
+%scm_setup
 
 %define kmk_env \
     KMK_FLAGS="\
@@ -88,6 +75,10 @@ rm -rf %{buildroot}
 %{_includedir}/sys/mman.h
 
 %changelog
+* Fri Mar 10 2017 Dmitriy Kuminov <coding@dmik.org> 0.5.0-1
+- Release version 0.4.1
+  (https://github.com/bitwiseworks/libcx/blob/0.5.0/CHANGELOG.md).
+
 * Wed Jan 18 2017 Dmitriy Kuminov <coding@dmik.org> 0.4.1-1
 - Release version 0.4.1
   (https://github.com/bitwiseworks/libcx/blob/0.4.1/CHANGELOG.md).
