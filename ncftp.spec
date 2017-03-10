@@ -1,13 +1,13 @@
 Summary: Improved console FTP client
 Name: ncftp
 Version: 3.2.6
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: Artistic clarified
 Group: Applications/Internet
 URL: http://www.ncftp.com/ncftp/
 
 Vendor:  bww bitwise works GmbH
-%scm_source  svn http://svn.netlabs.org/repos/ports/Ncftp/trunk 1925
+%scm_source  svn http://svn.netlabs.org/repos/ports/Ncftp/trunk 2131
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
@@ -39,6 +39,7 @@ make
 rm -rf %{buildroot}
 mkdir -p %{buildroot}{%{_bindir},%{_mandir}/man1}
 make install DESTDIR=%{buildroot}
+install -p -m0644 -D ncftp_os2.ico $RPM_BUILD_ROOT%{_datadir}/os2/icons/ncftp_os2.ico 
 
 %clean
 rm -rf %{buildroot}
@@ -47,8 +48,10 @@ rm -rf %{buildroot}
 if [ "$1" -ge 1 ]; then # (upon update)
     %wps_object_delete_all
 fi
-%bww_folder -e %{name} -r README.txt -s Y
-%bww_folder -e ncftpbookmarks
+# for the definition of the parameters see macros.bww
+%define title Improved console FTP client
+%bww_folder -e %{name} -t %{title} -r README.txt -i ncftp_os2.ico -s Y
+%bww_folder -e ncftpbookmarks -t bookmarks
 
 %postun
 if [ "$1" -eq 0 ]; then # (upon removal)
@@ -73,8 +76,13 @@ fi
 %{_mandir}/man1/ncftpbatch.1*
 %{_mandir}/man1/ncftpls.1*
 %{_mandir}/man1/ncftpspooler.1*
+%{_datadir}/os2/icons/ncftp_os2.ico
 
 %changelog
+* Fri Mar 10 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.2.6-4
+- change the way to add a icon
+- adjust to latest bww res macro
+
 * Fri Feb 17 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.2.6-3
 - add icon to ncftp.exe
 - use new scm_source and scm_setup macro
