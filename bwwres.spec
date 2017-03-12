@@ -4,7 +4,7 @@
 Summary:    bitwiseworks icons and folders
 Name:       bwwres
 Version:    1.0.0
-Release:    2%{?dist}
+Release:    3%{?dist}
 License:    Proprietory
 Group:      Applications/System
 URL:        http://www.bitwiseworks.com
@@ -36,14 +36,8 @@ install -p -m0644 -D %{SOURCE12} $RPM_BUILD_ROOT%{_datadir}/os2/bww/bwwfldro.ico
 rm -rf "$RPM_BUILD_ROOT"
 
 %post
-if [ "$1" -ge 1 ]; then # (upon update)
-    %wps_object_delete_all
-fi
 
 %postun
-if [ "$1" -eq 0 ]; then # (upon removal)
-    %wps_object_delete_all
-fi
 
 %files
 %defattr(-,root,root,-)
@@ -53,6 +47,8 @@ fi
 %_datadir/os2/bww/*.ico
 
 %changelog
+* Mon Mar 06 2017 hb <herwig.bauernfeind@bitwiseworks.com> 1.0.0-3
+- -t switch in order to allow custom object titles (diver)
 * Mon Mar 06 2017 hb <herwig.bauernfeind@bitwiseworks.com> 1.0.0-2
 - fix exe shadow
 - heavily modified specfile (diver)
