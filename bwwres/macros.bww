@@ -16,6 +16,10 @@
 # parameter (-t)
 # this is the desired title for the app or the exe, if this parameter is left
 # out, we use %{summary} as the title
+#
+# parameter (-i)
+# Icon for the exe. If this parameter is left out, no icon is added
+# The icon has to be copied to /@unixroot/usr/share/os2/icons during installation
 
 %__bww_commonobjects()\
 %wps_object_create WP_BWWHELP:WPFolder|bww Help|<WP_ASSISTANCE>|TITLE=bitwiseworks Help Center;SHOWALLINTREEVIEW=YES;ICONRESOURCE=60,PMWP.DLL;ICONNRESOURCE=83,PMWP.DLL;BACKGROUND=((/@unixroot/usr/share/os2/bww/bwwfbkg.bmp));\
@@ -25,14 +29,15 @@
 %wps_object_create %{name}_FOLDER:WPFolder|%{name}|<WP_BWWAPPS>|TITLE=%{__bww_title};\
 %{nil}
 
-%bww_folder(e:r:s:t:)\
+%bww_folder(e:r:s:t:i:)\
 %{-t:%global __bww_title %{-t*}}%{!-t:%global __bww_title %{summary}}\
 %if %{undefined __bww_folder_done}\
 %global __bww_folder_done 1\
 %__bww_commonobjects %{__bww_title}\
 %endif\
 %define __bww_exeTitle %{!-t:%{__bww_title}}%{-t:%{-t*}}\
-%{-e:%{expand:%wps_object_create %{-e*}_EXE:WPProgram|%{__bww_exeTitle}|<%{name}_FOLDER>|EXENAME=((%_bindir/%{-e*}.exe));STARTUPDIR=((%_bindir));TITLE=%{__bww_exeTitle};}}\
+%define __bww_exeIcon %{!-i:}%{-i:ICONFILE=((/@unixroot/usr/share/os2/icons/%{-i*}));}\
+%{-e:%{expand:%wps_object_create %{-e*}_EXE:WPProgram|%{__bww_exeTitle}|<%{name}_FOLDER>|EXENAME=((%_bindir/%{-e*}.exe));STARTUPDIR=((%_bindir));TITLE=%{__bww_exeTitle};%{__bww_exeIcon}}}\
 %{-r:%{expand:%wps_object_create %{name}_README:WPShadow|Readme|<%{name}_FOLDER>|SHADOWID=((%_defaultdocdir/%{name}-%{version}/%{-r*}))}}\
 %{-s:%{-e:%{expand:%wps_object_create %{name}_SHADOW:WPShadow|%{__bww_exeTitle}|<WP_DESKTOP>|SHADOWID=<%{-e*}_EXE>;}}}\
 %{nil}

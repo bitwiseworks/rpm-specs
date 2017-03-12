@@ -15,6 +15,7 @@ Source10:   bwwfbkg.bmp
 Source11:   bwwfldrc.ico
 Source12:   bwwfldro.ico
 BuildRoot:  %_tmppath/%name-%version-%release-root
+BuildArch:  noarch
 
 %description
 This package provides bitwiseworks icons and folder background
