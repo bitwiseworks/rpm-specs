@@ -3,7 +3,7 @@
 Summary:    kLIBC User Management
 Name:       klusrmgr
 Version:    1.1.0
-Release:    2%{?dist}
+Release:    3%{?dist}
 License:    proprietary
 Group:      Applications/System
 URL:        http://www.netlabs.org/vxapps
@@ -11,6 +11,8 @@ Vendor:     bww bitwise works GmbH
 Source:     %{name}-%{version}.zip
 BuildRoot:  %_tmppath/%name-%version-%release-root
 Requires:   wpi4rpm >= 0.9.2
+Requires:   rxcrypt >= 1.0.0
+Requires:   bwwres  >= 1.0.0
 Obsoletes:  kLIBCum <= 1.0.10
 
 %description
@@ -34,8 +36,6 @@ unzip -q %{_sourcedir}/%{name}-%{version}.zip
 mkdir -p $RPM_BUILD_ROOT%{_bindir}
 cp usr/bin/*.exe $RPM_BUILD_ROOT%{_bindir}
 cp usr/bin/*.EXE $RPM_BUILD_ROOT%{_bindir}
-mkdir -p $RPM_BUILD_ROOT%{_libdir}
-cp usr/lib/*.dll $RPM_BUILD_ROOT%{_libdir}
 mkdir -p $RPM_BUILD_ROOT%{_defaultdocdir}/%{name}-%{version}
 cp usr/share/doc/klusrmgr/readme.txt $RPM_BUILD_ROOT%{_defaultdocdir}/%{name}-%{version}
 mkdir -p $RPM_BUILD_ROOT%{_datadir}/os2/lang
@@ -50,11 +50,8 @@ if [ "$1" -ge 1 ]; then # (upon update)
     %wps_object_delete_all
     wpi4rpm del %{vendor}/%{name}/binaries %{version}-%{release}
 fi
-%wps_object_create_begin
-klusrmgr_FOLDER:WPFolder|klusrmgr|<WP_DESKTOP>|TITLE=kLIBC User Management;
-klusrmgr_README:WPShadow|Readme|<klusrmgr_FOLDER>|SHADOWID=((%_defaultdocdir/%{name}-%{version}/readme.txt))
-klusrmgr_EXE:WPProgram|User Management|<klusrmgr_FOLDER>|EXENAME=((%_bindir/klusrmgr.exe));STARTUPDIR=((%_bindir));TITLE=User Management;
-%wps_object_create_end
+%bww_folder -e %{name} -r readme.txt
+%wps_object_create %{name}_WPCFGSHADOW:WPShadow|%{summary}|<WP_CONFIG>|SHADOWID=<%{__bww_exe}_EXE>;
 wpi4rpm add %{vendor}/%{name}/binaries %{version}-%{release}
 
 %postun
@@ -68,12 +65,13 @@ fi
 %_defaultdocdir/%{name}-%{version}/readme.txt
 %_bindir/*.exe
 %_bindir/*.EXE
-%_libdir/*.dll
 %_datadir/os2/lang/*.msg
 
 
 %changelog
-* Thu Jan 26 2017 hb <herwig.bauernfeind@bitwiseworks.com> 1.1.0
+* Sun Feb 05 2017 hb <herwig.bauernfeind@bitwiseworks.com> 1.1.0-3
+- put RxCrypt.DLL into a separate package
+* Thu Jan 26 2017 hb <herwig.bauernfeind@bitwiseworks.com> 1.1.0-2
 - renamed to klusrmgr
 - added support for shell
 - completely rewrote user properties dialogue
@@ -104,5 +102,5 @@ fi
 - Add some hints, fix wrong hints
 * Thu Oct 27 2016 hb <herwig.bauernfeind@bitwiseworks.com> 1.0.4-1
 - bigger buttons, shortened strings for EN, ES
-* Mon Oct 24 2016 yd <silvan.scherrer@bitwiseworks.com> 1.0.3-1
+* Mon Oct 24 2016 scs <silvan.scherrer@bitwiseworks.com> 1.0.3-1
 - first public version
