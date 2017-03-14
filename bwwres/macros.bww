@@ -10,8 +10,9 @@
 #
 # then create the WPS objects according to the parameter
 # 6. (-e) Create program object for the installed app in the app folder
-# 7. (-r) Create shadow of readme.txt for the installed app in the app folder
-# 8. (-s) Create shadow of the installed app on the desktop
+# 7. (-a) Associate file filter with the installed app
+# 8. (-r) Create shadow of readme.txt for the installed app in the app folder
+# 9. (-s) Create shadow of the installed app on the desktop
 #
 # parameter (-t)
 # this is the desired title for the app or the exe, if this parameter is left
@@ -20,7 +21,10 @@
 # parameter (-i)
 # Icon for the exe. If this parameter is left out, no icon is added
 # The icon has to be copied to /@unixroot/usr/share/os2/icons during installation
-
+#
+# parameter (-a)
+# Associate a file filter (for example -a *.txt) to the .exe file
+#
 %__bww_commonobjects()\
 %wps_object_create WP_BWWHELP:WPFolder|bww Help|<WP_ASSISTANCE>|TITLE=bitwiseworks Help Center;SHOWALLINTREEVIEW=YES;ICONRESOURCE=60,PMWP.DLL;ICONNRESOURCE=83,PMWP.DLL;BACKGROUND=((/@unixroot/usr/share/os2/bww/bwwfbkg.bmp));\
 %wps_object_create %{name}_BWWHELP:WPShadow|Readme|<WP_BWWHELP>|SHADOWID=((%_defaultdocdir/%{name}-%{version}));\
@@ -29,7 +33,7 @@
 %wps_object_create %{name}_FOLDER:WPFolder|%{name}|<WP_BWWAPPS>|TITLE=%{__bww_title};\
 %{nil}
 
-%bww_folder(e:r:s:t:i:)\
+%bww_folder(e:r:s:t:i:a)\
 %{-t:%global __bww_title %{-t*}}%{!-t:%global __bww_title %{summary}}\
 %if %{undefined __bww_folder_done}\
 %global __bww_folder_done 1\
@@ -37,7 +41,8 @@
 %endif\
 %define __bww_exeTitle %{!-t:%{__bww_title}}%{-t:%{-t*}}\
 %define __bww_exeIcon %{!-i:}%{-i:ICONFILE=((/@unixroot/usr/share/os2/icons/%{-i*}));}\
-%{-e:%{expand:%wps_object_create %{-e*}_EXE:WPProgram|%{__bww_exeTitle}|<%{name}_FOLDER>|EXENAME=((%_bindir/%{-e*}.exe));STARTUPDIR=((%_bindir));TITLE=%{__bww_exeTitle};%{__bww_exeIcon}}}\
+%define __bww_exeAssoc %{!-a:}%{-a:ASSOCFILTER=%{-a*};}\
+%{-e:%{expand:%wps_object_create %{-e*}_EXE:WPProgram|%{__bww_exeTitle}|<%{name}_FOLDER>|EXENAME=((%_bindir/%{-e*}.exe));STARTUPDIR=((%_bindir));TITLE=%{__bww_exeTitle};%{__bww_exeIcon}%{__bww_exeAssoc}}}\
 %{-r:%{expand:%wps_object_create %{name}_README:WPShadow|Readme|<%{name}_FOLDER>|SHADOWID=((%_defaultdocdir/%{name}-%{version}/%{-r*}))}}\
 %{-s:%{-e:%{expand:%wps_object_create %{name}_SHADOW:WPShadow|%{__bww_exeTitle}|<WP_DESKTOP>|SHADOWID=<%{-e*}_EXE>;}}}\
 %{nil}
