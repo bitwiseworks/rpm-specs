@@ -1,26 +1,22 @@
-#define svn_url     F:/rd/ports/file/trunk
-%define svn_url     http://svn.netlabs.org/repos/ports/file/trunk
-%define svn_rev     266
-
-%{!?python_sitelib: %define python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
-%{!?python_sitearch: %define python_sitearch %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)")}
-%define __libtoolize :
+%global with_python3 0
 
 Summary: A utility for determining file types
 Name: file
-Version: 5.04
-Release: 7%{?dist}
+Version: 5.30
+Release: 1%{?dist}
 License: BSD
 Group: Applications/File
+
+Vendor:  bww bitwise works GmbH
+%scm_source svn  http://svn.netlabs.org/repos/ports/file/trunk 2149
+
+# DEF files to create forwarders for the legacy package
+Source10:       magic.def
+
 URL: http://www.darwinsys.com/file/
-
-Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
-
 Requires: file-libs = %{version}-%{release}
-Requires: mmap >= 20110103
-
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: zlib-devel
+BuildRequires: autoconf automake libtool
 
 %description
 The file command is used to identify a particular file according to the
@@ -31,6 +27,7 @@ different graphics formats.
 %package libs
 Summary: Libraries for applications using libmagic
 Group:   Applications/File
+License: BSD
 
 %description libs
 
@@ -45,19 +42,11 @@ Requires: %{name} = %{version}-%{release}
 The file-devel package contains the header files and libmagic library
 necessary for developing programs using libmagic.
 
-%package static
-Summary: Static library for file development
-Group:    Applications/File
-Requires: %{name} = %{version}-%{release}
-
-%description static
-The file-static package contains the static version of
-the libmagic library.
-
 %package -n python-magic
-Summary: Python bindings for the libmagic API
+Summary: Python 2 bindings for the libmagic API
 Group:   Development/Libraries
-BuildRequires: python-devel
+BuildRequires: python2-devel
+BuildArch: noarch
 Requires: %{name} = %{version}-%{release}
 
 %description -n python-magic
@@ -65,42 +54,58 @@ This package contains the Python bindings to allow access to the
 libmagic API. The libmagic library is also used by the familiar
 file(1) command.
 
-%package debug
-Summary: HLL debug data for exception handling support.
+%if %{with_python3}
+%package -n python3-magic
+Summary: Python 3 bindings for the libmagic API
+Group:   Development/Libraries
+BuildRequires: python3-devel
+BuildArch: noarch
+Requires: %{name} = %{version}-%{release}
 
-%description debug
-HLL debug data for exception handling support.
+%description -n python3-magic
+This package contains the Python 3 bindings to allow access to the
+libmagic API. The libmagic library is also used by the familiar
+file(1) command.
+%endif
+
+%debug_package
 
 %prep
-%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc
-svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
-%endif
+%scm_setup
+autoreconf -fvi
+
+# Prepare forwarder DLLs.
+for m in %{SOURCE10}; do
+  cp ${m} .
+done
 
 #iconv -f iso-8859-1 -t utf-8 < doc/libmagic.man > doc/libmagic.man_
 touch -r doc/libmagic.man doc/libmagic.man_
 mv doc/libmagic.man_ doc/libmagic.man
 
-%build
-export CONFIG_SITE="/@unixroot/usr/share/config.legacy"
-export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
-export LIBS="-lurpo -lmmap"
-export CFLAGS="%{optflags} -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE"
-%configure \
-        --enable-fsect-man5 --disable-rpath \
-        --disable-shared --disable-static
+%if %{with_python3}
+rm -rf %{py3dir}
+cp -a python %{py3dir}
+%endif
 
+%build
+export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+export LIBS="-lcx"
+export CFLAGS="%{optflags} -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE"
+export VENDOR="%{vendor}"
+%configure --enable-fsect-man5 --disable-rpath
+
+export BEGINLIBPATH=%{_builddir}/%{name}-%{version}/src/.libs
 make %{?_smp_mflags}
 
 cd python
 CFLAGS="%{optflags}" %{__python} setup.py build
+%if %{with_python3}
+cd %{py3dir}
+CFLAGS="%{optflags}" %{__python3} setup.py build
+%endif
 
 %install
-rm -rf $RPM_BUILD_ROOT
 mkdir -p ${RPM_BUILD_ROOT}%{_bindir}
 mkdir -p ${RPM_BUILD_ROOT}%{_mandir}/man1
 mkdir -p ${RPM_BUILD_ROOT}%{_mandir}/man5
@@ -112,27 +117,34 @@ rm -f ${RPM_BUILD_ROOT}%{_libdir}/*.la
 
 cat magic/Magdir/* > ${RPM_BUILD_ROOT}%{_datadir}/misc/magic
 ln -s misc/magic ${RPM_BUILD_ROOT}%{_datadir}/magic
-#ln -s file/magic.mime ${RPM_BUILD_ROOT}%{_datadir}/magic.mime
 ln -s ../magic ${RPM_BUILD_ROOT}%{_datadir}/file/magic
 
-cp src/magic.dll ${RPM_BUILD_ROOT}%{_libdir}
-cp src/.libs/magic_s.a ${RPM_BUILD_ROOT}%{_libdir}
+# Generate & install forwarder DLLs.
+gcc -Zomf -Zdll -nostdlib magic.def -l$RPM_BUILD_ROOT/%{_libdir}/magic1.dll -lend -o $RPM_BUILD_ROOT/%{_libdir}/magic.dll
 
 cd python
 %{__python} setup.py install -O1 --skip-build --root ${RPM_BUILD_ROOT}
+%if %{with_python3}
+cd %{py3dir}
+%{__python3} setup.py install -O1 --skip-build --root ${RPM_BUILD_ROOT}
+%endif
 %{__install} -d ${RPM_BUILD_ROOT}%{_datadir}/%{name}
 
-%clean
-rm -rf $RPM_BUILD_ROOT
+#post libs -p /sbin/ldconfig
+
+#postun libs -p /sbin/ldconfig
 
 %files
-%defattr(-,root,root,-)
-%doc COPYING ChangeLog README
-%{_bindir}/*
+%{!?_licensedir:%global license %%doc}
+%license COPYING
+%doc ChangeLog README
+%{_bindir}/*.exe
 %{_mandir}/man1/*
 
 %files libs
-%defattr(-,root,root,-)
+%{!?_licensedir:%global license %%doc}
+%license COPYING
+%doc ChangeLog README
 %{_libdir}/*.dll
 %{_datadir}/magic*
 %{_mandir}/man5/*
@@ -140,25 +152,36 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/misc/*
 
 %files devel
-%defattr(-,root,root,-)
-%{_libdir}/*.dll
-%{_libdir}/magic.a
+%{_libdir}/magic*_dll.a
 %{_includedir}/magic.h
 %{_mandir}/man3/*
 
-%files static
-%defattr(-,root,root,-)
-%{_libdir}/*_s.a
 
 %files -n python-magic
-%defattr(-, root, root, -)
-%doc python/README COPYING python/example.py
+%{!?_licensedir:%global license %%doc}
+%license COPYING
+%doc python/README python/example.py
 %{_libdir}/python*/*
+%{python_sitelib}/magic.py
+%{python_sitelib}/magic.pyc
+%{python_sitelib}/magic.pyo
+%{python_sitelib}/*egg-info
 
-%files debug
-%defattr(-,root,root)
-%{_libdir}/*.dbg
+%if %{with_python3}
+%files -n python3-magic
+%{!?_licensedir:%global license %%doc}
+%license COPYING
+%doc python/README python/example.py
+%{python3_sitelib}/magic.py
+%{python3_sitelib}/*egg-info
+%{python3_sitelib}/__pycache__/*
+%endif
 
 %changelog
+* Mon Mar 06 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 5.30-1
+- updated to vendor version 5.30
+- use scm_ macros
+- add forwarder
+
 * Mon Feb 02 2015 yd <yd@os2power.com> 5.04-7
 - r266, rebuilt with gcc 4.9.2 and python 2.7.
