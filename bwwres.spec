@@ -4,7 +4,7 @@
 Summary:    bitwiseworks icons and folders
 Name:       bwwres
 Version:    1.0.0
-Release:    4%{?dist}
+Release:    5%{?dist}
 License:    Proprietory
 Group:      Applications/System
 URL:        http://www.bitwiseworks.com
@@ -48,6 +48,8 @@ rm -rf "$RPM_BUILD_ROOT"
 %_datadir/os2/bww/*.ico
 
 %changelog
+* Sat Mar 18 2017 hb <herwig.bauernfeind@bitwiseworks.com> 1.0.0-5
+- fix -a switch (diver)
 * Tue Mar 14 2017 hb <herwig.bauernfeind@bitwiseworks.com> 1.0.0-4
 - -a switch in order to allow file filters
 * Mon Mar 06 2017 hb <herwig.bauernfeind@bitwiseworks.com> 1.0.0-3

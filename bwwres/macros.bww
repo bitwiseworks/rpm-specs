@@ -33,7 +33,7 @@
 %wps_object_create %{name}_FOLDER:WPFolder|%{name}|<WP_BWWAPPS>|TITLE=%{__bww_title};\
 %{nil}
 
-%bww_folder(e:r:s:t:i:a)\
+%bww_folder(e:r:s:t:i:a:)\
 %{-t:%global __bww_title %{-t*}}%{!-t:%global __bww_title %{summary}}\
 %if %{undefined __bww_folder_done}\
 %global __bww_folder_done 1\
