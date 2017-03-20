@@ -1,15 +1,9 @@
-#define svn_url     e:/trees/binutils/trunk
-%define svn_url     http://svn.netlabs.org/repos/ports/binutils/trunk
-%define svn_rev     1587
-
 # rpmbuild parameters:
 # --define "binutils_target arm-linux-gnu" to create arm-linux-gnu-binutils.
-# --with debug: Build without optimizations and without splitting the debuginfo.
-# --without testsuite: Do not run the testsuite.  Default is to run it.
-# --with testsuite: Run the testsuite.  Default --with debug is not to run it.
-
-# we don't run the testsuit, as there are dependencies we don't have atm
-%define _without_testsuite 1
+# --with=bootstrap: Build with minimal dependencies.
+# --with=debug: Build without optimizations and without splitting the debuginfo.
+# --without=docs: Skip building documentation.
+# --without=testsuite: Do not run the testsuite.
 
 %if 0%{!?binutils_target:1}
 # we always use _build, as target_platform isn't recognised by configure
@@ -26,47 +20,89 @@
 # BZ 1195883: But do not do this by default.
 %define enable_deterministic_archives 0
 
+# BZ 1342618: Enable support for GCC LTO compilation.
+%define enable_lto 0
+# Disable the default generation of compressed debug sections.
+%define default_compress_debug 0
+
+# Default: Not bootstrapping.
+%bcond_with bootstrap
+# Default: Not debug
+%bcond_with debug
+# Default: Always build documentation.
+%bcond_without docs
+# Default: don't run run the testsuite.
+%bcond_with testsuite
+
+%if %{with bootstrap}
+%undefine with_docs
+%undefine with_testsuite
+%endif
+
+%if %{with debug}
+%undefine with_testsuite
+%endif
+
 
 Summary: A GNU collection of binary utilities
 Name: %{?cross}binutils%{?_with_debug:-debug}
-Version: 2.25
+Version: 2.27
 Release: 1%{?dist}
 License: GPLv3+
 Group: Development/Tools
 URL: http://sources.redhat.com/binutils
 
-Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 Vendor: bww bitwise works GmbH
+%scm_source svn http://svn.netlabs.org/repos/ports/binutils/trunk 2151
 
 Provides: bundled(libiberty)
 
 # BZ 1173780: Building GOLD for PPC is not working at the moment.
-# define gold_arches %ix86 x86_64 %arm aarch64 ppc* %{power64}
+# %define gold_arches %ix86 x86_64 %arm aarch64 ppc* %{power64}
 %define gold_arches %ix86 x86_64 %arm aarch64
 
-# we don't build on elf, so no gold for us
-# ifarch %gold_arches
-# define build_gold	both
-# else
+%if %{with bootstrap}
 %define build_gold	no
-# endif
+%else
+%ifarch %gold_arches
+# we don't build on elf, so no gold for us
+#define build_gold	both
+%define build_gold	no
+%else
+%define build_gold	no
+%endif
+%endif
 
-%if 0%{?_with_debug:1}
+%if %{with debug}
 # Define this if you want to skip the strip step and preserve debug info.
 # Useful for testing.
 %define __debug_install_post : > %{_builddir}/%{?buildsubdir}/debugfiles.list
 %define debug_package %{nil}
-%define run_testsuite 0%{?_with_testsuite:1}
-%else
-%define run_testsuite 0%{!?_without_testsuite:1}
 %endif
 
-BuildRequires: texinfo >= 4.0, gettext, flex, bison, zlib-devel
+BuildRequires: gcc
+
+# Gold needs bison in order to build gold/yyscript.c.
+# Bison needs m4.
+%if "%{build_gold}" == "both"
+BuildRequires: bison, m4, gcc-c++
+%endif
+
+%if %{without bootstrap}
+BuildRequires: gettext, flex, zlib-devel
+%endif
+
+%if %{with docs}
+BuildRequires: texinfo >= 4.0
 # BZ 920545: We need pod2man in order to build the manual pages.
-# BuildRequires: /@unixroot/usr/bin/pod2man
+#BuildRequires: /@unixroot/usr/bin/pod2man
+Requires(post): %{_sbindir}/install-info.exe
+Requires(preun): %{_sbindir}/install-info.exe
+%endif
+
 # Required for: ld-bootstrap/bootstrap.exp bootstrap with --static
 # It should not be required for: ld-elf/elf.exp static {preinit,init,fini} array
-%if %{run_testsuite}
+%if %{with testsuite}
 # relro_test.sh uses dc which is part of the bc rpm, hence its inclusion here.
 BuildRequires: dejagnu, zlib-static, glibc-static, sharutils, bc
 %if "%{build_gold}" == "both"
@@ -74,13 +110,8 @@ BuildRequires: dejagnu, zlib-static, glibc-static, sharutils, bc
 BuildRequires: libstdc++-static
 %endif
 %endif
-Conflicts: gcc-c++ < 4.0.0
-#Requires(post): /sbin/install-info
-#Requires(preun): /sbin/install-info
-%ifarch ia64
-Obsoletes: gnupro <= 1117-1
-%endif
 
+Conflicts: gcc-c++ < 4.0.0
 
 # The higher of these two numbers determines the default ld.
 %{!?ld_bfd_priority: %define ld_bfd_priority	50}
@@ -112,11 +143,13 @@ from files), strip (for discarding symbols), and addr2line (for
 converting addresses to file and line).
 
 %package devel
-Summary: BFD and opcodes dynamic libraries and header files
+Summary: BFD and opcodes static and dynamic libraries and header files
 Group: System Environment/Libraries
-Conflicts: binutils < 2.17.50.0.3-4
-#Requires(post): /sbin/install-info
-#Requires(preun): /sbin/install-info
+Provides: binutils-static = %{version}-%{release}
+%if %{with docs}
+Requires(post): %{_sbindir}/install-info.exe
+Requires(preun): %{_sbindir}/install-info.exe
+%endif
 Requires: zlib-devel
 Requires: binutils = %{version}-%{release}
 # BZ 1215242: We need touch...
@@ -139,16 +172,13 @@ using libelf instead of BFD.
 %debug_package
 
 %prep
-%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc
-svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
-%endif
+%scm_setup
 
 autogen.sh
+
+%if %{without docs}
+  find . -name *.info -print -exec touch {} \;
+%endif
 
 %build
 echo target is %{binutils_target}
@@ -184,12 +214,20 @@ case %{binutils_target} in  ppc64le*)
     ;;
 esac
 
+# we are not elf
+#case %{binutils_target} in x86_64*|i?86*|arm*|aarch64*)
+#  CARGS="$CARGS --enable-targets=x86_64-pep"
+#  ;;
+#esac
+
+
 %if 0%{?_with_debug:1}
 CFLAGS="$CFLAGS -O0 -ggdb2 -Wno-error -D_FORTIFY_SOURCE=0"
 %define enable_shared 0
 %endif
 
-export LDFLAGS=" -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+export LIBS="-lcx"
 
 # We could optimize the cross builds size by --enable-shared but the produced
 # binaries may be less convenient in the embedded environment.
@@ -197,6 +235,7 @@ export LDFLAGS=" -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 #  --build=%{_target_platform} --host=%{_target_platform} \
 %configure \
   --target=%{binutils_target} \
+  --with-system-zlib \
 %ifarch %gold_arches
 %if "%{build_gold}" == "both"
   --enable-gold=default --enable-ld \
@@ -204,7 +243,9 @@ export LDFLAGS=" -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
   --enable-ld \
 %endif
 %endif
-%if !%{isnative}
+%if %{isnative}
+  --with-sysroot=/@unixroot \
+%else
   --enable-targets=%{_host} \
   --with-sysroot=%{_prefix}/%{binutils_target}/sys-root \
   --program-prefix=%{cross} \
@@ -219,15 +260,28 @@ export LDFLAGS=" -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 %else    
   --enable-deterministic-archives=no \
 %endif
+%if %{enable_lto}
+  --enable-lto \
+%endif
+%if %{default_compress_debug}
+  --enable-compressed-debug-sections=all \
+%else
+  --enable-compressed-debug-sections=none \
+%endif
   $CARGS \
   --enable-plugins=no \
   --with-bugurl=http://trac.netlabs.org/ports/
+
+%if %{with docs}  
 make %{_smp_mflags} tooldir=%{_prefix} all
 make %{_smp_mflags} tooldir=%{_prefix} info
+%else
+make %{_smp_mflags} tooldir=%{_prefix} MAKEINFO=true all
+%endif
 
 # Do not use %%check as it is run after %%install where libbfd.so is rebuild
 # with -fvisibility=hidden no longer being usable in its shared form.
-%if !%{run_testsuite}
+%if %{without testsuite}
 echo ====================TESTSUITE DISABLED=========================
 %else
 make -k check < /dev/null || :
@@ -245,9 +299,15 @@ rm -f binutils-%{_target_platform}.tar.bz2 binutils-%{_target_platform}-*.{sum,l
 
 %install
 rm -rf %{buildroot}
+%if %{with docs}  
 make install DESTDIR=%{buildroot}
+%else
+make install DESTDIR=%{buildroot} MAKEINFO=true
+%endif
 %if %{isnative}
+%if %{with docs}
 make prefix=%{buildroot}%{_prefix} infodir=%{buildroot}%{_infodir} install-info
+%endif
 
 #install -m 644 bfd/libbfd.a %{buildroot}%{_libdir}
 #install -m 644 libiberty/libiberty.a %{buildroot}%{_libdir}
@@ -256,6 +316,7 @@ install -m 644 include/libiberty.h %{buildroot}%{_prefix}/include
 # Remove Windows/Novell only man pages
 rm -f %{buildroot}%{_mandir}/man1/dlltool*
 rm -f %{buildroot}%{_mandir}/man1/nlmconv*
+rm -f %{buildroot}%{_mandir}/man1/windres*
 rm -f %{buildroot}%{_mandir}/man1/windmc*
 
 %if %{enable_shared}
@@ -322,6 +383,8 @@ fi
 %endif # %{isnative}
 exit 0
 
+exit 0
+
 %preun
 %if "%{build_gold}" == "both"
 if [ $1 = 0 ]; then
@@ -343,11 +406,20 @@ fi
 exit 0
 
 %if %{isnative}
-#%postun -p /sbin/ldconfig
+#%postun 
+#/sbin/ldconfig
+  if [ -e %{_infodir}/binutils.info.gz ]
+  then
+   %{_sbindir}/install-info --delete --info-dir=%{_infodir} %{_infodir}/as.info.gz
+   %{_sbindir}/install-info --delete --info-dir=%{_infodir} %{_infodir}/binutils.info.gz
+   %{_sbindir}/install-info --delete --info-dir=%{_infodir} %{_infodir}/gprof.info.gz
+   %{_sbindir}/install-info --delete --info-dir=%{_infodir} %{_infodir}/ld.info.gz
+  fi
 %endif # %{isnative}
 
 %files -f %{?cross}binutils.lang
 %defattr(-,root,root,-)
+%license COPYING COPYING3 COPYING3.LIB COPYING.LIB
 %doc README
 %{_bindir}/%{?cross}[!l]*.exe
 %{_prefix}/%{binutils_target}/bin/%{?cross}[!l]*.exe
@@ -358,23 +430,35 @@ exit 0
 #%{_bindir}/%{?cross}ld*.exe
 %endif
 %{_mandir}/man1/*
+%{_infodir}/as.info.gz
+%{_infodir}/binutils.info.gz
+%{_infodir}/gprof.info.gz
+#%{_infodir}/ld.info.gz
 %if %{enable_shared}
 %{_libdir}/*.dll
 %endif
 
 %if %{isnative}
+%if %{with docs}
 %{_infodir}/[^b]*info*
 %{_infodir}/binutils*info*
+%endif
 
 %files devel
 %defattr(-,root,root,-)
 %{_prefix}/include/*
 %{_libdir}/*_dll.a
+%if %{with docs}
 %{_infodir}/bfd*info*
+%endif # with docs
 
 %endif # %{isnative}
 
 %changelog
+* Mon Mar 20 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.27-1
+- update to version 2.27
+- adjust spec to scm_ macros usage
+
 * Tue May 31 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.25-1
 - update to version 2.25
 
