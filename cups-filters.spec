@@ -1,11 +1,7 @@
-#define svn_url     e:/trees/cups-filter/trunk
-%define svn_url     http://svn.netlabs.org/repos/ports/cups-filter/trunk
-%define svn_rev     1542
-
 Summary: OpenPrinting CUPS filters and backends
 Name:    cups-filters
-Version: 1.8.2
-Release: 5%{?dist}
+Version: 1.13.3
+Release: 1%{?dist}
 
 # For a breakdown of the licensing, see COPYING file
 # GPLv2:   filters: commandto*, imagetoraster, pdftops, rasterto*,
@@ -20,7 +16,7 @@ License: GPLv2 and GPLv2+ and GPLv3 and GPLv3+ and LGPLv2+ and MIT
 
 Url:     http://www.linuxfoundation.org/collaborate/workgroups/openprinting/cups-filters
 Vendor:  bww bitwise works GmbH
-Source:  %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
+%scm_source  svn http://svn.netlabs.org/repos/ports/cups-filter/trunk 2017
 
 Requires: cups-filters-libs = %{version}-%{release}
 
@@ -41,7 +37,7 @@ BuildRequires: poppler-cpp-devel
 BuildRequires: libjpeg-devel
 BuildRequires: libtiff-devel
 BuildRequires: libpng-devel
-BuildRequires: zlib
+BuildRequires: zlib-devel
 #BuildRequires: pkgconfig(dbus-1)
 # libijs
 BuildRequires: ghostscript-devel
@@ -64,6 +60,7 @@ BuildRequires:  glib2-devel
 BuildRequires: autoconf
 BuildRequires: automake
 BuildRequires: libtool
+#BuildRequires: mupdf
 
 Requires: cups-filesystem
 Requires: poppler-utils >= 0.38.0-2
@@ -118,29 +115,29 @@ This is the development package for OpenPrinting CUPS filters and backends.
 %debug_package
 
 %prep
-%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc
-svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
-%endif
+%scm_setup
 
 %build
 # work-around Rpath
 ./autogen.sh
 
-# --with-pdftops=pdftops - use Poppler's pdftops instead of Ghostscript
+# --with-pdftops=hybrid - use Poppler's pdftops instead of Ghostscript
+#                         Brother, Minolta, and Konica Minolta to work around
+#                         bugs in the printer's PS interpreters
 # --with-rcdir=no - don't install SysV init script
-export LDFLAGS=" -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp -lcx"
+export VENDOR="%{vendor}"
 %configure --disable-static \
            --disable-silent-rules \
            --with-pdftops=pdftops \
            --with-rcdir=no \
            --enable-dbus=no \
            --enable-braille=no \
-           --with-test-font-path=/@system_drive/psfonts/DejaVuSans.ttf
+           --disable-avahi \
+           --disable-mutool \
+           --with-test-font-path=/@system_drive/psfonts/DejaVuSans.ttf \
+           --with-shell=%{_bindir}/sh \
+           --docdir=%{_pkgdocdir}
 
 make %{?_smp_mflags}
 
@@ -153,9 +150,9 @@ rm -f %{buildroot}%{_libdir}/lib*.la
 # Not sure what is this good for.
 rm -f %{buildroot}%{_bindir}/ttfread.exe
 
-rm -f %{buildroot}%{_defaultdocdir}/cups-filters/INSTALL
-mkdir -p %{buildroot}%{_defaultdocdir}/cups-filters/fontembed/
-cp -p fontembed/README %{buildroot}%{_defaultdocdir}/cups-filters/fontembed/
+rm -f %{buildroot}%{_pkgdocdir}/INSTALL
+mkdir -p %{buildroot}%{_pkgdocdir}/fontembed/
+cp -p fontembed/README %{buildroot}%{_pkgdocdir}/fontembed/
 
 # systemd unit file
 #mkdir -p %{buildroot}%{_unitdir}
@@ -164,6 +161,12 @@ cp -p fontembed/README %{buildroot}%{_defaultdocdir}/cups-filters/fontembed/
 # LSB3.2 requires /usr/bin/foomatic-rip,
 # create it temporarily as a relative symlink
 ln -sf ../lib/cups/filter/foomatic-rip %{buildroot}%{_bindir}/foomatic-rip
+
+# imagetobrf is going to be mapped as /usr/lib/cups/filter/imagetoubrl
+#ln -sf imagetobrf %{buildroot}%{_cups_serverbin}/filter/imagetoubrl
+
+# textbrftoindex3 is going to be mapped as /usr/lib/cups/filter/textbrftoindexv4
+#ln -sf textbrftoindexv3 %{buildroot}%{_cups_serverbin}/filter/textbrftoindexv4
 
 # Don't ship urftopdf for now (bug #1002947).
 rm -f %{buildroot}%{_cups_serverbin}/filter/urftopdf.exe
@@ -191,7 +194,7 @@ if [ $1 -eq 1 ] ; then
 
     # We can remove this after few releases, it's just for the introduction of cups-browsed.
     if [ -f "$OUT" ]; then
-        echo -e "\n# NOTE: This file is not part of CUPS.\n# You need to enable cups-browsed service\n# and allow ipp-client service in firewall." >> "$OUT"
+        printf "\n# NOTE: This file is not part of CUPS.\n# You need to enable cups-browsed service\n# and allow ipp-client service in firewall." >> "$OUT"
     fi
 
     # move BrowsePoll from cupsd.conf to cups-browsed.conf
@@ -221,29 +224,24 @@ fi
 
 
 %files
-%{_defaultdocdir}/cups-filters/README
-%{_defaultdocdir}/cups-filters/AUTHORS
-%{_defaultdocdir}/cups-filters/NEWS
+%{_pkgdocdir}/README
+%{_pkgdocdir}/AUTHORS
+%{_pkgdocdir}/NEWS
 %config(noreplace) %{_sysconfdir}/cups/cups-browsed.conf
 %attr(0755,root,root) %{_cups_serverbin}/filter/*.exe
-#%attr(0755,root,root) %{_cups_serverbin}/filter/brftoembosser
+%attr(0755,root,root) %{_cups_serverbin}/filter/gstopdf
 %attr(0755,root,root) %{_cups_serverbin}/filter/gstopxl
-#%attr(0755,root,root) %{_cups_serverbin}/filter/imagetobrf
 %attr(0755,root,root) %{_cups_serverbin}/filter/imagetops
-#%attr(0755,root,root) %{_cups_serverbin}/filter/imagetoubrl
-#%attr(0755,root,root) %{_cups_serverbin}/filter/imageubrltoindexv3
-#%attr(0755,root,root) %{_cups_serverbin}/filter/imageubrltoindexv4
-%attr(0755,root,root) %{_cups_serverbin}/filter/pstopdf
-#%attr(0755,root,root) %{_cups_serverbin}/filter/textbrftoindexv3
-#%attr(0755,root,root) %{_cups_serverbin}/filter/textbrftoindexv4
-%attr(0755,root,root) %{_cups_serverbin}/filter/textonly
-#%attr(0755,root,root) %{_cups_serverbin}/filter/texttobrf
 %attr(0755,root,root) %{_cups_serverbin}/filter/texttops
 %attr(0755,root,root) %{_cups_serverbin}/backend/parallel.exe
 # Serial backend needs to run as root (bug #212577#c4).
 #attr(0700,root,root) %{_cups_serverbin}/backend/serial
 %attr(0755,root,root) %{_cups_serverbin}/backend/implicitclass.exe
 %attr(0755,root,root) %{_cups_serverbin}/backend/beh.exe
+%{_bindir}/foomatic-rip
+%{_bindir}/driverless
+%{_cups_serverbin}/backend/driverless
+%{_cups_serverbin}/driver/driverless.exe
 %{_datadir}/cups/banners
 #%{_datadir}/cups/braille
 %{_datadir}/cups/charsets
@@ -266,20 +264,23 @@ fi
 #%{_datadir}/cups/drv/indexv4.drv
 %{_datadir}/cups/mime/cupsfilters.types
 %{_datadir}/cups/mime/cupsfilters.convs
+%{_datadir}/cups/mime/cupsfilters-ghostscript.convs
+#%{_datadir}/cups/mime/cupsfilters-mupdf.convs
+%{_datadir}/cups/mime/cupsfilters-poppler.convs
 #%{_datadir}/cups/mime/braille.convs
 #%{_datadir}/cups/mime/braille.types
 %{_datadir}/ppd/cupsfilters
 #{_sbindir}/cups-browsed.exe
 #{_unitdir}/cups-browsed.service
-%{_mandir}/man8/cups-browsed.8
-%{_mandir}/man5/cups-browsed.conf.5
-%{_mandir}/man1/foomatic-rip.1
-%{_bindir}/foomatic-rip
+%{_mandir}/man8/cups-browsed.8*
+%{_mandir}/man5/cups-browsed.conf.5*
+%{_mandir}/man1/foomatic-rip.1*
+%{_mandir}/man1/driverless.1*
 
 %files libs
-%dir %{_defaultdocdir}/cups-filters/
-%{_defaultdocdir}/cups-filters/COPYING
-%{_defaultdocdir}/cups-filters/fontembed/README
+%dir %{_pkgdocdir}/
+%{_pkgdocdir}/COPYING
+%{_pkgdocdir}/fontembed/README
 %{_libdir}/cupsfil*.dll
 %{_libdir}/fontemb*.dll
 
@@ -289,10 +290,17 @@ fi
 %{_datadir}/cups/ppdc/escp.h
 %{_libdir}/pkgconfig/libcupsfilters.pc
 %{_libdir}/pkgconfig/libfontembed.pc
-%{_libdir}/cupsfilters*.a
-%{_libdir}/fontembed*.a
+%{_libdir}/cupsfilters*_dll.a
+%{_libdir}/fontembed*_dll.a
 
 %changelog
+* Tue Feb 14 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.13.3-1
+- use printf instead of echo -e
+- add bldlevel to the dll
+- fix using of bash as shell
+- adjust spec to scm_ macros usage
+- update to vendor version 1.13.3
+
 * Wed Aug 24 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.8.2-5
 - lower the gs req to 9.14
 - rebuild with new poppler
