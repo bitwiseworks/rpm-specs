@@ -201,7 +201,7 @@ find examples/ -name "*.py" | xargs chmod a-x
 
 %build
 # !!!!!!!! remove the below instructions, when switched to shell based qmake
-# 
+# see also qt ticket 303 for more reference
 # configure needs qmake_sh, as else install will never work
 # adjust qmake.conf to the following
 # first before the first isEmpty(QMAKE_SH) you need to add QMAKE_SH=$$(QMAKE_SH)
@@ -224,7 +224,7 @@ find examples/ -name "*.py" | xargs chmod a-x
 #        $(if $(DEF_FILE_VENDOR),-vendor \"$(DEF_FILE_VENDOR)\") \
 #        $(if $(DEF_FILE_TEMPLATE),-template \"$(DEF_FILE_TEMPLATE)\")
 #}
-# forth you need to garde QMAKE_MOC with isEmpty(QMAKE_SH) and add the below block
+# fourth you need to garde QMAKE_MOC with isEmpty(QMAKE_SH) and add the below block
 #} else {
 #QMAKE_MOC       = $$[QT_INSTALL_BINS]/moc.exe
 #QMAKE_UIC       = $$[QT_INSTALL_BINS]/uic.exe
