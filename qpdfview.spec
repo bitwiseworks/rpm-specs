@@ -1,6 +1,8 @@
+%global prerelease beta1
+
 Name:           qpdfview
 Version:        0.4.17
-Release:        1%{?dist}
+Release:        2%{?prerelease}%{?dist}
 License:        GPLv2+
 Summary:        Tabbed PDF Viewer
 Url:            https://launchpad.net/qpdfview
@@ -8,6 +10,7 @@ Url:            https://launchpad.net/qpdfview
 Vendor:         bww bitwise works GmbH
 %scm_source github https://github.com/bitwiseworks/qpdfview %{version}
 
+Requires:       bwwres
 Requires:       libqt4
 Requires:       cups
 Requires:       poppler-qt4
@@ -15,6 +18,7 @@ Requires:       libspectre ghostscript
 Requires:       zlib
 Requires:       djvulibre
 Requires:       libjpeg libtiff libpng
+Requires:       %{name}-common = %{version}-%{release}
 
 BuildRequires:  libqt4-devel
 BuildRequires:  cups-devel
@@ -29,6 +33,12 @@ qpdfview is a tabbed PDF viewer.
 It uses the Poppler library for rendering and CUPS for printing.
 It provides a clear and simple graphical user interface using the Qt framework.
 
+%package common
+Summary:        Common files for %{name}
+BuildArch:      noarch
+
+%description common
+This package provides common files for %{name}.
 
 %prep
 %scm_setup
@@ -59,10 +69,13 @@ make INSTALL_ROOT=%{buildroot} install
 %find_lang %{name} --with-qt --without-mo
 # unknown language
 rm -f %{buildroot}/%{_datadir}/%{name}/%{name}_ast.qm
+
+# remove not needed desktop files
 rm -rf %{buildroot}/%{_datadir}/appdata
 rm -rf %{buildroot}/%{_datadir}/applications
 rm -rf %{buildroot}/%{_datadir}/icons
 
+# adjust install.os2 with the right version and build
 sed -i -e "s|_VERSION_|%{version}|" -e "s|_BUILD_|%{release}|" %{_builddir}/%{buildsubdir}/install.os2
 
 
@@ -81,14 +94,22 @@ if [ "$1" -eq 0 ]; then # (upon removal)
 fi
 
 
-%files -f %{name}.lang
-%doc CHANGES CONTRIBUTORS COPYING README TODO install.os2
+%files
 %{_bindir}/%{name}.exe
 %{_libdir}/%{name}/
+
+%files common -f %{name}.lang
+%license COPYING
+%doc CHANGES CONTRIBUTORS README TODO
+%doc install.os2
 %dir %{_datadir}/%{name}
 %{_datadir}/%{name}/help*.html
 %{_mandir}/man?/*
 
 %changelog
+* Mon Mar 20 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.4.17-2.beta1
+- rebuild with latest bwwres
+- added noarch rpm for the really noarch files
+
 * Fri Mar 17 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.4.17-1
 - initial version
