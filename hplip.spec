@@ -1,6 +1,3 @@
-#define svn_url     e:/trees/hplip/trunk
-%define svn_url     http://svn.netlabs.org/repos/ports/hplip/trunk
-%define svn_rev     1600
 
 %define without_sane 1
 %define without_dbus 1
@@ -8,12 +5,12 @@
 
 Summary: HP Linux Imaging and Printing Project
 Name: hplip
-Version: 3.16.3
+Version: 3.16.11
 Release: 1%{?dist}
 License: GPLv2+ and MIT and BSD
 
-Url: http://hplip.sourceforge.net/
-Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
+Url: http://hplipopensource.com/
+%scm_source svn http://svn.netlabs.org/repos/ports/hplip/trunk 2155
 Vendor: bww bitwise works GmbH
 
 # @todo: decide if we need that to
@@ -23,7 +20,7 @@ Vendor: bww bitwise works GmbH
 Requires: %{name}-libs = %{version}-%{release}
 #Requires: python-pillow
 Requires: cups
-#Requires: wget
+Requires: wget
 %if 0%{!?without_dbus:1}
 Requires: python-dbus
 %endif
@@ -80,8 +77,8 @@ Libraries needed by HPLIP.
 %package gui
 Summary: HPLIP graphical tools
 License: BSD
-Requires: python-PyQt4
-Requires: python-reportlab
+Requires: python2-PyQt4
+#Requires: python-reportlab
 # hpssd.py
 #Requires: python-gobject
 Requires: %{name} = %{version}-%{release}
@@ -108,14 +105,7 @@ SANE driver for scanners in HP's multi-function devices (from HPOJ).
 %debug_package
 
 %prep
-%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc
-svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
-%endif
+%scm_setup
 
 
 %build
@@ -126,6 +116,10 @@ sed -i 's|^AM_INIT_AUTOMAKE|AM_INIT_AUTOMAKE([foreign])|g' configure.in
 # Regenerating all autotools files works-around these rpath issues.
 autoreconf --verbose --force --install
 
+export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+export LIBS="-lcx"
+export VENDOR="%{vendor}"
+
 %configure \
 %if 0%{!?without_sane:1}
         --enable-scan-build \
@@ -134,14 +128,14 @@ autoreconf --verbose --force --install
 %endif
         --enable-gui-build \
         --disable-foomatic-rip-hplip-install  \
-        --enable-qt4 --enable-hpcups-install --enable-cups-drv-install \
+        --enable-qt4 \
+        --enable-hpcups-install --enable-cups-drv-install \
         --enable-foomatic-drv-install \
         --enable-hpijs-install \
 %if 0%{!?without_fax:1}
         --enable-fax-build \
 %else
         --enable-fax-build=no \
-        --enable-dbus-build=no \
 %endif
 %if 0%{?without_dbus:1}
         --enable-dbus-build=no \
@@ -357,5 +351,10 @@ rm -f  %{buildroot}%{_libdir}/*.a \
 #%postun libs -p /sbin/ldconfig
 
 %changelog
+* Tue Mar 21 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.16.11-1
+- fix gui Requires
+- use new scm_ macros
+- update to version 3.16.11
+
 * Mon Jun 13 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.16.3-1
 - initial port
