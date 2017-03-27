@@ -1,6 +1,6 @@
 #define svn_url     F:/rd/ports/perl/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/perl/trunk
-%define svn_rev     745
+%define svn_rev     2164
 
 %global perl_version    5.16.1
 %global perl_epoch      0
@@ -24,7 +24,7 @@
 Name:           perl
 Version:        %{perl_version}
 # release number must be even higher, becase dual-lived modules will be broken otherwise
-Release:        2%{?dist}
+Release:        3%{?dist}
 Epoch:          %{perl_epoch}
 Summary:        Practical Extraction and Report Language
 Group:          Development/Languages
@@ -1945,6 +1945,9 @@ rm -rf $RPM_BUILD_ROOT
 # Nothing. Nada. Zilch. Zarro. Uh uh. Nope. Sorry.
 
 %changelog
+* Mon Mar 27 2017 yd <yd@os2power.com> 5.16.1-3
+- package rebuild due to new perl() rpm macros.
+
 * Fri Mar 11 2016 yd <yd@os2power.com> 5.16.1-2
 - package rebuild due to broken hard links, ticket#172.
 
