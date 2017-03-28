@@ -6,13 +6,14 @@
 Summary: Encoding files 
 Name:    poppler-data
 Version: 0.4.7
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 # The cMap data files installed by the poppler-data package are
 # under the COPYING.adobe license
 # cidToUnicode, nameToUnicode and unicodeMap data files
 # are under the COPYING.gpl2 license
-License: BSD and GPLv2
+# Identity-UTF16-H is GPLv3+ (from GPL ghostscript)
+License: BSD and GPLv2 and GPLv3+
 URL:     http://poppler.freedesktop.org/
 Source0: http://poppler.freedesktop.org/poppler-data-%{version}.tar.gz
 Source1: http://downloads.sourceforge.net/project/cmap.adobe/cmapresources_identity0.tar.z
@@ -46,7 +47,6 @@ Requires: %{name} = %{version}-%{release}
 # intentionally left blank
 
 %install
-export MAKESHELL="/@unixroot/usr/bin/sh.exe";
 make install  DESTDIR=%{buildroot} datadir=%{_datadir}
 
 # manually install Identity-* files
@@ -76,5 +76,8 @@ done
 
 
 %changelog
+* Tue Mar 28 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.4.7-2
+- rebuild for ghostscript 9.18
+
 * Fri Dec 12 2014 yd
 - initial unixroot build.
