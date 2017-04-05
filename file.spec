@@ -3,12 +3,12 @@
 Summary: A utility for determining file types
 Name: file
 Version: 5.30
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: BSD
 Group: Applications/File
 
 Vendor:  bww bitwise works GmbH
-%scm_source svn  http://svn.netlabs.org/repos/ports/file/trunk 2149
+%scm_source svn  http://svn.netlabs.org/repos/ports/file/trunk 2171
 
 # DEF files to create forwarders for the legacy package
 Source10:       magic.def
@@ -178,6 +178,11 @@ cd %{py3dir}
 %endif
 
 %changelog
+* Wed Apr 05 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 5.30-2
+- fix a regex issue (this will be rolled back, when libc issue 375 or libcx
+  issue 35 is done)
+- added buildlevel information
+
 * Mon Mar 06 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 5.30-1
 - updated to vendor version 5.30
 - use scm_ macros
