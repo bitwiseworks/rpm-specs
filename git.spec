@@ -16,18 +16,13 @@
 
 Name:           git
 Version:        2.11.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Fast Version Control System
 License:        GPLv2
 Group:          Development/Tools
 URL:            https://git-scm.com/
 
-%define svn_url     http://svn.netlabs.org/repos/ports/git/trunk
-%define svn_rev     1885
-
-Source: %{name}-%{version}-r%{svn_rev}.zip
-
-BuildRequires: gcc make subversion zip
+%scm_source     svn http://svn.netlabs.org/repos/ports/git/trunk 2163
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -53,6 +48,7 @@ Requires:       git-core = %{version}-%{release}
 Requires:       git-core-doc = %{version}-%{release}
 #Requires:       perl(Error)
 %if ! %{defined perl_bootstrap}
+# TODO Doesn't exist on OS/2 yet.
 #Requires:       perl(Term::ReadKey)
 %endif
 Requires:       perl-Git = %{version}-%{release}
@@ -84,6 +80,7 @@ Requires:       git-p4 = %{version}-%{release}
 Requires:       gitk = %{version}-%{release}
 Requires:       perl-Git = %{version}-%{release}
 %if ! %{defined perl_bootstrap}
+# TODO Doesn't exist on OS/2 yet.
 #Requires:       perl(Term::ReadKey)
 %endif
 #Requires:       emacs-git = %{version}-%{release}
@@ -166,6 +163,7 @@ Group:          Development/Tools
 Requires:       git = %{version}-%{release}, subversion
 Requires:       perl(Digest::MD5)
 %if ! %{defined perl_bootstrap}
+# TODO Doesn't exist on OS/2 yet.
 #Requires:       perl(Term::ReadKey)
 %endif
 %description svn
@@ -279,14 +277,7 @@ Requires:       emacs-git = %{version}-%{release}
 %debug_package
 
 %prep
-%if %(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc
-svn export -r %{svn_rev} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" "%{name}-%{version}")
-%endif
+%scm_setup
 
 # Use these same options for every invocation of 'make'.
 # Otherwise it will rebuild in %%install due to flags changes.
@@ -314,6 +305,14 @@ echo gitexecdir = %{_bindir} >> config.mak
 %if %{docbook_suppress_sp}
 # This is needed for 1.69.1-1.71.0
 echo DOCBOOK_SUPPRESS_SP = 1 >> config.mak
+%endif
+
+# Filter bogus perl requires
+# packed-refs comes from a comment in contrib/hooks/update-paranoid
+%{?perl_default_filter}
+%global __requires_exclude %{?__requires_exclude:%__requires_exclude|}perl\\(packed-refs\\)
+%if ! %{defined perl_bootstrap}
+%global __requires_exclude %{?__requires_exclude:%__requires_exclude|}perl\\(Term::ReadKey\\)
 %endif
 
 %build
@@ -624,6 +623,13 @@ rm -rf %{buildroot}
 # No files for you!
 
 %changelog
+* Thu Apr 6 2017 Dmitriy Kuminov <coding@dmik.org> 2.11.0-2
+- Make git add --interactive output use CRLFs on DOS-like platforms.
+- Remove a lot of outdated OS/2-specific code.
+- Make the .git directory truly hidden on OS/2.
+- Enable mmap support on OS/2.
+- Change vendor to bww bitwise works GmbH.
+
 * Tue Dec 13 2016 Dmitriy Kuminov <coding@dmik.org> 2.11.0-1
 - Update git to version 2.11.0.
 - Increase stack size to 8 MB to fix crashes when cloning huge repos.
