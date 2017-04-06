@@ -30,11 +30,12 @@
 Summary: The RPM package management system
 Name: rpm
 Version: %{rpmver}
-Release: %{?snapver:0.%{snapver}.}14%{?dist}
+Release: %{?snapver:0.%{snapver}.}15%{?dist}
 Group: System Environment/Base
 Url: http://www.rpm.org/
+Vendor: bww bitwise works GmbH
 
-%scm_source svn http://svn.netlabs.org/repos/rpm/rpm/trunk 1035
+%scm_source svn http://svn.netlabs.org/repos/rpm/rpm/trunk 1081
 
 %if %{with int_bdb}
 Source1: db-%{bdbver}.tar.gz
@@ -84,7 +85,7 @@ BuildRequires: bzip2-devel >= 0.9.0c-2
 # YD because of ucs4
 BuildRequires: python-devel >= 2.7.6-13
 BuildRequires: libcx-devel
-#BuildRequires: lua-devel >= 5.1
+BuildRequires: lua-devel >= 5.1
 %if ! %{without xz}
 BuildRequires: xz-devel >= 4.999.8
 %endif
@@ -177,6 +178,10 @@ Requires: pkgconfig >= 1:0.24
 # pythondistdeps generator expects it.
 # See: https://bugzilla.redhat.com/show_bug.cgi?id=1410631
 #Requires: python3-setuptools
+# TODO On OS/2 we don't provide a separate perl-generators RPM yet.
+%if 1
+Provides: perl-generators
+%endif
 
 %description build
 The rpm-build package contains the scripts and executable programs
@@ -286,8 +291,8 @@ sed -i \
   }' \
   configure.ac
 
-CPPFLAGS="`pkg-config --cflags nss`" # -DLUA_COMPAT_APIINTCASTS"
-CFLAGS="$RPM_OPT_FLAGS %{?sanitizer_flags}" # -DLUA_COMPAT_APIINTCASTS"
+CPPFLAGS="`pkg-config --cflags nss` -DLUA_COMPAT_APIINTCASTS"
+CFLAGS="$RPM_OPT_FLAGS %{?sanitizer_flags} -DLUA_COMPAT_APIINTCASTS"
 LDFLAGS="%{?__global_ldflags} -Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 LIBS="-lintl -lcx"
 export CPPFLAGS CFLAGS LDFLAGS LIBS
@@ -301,7 +306,7 @@ export ac_cv_path___SSH=ssh
     --enable-shared --disable-static \
     %{!?with_int_bdb: --with-external-db} \
     %{!?with_plugins: --disable-plugins} \
-    %{!?with_lua: --without-lua} \
+    --with-lua \
     %{!?with_libarchive: --without-archive} \
     %{?with_ndb: --with-ndb} \
     --enable-python
@@ -390,9 +395,12 @@ done
 
 find $RPM_BUILD_ROOT -name "*.la"|xargs rm -f
 
+# TODO On OS/2 we don't provide a separate perl-generators RPM yet.
+%if 0
 # These live in perl-generators now
-#rm -f $RPM_BUILD_ROOT/%{rpmhome}/{perldeps.pl,perl.*}
-#rm -f $RPM_BUILD_ROOT/%{_fileattrsdir}/perl*
+rm -f $RPM_BUILD_ROOT/%{rpmhome}/{perldeps.pl,perl.*}
+rm -f $RPM_BUILD_ROOT/%{_fileattrsdir}/perl*
+%endif
 # Axe unused cruft
 rm -f $RPM_BUILD_ROOT/%{rpmhome}/{tcl.req,osgideps.pl}
 
@@ -490,7 +498,6 @@ make check
 #{rpmhome}/sepdebugcrcfix
 #{rpmhome}/find-debuginfo.sh
 %{rpmhome}/find-lang.sh
-%{rpmhome}/find-legacy-runtime.sh
 %{rpmhome}/*provides*
 %{rpmhome}/*requires*
 %{rpmhome}/*deps*
@@ -528,6 +535,13 @@ make check
 %doc doc/librpm/html/*
 
 %changelog
+* Thu Apr 6 2017 Dmitriy Kuminov <coding@dmik.org> - 4.13.0-15
+- Enable lua scritping.
+- Temporarily make rpm-build provide perl-generators for compatibility with Fedora.
+- Move some OS/2 specific macros and scripts to a separate package os2-rpm-build.
+- Make rpmbuild obey -v and -d options (to enable printing debug info).
+- Change vendor to bww bitwise works GmbH.
+
 * Sat Feb 25 2017 Dmitriy Kuminov <coding@dmik.org> - 4.13.0-14
 - Update to version 4.13.0 GA.
 - Fix sed warnings in find-lang.sh due to ':' in pats on OS/2.
