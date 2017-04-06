@@ -2,14 +2,14 @@
 
 Name:           lua
 Version:        %{major_version}.4
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Powerful light-weight programming language
 Group:          Development/Languages
 License:        MIT
 URL:            http://www.lua.org/
 
 Vendor:         bww bitwise works GmbH
-%scm_source svn http://svn.netlabs.org/repos/ports/lua/trunk 2099
+%scm_source svn http://svn.netlabs.org/repos/ports/lua/trunk 2173
 
 BuildRequires:  automake autoconf libtool readline-devel ncurses-devel
 Provides:       lua(abi) = %{major_version}
@@ -113,5 +113,8 @@ mkdir -p $RPM_BUILD_ROOT%{_datadir}/lua/%{major_version}
 
 
 %changelog
+* Thu Apr 6 2017 Dmitriy Kuminov <coding@dmik.org> 5.3.4-2
+- Fix headers to atually enable LUA_COMPAT_MODULE.
+
 * Tue Feb 28 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 5.3.4-1
 - first rpm version
