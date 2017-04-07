@@ -1,0 +1,86 @@
+Index: stabshll.c
+===================================================================
+--- stabshll.c	(revision 3885)
++++ stabshll.c	(working copy)
+@@ -381,8 +381,11 @@
+ 
+ static int unnamed_struct_number;
+ 
++/* Show more warnings if this variable is TRUE (-v option). */
++extern int verbose;
++
+ /* kso #456 2003-06-11: Reversed quiet workaround. */
+-#define no_warning warning_parse
++#define no_warning if (verbose) warning_parse
+ 
+ 
+ /*******************************************************************************
+@@ -2024,7 +2027,7 @@
+               }
+             else
+               {
+-                warning_parse ("Invalid BASE_OFFSET GNU extension format!");
++                no_warning ("Invalid BASE_OFFSET GNU extension format!");
+                 goto syntax;
+               }
+             break;
+@@ -2693,7 +2696,7 @@
+        * The normal issue is C++ class references. */
+       if (tp->tag != ty_alias || tp->index <= -3)
+         {
+-          warning_parse ("Cycle detected by make_type.");
++          no_warning ("Cycle detected by make_type.");
+           RETURN (0);
+         }
+     }
+@@ -2706,7 +2709,7 @@
+       t1 = stype_find (tp->d.stabs_ref);
+       if (t1 == NULL)
+         {
+-          warning_parse ("Undefined stabs type %d referenced", tp->d.stabs_ref);
++          no_warning ("Undefined stabs type %d referenced", tp->d.stabs_ref);
+           RETURN (0x82);        /* 32 bit signed */
+         }
+       make_type (t1, &tp->index);
+Index: emxomf.c
+===================================================================
+--- emxomf.c	(revision 3885)
++++ emxomf.c	(working copy)
+@@ -407,6 +407,9 @@
+ /* Supress certain warnings if this variable is TRUE (-q option). */
+ static int quiet = FALSE;
+ 
++/* Show more warnings if this variable is TRUE (-v option). */
++int verbose = FALSE;
++
+ /* The libreq_head variable contains a pointer to the head of the list
+    of default libraries.  The -i option is used to add a default
+    library request.  The libreq_add pointer is used for appending new
+@@ -822,7 +825,8 @@
+         memcpy(pszOutBuf + SYMBOL_MAX_LENGTH, szHash, SYMBOL_HASH_LENGTH);
+         pszOutBuf[SYMBOL_MAX_LENGTH + SYMBOL_HASH_LENGTH] = '\0';
+ 
+-        warning ("Truncated symbol '%.*s' to '%.*s%s'", cch, pszName, SYMBOL_MAX_LENGTH, pszName, szHash);
++        if (verbose)
++            warning ("Truncated symbol '%.*s' to '%.*s%s'", cch, pszName, SYMBOL_MAX_LENGTH, pszName, szHash);
+ 
+         cch = SYMBOL_MAX_LENGTH + SYMBOL_HASH_LENGTH;
+     }
+@@ -3744,6 +3761,7 @@
+   puts ("  -O <directory>     Extract files to <directory>");
+   puts ("  -z                 Remove underscores from all symbol names");
+   puts ("  -P <dbgpackdll>    Name the dbgpack DLL (ilink)");
++  puts ("  -v                 Show more warnings (truncated symbols and HLL warnings)");
+   exit (1);
+ }
+ 
+@@ -4244,6 +4262,9 @@
+       case 'u':
+         unknown_stabs = TRUE;
+         break;
++      case 'v':
++        verbose = TRUE;
++        break;
+       case 'x':
+         opt_x = TRUE;
+         break;

@@ -6,7 +6,7 @@ License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Standard Shared Libraries
 Group:          System/Libraries
 Version:        0.6.6
-Release:        31%{?dist}
+Release:        32%{?dist}
 Url:            http://svn.netlabs.org/libc
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -25,6 +25,10 @@ Patch101:       libc-dmik-emxomf-02-remove-asterisk.diff
 Patch102:       libc-yuri-emxomf-verbose-warnings-3.patch
 
 BuildRequires:  rexx_exe
+
+# Require kLIBC user management to make programs using Unix user management API
+# (getpwuid() and friends) work correctly.
+Requires:       klusrmgr
 
 %description
 kLIBC is a C runtime library in which the coder is exploring The Single Unix
@@ -158,6 +162,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_usr}/info
 %{_libdir}
 %exclude %{_libdir}/*.dbg
+%exclude %{_libdir}/dbg
+%exclude %{_libdir}/tcpipv4/dbg
 %exclude %{_libdir}/gcc335.dll
 
 %files -n db1-devel
@@ -173,8 +179,15 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root)
 %{_bindir}/*.dbg
 %{_libdir}/*.dbg
+%{_libdir}/dbg
+%{_libdir}/tcpipv4/dbg
 
 %changelog
+* Fri Apr 7 2017 Dmitriy Kuminov <coding@dmik.org> 0.6.6-32
+- Require kLIBC user management (klusrmgr) to make programs using Unix user
+  management API (getpwuid() and friends) work correctly.
+- Move debug libraries from libc-devel to libc-debug (saves a lot of space).
+
 * Thu Sep 22 2016 Dmitriy Kuminov <coding@dmik.org> 0.6.6-31
 - Remove sys/mman.h which is now provided by libcx-devel.
 
