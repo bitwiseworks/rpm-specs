@@ -3,7 +3,7 @@
 Name:      hunspell
 Summary:   A spell checker and morphological analyzer library
 Version:   1.6.1
-Release:   1%{?dist}
+Release:   2%{?dist}
 URL:       https://github.com/hunspell/hunspell
 Group:     System Environment/Libraries
 License:   LGPLv2+ or GPLv2+ or MPLv1.1
@@ -94,9 +94,9 @@ mkdir $RPM_BUILD_ROOT/%{_datadir}/myspell
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%post -p /sbin/ldconfig
+#post -p /sbin/ldconfig
 
-%postun -p /sbin/ldconfig
+#postun -p /sbin/ldconfig
 
 %files -f %{name}.lang
 %defattr(-,root,root,-)
@@ -129,5 +129,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/hunspell.5.gz
 
 %changelog
+* Mon Apr 10 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.6.1-2
+- remove wrong ldconfig in post and postun
+
 * Fri Apr 07 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.6.1-1
 - initial port
