@@ -1,17 +1,27 @@
 Name:           check
-Version:        0.9.8
-Release:        3%{?dist}
+Version:        0.11.0
+Release:        1%{?dist}
 Summary:        A unit test framework for C
-Source0:        http://downloads.sourceforge.net/check/%{name}-%{version}.tar.gz
-Patch0:         check-os2.diff
-
-Group:          Development/Tools
 License:        LGPLv2+
-URL:            http://check.sourceforge.net/
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+URL:            http://libcheck.github.io/check/
+Group:          Development/Tools
 
-#Requires(post): /sbin/install-info
-#Requires(preun): /sbin/install-info
+Vendor:         bww bitwise works GmbH
+%scm_source github https://github.com/bitwiseworks/check-os2 %{version}-os2
+
+# DEF files to create forwarders for the legacy package
+Source10:       check.def
+
+BuildRequires:  gcc
+BuildRequires:  libtool
+#BuildRequires:  patchutils
+BuildRequires:  pkgconfig
+#BuildRequires:  subunit-devel
+BuildRequires:  texinfo
+
+Requires(post): info
+Requires(preun): info
+
 
 %description
 Check is a unit test framework for C. It features a simple interface for 
@@ -36,66 +46,113 @@ Group:          Development/Libraries
 %description static
 Static libraries of check.
 
+%package checkmk
+Summary:        Translate concise versions of test suites into C programs
+License:        BSD
+BuildArch:      noarch
+Requires:       %{name} = %{version}-%{release}
+
+%description checkmk
+The checkmk binary translates concise versions of test suites into C
+programs suitable for use with the Check unit test framework.
+
+%debug_package
+
+
 %prep
-%setup -q
-%patch0 -p1 -b .os2~
+%scm_setup
+
+# Regenerate configure
+autoreconf -ivf
+
+# Prepare forwarder DLLs.
+for m in %{SOURCE10}; do
+  cp ${m} .
+done
+
 
 %build
-export CONFIG_SHELL="/bin/sh"
-export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp" ; \
-%configure \
-    --enable-shared --disable-static \
-    "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
+export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+export LIBS="-lcx"
+export VENDOR="%{vendor}"
+
+%configure
 
 make %{?_smp_mflags}
 
 %install
-rm -rf $RPM_BUILD_ROOT
 make DESTDIR=$RPM_BUILD_ROOT install
 rm -f $RPM_BUILD_ROOT%{_libdir}/*.la
 rm -rf $RPM_BUILD_ROOT%{_infodir}/dir
-rm -rf $RPM_BUILD_ROOT%{_defaultdocdir}/%{name}
+rm -rf $RPM_BUILD_ROOT%{_docdir}/%{name}
 
-install -m 755 src/check.dll $RPM_BUILD_ROOT/%{_libdir}
-install -m 755 src/.libs/check_s.a $RPM_BUILD_ROOT/%{_libdir}
+rm -f doc/example/.cvsignore
 
-%clean
-rm -rf $RPM_BUILD_ROOT
+# Generate & install forwarder DLLs.
+gcc -Zomf -Zdll -nostdlib check.def -l$RPM_BUILD_ROOT/%{_libdir}/check0.dll -lend -o $RPM_BUILD_ROOT/%{_libdir}/check.dll
 
-#%post
+
+%check
+#export LD_LIBRARY_PATH=$PWD/src/.libs
+#make check
+# Don't need to package the sh, log or trs files
+# when we scoop the other checkmk/test files for doc
+rm -rf checkmk/test/check_checkmk*
+# these files are empty
+rm -rf checkmk/test/empty_input
+
+
+%post
 #/sbin/ldconfig
-#if [ -e %{_infodir}/%{name}.info* ]; then
-#  /sbin/install-info \
-#    --entry='* Check: (check).               A unit testing framework for C.' \
-#    %{_infodir}/%{name}.info %{_infodir}/dir || :
-#fi
+if [ -e %{_infodir}/%{name}.info* ]; then
+  %{_sbindir}/install-info \
+    --entry='* Check: (check).               A unit testing framework for C.' \
+    %{_infodir}/%{name}.info %{_infodir}/dir || :
+fi
 
 #%postun -p /sbin/ldconfig
 
-#%preun
-#if [ $1 = 0 -a -e %{_infodir}/%{name}.info* ]; then
-#  /sbin/install-info --delete %{_infodir}/%{name}.info %{_infodir}/dir || :
-#fi
+%preun
+if [ $1 = 0 -a -e %{_infodir}/%{name}.info* ]; then
+  %{_sbindir}/install-info --delete %{_infodir}/%{name}.info %{_infodir}/dir || :
+fi
+
 
 %files
-%defattr(-,root,root,-)
-%doc AUTHORS COPYING.LESSER ChangeLog ChangeLogOld NEWS README SVNChangeLog
-%doc THANKS TODO
+%doc AUTHORS ChangeLog
+%license COPYING.LESSER
 %{_libdir}/*.dll
 %{_infodir}/check*
 
 %files devel
-%defattr(-,root,root,-)
 %doc doc/example
 %{_includedir}/check.h
-%{_libdir}/*.dll
-%{_libdir}/check.a
+%{_includedir}/check_stdint.h
+%{_libdir}/check*_dll.a
 %{_libdir}/pkgconfig/check.pc
 %{_datadir}/aclocal/check.m4
 
 #check used to be static only, hence this.
 %files static
-%defattr(-,root,root,-)
-%{_libdir}/check_s.a
+%license COPYING.LESSER
+%{_libdir}/check.a
+
+%files checkmk
+%doc checkmk/README checkmk/examples
+%doc checkmk/test
+%{_bindir}/checkmk
+%{_mandir}/man1/checkmk.1*
 
 %changelog
+* Mon Apr 03 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.11.0-1
+- update vendor source to version 0.11.0
+- move source from netlabs svn to github
+
+* Mon Aug 29 2011 yd <yd@os2power.com> 0.9.8-3
+- massive rebuild due to new rpm lx parser updates
+
+* Wed Apr 20 2011 yd <yd@os2power.com> 0.9.8-2
+- add target cpu field in cache file
+
+* Wed Nov 10 2010 yd <yd@os2power.com> 0.9.8-1
+- first initial rpm
