@@ -3,7 +3,7 @@
 
 Summary:	WarpIN package entry for rpms
 Name:		wpi4rpm
-Version:	0.9.6
+Version:	0.9.7
 Release:	1%{?dist}
 License:	proprietary
 Group:		Applications/System
@@ -38,21 +38,31 @@ rm -rf "$RPM_BUILD_ROOT"
 %_bindir/*.exe
 
 %changelog
+* Wed Apr 12 2017 hb <herwig.bauernfeind@bitwiseworks.com> 0.9.7-1
+- Warn only in case more than 1 DATBAS_?.INI is found.
+- Reworked help text
+
 * Fri Mar 03 2017 hb <herwig.bauernfeind@bitwiseworks.com> 0.9.6-1
 - Check if more than 1 DATBAS_?.INI is present (not supported yet)
+
 * Tue Feb 07 2017 hb <herwig.bauernfeind@bitwiseworks.com> 0.9.5-1
 - Dummy path changed to DEV\NULL 
   (prevents WarpIN from "updating" a fake package).
 - Make it quiet (but support VERBOSE=bla env var).
+
 * Thu Feb 02 2017 hb <herwig.bauernfeind@bitwiseworks.com> 0.9.4-1
 - Write proper install date/time
 - Fix cosmetic error on package removal
+
 * Mon Jan 30 2017 hb <herwig.bauernfeind@bitwiseworks.com> 0.9.3-1
 - Add errorhandler
 - Allow all kind of help switches
+
 * Sat Jan 28 2017 hb <herwig.bauernfeind@bitwiseworks.com> 0.9.2-1
 - Add support for vendor and package
+
 * Fri Jan 27 2017 hb <herwig.bauernfeind@bitwiseworks.com> 0.9.1-1
 - Initial release
+
 * Thu Jan 26 2017 hb <herwig.bauernfeind@bitwiseworks.com> 0.9.0-1
 - Initial working model
