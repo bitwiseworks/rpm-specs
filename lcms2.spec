@@ -89,7 +89,7 @@ rm -rf ${RPM_BUILD_ROOT}
 %changelog
 * Fri Mar 03 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.8-1
 - update to vendor version 2.8
-_ use scm_ macros
+- use scm_ macros
 
 * Wed Mar 16 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.7-1
 - remove dbg files from normal packages
