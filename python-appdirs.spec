@@ -9,14 +9,14 @@
 %global python3_wheelname %python2_wheelname
 
 Name:          python-%{modname}
-Version:       1.4.0
+Version:       1.4.3
 Release:       1%{?dist}
 Summary:       Python module for determining platform-specific directories
 
 License:       MIT
 URL:           http://github.com/ActiveState/appdirs
 Vendor:        bww bitwise works GmbH
-%scm_source  svn http://svn.netlabs.org/repos/ports/python-appdirs/trunk 2089
+%scm_source github https://github.com/bitwiseworks/%{modname}-os2 %{version}-os2
 
 BuildRequires: python2-devel
 #BuildRequires: python-setuptools
@@ -113,5 +113,9 @@ sed -i -e '1{\@^#!/usr/bin/env python@d}' %{buildroot}%{python3_sitelib}/%{modna
 %endif
 
 %changelog
+* Thu Apr 13 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.4.3-1
+- update to version 1.4.3
+- moved source to github
+
 * Mon Feb 27 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.4.0-1
-- first rpm version
+- first rpm version (internal version only)
