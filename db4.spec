@@ -1,6 +1,6 @@
 #define svn_url     F:/rd/ports/bdb/trunk
 %define svn_url     http://svn.netlabs.org/repos/ports/bdb/trunk
-%define svn_rev     1981
+%define svn_rev     2176
 
 # the set of arches on which libgcj provides gcj and libgcj-javac-placeholder.sh
 #%define java_arches __%{ix86} alpha ia64 ppc sparc sparcv9 x86_64 s390 s390x
@@ -15,7 +15,7 @@
 Summary: The Berkeley DB database library (version 4) for C
 Name: db4
 Version: 4.8.30
-Release: 7%{?dist}
+Release: 8%{?dist}
 
 Vendor:  bww bitwise works GmbH
 Source:  %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
@@ -169,27 +169,25 @@ fixup_href() {
 
 set +x
 # Fix all of the HTML files.
-fixup_href `find . -name "*.html"`
+# YD this is not needed without docs
+#fixup_href `find . -name "*.html"`
 set -x
 
-#cd dist
-#./s_config
+cd dist
+./s_config
 
-mkdir dist/os2
+mkdir os2
 
 %build
 export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
-export LDFLAGS="-Zexe -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp" 
+export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp" 
 export LIBS="-lurpo -lcx -lpthread" 
 export CFLAGS="$RPM_OPT_FLAGS -fno-strict-aliasing"
 
 # Build the old db-185 libraries.
 #make -C db.1.85/PORT/%{_os} OORG="$CFLAGS"
 
-cd dist
-s_config
-
-cd os2
+cd dist/os2
 #ln -sf ../configure .
 cp ../configure .
 
@@ -198,7 +196,8 @@ cp ../configure .
 	# XXX --enable-debug_{r,w}op should be disabled for production.
 
 %configure -C \
-    --disable-shared --enable-static \
+    --enable-compat185 \
+    --enable-shared --enable-static \
     --enable-cxx \
     --disable-tcl \
     --disable-java \
@@ -234,9 +233,6 @@ mkdir -p ${RPM_BUILD_ROOT}%{_libdir}
 
 %makeinstall -C dist/os2
 
-cp dist/os2/libdb-%{__soversion}_s.a ${RPM_BUILD_ROOT}%{_libdir}
-cp dist/os2/libdb_cxx-%{__soversion}_s.a ${RPM_BUILD_ROOT}%{_libdir}
-
 # XXX Nuke non-versioned archives and symlinks
 rm -f ${RPM_BUILD_ROOT}%{_libdir}/libdb.a
 rm -f ${RPM_BUILD_ROOT}%{_libdir}/libdb_cxx.a
@@ -259,8 +255,8 @@ rm -f ${RPM_BUILD_ROOT}%{_libdir}/libdb_cxx.a
 #fi
 
 # add symlink without version number
-ln -s libdb-%{__soversion}.a $RPM_BUILD_ROOT/%{_libdir}/libdb.a
-ln -s libcxx-%{__soversion}.a $RPM_BUILD_ROOT/%{_libdir}/libdb_cxx.a
+ln -s db-%{__soversion}_dll.a $RPM_BUILD_ROOT/%{_libdir}/db.a
+ln -s db_cxx-%{__soversion}_dll.a $RPM_BUILD_ROOT/%{_libdir}/db_cxx.a
 
 # Move the header files to a subdirectory, in case we're deploying on a
 # system with multiple versions of DB installed.
@@ -321,25 +317,22 @@ rm -rf ${RPM_BUILD_ROOT}
 
 %files devel
 %defattr(-,root,root)
-#%doc	docs/*
-#%doc	examples_c examples_cxx
 %{_libdir}/db*.dll
-%{_libdir}/libdb-%{__soversion}.a
-%{_libdir}/libdb.a
-%{_libdir}/libdb_cxx-%{__soversion}.a
-%{_libdir}/libdb_cxx.a
+%{_libdir}/db-%{__soversion}_dll.a
+%{_libdir}/db.a
+%{_libdir}/db_cxx-%{__soversion}_dll.a
+%{_libdir}/db_cxx.a
 %dir %{_includedir}/%{name}
 %{_includedir}/%{name}/db.h
-#%{_includedir}/%{name}/db_185.h
+%{_includedir}/%{name}/db_185.h
 %{_includedir}/%{name}/db_cxx.h
 %{_includedir}/db.h
-#%{_includedir}/db_185.h
 %{_includedir}/db_cxx.h
 
 %files devel-static
 %defattr(-,root,root)
-%{_libdir}/libdb-%{__soversion}_s.a
-%{_libdir}/libdb_cxx-%{__soversion}_s.a
+%{_libdir}/db-%{__soversion}.a
+%{_libdir}/db_cxx-%{__soversion}.a
 #%{_libdir}/libdb_tcl-%{__soversion}.a
 %ifarch %{java_arches}
 %{_libdir}/libdb_java-%{__soversion}.a
@@ -359,6 +352,9 @@ rm -rf ${RPM_BUILD_ROOT}
 #%endif
 
 %changelog
+* Thu Apr 13 2017 yd <yd@os2power.com> 4.8.30-8
+- enable db 1.8.5 compatibility api.
+
 * Wed Feb 08 2017 yd <yd@os2power.com> 4.8.30-7
 - r1981, disable docs.
 - r1980, remove mmap hack.
