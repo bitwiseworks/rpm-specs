@@ -1,6 +1,6 @@
 Name:           check
 Version:        0.11.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        A unit test framework for C
 License:        LGPLv2+
 URL:            http://libcheck.github.io/check/
@@ -104,17 +104,17 @@ rm -rf checkmk/test/empty_input
 
 %post
 #/sbin/ldconfig
-if [ -e %{_infodir}/%{name}.info* ]; then
+if [ -f %{_infodir}/%{name}.info.gz ]; then
   %{_sbindir}/install-info \
     --entry='* Check: (check).               A unit testing framework for C.' \
-    %{_infodir}/%{name}.info %{_infodir}/dir || :
+    %{_infodir}/%{name}.info.gz %{_infodir}/dir || :
 fi
 
 #%postun -p /sbin/ldconfig
 
 %preun
-if [ $1 = 0 -a -e %{_infodir}/%{name}.info* ]; then
-  %{_sbindir}/install-info --delete %{_infodir}/%{name}.info %{_infodir}/dir || :
+if [ $1 = 0 -a -f %{_infodir}/%{name}.info.gz ]; then
+  %{_sbindir}/install-info --delete %{_infodir}/%{name}.info.gz %{_infodir}/dir || :
 fi
 
 
@@ -144,6 +144,9 @@ fi
 %{_mandir}/man1/checkmk.1*
 
 %changelog
+* Thu Apr 13 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.11.0-2
+- fix a script error
+
 * Mon Apr 03 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.11.0-1
 - update vendor source to version 0.11.0
 - move source from netlabs svn to github
