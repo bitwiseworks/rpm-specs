@@ -13,12 +13,12 @@
 Summary:        %{sum}
 Name:           pyparsing
 Version:        2.1.10
-Release:        1%{?dist}
+Release:        2%{?dist}
 
 License:        MIT
 URL:            http://pyparsing.wikispaces.com/
 Vendor:         bww bitwise works GmbH
-%scm_source  svn http://svn.netlabs.org/repos/ports/pyparsing/trunk 2076
+%scm_source github https://github.com/bitwiseworks/%{srcname}-os2 %{version}-os2
 
 BuildArch:      noarch
 BuildRequires:  dos2unix
@@ -127,5 +127,8 @@ dos2unix -k CHANGES LICENSE README
 %doc CHANGES README HowToUsePyparsing.html docs examples htmldoc
 
 %changelog
+* Thu Apr 13 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.1.10-2
+- moved source to github
+
 * Mon Feb 27 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.1.10-1
-- first rpm version
+- first rpm version (internal version only)
