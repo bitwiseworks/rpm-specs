@@ -12,13 +12,13 @@
 
 Name:           python-%{pypi_name}
 Version:        16.8
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Core utilities for Python packages
 
 License:        BSD or ASL 2.0
 URL:            https://github.com/pypa/packaging
 Vendor:         bww bitwise works GmbH
-%scm_source  svn http://svn.netlabs.org/repos/ports/python-packaging/trunk 2071
+%scm_source github https://github.com/bitwiseworks/%{pypi_name}-os2 %{version}-os2
 
 BuildArch:      noarch
  
@@ -150,5 +150,8 @@ rm -rf html/_static/fonts/
 %license LICENSE LICENSE.APACHE LICENSE.BSD
 
 %changelog
+* Thu Apr 13 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 16.8-2
+- moved source to github
+
 * Mon Feb 27 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 16.8-1
-- first rpm version
+- first rpm version (internal version only)
