@@ -1,6 +1,6 @@
 #define svn_url     F:/rd/rpm/python/trunk
 %define svn_url     http://svn.netlabs.org/repos/rpm/python/trunk
-%define svn_rev     977
+%define svn_rev     1117
 
 %{!?__python_ver:%global __python_ver EMPTY}
 #global __python_ver 2.7
@@ -49,7 +49,7 @@
 Summary: An interpreted, interactive, object-oriented programming language
 Name: %{python}
 Version: 2.7.6
-Release: 16%{?dist}
+Release: 17%{?dist}
 License: Python
 Group: Development/Languages
 Provides: python-abi = %{pybasever}
@@ -152,6 +152,8 @@ provides the libraries needed for this.
 Summary: The libraries and header files needed for Python development
 Group: Development/Libraries
 Requires: %{python}%{?_isa} = %{version}-%{release}
+Requires: python-rpm-macros
+Requires: python2-rpm-macros
 # Needed here because of the migration of Makefile from -devel to the main
 # package
 Conflicts: %{python} < %{version}-%{release}
@@ -254,10 +256,6 @@ find -name "*~" |xargs rm -f
 autoreconf -fvi
 
 %build
-
-export SHELL=""
-export MAKESHELL=""
-export CONFIG_SHELL=""
 
 export LDFLAGS="-g -Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 export LIBS="-lcx -lssl -lcrypto -lurpo -lpthread -lintl"
@@ -448,6 +446,7 @@ fi
 %doc systemtap-example.stp pyfuntop.stp
 %endif
 %exclude %{_libdir}/*.dbg
+%{pylibdir}/unittest/*
 
 %files devel
 %defattr(-,root,root,-)
@@ -495,7 +494,6 @@ fi
 %{pylibdir}/json/tests
 %{pylibdir}/sqlite3/test
 %{pylibdir}/test/*
-%{pylibdir}/unittest/*
 # These two are shipped in the main subpackage:
 %exclude %{pylibdir}/test/test_support.py*
 %exclude %{pylibdir}/test/__init__.py*
@@ -518,6 +516,9 @@ fi
 # payload file would be unpackaged)
 
 %changelog
+* Mon Apr 24 2017 yd <yd@os2power.com> 2.7.6-17
+- add new requirements and move unittest files. ticket#248.
+
 * Fri Feb 17 2017 yd <yd@os2power.com> 2.7.6-16
 - force db4 minimal version (libcx req).
 
