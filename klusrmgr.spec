@@ -2,8 +2,8 @@
 
 Summary:    kLIBC User Management
 Name:       klusrmgr
-Version:    1.1.0
-Release:    3%{?dist}
+Version:    1.1.1
+Release:    1%{?dist}
 License:    proprietary
 Group:      Applications/System
 URL:        http://www.netlabs.org/vxapps
@@ -51,8 +51,9 @@ if [ "$1" -ge 1 ]; then # (upon update)
     wpi4rpm del %{vendor}/%{name}/binaries %{version}-%{release}
 fi
 %bww_folder -e %{name} -r readme.txt
-%wps_object_create %{name}_WPCFGSHADOW:WPShadow|%{summary}|<WP_CONFIG>|SHADOWID=<%{__bww_exe}_EXE>;
+%wps_object_create %{name}_WPCFGSHADOW:WPShadow|%{summary}|<WP_CONFIG>|SHADOWID=<%{name}_EXE>;
 wpi4rpm add %{vendor}/%{name}/binaries %{version}-%{release}
+klusrmgr -init
 
 %postun
 if [ "$1" -eq 0 ]; then # (upon removal)
@@ -69,6 +70,8 @@ fi
 
 
 %changelog
+* Mon Apr 24 2017 hb <herwig.bauernfeind@bitwiseworks.com> 1.1.1-1
+- add -init switch and ensure default files are created upon installation
 * Sun Feb 05 2017 hb <herwig.bauernfeind@bitwiseworks.com> 1.1.0-3
 - put RxCrypt.DLL into a separate package
 * Thu Jan 26 2017 hb <herwig.bauernfeind@bitwiseworks.com> 1.1.0-2
