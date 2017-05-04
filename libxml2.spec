@@ -1,10 +1,6 @@
 # remove the comment below, when we have python3 support
 #global with_python3 1
 
-#define svn_url     e:/trees/libxml2/trunk
-%define svn_url     http://svn.netlabs.org/repos/ports/xml2/trunk
-%define svn_rev     1830
-
 Summary: Library providing XML and HTML support
 Name: libxml2
 Version: 2.9.4
@@ -14,7 +10,7 @@ Group: Development/Libraries
 URL: http://xmlsoft.org/
 Vendor: bww bitwise works GmbH
 
-Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
+%scm_source  svn http://svn.netlabs.org/repos/ports/xml2/trunk 2188
 
 # DEF files to create forwarders for the legacy package
 Source10:       libxml2.def
@@ -108,14 +104,7 @@ at parse time or later once the document has been modified.
 %debug_package
 
 %prep
-%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{?!svn_rev):0}
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc
-svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
-%endif
+%scm_setup
 
 # Prepare forwarder DLLs.
 for m in %{SOURCE10}; do
@@ -248,6 +237,10 @@ rm -fr %{buildroot}
 %endif # with_python3
 
 %changelog
+* Thu May 04 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.9.4-3
+- prefix /etc path with /@unixroot
+- use the new scm_source and scm_setup macros
+
 * Wed Nov 30 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.9.4-2
 - add -nostdlib to forwarders, to need less heap
 
