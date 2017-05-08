@@ -216,8 +216,9 @@ LANG=en_US.utf8 PYTHONPATH=$(pwd) py.test-%{python3_version}
 %endif # with_python3
 
 %changelog
-* Thu Apr 13 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 34.4.1-1
+* Mon May 08 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 34.4.1-1
 - moved source to github
+- rebuilt with latest python macros
 
 * Mon Feb 27 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 34.2-0
 - first rpm version (internal version only)
