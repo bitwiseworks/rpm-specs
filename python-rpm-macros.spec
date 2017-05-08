@@ -3,7 +3,7 @@
 
 Name:           python-rpm-macros
 Version:        1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        The unversioned Python RPM macros
 
 License:        MIT
@@ -67,5 +67,8 @@ install -m 644 %{SOURCE0} %{SOURCE1} %{SOURCE2} %{SOURCE3} \
 
 
 %changelog
+* Mon May 08 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 1-2
+- add .exe to the python2 and python3 exe path
+
 * Tue Feb 28 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 1-1
 - first rpm version
