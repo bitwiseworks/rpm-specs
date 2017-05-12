@@ -8,7 +8,7 @@ if [ -f %{_infodir}/%1 ]; then # --excludedocs? \
 fi
 
 %info_preun() \
-if [ $1 == 0 ]; then \
+if [ $1 = 0 ]; then \
   if [ -f %{_infodir}/%1 ]; then # --excludedocs? \
     %{_sbindir}/install-info.exe --delete %{_infodir}/%1 %{_infodir}/dir || : \
   fi \

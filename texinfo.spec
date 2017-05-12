@@ -5,48 +5,48 @@
 Summary: Tools needed to create Texinfo format documentation files
 Name: texinfo
 Version: 5.2
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv3+
 Group: Applications/Publishing
 Url: http://www.gnu.org/software/texinfo/
+Vendor: bww bitwise works GmbH
 
-#Source0: ftp://ftp.gnu.org/gnu/texinfo/texinfo-%{version}.tar.xz
-#Source1: ftp://ftp.gnu.org/gnu/texinfo/texinfo-%{version}.tar.xz.sig
-
-%define svn_url     http://svn.netlabs.org/repos/ports/texinfo/trunk
-%define svn_rev     1066
-
-Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
-
-BuildRequires: gcc make subversion zip
+%scm_source svn http://svn.netlabs.org/repos/ports/texinfo/trunk 1066
 
 Source2: info-dir
-# Source3: script for filtering out false perl requires
-Source3:   filter-requires-texinfo.sh
-# Source4: script for filtering out false perl provides
-Source4: filter-provides-texinfo.sh
-# Source5: macro definitions
 Source5: macros.info
+
+# TODO: Do we lack these perl bits on OS/2?
+%define perl_i18n_support 0
 
 Requires(post): %{_sbindir}/install-info.exe
 Requires(preun): %{_sbindir}/install-info.exe
 Requires: perl >= 5.7.3
-#Requires: perl(Text::Unidecode), perl(Unicode::EastAsianWidth), perl(Data::Dumper), perl(Locale::Messages)
+Requires: perl(Data::Dumper)
+%if %{?perl_i18n_support}
+Requires: perl(Text::Unidecode), perl(Unicode::EastAsianWidth), perl(Locale::Messages)
+%endif
 BuildRequires: zlib-devel, ncurses-devel, help2man
-#BuildRequires: perl(Data::Dumper), perl(Locale::Messages), perl(Unicode::EastAsianWidth), perl(Text::Unidecode)
-
-# @todo Disabled, seems to not work (and not needed ATM)
-#global _use_internal_dependency_generator 0
-#global __find_requires %{SOURCE3}
-#global __find_provides %{SOURCE4}
+BuildRequires: perl(Data::Dumper)
+%if %{?perl_i18n_support}
+BuildRequires: perl(Locale::Messages), perl(Unicode::EastAsianWidth), perl(Text::Unidecode)
+%endif
 
 # Two reasons for the following dependency:
 # 1. texinfo.mo is installed by info rather by texinfo (since info needs it and for most users
 #    texinfo itself isn't necessary), so texinfo must depend on it.
 # 2. Packages that contain .info documentation often use BuildRequires: texinfo so that they
-#    can build it. However, if they want to use %info_requires/%info_post()/%info_preun() macros
+#    can build it. However, if they want to use info_requires/info_post()/info_preun() macros
 #    they must have macros.info installed at rpm-build time which is provided by info.
 Requires: info = %{version}-%{release}
+
+# Texinfo perl packages are not installed in default perl library dirs
+%global __provides_exclude ^perl\\(.*Texinfo.*\\)$
+%global __requires_exclude ^perl\\(.*Texinfo.*\\)$
+# Also no need to look into installed perl stuff at all (this filters out
+# quile a lot of deps like perl(Locale::RecodeData::*) on OS/2)
+%global __provides_exclude_from ^%{_datadir}/texinfo
+%global __requires_exclude_from ^%{_datadir}/texinfo
 
 %description
 Texinfo is a documentation system that can produce both online
@@ -83,14 +83,7 @@ The texinfo-tex package provides tools to format Texinfo documents
 for printing using TeX.
 
 %prep
-%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc
-svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
-%endif
+%scm_setup
 
 # Create files necessary for configure
 autogen.sh
@@ -100,10 +93,11 @@ sed -i -e "/define DEFAULT_INFOPATH/ s,/usr,%{_prefix},g" info/filesys.h
 
 %build
 %configure
-#           --with-external-Text-Unidecode \
-#           --with-external-libintl-perl \
-#           --with-external-Unicode-EastAsianWidth
-
+%if %{?perl_i18n_support}
+           --with-external-Text-Unidecode \
+           --with-external-libintl-perl \
+           --with-external-Unicode-EastAsianWidth
+%endif
 # This is necessary so that Perl module search path is properly set
 # when running help2man on makeinfo etc.
 export TEXINFO_DEV_SOURCE=1
@@ -127,7 +121,7 @@ cp %{SOURCE5} $RPM_BUILD_ROOT%{_rpmconfigdir}/macros.d
 %find_lang %{name}
 %find_lang %{name}_document
 
-# @todo Disabled for now
+# TODO: Disabled for now
 #%check
 #export ALL_TESTS=yes
 #make %{?_smp_mflags} check
@@ -212,6 +206,10 @@ fi
 %{_mandir}/man1/pdftexi2dvi.1*
 
 %changelog
+* Fri May 12 2017 Dmitriy Kuminov <coding@dmik.org> 5.2-3
+- Use scm_source and friends.
+- Fix broken info_preun macro (bashism).
+
 * Tue Feb 17 2015 Dmitriy Kuminov <coding@dmik.org> 5.2-2
 - Make @unixroot strings properly quoted in perl scripts.
 
