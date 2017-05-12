@@ -1,4 +1,6 @@
 %define debug_package %{nil}
+%define _strip_opts --no-compress --no-debuginfo
+
 
 Summary:    Steven Elliott's REXXINI library
 Name:       REXXINI
