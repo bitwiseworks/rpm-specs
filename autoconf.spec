@@ -1,19 +1,14 @@
 Summary:    A GNU tool for automatically configuring source code
 Name:       autoconf
 Version:    2.69
-Release:    4%{?dist}
+Release:    5%{?dist}
 License:    GPLv2+ and GFDL
 Group:      Development/Tools
 URL:        http://www.gnu.org/software/autoconf/
-BuildArch: noarch
-BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+BuildArch:  noarch
+Vendor:     bww bitwise works GmbH
 
-%define svn_url     http://svn.netlabs.org/repos/ports/autoconf/trunk
-%define svn_rev     1760
-
-Source: %{name}-%{version}-r%{svn_rev}.zip
-
-BuildRequires: gcc make subversion zip
+%scm_source svn http://svn.netlabs.org/repos/ports/autoconf/trunk 2192
 
 # m4 >= 1.4.6 is required, >= 1.4.13 is recommended:
 BuildRequires:      m4 >= 1.4.13
@@ -24,6 +19,9 @@ Requires:           m4 >= 1.4.13
 
 # for autoreconf
 Requires: autoconf
+
+# for docs (makeinfo etc)
+BuildRequires:      texinfo help2man
 
 # for check only:
 #BuildRequires: automake libtool gcc-gfortran
@@ -45,19 +43,12 @@ Autoconf is only required for the generation of the scripts, not
 their use.
 
 %prep
-%if %(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc
-svn export -r %{svn_rev} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" "%{name}-%{version}")
-%endif
+%scm_setup
 
 %build
 
 # make sure configure is updated to properly support OS/2
-autoreconf --verbose --install
+autoreconf -fvi
 
 %configure
 
@@ -84,7 +75,7 @@ rm -rf ${RPM_BUILD_ROOT}
 %info_post autoconf.info
 
 %preun
-info_preun autoconf.info
+%info_preun autoconf.info
 
 %files
 %defattr(-,root,root,-)
@@ -99,6 +90,11 @@ info_preun autoconf.info
 %doc AUTHORS COPYING ChangeLog NEWS README THANKS TODO
 
 %changelog
+* Fri May 12 2017 Dmitriy Kuminov <coding@dmik.org> 2.69-5
+- Use scm_source and friends.
+- Fix fatal failure in postun script (missing percent in macro).
+- Support escaping and quoting in LDFLAGS and similar vars (#156).
+
 * Wed Oct 19 2016 Dmitriy Kuminov <coding@dmik.org> 2.69-4
 - Overcome 32k command line limit on OS/2 in autom4te.
 
