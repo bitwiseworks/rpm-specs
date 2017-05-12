@@ -7,6 +7,8 @@ URL:            http://sourceforge.net/projects/libjpeg-turbo
 
 Vendor:         bww bitwise works GmbH
 %scm_source github https://github.com/bitwiseworks/%{name}-os2 %{version}-os2
+# DEF files to create forwarders for the legacy package
+Source10:       jpeg.def
 
 BuildRequires:  autoconf
 BuildRequires:  automake
@@ -65,6 +67,11 @@ manipulate JPEG files using the TurboJPEG library.
 %prep
 %scm_setup
 
+# Prepare forwarder DLLs.
+for m in %{SOURCE10}; do
+  cp ${m} .
+done
+
 %build
 autoreconf -vif
 
@@ -81,6 +88,9 @@ make %{?_smp_mflags} V=1
 %install
 make install DESTDIR=%{buildroot}
 find %{buildroot} -name "*.la" -delete
+
+# Generate & install forwarder DLLs.
+gcc -Zomf -Zdll -nostdlib jpeg.def -l$RPM_BUILD_ROOT/%{_libdir}/jpeg8.dll -lend -o $RPM_BUILD_ROOT/%{_libdir}/jpeg.dll
 
 # Fix perms
 chmod -x README.md
