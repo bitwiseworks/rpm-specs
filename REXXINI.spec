@@ -5,7 +5,7 @@
 Summary:    Steven Elliott's REXXINI library
 Name:       REXXINI
 Version:    1.0.0
-Release:    1%{?dist}
+Release:    2%{?dist}
 License:    Freeware
 Group:      Applications/System
 URL:        http://www.edm2.com/index.php/RexxINI
@@ -60,7 +60,7 @@ fi
 
 
 %changelog
+* Fri May 12 2017 hb <herwig.bauernfeind@bitwiseworks.com> 1.0.0-2
+- do not lxlite rexxini.dll
 * Sun Feb 05 2017 hb <herwig.bauernfeind@bitwiseworks.com> 1.0.0-1
 - final release from Steven Elliott
-
-
