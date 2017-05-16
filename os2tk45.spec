@@ -1,7 +1,7 @@
 Summary: IBM OS/2 Developer's Toolkit Version 4.5
 Name: os2tk45
 Version: 4.5.2
-Release: 2%{?dist}
+Release: 3%{?dist}
 Group: System Environment/Libraries
 License: IBM
 Vendor: bww bitwise works GmbH
@@ -18,9 +18,9 @@ BuildRequires: curl zip
 Requires: os2-base >= 0.0.0-12
 
 # Act like a meta-package and install all essential subpackages
-Requires: %{name}-headers = %{version}
-Requires: %{name}-libs = %{version}
-Requires: %{name}-books = %{version}
+Requires: %{name}-headers = %{version}-%{release}
+Requires: %{name}-libs = %{version}-%{release}
+Requires: %{name}-books = %{version}-%{release}
 
 %description
 The IBM OS/2 Developer's Toolkit Version 4.5 provides development support
@@ -86,6 +86,8 @@ mkdir -p %{buildroot}%{_libdir}
 cp -pR lib/* %{buildroot}%{_libdir}/
 # remove LIBC stuff, will go to a separate subpackage one day
 rm %{buildroot}%{_libdir}/libc*.lib
+# remove cryptol.lib, it will go to a separate subpackage one day
+rm %{buildroot}%{_libdir}/crypto.lib
 
 mkdir -p %{buildroot}%{_datadir}/os2/book
 cp -p book/* %{buildroot}%{_datadir}/os2/book/
@@ -149,6 +151,9 @@ if [ "$1" = 0 ] ; then
 fi
 
 %changelog
+* Thu Feb 4 2016 Dmitriy Kuminov <coding@dmik.org> 4.5.2-3
+- Remove crypto.lib from libs package (conflicts with openssl-devel).
+
 * Wed Jan 27 2016 Dmitriy Kuminov <coding@dmik.org> 4.5.2-2
 - Add libs package.
 - Remove LIBC related files from headers and libraries.
