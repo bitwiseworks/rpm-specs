@@ -1,25 +1,17 @@
 Summary: IBM OS/2 Developer's Toolkit Version 4.5
 Name: os2tk45
 Version: 4.5.2
-Release: 3%{?dist}
+Release: 4%{?dist}
 Group: System Environment/Libraries
 License: IBM
 Vendor: bww bitwise works GmbH
 
-%define github_name os2tk45
-%define github_url  https://github.com/bitwiseworks/%{github_name}/archive
-%define github_rev  660fdb07c929623bd9043c88f2734f08c741e714
-
-Source: %{github_name}-%{github_rev}.zip
-
-BuildRequires: curl zip
-
-# os2-base 0.0.0-12 sets up BOOK and HELP for UNIXROOT in config.sys
-Requires: os2-base >= 0.0.0-12
+%scm_source github https://github.com/bitwiseworks/%{name} 660fdb07c929623bd9043c88f2734f08c741e714
 
 # Act like a meta-package and install all essential subpackages
 Requires: %{name}-headers = %{version}-%{release}
 Requires: %{name}-libs = %{version}-%{release}
+Requires: %{name}-rc = %{version}-%{release}
 Requires: %{name}-books = %{version}-%{release}
 
 %description
@@ -30,6 +22,11 @@ and eComStation.
 %package readme
 Summary: IBM OS/2 Developer's Toolkit readme
 BuildArch: noarch
+# The readme subpackage is required by everybody, so use it as a place for
+# common dependencies (meta package isn't good for it as it may be not
+# installed):
+# - os2-base 0.0.0-12 sets up BOOK/HELP/DPATH for UNIXROOT in config.sys
+Requires: os2-base >= 0.0.0-12
 
 %description readme
 Provides IBM OS/2 Developer's Toolkit readme and changelog files.
@@ -45,10 +42,18 @@ Provides IBM OS/2 Developer's Toolkit header files.
 %package libs
 Summary: IBM OS/2 Developer's Toolkit libraries
 Requires: %{name}-readme = %{version}-%{release}
-BuildArch: noarch
 
 %description libs
 Provides IBM OS/2 Developer's Toolkit library files.
+
+%package rc
+Summary: IBM OS/2 Developer's Toolkit resource compilers
+Requires: %{name}-readme = %{version}-%{release}
+
+%description rc
+Provides IBM OS/2 Developer's Toolkit resource compilers. Both 32-bit and 16-bit
+resource compilers (version 5.xxx and 4.xxx, respectively) are included in this
+package.
 
 %package books
 Summary: IBM OS/2 Developer's Toolkit books
@@ -59,14 +64,7 @@ BuildArch: noarch
 Provides IBM OS/2 Developer's Toolkit book files in INF and HLP formats.
 
 %prep
-%if %(sh -c 'if test -f "%{_sourcedir}/%{github_name}-%{github_rev}.zip" ; then echo 1 ; else echo 0 ; fi')
-%setup -n "%{github_name}-%{github_rev}" -q
-%else
-%setup -n "%{github_name}-%{github_rev}" -Tc
-rm -f "%{_sourcedir}/%{github_name}-%{github_rev}.zip"
-curl -sSL "%{github_url}/%{github_rev}.zip" -o "%{_sourcedir}/%{github_name}-%{github_rev}.zip"
-unzip "%{_sourcedir}/%{github_name}-%{github_rev}.zip" -d ..
-%endif
+%scm_setup
 
 %build
 
@@ -89,10 +87,18 @@ rm %{buildroot}%{_libdir}/libc*.lib
 # remove cryptol.lib, it will go to a separate subpackage one day
 rm %{buildroot}%{_libdir}/crypto.lib
 
+mkdir -p %{buildroot}%{_bindir}
+mkdir -p %{buildroot}%{_datadir}/os2/lang
+
+cp -p bin/rc*.exe %{buildroot}%{_bindir}/
+cp -p bin/rcpp.* %{buildroot}%{_bindir}/
+cp -p msg/rc*.msg %{buildroot}%{_datadir}/os2/lang/
+
 mkdir -p %{buildroot}%{_datadir}/os2/book
 cp -p book/* %{buildroot}%{_datadir}/os2/book/
 
 %files
+# nothing of its own in the meta-package
 
 %files readme
 %doc readme
@@ -104,14 +110,16 @@ cp -p book/* %{buildroot}%{_datadir}/os2/book/
 %files libs
 %{_libdir}/*.lib
 
+%files rc
+%{_bindir}/rc*.exe
+%{_bindir}/rcpp.*
+%{_datadir}/os2/lang/rc*.msg
+
 %files books
 %{_datadir}/os2/book/*
 
 %post headers
-if [ "$1" = 1 ] ; then
-# execute only on first install
 %cube {ADDSTRING "%UNIXROOT%\usr\include\os2tk45\inc;%UNIXROOT%\usr\include\os2tk45\gl;%UNIXROOT%\usr\include\os2tk45;" IN "SET INCLUDE=" (FIRST IFNEW BEFORE ADDBOTTOM RS(%%)} c:\config.sys > NUL
-fi
 
 %postun headers
 if [ "$1" = 0 ] ; then
@@ -120,25 +128,20 @@ if [ "$1" = 0 ] ; then
 fi
 
 %post libs
-if [ "$1" = 1 ] ; then
-# execute only on first install
 %cube {ADDSTRING "%UNIXROOT%\usr\lib;" IN "SET LIB=" (FIRST IFNEW BEFORE ADDBOTTOM RS(%%)} c:\config.sys > NUL
-fi
 
 %postun libs
 if [ "$1" = 0 ] ; then
 # execute only on last uninstall
+%cube {DELSTRING "%UNIXROOT%\usr\lib;" IN "SET LIB=" (FIRST RS(%%)} c:\config.sys > NUL
 fi
 
 %post books
-if [ "$1" = 1 ] ; then
-# execute only on first install
 %cube {REPLINE "SET CPREF=" WITH "SET CPREF=CP1.INF+CP2.INF+CP3.INF" (ADDBOTTOM} c:\config.sys > NUL
 %cube {REPLINE "SET GPIREF=" WITH "SET GPIREF=GPI1.INF+GPI2.INF+GPI3.INF+GPI4.INF" (ADDBOTTOM} c:\config.sys > NUL
 %cube {REPLINE "SET MMREF=" WITH "SET MMREF=MMREF1.INF+MMREF2.INF+MMREF3.INF" (ADDBOTTOM} c:\config.sys > NUL
 %cube {REPLINE "SET PMREF=" WITH "SET PMREF=PM1.INF+PM2.INF+PM3.INF+PM4.INF+PM5.INF" (ADDBOTTOM} c:\config.sys > NUL
 %cube {REPLINE "SET WPSREF=" WITH "SET WPSREF=WPS1.INF+WPS2.INF+WPS3.INF" (ADDBOTTOM} c:\config.sys > NUL
-fi
 
 %postun books
 if [ "$1" = 0 ] ; then
@@ -151,6 +154,12 @@ if [ "$1" = 0 ] ; then
 fi
 
 %changelog
+* Tue May 16 2017 Dmitriy Kuminov <coding@dmik.org> 4.5.2-4
+- Add rc subpackage that contains resource compilers version 4 and 5.
+- Remove noarch from libs subpackage.
+- Make libs subpackage properly clean up LIB statement in config.sys.
+- Update config.sys settings upon each update/reinstall.
+
 * Thu Feb 4 2016 Dmitriy Kuminov <coding@dmik.org> 4.5.2-3
 - Remove crypto.lib from libs package (conflicts with openssl-devel).
 
