@@ -3,21 +3,14 @@
 Summary:        Netscape Portable Runtime
 Name:           nspr
 Version:        4.12.0
-Release:        3%{?dist}
+Release:        4%{?dist}
 License:        MPLv2.0
 URL:            http://www.mozilla.org/projects/nspr/
 Group:          System Environment/Libraries
 Conflicts:      filesystem < 3
-Vendor:     bww bitwise works GmbH
+Vendor:         bww bitwise works GmbH
 
-%scm_source svn http://svn.netlabs.org/repos/ports/nspr/trunk 2052
-
-BuildRequires: gcc make subversion zip
-
-# Sources available at ftp://ftp.mozilla.org/pub/mozilla.org/nspr/releases/
-# When hg tag based snapshots are being used, refer to hg documentation on
-# mozilla.org and check out subdirectory mozilla/nsprpub.
-#Source0:        %{name}-%{version}.tar.gz
+%scm_source svn http://svn.netlabs.org/repos/ports/nspr/trunk 2194
 
 Source1:        nspr-config.xml
 
@@ -172,6 +165,12 @@ cp -p *.dll $RPM_BUILD_ROOT/%{_libdir}/
 %{_libdir}/plds4k.dll
 
 %changelog
+* Thu May 16 2017 Dmitriy Kuminov <coding@dmik.org> - 4.12.0-4
+- Use kLIBC APIs for file manipulation functions to bring symlink support and
+  other kLIBC I/O extensions (#153).
+- Remove manual EXCEPTQ installation as NSPR is linked against LIBCx now.
+- Rebuild with fixed pkgconfig dependency generator.
+
 * Thu Feb 23 2017 Dmitriy Kuminov <coding@dmik.org> - 4.12.0-3
 - Generate more compact forwarder DLLs with better memory footprint.
 
