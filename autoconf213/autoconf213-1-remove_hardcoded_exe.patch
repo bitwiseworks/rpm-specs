@@ -1,0 +1,46 @@
+diff -ru autoconf213/share/autoconf/acgeneral.m4 autoconf-gcc/share/autoconf/acgeneral.m4
+--- autoconf213/share/autoconf/acgeneral.m4	1999-02-05 06:40:22.000000000 +0400
++++ autoconf-gcc/share/autoconf/acgeneral.m4	2003-05-06 19:39:22.000000000 +0400
+@@ -877,15 +877,6 @@
+ if test -z "$ac_aux_dir"; then
+   AC_MSG_ERROR([can not find install-sh or install.sh in $1])
+ fi
+-case "`uname -s 2> /dev/null`" in
+-OS/2)
+-  if test $ac_aux_dir != AC_MACRODIR ; then
+-    for i in config.sub config.guess mkinstalldirs; do
+-      cp -f AC_MACRODIR/$i $ac_aux_dir/
+-    done
+-  fi
+-  ;;
+-esac
+ ac_config_guess=$ac_aux_dir/config.guess
+ ac_config_sub=$ac_aux_dir/config.sub
+ ac_configure=$ac_aux_dir/configure # This should be Cygnus configure.
+diff -ru autoconf213/share/autoconf/acspecific.m4 autoconf-gcc/share/autoconf/acspecific.m4
+--- autoconf213/share/autoconf/acspecific.m4	1999-02-05 06:40:22.000000000 +0400
++++ autoconf-gcc/share/autoconf/acspecific.m4	2003-03-12 22:56:28.000000000 +0400
+@@ -2715,22 +2715,8 @@
+ # Filter path to get backslahes into forwardslashes
+ case "`uname -s 2> /dev/null`" in
+ OS/2)
+-  : ${CC=gcc.exe}
+-  : ${MAKE=make}
+-  : ${CXX=gcc.exe}
+-  : ${CPP="gcc.exe -E"}
+-  : ${CFLAGS="-O2 -m486 -Zmt"}
+-  : ${CXXFLAGS="-O2 -m486 -Zmt"}
+-  : ${LDFLAGS="-s -Zmt -Zcrtdll -Zsysv-signals -Zbin-files"}
+-  : ${CONFIG_SHELL=sh.exe}
+-  : ${AR="ar.exe"}
+-  : ${LD="ld.exe"}
+-  : ${NM=nm.exe}
+-  : ${RANLIB="ar.exe s"}
+-  SHELL=${CONFIG_SHELL}
+-  PATH=`echo -E "$PATH" | sed 's+\\\\+/+g'`
++  PATH=`echo "$PATH" | sed 's+\\\\+/+g'`
+   PATH_IFS=';'
+-  ac_cv_emxos2=yes
+   ;;
+ *)
+   PATH_IFS=':'

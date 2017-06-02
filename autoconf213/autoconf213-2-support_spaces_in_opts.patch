@@ -1,0 +1,12 @@
+diff -ru autoconf-gcc/share/autoconf/acgeneral.m4 autoconf/share/autoconf/acgeneral.m4
+--- autoconf-gcc/share/autoconf/acgeneral.m4	2003-05-06 19:39:22.000000000 +0400
++++ autoconf/share/autoconf/acgeneral.m4	2014-05-22 00:09:20.000000000 +0400
+@@ -1279,7 +1279,7 @@
+ dnl AC_TRY_EVAL(VARIABLE)
+ AC_DEFUN(AC_TRY_EVAL,
+ [{ (eval echo configure:__oline__: \"[$]$1\") 1>&AC_FD_CC; dnl
+-(eval [$]$1) 2>&AC_FD_CC; }])
++(eval $1=\"[$]$1\"; eval [$]$1) 2>&AC_FD_CC; }])
+ 
+ dnl AC_TRY_COMMAND(COMMAND)
+ AC_DEFUN(AC_TRY_COMMAND,

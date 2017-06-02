@@ -1,18 +1,18 @@
 Summary:    A GNU tool for automatically configuring source code
 Name:       autoconf213
 Version:    2.13
-Release:    1%{?dist}
+Release:    2%{?dist}
 License:    GPLv2+ and GFDL
 Group:      Development/Tools
 Source:     http://hobbes.nmsu.edu/download/pub/os2/dev/util/autoconf213.zip
 URL:        http://www.gnu.org/software/autoconf/
-BuildArch: noarch
-BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+BuildArch:  noarch
+Vendor:     bww bitwise works GmbH
 
 BuildRequires:      m4 >= 1.4.13
 Requires:           m4 >= 1.4.13
-#Requires(post):     /sbin/install-info
-#Requires(preun):    /sbin/install-info
+
+%info_requires
 
 Patch1: autoconf213-1-remove_hardcoded_exe.patch
 Patch2: autoconf213-2-support_spaces_in_opts.patch
@@ -45,48 +45,54 @@ their use.
 %build
 
 # remove frozen states as they are wrong after patching
-rm share/autoconf/*.m4f
+%{__rm} share/autoconf/*.m4f
 # remove the dir with the os2 diff
-rm -rf src
+%{__rm} -rf src
 
 %install
 
-rm -rf ${RPM_BUILD_ROOT}
-mkdir -p ${RPM_BUILD_ROOT}/%{_bindir}
-mkdir -p ${RPM_BUILD_ROOT}/%{_datadir}
-mkdir -p ${RPM_BUILD_ROOT}/%{_infodir}
-for f in `cd bin && echo *`
-do sed -r \
+%{__rm} -rf ${RPM_BUILD_ROOT}
+%{__mkdir_p} ${RPM_BUILD_ROOT}%{_bindir}
+%{__mkdir_p} ${RPM_BUILD_ROOT}%{_datadir}
+%{__mkdir_p} ${RPM_BUILD_ROOT}%{_infodir}
+(cd bin
+for f in *
+do %{__sed} -r \
   -e 's|/usr/local|/@unixroot/usr|g' \
   -e 's|/share/autoconf|/share/autoconf213|g' \
-  < bin/$f > ${RPM_BUILD_ROOT}/%{_bindir}/${f}213
-done
-cp -R share/autoconf ${RPM_BUILD_ROOT}/%{_datadir}/autoconf213
-cp info/autoconf.info ${RPM_BUILD_ROOT}/%{_infodir}/autoconf213.info
+  < $f > ${RPM_BUILD_ROOT}%{_bindir}/${f}213
+done)
+chmod +x ${RPM_BUILD_ROOT}%{_bindir}/*
+%{__cp} -a share/autoconf ${RPM_BUILD_ROOT}%{_datadir}/autoconf213
+%{__cp} -a info/autoconf.info ${RPM_BUILD_ROOT}%{_infodir}/autoconf213.info
 
-#rm -f $RPM_BUILD_ROOT%{_infodir}/dir
+#{__rm} -f $RPM_BUILD_ROOT%{_infodir}/dir
 
 %clean
-rm -rf ${RPM_BUILD_ROOT}
+%{__rm} -rf ${RPM_BUILD_ROOT}
+cd .. && %{__rm} -rf %{buildsubdir}
 
-#%post
-#/sbin/install-info %{_infodir}/autoconf.info %{_infodir}/dir || :
+%post
+%info_post autoconf213.info
 
-#%preun
-#if [ "$1" = 0 ]; then
-#    /sbin/install-info --del %{_infodir}/autoconf.info %{_infodir}/dir || :
-#fi
+%preun
+%info_preun autoconf213.info
 
 %files
 %defattr(-,root,root,-)
 %{_bindir}/*
 %{_infodir}/autoconf213.info*
 # don't include standards.info, because it comes from binutils...
-#%exclude %{_infodir}/standards*
+%exclude %{_infodir}/standards*
 %{_datadir}/autoconf213/
-#%{_mandir}/man1/*
+#{_mandir}/man1/*
 %doc doc/autoconf/*
 
 %changelog
+* Fri Jun 2 2017 Dmitriy Kuminov <coding@dmik.org> 2.13-2
+- Add executable bit to scripts in /usr/bin to make them recognizable by which,
+  test -x etc.
+- Brush up the .spec by using proper RPM macros.
+
 * Thu May 22 2014 Dmitriy Kuminov <coding@dmik.org> 2.13-1
 - Initial version with some fixes (e.g. allow options with spaces).
