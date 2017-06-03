@@ -1,7 +1,3 @@
-#define svn_url     F:/rd/rpm/python/trunk
-%define svn_url     http://svn.netlabs.org/repos/rpm/python/trunk
-%define svn_rev     1117
-
 %{!?__python_ver:%global __python_ver EMPTY}
 #global __python_ver 2.7
 %global unicode ucs4
@@ -46,18 +42,26 @@
 #
 %global _python_bytecompile_errors_terminate_build 0
 
+# Completely disable python dependency generators as we enforce the right
+# provides/requires manually. This, in particular, prevents python-libs from
+# having the python(abi) dependency so that it can be installed anone.
+%global __python_provides %{nil}
+%global __python_requires %{nil}
+
+# Exclude Windows installer stubs from debug info stripping
+%define _strip_opts --debuginfo -x "wininst-*.exe"
+
 Summary: An interpreted, interactive, object-oriented programming language
 Name: %{python}
 Version: 2.7.6
-Release: 17%{?dist}
+Release: 18%{?dist}
 License: Python
 Group: Development/Languages
+Requires: %{name}-libs = %{version}-%{release}
 Provides: python-abi = %{pybasever}
 Provides: python(abi) = %{pybasever}
 
-Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
-
-BuildRequires: gcc make subversion zip
+%scm_source svn http://svn.netlabs.org/repos/rpm/python/trunk 1151
 
 %if %{main_python}
 Obsoletes: Distutils
@@ -75,6 +79,9 @@ Obsoletes: python-uuid < 1.31
 Provides: python-uuid = 1.31
 %endif
 
+# Because of fread override that fixes freezes when reading big files on JFS
+Requires: libcx >= 0.5.3
+
 # YD because of libcx
 Requires: db4 > 4.8.30-6
 
@@ -82,9 +89,6 @@ Requires: db4 > 4.8.30-6
 Conflicts: python-pycurl < 7.19.5.1-2
 Conflicts: rpm < 4.13.0-8
 Conflicts: yum-metadata-parser < 1.1.4-6
-
-# YD unix adds this automatically by parsing elf binaries
-Requires: %{name}-libs = %{version}-%{release}
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: readline-devel, openssl-devel, gmp-devel
@@ -106,9 +110,6 @@ BuildRequires: valgrind-devel
 BuildRequires: systemtap-sdt-devel
 %global tapsetdir      /usr/share/systemtap/tapset
 %endif
-
-# OS/2 specific
-BuildRequires: mmap urpo-devel
 
 URL: http://www.python.org/
 
@@ -139,7 +140,7 @@ Only binary files without versioned name. Allows multiple installations.
 %package libs
 Summary: The libraries for python runtime
 Group: Applications/System
-Requires: %{name} = %{version}-%{release}
+
 # Needed for ctypes, to load libraries, worked around for Live CDs size
 # Requires: binutils
 
@@ -151,7 +152,7 @@ provides the libraries needed for this.
 %package devel
 Summary: The libraries and header files needed for Python development
 Group: Development/Libraries
-Requires: %{python}%{?_isa} = %{version}-%{release}
+Requires: %{python} = %{version}-%{release}
 Requires: python-rpm-macros
 Requires: python2-rpm-macros
 # Needed here because of the migration of Makefile from -devel to the main
@@ -223,14 +224,7 @@ code that uses more than just unittest and/or test_support.py.
 %debug_package
 
 %prep
-%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc
-svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
-%endif
+%scm_setup
 
 %if 0%{?with_systemtap}
 # Provide an example of usage of the tapset:
@@ -257,8 +251,10 @@ autoreconf -fvi
 
 %build
 
-export LDFLAGS="-g -Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
-export LIBS="-lcx -lssl -lcrypto -lurpo -lpthread -lintl"
+# NOTE: Put -lcx to LDFLAGS instead of LIBS to have LIBCx linked to all shared
+# (.pyd) modules in addition to the python DLL and EXE itself
+export LDFLAGS="-g -Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp -Zmap -lcx"
+export LIBS="-lssl -lcrypto -lintl"
 %configure \
         --enable-shared \
         --with-system-expat \
@@ -353,6 +349,10 @@ rm -f %{buildroot}%{pylibdir}/email/test/data/audiotest.au %{buildroot}%{pylibdi
 # Get rid of egg-info files (core python modules are installed through rpms)
 rm %{buildroot}%{pylibdir}/*.egg-info
 
+# Get rid of all .pyo files as they are identical to .pyc (only needed in
+# python -O mode which is used rarely or not at all on OS/2)
+find %{buildroot}%{pylibdir} -type f -name *.pyo -exec rm -f {} +
+
 %clean
 rm -fr %{buildroot}
 
@@ -369,7 +369,7 @@ if [ "$1" = 1 ] ; then
 fi
 
 
-%files
+%files -f %{debug_package_exclude_files}
 %defattr(-, root, root, -)
 %doc LICENSE README
 %{_bindir}/pydoc*
@@ -381,12 +381,12 @@ fi
 %endif
 %{_bindir}/python%{pybasever}.exe
 %{_mandir}/*/*
-%exclude %{_bindir}/*.dbg
 
 %dir %{pylibdir}
 %dir %{dynload_dir}
 %{dynload_dir}/Python-%{version}-py%{pybasever}.egg-info
 %{dynload_dir}/*.pyd
+%exclude %{dynload_dir}/*.map
 %exclude %{dynload_dir}/_ctypes_test.pyd
 %exclude %{dynload_dir}/_ct3574.pyd
 %exclude %{dynload_dir}/_testcapi.pyd
@@ -437,7 +437,7 @@ fi
 %dir %{_includedir}/python%{pybasever}
 %{_includedir}/python%{pybasever}/%{_pyconfig_h}
 
-%files libs
+%files libs -f %{debug_package_exclude_files}
 %defattr(-,root,root,-)
 #%doc LICENSE README
 %{_libdir}/python%{pybasever_cond}.dll
@@ -445,7 +445,6 @@ fi
 %{tapsetdir}/%{libpython_stp}
 %doc systemtap-example.stp pyfuntop.stp
 %endif
-%exclude %{_libdir}/*.dbg
 %{pylibdir}/unittest/*
 
 %files devel
@@ -516,6 +515,16 @@ fi
 # payload file would be unpackaged)
 
 %changelog
+* Sat Jun 3 2017 Dmitriy Kuminov <coding@dmik.org> 2.7.6-18
+- Put the LIBCx library to LDFLAGS rather than LIBS to have all module DLLs
+  linked against it as well.
+- Rebuild against LIBCx 0.5.3 to incorporate DosRead JFS workaround for fread.
+- Remove urpo as it conflicts with LIBCx.
+- Remove pthread from libraries as not needed any more.
+- Remove .pyo files (needed only in python -O mode which is rarely used).
+- Remove .dbg files for Windows stubs (wininst-*.exe).
+- Use scm_source/scm_setup for downloading sources.
+
 * Mon Apr 24 2017 yd <yd@os2power.com> 2.7.6-17
 - add new requirements and move unittest files. ticket#248.
 
