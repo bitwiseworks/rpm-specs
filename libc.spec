@@ -6,15 +6,15 @@ License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Standard Shared Libraries
 Group:          System/Libraries
 Version:        0.6.6
-Release:        32%{?dist}
+Release:        33%{?dist}
 Url:            http://svn.netlabs.org/libc
-
-BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 
 Source:         libc-%{version}.zip
 Source1:        libc-emxomf.zip
 # This contains binary build of LIBC with patches from tickets #361-365
 Source2:        libc-hotfix.zip
+# This contains binary build of emxomfld with patches from ticket #376
+Source3:        libc-emxomfld.zip
 
 Patch0:         libc.patch
 
@@ -80,7 +80,7 @@ HLL debug data for exception handling support.
 
 
 %prep
-%setup -q -c -a 1 -a 2
+%setup -q -c -a 1 -a 2 -a 3
 %patch0
 
 #replace paths.h wrong macros
@@ -105,6 +105,8 @@ cp -p -r emxomf.exe %{buildroot}%{_bindir}
 cp -p -r emxomfstrip.exe %{buildroot}%{_bindir}
 cp -p -r os2safe.h %{buildroot}%{_includedir}
 cp -p -r libos2.a %{buildroot}%{_libdir}
+
+cp -p -r emxomfld.exe %{buildroot}%{_bindir}
 
 # add hotfix DLLs
 cp -p -r libc066.* %{buildroot}%{_libdir}
@@ -183,6 +185,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/tcpipv4/dbg
 
 %changelog
+* Tue Jun 6 2017 Dmitriy Kuminov <coding@dmik.org> 0.6.6-33
+- Provide patched emxomfld.exe that fixes Invalid WKEXT record errors.
+
 * Fri Apr 7 2017 Dmitriy Kuminov <coding@dmik.org> 0.6.6-32
 - Require kLIBC user management (klusrmgr) to make programs using Unix user
   management API (getpwuid() and friends) work correctly.
