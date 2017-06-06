@@ -91,6 +91,7 @@ unzip -qq "%SOURCE0" -d ..\
 %{expand:%%{?__scm_source_%1}}\
 %{nil}
 
+# -A    Options for zip (-rx9 by default, currently used only for SVN SCM type)
 %scm_setup(A:)\
 %{!?__source_scm:%{error:%0: Missing %%scm_source specification}exit 1}\
 %{!?__source_url:%{?__source_scm:%{error:%0: Missing URL in %%scm_source}exit 1}}\
