@@ -27,3 +27,20 @@
 
 # Disable using find-debuginfo.sh, brp-strip-os2 does the job.
 %__debug_install_post %{nil}
+
+#------------------------------------------------------------------------
+# handle file unlocking, options:
+#   0 - automatic handling (default)
+#   1 - use config.sys driver only
+#   2 - do nothing, report error
+#
+%_os2_unlock_mode       0
+
+#------------------------------------------------------------------------
+# OS/2 macros to handle config.sys changes (using cube script)
+#
+%os2_boot_drive			%{_os2_boot_drive}
+%os2_unixroot_drive		%{_os2_unixroot_drive}
+%os2_config_sys			%{os2_boot_drive}\\config.sys
+%cube() 			cmd /c '%UNIXROOT%\\usr\\bin\\cube.exe %{*}'\
+%{nil}
