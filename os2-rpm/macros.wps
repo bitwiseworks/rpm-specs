@@ -1,0 +1,132 @@
+#------------------------------------------------------------------------
+# Macros to handle creation/deletion of WPS objects from %post* sections.
+# There are four single macros:
+#
+# %wps_object_create OBJECTID:SPECIFICATION
+# %wps_object_create_batch < FILE
+# %wps_object_delete OBJECTID
+# %wps_object_delete_all
+#
+# And a pair of begin-end macros:
+#
+# %wps_object_create_begin
+# OBJECTID:SPECIFICATION
+# OBJECTID:SPECIFICATION
+# ...
+# %wps_object_create_end
+#
+# All macros (except %wps_object_create_end) accept the -n option that
+# specifies the full package name (defaults to %{name}). The -n option
+# must be always used for subpackages as there is no way to detect the
+# subpackage name automatically.
+#
+# OBJECTID is an object identifier (w/o angle brackets). SPECIFICATION is
+# a string that describes the properties of the object to create and has
+# the following format:
+#
+#   CLASSNAME|TITLE|LOCATION[|SETUP[|OPTION]]
+#
+# Each component of this format string directly corresponds to the
+# respective argument of the SysCreateObject REXX function. Refer to
+# to the REXX reference manual for details.. Note that when OPTION is not
+# specified, U (update) mode is used by default.
+#
+# FILE is a text file used to create multiple objects at once: each line
+# in this file is an object ID followed by the specification (as described
+# above except that no quotes needed), like this:
+#
+#   OBJECTID:SPECIFICATION
+#
+# The pair of begin-end macrs serves for the same purpose but doesn't require
+# an external file (see below for an example).
+#
+# The indirect FILE or begin-end form is preferred and even required if one
+# of the object parameters contains a double forward slash (e.g. 'http://foo')
+# because otherwise the Classic REXX interpreter will treat it as a start of
+# the comment block and fail.
+#
+# Note that RPM tracks reference counting for each created object so you
+# may e.g. share a single WPS folder among several packages -- by creating a
+# folder with the same object ID in each package's %post section and
+# deleting it in its %postun section -- the folder will be actually removed
+# from the desktop only when the last package that creates it gets
+# uninstalled.
+#
+# Note also that each object is automatically associated with the package
+# it is created for so that %wps_object_delete_all knows what objects
+# to delete when you call it from %postun.
+#
+# Some object parameters (the LOCATION string or parts of the SETUP string such
+# as EXENAME) require valid OS/2 path strings as values, with back slashes
+# instead of forward slashes and @unixroot expanded to a full path. You may
+# cause this expansion by enclosing the respective part of the string in double
+# parenthesis. Note that double parenthesis may not be nested.
+#
+# Examples:
+#
+# %post
+# ...
+# # create objects one by one...
+# %wps_object_create MYAPP_FOLDER:WPFolder|My App %{version}|<WP_DESKTOP>
+# %wps_object_create MYAPP_EXE:WPProgram|My App|<MYAPP_FOLDER>|EXENAME=((${_bindir}/myapp.exe))
+#
+# # ...or all at once
+# %wps_object_create_begin
+# MYAPP_README:WPProgram|Read Me|<MYAPP_FOLDER>|EXENAME=e.exe;PROGTYPE=PROG_PM;PARAMETERS=(({_%docdir}/%{name}/README));OPEN=RUNNING
+# MYAPP_URL:WPUrl|myapp.example.com|<MYAPP_FOLDER>|URL=http://myapp.example.com
+# %wps_object_create_end
+#
+# %postun
+# ...
+# # delete all objects created for this package with wps_object_create*
+# %wps_object_delete_all
+#
+# # create objects for the subpackage 'sub'
+# %post sub
+# %wps_object_create -n %{name}-sub MYAPP_EXE:WPProgram|My Sub App|<MYAPP_FOLDER>|EXENAME=((${_bindir}/mysubapp.exe))
+#
+# # delete objects for the subpackage 'sub'
+# %postun sub
+# %wps_object_delete_all -n %{name}-sub
+#
+
+%wps_object_create(n:) /@unixroot/usr/lib/rpm/wps-object.cmd /create %{!-n:%{name}}%{-n:%{-n*}} "%{*}"\
+%{nil}
+
+%wps_object_create_batch(n:) /@unixroot/usr/lib/rpm/wps-object.cmd /create %{!-n:%{name}}%{-n:%{-n*}} %{*}\
+%{nil}
+
+%wps_object_delete(n:) /@unixroot/usr/lib/rpm/wps-object.cmd /delete %{!-n:%{name}}%{-n:%{-n*}} "%{*}"\
+%{nil}
+
+%wps_object_delete_all(n:) /@unixroot/usr/lib/rpm/wps-object.cmd /deleteall %{!-n:%{name}}%{-n:%{-n*}}\
+%{nil}
+
+%wps_object_create_begin(n:) /@unixroot/usr/lib/rpm/wps-object.cmd /create %{!-n:%{name}}%{-n:%{-n*}} <<'EOF'\
+%{nil}
+
+%wps_object_create_end EOF\
+###
+
+#------------------------------------------------------------------------
+# Macros to check for conflicts with installed WarpIn packages.
+#
+# %warpin_conflicts_begin
+# Vendor\Application\ConflictingPackage1
+# Vendor\Application\ConflictingPackage2
+# ...
+# %warpin_conflicts_end
+#
+# This pair of begin-end macros takes a list of WarpIn package IDs in between
+# and aborts the current scriptlet if any of these packages is installed.
+# A message containing the name and the version of the detected conflicting
+# package, if any, is printed to the console. This pair of macros is intended
+# to be used in %pre sections of .spec files so that it is able to abort the
+# installation if there are conflicts.
+#
+
+%warpin_conflicts_begin \{ /@unixroot/usr/lib/rpm/warpin-conflicts.cmd <<'EOF'\
+%{nil}
+
+%warpin_conflicts_end EOF\
+\} || exit $?
