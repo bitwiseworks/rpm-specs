@@ -41,7 +41,13 @@ BuildRequires: git zip unzip\
 %else\
 %setup -n "%__source_dir" -Tc\
 rm -f "%SOURCE0"\
-git archive --format zip --output "%SOURCE0" --prefix "%__source_dir/" --remote "%{__source_url}" "%{?__source_rev}"\
+_localfile="%__source_url"\
+_localfile="${_localfile#file://}"\
+if [ "$_localfile" != "%__source_url" ] ; then\
+git -C "$_localfile" archive --format zip --output "%SOURCE0" --prefix "%__source_dir/" "%{?__source_rev}"\
+else\
+git archive --format zip --output "%SOURCE0" --prefix "%__source_dir/" --remote "%__source_url" "%{?__source_rev}"\
+fi\
 unzip -qq "%SOURCE0" "%__source_dir"/RPMBUILD_SOURCE -d .. 2>/dev/null || :\
 %__scm_pre_pack\
 (cd .. && zip -mX "%SOURCE0" "%__source_dir"/RPMBUILD_SOURCE*)\
