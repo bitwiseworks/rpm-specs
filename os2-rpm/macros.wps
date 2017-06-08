@@ -90,19 +90,19 @@
 # %wps_object_delete_all -n %{name}-sub
 #
 
-%wps_object_create(n:) /@unixroot/usr/lib/rpm/wps-object.cmd /create %{!-n:%{name}}%{-n:%{-n*}} "%{*}"\
+%wps_object_create(n:) %{_rpmconfigdir_os2}/wps-object.exe /create %{!-n:%{name}}%{-n:%{-n*}} "%{*}"\
 %{nil}
 
-%wps_object_create_batch(n:) /@unixroot/usr/lib/rpm/wps-object.cmd /create %{!-n:%{name}}%{-n:%{-n*}} %{*}\
+%wps_object_create_batch(n:) %{_rpmconfigdir_os2}/wps-object.exe /create %{!-n:%{name}}%{-n:%{-n*}} %{*}\
 %{nil}
 
-%wps_object_delete(n:) /@unixroot/usr/lib/rpm/wps-object.cmd /delete %{!-n:%{name}}%{-n:%{-n*}} "%{*}"\
+%wps_object_delete(n:) %{_rpmconfigdir_os2}/wps-object.exe /delete %{!-n:%{name}}%{-n:%{-n*}} "%{*}"\
 %{nil}
 
-%wps_object_delete_all(n:) /@unixroot/usr/lib/rpm/wps-object.cmd /deleteall %{!-n:%{name}}%{-n:%{-n*}}\
+%wps_object_delete_all(n:) %{_rpmconfigdir_os2}/wps-object.exe /deleteall %{!-n:%{name}}%{-n:%{-n*}}\
 %{nil}
 
-%wps_object_create_begin(n:) /@unixroot/usr/lib/rpm/wps-object.cmd /create %{!-n:%{name}}%{-n:%{-n*}} <<'EOF'\
+%wps_object_create_begin(n:) %{_rpmconfigdir_os2}/wps-object.exe /create %{!-n:%{name}}%{-n:%{-n*}} <<'EOF'\
 %{nil}
 
 %wps_object_create_end EOF\
@@ -125,7 +125,7 @@
 # installation if there are conflicts.
 #
 
-%warpin_conflicts_begin \{ /@unixroot/usr/lib/rpm/warpin-conflicts.cmd <<'EOF'\
+%warpin_conflicts_begin \{ %{_rpmconfigdir_os2}/warpin-conflicts.exe <<'EOF'\
 %{nil}
 
 %warpin_conflicts_end EOF\
