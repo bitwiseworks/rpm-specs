@@ -2,7 +2,7 @@
 
 Summary:    kLIBC User Management
 Name:       klusrmgr
-Version:    1.1.1
+Version:    1.1.2
 Release:    1%{?dist}
 License:    proprietary
 Group:      Applications/System
@@ -70,6 +70,9 @@ fi
 
 
 %changelog
+* Thu Jun 08 2017 hb <herwig.bauernfeind@bitwiseworks.com> 1.1.2-1
+- add root group with GID 0 as a default group
+- fix several small bugs
 * Mon Apr 24 2017 hb <herwig.bauernfeind@bitwiseworks.com> 1.1.1-1
 - add -init switch and ensure default files are created upon installation
 * Sun Feb 05 2017 hb <herwig.bauernfeind@bitwiseworks.com> 1.1.0-3
