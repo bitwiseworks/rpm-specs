@@ -2,7 +2,7 @@ Summary: Wrap REXX scrips into OS/2 PM or VIO executables
 Name: rexx_exe
 Epoch: 1
 Version: 1.0.0
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: None
 Group: System Environment/Shells
 Vendor: bww bitwise works GmbH
@@ -35,7 +35,10 @@ Features of this implementation:
 # Tailor converter scripts to search for helper in usr/lib/%{name}
 for f in exe/rexx2vio.cmd exe/rexx2pm.cmd ; do
   # Due to bug in sed 4.2.1-2 -i kills CRLF in processed files, so use redirection
-  %{__sed} -e 's|rexx2xx.cmd|..\\lib\\%{name}\\rexx2xx.exe|g' -e 's|@call|@|g' "$f" > "$f.new"
+  %{__sed} \
+-e '/^Parse Source .*$/ d' \
+-e 's|^helper = .*$|helper = value('UNIXROOT',,'OS2ENVIRONMENT')"\\usr\\lib\\%{name}\\rexx2xx.exe"|' \
+-e 's|@call|@|g' "$f" > "$f.new"
   %{__rm} "$f"
   %{__mv} "$f.new" "$f"
 done
@@ -68,6 +71,10 @@ done
 
 
 %changelog
+* Fri Jun 9 2017 Dmitriy Kuminov <coding@dmik.org> 1.0.0-2
+- Hardcode helper path to converters as `parse source` does not contain a full
+  path when CMD is converted to EXE and started by name w/o any path.
+
 * Thu Jun 8 2017 Dmitriy Kuminov <coding@dmik.org> 1.0.0-1
 - Store binary distribution on github for easy patching.
 - Change epoch to 1 due to changed versioning scheme.
