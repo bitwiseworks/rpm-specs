@@ -4,7 +4,7 @@
 Summary:    bitwiseworks icons and folders
 Name:       bww-resources
 Version:    1.0.1
-Release:    0%{?dist}
+Release:    1%{?dist}
 License:    Proprietory
 Group:      Applications/System
 URL:        http://www.bitwiseworks.com

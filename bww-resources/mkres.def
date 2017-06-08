@@ -1,0 +1,11 @@
+;  MKRES.DEF: Definition file for resource DLL's
+;  -----------------------------------------------
+
+
+LIBRARY
+
+CODE SHARED
+DATA SHARED SINGLE
+
+PROTMODE
+
