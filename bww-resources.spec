@@ -9,11 +9,14 @@ License:    Proprietory
 Group:      Applications/System
 URL:        http://www.bitwiseworks.com
 Vendor:     bww bitwiseworks GmbH
-Source1:    bwwres.dll
-Source2:    macros.bww
+Source1:    macros.bww
 Source10:   bwwfbkg.bmp
 Source11:   bwwfldrc.ico
 Source12:   bwwfldro.ico
+Source13:   mkdll.cmd
+Source14:   mkres.obj
+Source15:   mkres.def
+Source16:   bwwres.rc
 BuildRoot:  %_tmppath/%name-%version-%release-root
 BuildArch:  noarch
 Obsoletes:  bwwres <= 1.0.0-5
@@ -31,15 +34,20 @@ This package provides bitwiseworks macros
 %prep
 %setup -n "%{name}-%{version}" -Tc
 
-%build
+# Prepare forwarder DLLs.
+for m in %{SOURCE1} %{SOURCE10} %{SOURCE11} %{SOURCE12} %{SOURCE13} %{SOURCE14} %{SOURCE15} %{SOURCE16}; do
+  cp ${m} .
+done
 
+%build
+mkdll.cmd
 
 %install
-install -p -m0644 -D %{SOURCE1}  $RPM_BUILD_ROOT%{_libdir}/bwwres.dll
-install -p -m0644 -D %{SOURCE2}  $RPM_BUILD_ROOT%{_rpmconfigdir}/macros.d/macros.bww
-install -p -m0644 -D %{SOURCE10} $RPM_BUILD_ROOT%{_datadir}/os2/bww/bwwfbkg.bmp 
-install -p -m0644 -D %{SOURCE11} $RPM_BUILD_ROOT%{_datadir}/os2/bww/bwwfldrc.ico
-install -p -m0644 -D %{SOURCE12} $RPM_BUILD_ROOT%{_datadir}/os2/bww/bwwfldro.ico
+install -p -m0644 -D bwwres.dll  $RPM_BUILD_ROOT%{_libdir}/bwwres.dll
+install -p -m0644 -D macros.bww  $RPM_BUILD_ROOT%{_rpmconfigdir}/macros.d/macros.bww
+install -p -m0644 -D bwwfbkg.bmp $RPM_BUILD_ROOT%{_datadir}/os2/bww/bwwfbkg.bmp 
+install -p -m0644 -D bwwfldrc.ico $RPM_BUILD_ROOT%{_datadir}/os2/bww/bwwfldrc.ico
+install -p -m0644 -D bwwfldro.ico $RPM_BUILD_ROOT%{_datadir}/os2/bww/bwwfldro.ico
 
 %clean
 rm -rf "$RPM_BUILD_ROOT"
