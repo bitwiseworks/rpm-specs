@@ -1,6 +1,31 @@
 # OS/2 specific rpm configuration file.
 
+#------------------------------------------------------------------------------
+# Macros needed at rpm runtime (package installation and such)
+
+# Path to OS/2 specific rpm configuration directory containing helper scripts
 %_rpmconfigdir_os2 @RPMCONFIGDIR_OS2@
+
+# OS/2 boot drive
+%os2_boot_drive %(%{_rpmconfigdir_os2}/getbootdrive.exe)
+
+# Converts a Unix path to a DOS path (backward slashes) expanding /@unixroot to
+# a current value of UNIXROOT if it starts the path.
+%os2_dos_path() %{lua:
+  path = rpm.expand("%{?1}")
+  if (string.sub(path, 1, 10) == "/@unixroot" and
+      (string.len(path) == 10 or string.sub(path, 11, 11) == '/')) then
+    path = os.getenv("UNIXROOT") .. string.sub(path, 11)
+  end
+  path = string.gsub(path, "/", "\\\\")
+  print(path)
+}
+
+# Current UNIXROOT value in DOS format (backward slashes)
+%os2_unixroot_path() %{os2_dos_path /@unixroot}
+
+#------------------------------------------------------------------------------
+# Macros needed at package creation time
 
 # Path to script that installs legacy runtime libraries.
 %__legacy_runtime_install_post \
