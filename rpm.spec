@@ -30,12 +30,12 @@
 Summary: The RPM package management system
 Name: rpm
 Version: %{rpmver}
-Release: %{?snapver:0.%{snapver}.}15%{?dist}
+Release: %{?snapver:0.%{snapver}.}16%{?dist}
 Group: System Environment/Base
 Url: http://www.rpm.org/
 Vendor: bww bitwise works GmbH
 
-%scm_source svn http://svn.netlabs.org/repos/rpm/rpm/trunk 1081
+%scm_source svn http://svn.netlabs.org/repos/rpm/rpm/trunk 1184
 
 %if %{with int_bdb}
 Source1: db-%{bdbver}.tar.gz
@@ -55,12 +55,6 @@ Requires: curl
 
 Requires: rpm-libs = %{version}-%{release}
 Requires: pthread >= 20151207
-Requires: cube
-
-Provides: rpm-macros-warpin
-Provides: rpm-macros-wps
-
-BuildRequires: rexx_exe
 
 %if %{without int_bdb}
 BuildRequires: %{bdbname}-devel
@@ -351,13 +345,6 @@ sed -i \
   -e '/usr/local' \
   ${RPM_BUILD_ROOT}%{rpmhome}/macros
 
-# Pack OS/2 Rexx scripts
-for f in wps-object warpin-conflicts ; do
-  rexx2vio "${RPM_BUILD_ROOT}%{rpmhome}/$f.cmd" "${RPM_BUILD_ROOT}%{rpmhome}/$f.exe"
-  rm "${RPM_BUILD_ROOT}%{rpmhome}/$f.cmd"
-  sed -i "s#$f.cmd#$f.exe#gi" ${RPM_BUILD_ROOT}%{rpmhome}/macros
-done
-
 # Save list of packages through cron
 mkdir -p ${RPM_BUILD_ROOT}%{_sysconfdir}/cron.daily
 install -m 755 scripts/rpm.daily ${RPM_BUILD_ROOT}%{_sysconfdir}/cron.daily/rpm
@@ -462,9 +449,6 @@ make check
 
 %dir %{rpmhome}/fileattrs
 
-%{rpmhome}/wps-object.exe
-%{rpmhome}/warpin-conflicts.exe
-
 %files libs
 %{_libdir}/rpmio[0-9].dll
 %{_libdir}/rpm[0-9].dll
@@ -535,6 +519,15 @@ make check
 %doc doc/librpm/html/*
 
 %changelog
+* Fri Jun 9 2017 Dmitriy Kuminov <coding@dmik.org> 0-2
+- Make pkgconfig dependency generator work on OS/2 and under [d]ash.
+- Greatly simplify/speedup pythondeps.sh and make it pick up .pyd/.exe.
+- Move scm_source/scm_setup macros from to os2-rpm-build sub-package.
+- Move WPS/WarpIn macros to os2-rpm-build sub-package.
+- Move config.sys macros to os2-rpm package.
+- Move os2_boot_drive macro to os2-rpm package.
+- Remove os2_unixroot_drive macro (superseded by os2_unixroot_path in os2-rpm).
+
 * Thu Apr 6 2017 Dmitriy Kuminov <coding@dmik.org> - 4.13.0-15
 - Enable lua scritping.
 - Temporarily make rpm-build provide perl-generators for compatibility with Fedora.
