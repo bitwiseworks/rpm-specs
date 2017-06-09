@@ -13,13 +13,11 @@ Source1:    macros.bww
 Source10:   bwwfbkg.bmp
 Source11:   bwwfldrc.ico
 Source12:   bwwfldro.ico
-Source13:   mkdll.cmd
-Source14:   mkres.obj
-Source15:   mkres.def
-Source16:   bwwres.rc
+Source13:   mkres.obj
 BuildRoot:  %_tmppath/%name-%version-%release-root
 BuildArch:  noarch
-Obsoletes:  bwwres <= 1.0.0-5
+Obsoletes:  bwwres
+Provides:   bwwres = %{version}
 
 %description
 This package provides bitwiseworks icons and folder background
@@ -35,12 +33,32 @@ This package provides bitwiseworks macros
 %setup -n "%{name}-%{version}" -Tc
 
 # Prepare forwarder DLLs.
-for m in %{SOURCE1} %{SOURCE10} %{SOURCE11} %{SOURCE12} %{SOURCE13} %{SOURCE14} %{SOURCE15} %{SOURCE16}; do
+for m in %{SOURCE1} %{SOURCE10} %{SOURCE11} %{SOURCE12} %{SOURCE13}; do
   cp ${m} .
 done
 
+cat << EOF >mkres.def
+;  MKRES.DEF: Definition file for resource DLL's
+;  -----------------------------------------------
+
+
+LIBRARY
+
+CODE SHARED
+DATA SHARED SINGLE
+
+PROTMODE
+EOF
+
+cat << EOF >bwwres.rc
+ICON     1 BWWFLDRC.ICO
+ICON     2 BWWFLDRO.ICO
+BITMAP   3 BWWFBKG.BMP
+EOF
+
 %build
-mkdll.cmd
+link386 /A:4 /BASE:0x12000000 /NOD /NOL mkres.obj, bwwres.dll, nul, , mkres;
+rc bwwres.rc bwwres.dll
 
 %install
 install -p -m0644 -D bwwres.dll  $RPM_BUILD_ROOT%{_libdir}/bwwres.dll
