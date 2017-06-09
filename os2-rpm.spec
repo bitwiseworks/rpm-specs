@@ -1,19 +1,32 @@
 Summary: OS/2 specific RPM macros and scripts
 Name: os2-rpm
 Version: 0
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv2+
 Group: Development/System
 Vendor: bww bitwise works GmbH
 
 BuildArch: noarch
 
-Requires: rpm >= 4.13.0-15
+Requires: rpm >= 4.13.0-16
+Requires: cube
+
 Provides: system-rpm-config = %{version}-%{release}
+
+BuildRequires: rexx_exe
 
 Source0: macros.os2
 Source1: brp-strip-os2
 Source2: find-legacy-runtime.sh
+Source3: macros.scm
+Source4: macros.cfg
+Source5: macros.wps
+Source6: wps-object.cmd
+Source7: warpin-conflicts.cmd
+Source8: getbootdrive.cmd
+
+# This is necessary due to a silly "Provides: os2-rpm" in os2-rpm-build-0-1
+Conflicts: os2-rpm-build <= 0-1
 
 %description
 OS/2 specific RPM macros and scripts neecessary to install RPM packages on
@@ -21,7 +34,7 @@ the OS/2 operating system.
 
 %package build
 Summary: OS/2 specific RPM macros and scripts to build RPM packages
-Provides: %{name} = %{version}-%{release}
+Requires: %{name} = %{version}-%{release}
 Requires: rpm-build >= 4.13.0-15
 
 %description build
@@ -29,29 +42,54 @@ OS/2 specific RPM macros and scripts neecessary to build RPM packages for
 the OS/2 operating system.
 
 %global _rpmconfigdir_os2 %{_rpmconfigdir}/%{_vendor}
+%global _rpmconfigdir_macros_d %{_rpmconfigdir}/macros.d
 
 %prep
 # Move all sources to build subdir to reference them by name instead of SOURCEx
 %setup -c -T
-cp -a %{sources} .
+%{__cp} -a %{sources} .
 
 # Note: we put the value of _rpmconfigdir_os2 unexpanded.
-sed -e 's|@RPMCONFIGDIR_OS2@|%%{_rpmconfigdir}/%%{_vendor}|' -i macros.os2
+%{__sed} -e 's|@RPMCONFIGDIR_OS2@|%%{_rpmconfigdir}/%%{_vendor}|' -i macros.os2
 
 %install
-mkdir -p %{buildroot}%{_rpmconfigdir_os2}
-install -p -m 644 macros.os2 %{buildroot}%{_rpmconfigdir_os2}/macros
-install -p -m 644 -t %{buildroot}%{_rpmconfigdir_os2} brp-strip-os2 find-legacy-runtime.sh
+%{__mkdir_p} %{buildroot}%{_rpmconfigdir_os2}
+%{__install} -p -m 644 macros.os2 %{buildroot}%{_rpmconfigdir_os2}/macros
+%{__install} -p -m 644 -t %{buildroot}%{_rpmconfigdir_os2} brp-strip-os2 find-legacy-runtime.sh
+
+%{__mkdir_p} %{buildroot}%{_rpmconfigdir_macros_d}
+%{__install} -p -m 644 -t %{buildroot}%{_rpmconfigdir_macros_d} \
+  macros.scm macros.cfg macros.wps
+
+# Pack and install OS/2 Rexx scripts
+for f in *.cmd ; do
+  rexx2vio "$f" "%{buildroot}%{_rpmconfigdir_os2}/${f%.cmd}.exe"
+done
 
 %files
-# TODO WPS and WarpIn scripts will move here from rpm
-
-%files build
 %dir %{_rpmconfigdir_os2}
 %{_rpmconfigdir_os2}/macros
+%{_rpmconfigdir_os2}/*.exe
+%{_rpmconfigdir_macros_d}/macros.cfg
+%{_rpmconfigdir_macros_d}/macros.wps
+
+%files build
 %{_rpmconfigdir_os2}/brp-strip-os2
 %{_rpmconfigdir_os2}/find-legacy-runtime.sh
+%{_rpmconfigdir_macros_d}/macros.scm
 
 %changelog
+* Fri Jun 9 2017 Dmitriy Kuminov <coding@dmik.org> 0-2
+- Change mistyped "Provides: os2-rpm" to "Requires" in os2-rpm-base.
+- Move scm_source/scm_setup macros from rpm to os2-rpm-build sub-package.
+- Better support for local git repos via file://.
+- Move WPS/WarpIn macros from rpm to os2-rpm-build sub-package.
+- Move config.sys macros from rpm to os2-rpm package.
+- Move os2_boot_drive from rpm to os2-rpm package.
+- Add os2_dos_path macro to convert from Unix paths to DOS paths.
+- Add os2_unixroot_path macro (replaces former os2_unixroot_drive in rpm).
+- Install main OS/2 macros file from os2-rpm as RPM installation scriptlets
+  need some definitions from it.
+
 * Thu Apr 6 2017 Dmitriy Kuminov <coding@dmik.org> 0-1
 - Initial release.
