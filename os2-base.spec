@@ -2,12 +2,12 @@
 Summary: OS/2 - eComStation 2.0 - ArcaOS 5.0 base
 Name: os2-base
 Version: 0.0.0
-Release: 15%{?dist}
+Release: 16%{?dist}
 
 License: free
 
-Requires: cube
 Requires: os2-release
+Requires: os2-rpm >= 0-2
 
 Provides: ansicall.dll
 Provides: asiacol.dll
@@ -352,6 +352,9 @@ fi
 
 
 %changelog
+* Fri Jun 9 2017 Dmitriy Kuminov <coding@dmik.org> 0.0.0-16
+- Make os2-rpm a requirement for os2-base (contains essential macros used in scriptlets).
+
 * Mon Feb 20 2017 scs, hb  <herwig,bauernfeind@bitwiseworks.com> 0.0.0-15
 - Add SHELL statements
 - Add ArcaOS to summary
