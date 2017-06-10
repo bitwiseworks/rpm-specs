@@ -1,7 +1,7 @@
 Summary: IBM OS/2 Developer's Toolkit Version 4.5
 Name: os2tk45
 Version: 4.5.2
-Release: 4%{?dist}
+Release: 5%{?dist}
 Group: System Environment/Libraries
 License: IBM
 Vendor: bww bitwise works GmbH
@@ -70,32 +70,34 @@ Provides IBM OS/2 Developer's Toolkit book files in INF and HLP formats.
 
 %install
 
-mkdir -p %{buildroot}%{_includedir}/os2tk45
-cp -pR h/* %{buildroot}%{_includedir}/os2tk45/
+%{__mkdir_p} %{buildroot}%{_includedir}/os2tk45
+%{__cp} -pR h/* %{buildroot}%{_includedir}/os2tk45/
 # copy inc directory inside to avoid one more dir under include
-cp -pR inc %{buildroot}%{_includedir}/os2tk45/
+%{__cp} -pR inc %{buildroot}%{_includedir}/os2tk45/
 # remove LIBC stuff, will go to a separate subpackage one day
-rm -rf %{buildroot}%{_includedir}/os2tk45/libc
+%{__rm} -rf %{buildroot}%{_includedir}/os2tk45/libc
 # remove SOM stuff, it will go to a separate subpackage one day
-rm %{buildroot}%{_includedir}/os2tk45/wincfg.*h
-rm %{buildroot}%{_includedir}/os2tk45/wp*.*h
+%{__rm} %{buildroot}%{_includedir}/os2tk45/wincfg.*h
+%{__rm} %{buildroot}%{_includedir}/os2tk45/wp*.*h
 
-mkdir -p %{buildroot}%{_libdir}
-cp -pR lib/* %{buildroot}%{_libdir}/
+%{__mkdir_p} -p %{buildroot}%{_libdir}
+%{__cp} -pR lib/* %{buildroot}%{_libdir}/
 # remove LIBC stuff, will go to a separate subpackage one day
-rm %{buildroot}%{_libdir}/libc*.lib
+%{__rm} %{buildroot}%{_libdir}/libc*.lib
 # remove cryptol.lib, it will go to a separate subpackage one day
-rm %{buildroot}%{_libdir}/crypto.lib
+%{__rm} %{buildroot}%{_libdir}/crypto.lib
 
-mkdir -p %{buildroot}%{_bindir}
-mkdir -p %{buildroot}%{_datadir}/os2/lang
+%{__mkdir_p} %{buildroot}%{_bindir}
+%{__mkdir_p} %{buildroot}%{_datadir}/os2/lang
 
-cp -p bin/rc*.exe %{buildroot}%{_bindir}/
-cp -p bin/rcpp.* %{buildroot}%{_bindir}/
-cp -p msg/rc*.msg %{buildroot}%{_datadir}/os2/lang/
+%{__cp} -p bin/rc.exe %{buildroot}%{_bindir}/
+%{__cp} -p bin/rc16.exe %{buildroot}%{_bindir}/
+%{__cp} -p bin/rcpp.* %{buildroot}%{_bindir}/
+%{__cp} -p msg/rc*.msg %{buildroot}%{_datadir}/os2/lang/
+%{__cp} -p msg/messages.msg %{buildroot}%{_datadir}/os2/lang/
 
-mkdir -p %{buildroot}%{_datadir}/os2/book
-cp -p book/* %{buildroot}%{_datadir}/os2/book/
+%{__mkdir_p} %{buildroot}%{_datadir}/os2/book
+%{__cp} -p book/* %{buildroot}%{_datadir}/os2/book/
 
 %files
 # nothing of its own in the meta-package
@@ -111,9 +113,11 @@ cp -p book/* %{buildroot}%{_datadir}/os2/book/
 %{_libdir}/*.lib
 
 %files rc
-%{_bindir}/rc*.exe
+%{_bindir}/rc.exe
+%{_bindir}/rc16.exe
 %{_bindir}/rcpp.*
 %{_datadir}/os2/lang/rc*.msg
+%{_datadir}/os2/lang/messages.msg
 
 %files books
 %{_datadir}/os2/book/*
@@ -154,6 +158,10 @@ if [ "$1" = 0 ] ; then
 fi
 
 %changelog
+* Sat Jun 10 2017 Dmitriy Kuminov <coding@dmik.org> 4.5.2-5
+- Add messages.msg to os2tk45-rc sub-package.
+- Brush up %install by using mkdir/cp/rm macros.
+
 * Tue May 16 2017 Dmitriy Kuminov <coding@dmik.org> 4.5.2-4
 - Add rc subpackage that contains resource compilers version 4 and 5.
 - Remove noarch from libs subpackage.
