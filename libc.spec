@@ -6,7 +6,7 @@ License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Standard Shared Libraries
 Group:          System/Libraries
 Version:        0.6.6
-Release:        33%{?dist}
+Release:        34%{?dist}
 Url:            http://svn.netlabs.org/libc
 
 Source:         libc-%{version}.zip
@@ -17,6 +17,9 @@ Source2:        libc-hotfix.zip
 Source3:        libc-emxomfld.zip
 
 Patch0:         libc.patch
+
+# http://trac.netlabs.org/libc/ticket/377
+Patch1:         libc-dmik-no-bsd.diff
 
 # These patches are not actually applied but they record what
 # needs to be done to the stock LIBC 0.6 source in order to build
@@ -82,6 +85,7 @@ HLL debug data for exception handling support.
 %prep
 %setup -q -c -a 1 -a 2 -a 3
 %patch0
+%patch1
 
 #replace paths.h wrong macros
 sed -i 's,"/@unixroot/bin,"/@unixroot/usr/bin,g' usr/include/paths.h
@@ -185,6 +189,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/tcpipv4/dbg
 
 %changelog
+* Sat Jun 10 2017 Dmitriy Kuminov <coding@dmik.org> 0.6.6-34
+- Remove BSD defines from sys/param.h and types.h to avoid mistreating OS/2
+  as BSD (e.g. by LIBICU's unicode/platform.h).
+
 * Tue Jun 6 2017 Dmitriy Kuminov <coding@dmik.org> 0.6.6-33
 - Provide patched emxomfld.exe that fixes Invalid WKEXT record errors.
 
