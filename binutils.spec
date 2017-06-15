@@ -47,13 +47,13 @@
 Summary: A GNU collection of binary utilities
 Name: %{?cross}binutils%{?_with_debug:-debug}
 Version: 2.27
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Group: Development/Tools
 URL: http://sources.redhat.com/binutils
 
 Vendor: bww bitwise works GmbH
-%scm_source svn http://svn.netlabs.org/repos/ports/binutils/trunk 2151
+%scm_source svn http://svn.netlabs.org/repos/ports/binutils/trunk 2204
 
 Provides: bundled(libiberty)
 
@@ -95,7 +95,7 @@ BuildRequires: gettext, flex, zlib-devel
 %if %{with docs}
 BuildRequires: texinfo >= 4.0
 # BZ 920545: We need pod2man in order to build the manual pages.
-#BuildRequires: /@unixroot/usr/bin/pod2man
+BuildRequires: /@unixroot/usr/bin/pod2man
 Requires(post): %{_sbindir}/install-info.exe
 Requires(preun): %{_sbindir}/install-info.exe
 %endif
@@ -228,6 +228,7 @@ CFLAGS="$CFLAGS -O0 -ggdb2 -Wno-error -D_FORTIFY_SOURCE=0"
 
 export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 export LIBS="-lcx"
+export VENDOR="%{vendor}"
 
 # We could optimize the cross builds size by --enable-shared but the produced
 # binaries may be less convenient in the embedded environment.
@@ -304,6 +305,7 @@ make install DESTDIR=%{buildroot}
 %else
 make install DESTDIR=%{buildroot} MAKEINFO=true
 %endif
+
 %if %{isnative}
 %if %{with docs}
 make prefix=%{buildroot}%{_prefix} infodir=%{buildroot}%{_infodir} install-info
@@ -372,17 +374,13 @@ rm -rf %{buildroot}
 %endif
 %if %{isnative}
 #/sbin/ldconfig
-# For --excludedocs:
-if [ -e %{_infodir}/binutils.info.gz ]
-then
+%if %{with docs}
   %{_sbindir}/install-info --info-dir=%{_infodir} %{_infodir}/as.info.gz
   %{_sbindir}/install-info --info-dir=%{_infodir} %{_infodir}/binutils.info.gz
   %{_sbindir}/install-info --info-dir=%{_infodir} %{_infodir}/gprof.info.gz
-  %{_sbindir}/install-info --info-dir=%{_infodir} %{_infodir}/ld.info.gz
-fi
+# %{_sbindir}/install-info --info-dir=%{_infodir} %{_infodir}/ld.info.gz
+%endif
 %endif # %{isnative}
-exit 0
-
 exit 0
 
 %preun
@@ -394,26 +392,26 @@ fi
 %endif
 %if %{isnative}
 if [ $1 = 0 ]; then
-  if [ -e %{_infodir}/binutils.info.gz ]
+  if [ -f %{_infodir}/binutils.info.gz ]
   then
    %{_sbindir}/install-info --delete --info-dir=%{_infodir} %{_infodir}/as.info.gz
    %{_sbindir}/install-info --delete --info-dir=%{_infodir} %{_infodir}/binutils.info.gz
    %{_sbindir}/install-info --delete --info-dir=%{_infodir} %{_infodir}/gprof.info.gz
-   %{_sbindir}/install-info --delete --info-dir=%{_infodir} %{_infodir}/ld.info.gz
+#  %{_sbindir}/install-info --delete --info-dir=%{_infodir} %{_infodir}/ld.info.gz
   fi
 fi
 %endif
 exit 0
 
 %if %{isnative}
-#%postun 
+%postun 
 #/sbin/ldconfig
-  if [ -e %{_infodir}/binutils.info.gz ]
+  if [ -f %{_infodir}/binutils.info.gz ]
   then
    %{_sbindir}/install-info --delete --info-dir=%{_infodir} %{_infodir}/as.info.gz
    %{_sbindir}/install-info --delete --info-dir=%{_infodir} %{_infodir}/binutils.info.gz
    %{_sbindir}/install-info --delete --info-dir=%{_infodir} %{_infodir}/gprof.info.gz
-   %{_sbindir}/install-info --delete --info-dir=%{_infodir} %{_infodir}/ld.info.gz
+#  %{_sbindir}/install-info --delete --info-dir=%{_infodir} %{_infodir}/ld.info.gz
   fi
 %endif # %{isnative}
 
@@ -455,6 +453,10 @@ exit 0
 %endif # %{isnative}
 
 %changelog
+* Thu Jun 15 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.27-2
+- fix ticket #165 (needs to be reverted after gcc issue #27 fix)
+- add bldlevel info to the dll
+
 * Mon Mar 20 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.27-1
 - update to version 2.27
 - adjust spec to scm_ macros usage
