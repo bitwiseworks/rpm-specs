@@ -22,12 +22,12 @@ Provides:   bwwres = %{version}
 %description
 This package provides bitwiseworks icons and folder background
 
-%package devel
-Summary:    bww macros and the like
+%package build
+Summary:    bww rpm macros for rpm
 Group:      Development/Libraries
 
 %description build
-This package provides bitwiseworks macros
+This package provides bitwiseworks macros for rpm builds
 
 %prep
 %setup -n "%{name}-%{version}" -Tc
