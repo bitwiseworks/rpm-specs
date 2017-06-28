@@ -1,7 +1,7 @@
 Summary: Improved console FTP client
 Name: ncftp
 Version: 3.2.6
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: Artistic clarified
 Group: Applications/Internet
 URL: http://www.ncftp.com/ncftp/
@@ -12,8 +12,8 @@ Vendor:  bww bitwise works GmbH
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
 BuildRequires: autoconf, automake, libtool, ncurses-devel
-BuildRequires: bwwres
-Requires: bwwres
+BuildRequires: bww-resources-rpm-build
+Requires: bww-resources-rpm
 Requires: ncurses >= 5.9
 
 %description
@@ -49,9 +49,10 @@ if [ "$1" -ge 1 ]; then # (upon update)
     %wps_object_delete_all
 fi
 # for the definition of the parameters see macros.bww
-%define title Improved console FTP client
-%bww_folder -e %{name} -t %{title} -r README.txt -i ncftp_os2.ico -s Y
-%bww_folder -e ncftpbookmarks -t bookmarks
+%bww_folder -s Y
+%bww_app -e %{name} -s Y -i ncftp_os2.ico
+%bww_app -e ncftpbookmarks -t bookmarks
+%bww_readme -r README.txt
 
 %postun
 if [ "$1" -eq 0 ]; then # (upon removal)
@@ -79,6 +80,9 @@ fi
 %{_datadir}/os2/icons/ncftp_os2.ico
 
 %changelog
+* Wed Jun 28 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.2.6-5
+- rebuild with latest macro.bww
+
 * Fri Mar 10 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.2.6-4
 - change the way to add a icon
 - adjust to latest bww res macro
