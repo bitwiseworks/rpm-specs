@@ -2,7 +2,7 @@
 
 Name:           qpdfview
 Version:        0.4.17
-Release:        2%{?prerelease}%{?dist}
+Release:        3%{?prerelease}%{?dist}
 License:        GPLv2+
 Summary:        Tabbed PDF Viewer
 Url:            https://launchpad.net/qpdfview
@@ -10,7 +10,7 @@ Url:            https://launchpad.net/qpdfview
 Vendor:         bww bitwise works GmbH
 %scm_source github https://github.com/bitwiseworks/qpdfview %{version}
 
-Requires:       bwwres
+Requires:       bww-resources-rpm
 Requires:       libqt4
 Requires:       cups
 Requires:       poppler-qt4
@@ -27,6 +27,7 @@ BuildRequires:  libspectre-devel ghostscript-devel
 BuildRequires:  zlib-devel
 BuildRequires:  djvulibre-devel
 BuildRequires:  libjpeg-devel libtiff-devel libpng-devel
+BuildRequires:  bww-resources-rpm-build
 
 %description
 qpdfview is a tabbed PDF viewer.
@@ -84,8 +85,9 @@ if [ "$1" -ge 1 ]; then # (upon update)
     %wps_object_delete_all
 fi
 # for the definition of the parameters see macros.bww
-%define title Tabbed PDF viewer
-%bww_folder -e %{name} -t %{title} -r README -s Y -a *.pdf,*.ps,*.eps,*.djvu,*.djv
+%bww_folder -s Y -d %_defaultdocdir/%{name}-common-%{version}
+%bww_app -e %{name} -s Y -a *.pdf,*.ps,*.eps,*.djvu,*.djv -d %{name}-common-%{version}
+%bww_readme -r README -d %_defaultdocdir/%{name}-common-%{version}
 
 
 %postun
@@ -107,6 +109,9 @@ fi
 %{_mandir}/man?/*
 
 %changelog
+* Wed Jun 28 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.4.17-3.beta1
+- rebuild with latest macro.bww to fix an install glitch
+
 * Mon Mar 20 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.4.17-2.beta1
 - rebuild with latest bwwres
 - added noarch rpm for the really noarch files
