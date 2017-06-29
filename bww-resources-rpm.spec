@@ -3,7 +3,7 @@
 
 Summary:    bitwiseworks icons and folders
 Name:       bww-resources-rpm
-Version:    1.0.1
+Version:    1.0.2
 Release:    1%{?dist}
 License:    Proprietory
 Group:      Applications/System
@@ -84,6 +84,10 @@ rm -rf "$RPM_BUILD_ROOT"
 %_libdir/rpm/macros.d/macros.bww
 
 %changelog
+* Thu Jun 29 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.0.2-1
+- added -nv parameter to the macro
+- fixed a possible wps id issue in the readme part of the macro
+
 * Thu Jun 08 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.0.1-1
 - redesigned the macro completely
 - moved the macro to -devel
