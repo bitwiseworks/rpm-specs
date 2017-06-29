@@ -85,8 +85,9 @@ if [ "$1" -ge 1 ]; then # (upon update)
     %wps_object_delete_all
 fi
 # for the definition of the parameters see macros.bww
-%bww_folder -s Y -d %_defaultdocdir/%{name}-common-%{version}
-%bww_app -e %{name} -s Y -a *.pdf,*.ps,*.eps,*.djvu,*.djv -d %{name}-common-%{version}
+%define title Tabbed PDF viewer
+%bww_folder -s Y -d %_defaultdocdir/%{name}-common-%{version} -t %{title}
+%bww_app -e %{name} -s Y -a *.pdf,*.ps,*.eps,*.djvu,*.djv -t %{title}
 %bww_readme -r README -d %_defaultdocdir/%{name}-common-%{version}
 
 
