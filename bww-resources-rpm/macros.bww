@@ -50,15 +50,15 @@
 # Create a shadow for the provided readme
 # If this parameter is not provided, then no shadow is created
 #
-# parameter (-nv) (used in bww_folder)
+# parameter (-v) (used in bww_folder)
 # Don't add the version to the folder name
 # If this parameter is not provided, then the version is added
 #
 
-%bww_folder(t:d:s:nv:)\
+%bww_folder(t:d:s:v:)\
 %if %{undefined __bww_folder_done}\
 %define __bww_titleov %{!-t:%{summary}}%{-t:%{-t*}}\
-%define __bww_title %{!-nv:%{__bww_titleov} %{version}}%{-nv:%{__bww_titleov}}\
+%define __bww_title %{!-v:%{__bww_titleov} %{version}}%{-v:%{__bww_titleov}}\
 %define __bww_docdir %{!-d:%_defaultdocdir/%{name}-%{version}}%{-d:%{-d*}}\
 %wps_object_create WP_BWWHELP:WPFolder|bww Help|<WP_ASSISTANCE>|TITLE=bitwiseworks Help Center;SHOWALLINTREEVIEW=YES;ICONRESOURCE=60,PMWP.DLL;ICONNRESOURCE=83,PMWP.DLL;BACKGROUND=((/@unixroot/usr/share/os2/bww/bwwfbkg.bmp));\
 %wps_object_create %{name}_BWWHELP:WPShadow|Readme|<WP_BWWHELP>|SHADOWID=((%{__bww_docdir}));\
