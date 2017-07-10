@@ -30,7 +30,7 @@
 Summary: The RPM package management system
 Name: rpm
 Version: %{rpmver}
-Release: %{?snapver:0.%{snapver}.}16%{?dist}
+Release: %{?snapver:0.%{snapver}.}17%{?dist}
 Group: System Environment/Base
 Url: http://www.rpm.org/
 Vendor: bww bitwise works GmbH
@@ -55,6 +55,9 @@ Requires: curl
 
 Requires: rpm-libs = %{version}-%{release}
 Requires: pthread >= 20151207
+
+# Due to _fread (see #257) and until #259 is done.
+Requires: libcx >= 0.5.3
 
 %if %{without int_bdb}
 BuildRequires: %{bdbname}-devel
@@ -519,7 +522,10 @@ make check
 %doc doc/librpm/html/*
 
 %changelog
-* Fri Jun 9 2017 Dmitriy Kuminov <coding@dmik.org> 0-2
+* Fri Jul 10 2017 Dmitriy Kuminov <coding@dmik.org> 4.13.0-17
+- Depend on LIBCx 0.5.3 due to _fread override.
+
+* Fri Jun 9 2017 Dmitriy Kuminov <coding@dmik.org> 4.13.0-16
 - Make pkgconfig dependency generator work on OS/2 and under [d]ash.
 - Greatly simplify/speedup pythondeps.sh and make it pick up .pyd/.exe.
 - Move scm_source/scm_setup macros from to os2-rpm-build sub-package.
