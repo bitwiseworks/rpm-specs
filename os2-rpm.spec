@@ -1,7 +1,7 @@
 Summary: OS/2 specific RPM macros and scripts
 Name: os2-rpm
 Version: 0
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv2+
 Group: Development/System
 Vendor: bww bitwise works GmbH
@@ -64,12 +64,14 @@ the OS/2 operating system.
 # Pack and install OS/2 Rexx scripts
 for f in *.cmd ; do
   rexx2vio "$f" "%{buildroot}%{_rpmconfigdir_os2}/${f%.cmd}.exe"
+  ln -sf %{_rpmconfigdir_os2}/${f%.cmd}.exe %{buildroot}%{_libdir}/rpm/${f%.cmd}.exe
 done
 
 %files
 %dir %{_rpmconfigdir_os2}
 %{_rpmconfigdir_os2}/macros
 %{_rpmconfigdir_os2}/*.exe
+%{_libdir}/rpm/*.exe
 %{_rpmconfigdir_macros_d}/macros.cfg
 %{_rpmconfigdir_macros_d}/macros.wps
 
@@ -79,6 +81,9 @@ done
 %{_rpmconfigdir_macros_d}/macros.scm
 
 %changelog
+* Mon Jul 10 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 0-3
+- add a symlink to the *.exe, so old rpm still work
+
 * Fri Jun 9 2017 Dmitriy Kuminov <coding@dmik.org> 0-2
 - Change mistyped "Provides: os2-rpm" to "Requires" in os2-rpm-base.
 - Move scm_source/scm_setup macros from rpm to os2-rpm-build sub-package.
