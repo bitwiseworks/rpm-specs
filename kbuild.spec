@@ -1,43 +1,21 @@
-#
-# http://svn.netlabs.org/kbuild
-#
-
 Name:       kbuild
 Vendor:     netlabs.org
 License:    BSD and GPLv2+
-Url:        http://svn.netlabs.org/kbuild
+Url:        https://github.com/bitwiseworks/kbuild-os2
 
 # Epoch is needed after dropping os2_release to keep proper updates.
 Epoch:      1
 
 Version:    0.1.9998
-Release:    8%{?dist}
+Release:    9%{?dist}
 
-%define svn_url     http://svn.netlabs.org/repos/kbuild/trunk
-%define svn_rev     2803
-
-Source:     %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
-
-BuildRequires: gcc make subversion zip
+%scm_source github https://github.com/bitwiseworks/kbuild-os2 7130a2f60fed139c31dc06710f59a02da990e992
 
 %define descr_brief kBuild is a GNU Make fork with a set of scripts to simplify\
 complex build tasks and portable versions of various UNIX tools to ensure\
 cross-platform portability.
 
 %define pkg_docdir      %{_docdir}/%{name}
-
-# Install DLLs to /bin rather than to /lib. Rejected upstream (#109).
-Patch1:     kbuild-001-os2_default_inst_dll_to_bin.patch
-# Generate import libraries for DLL targets. Left w/o attention (#109).
-Patch5:     kbuild-005-gcc3omf_gen_implib_for_dll.patch
-# Build with GCC4 (#124).
-Patch8:     kbuild-008-gcc4.patch
-# Fix slashes in .rsp files for OpenWatcom (#125).
-Patch9:     kbuild-009-OPENWATCOM_slashes.patch
-# Add major version suffix to Qt libs (#126).
-Patch10:    kbuild-010-qt4_major_suff.patch
-# Fix unsetting env vars in kmk_redirect (#127).
-Patch11:    kbuild-011-kmk_redirect.patch
 
 BuildRequires: kbuild gettext-devel
 
@@ -88,32 +66,13 @@ compatible with the vanilla GNU Make function-wise.
 %prep
 #------------------------------------------------------------------------------
 
-%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc
-svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
-%endif
+%scm_setup
 
-%patch1
-[ $? = 0 ] || exit 1
-%patch5
-[ $? = 0 ] || exit 1
-%patch8
-[ $? = 0 ] || exit 1
-%patch9
-[ $? = 0 ] || exit 1
-%patch10
-[ $? = 0 ] || exit 1
-%patch11
-[ $? = 0 ] || exit 1
-
-# Makefiles expect SVN info, generate it.
+# Makefiles expect SVN info, generate it. Note that we shorten the commit hash
+# to 7 digits and add 0x before to make it a valid C integer number.
 echo \
-"KBUILD_SVN_URL := %{svn_url}@%{svn_rev}
-KBUILD_SVN_REV := %{svn_rev}
+"KBUILD_SVN_URL := %{__source_url}
+KBUILD_SVN_REV := 0x%{lua: print(string.sub(rpm.expand('%{__source_rev}'), 1, 7))}
 " > SvnInfo.kmk
 
 #------------------------------------------------------------------------------
@@ -147,27 +106,36 @@ cmd /c "kBuild\envos2.cmd" kmk $KMK_FLAGS
 
 %{kmk_env}
 
-rm -rf "%{buildroot}"
+%{__rm} -rf "%{buildroot}"
 
 cmd /c "kBuild\envos2.cmd" kmk $KMK_FLAGS PATH_INS="%{buildroot}" install
 
-# We don't want LIBC*.DLL, there is a separate package for them
-rm "%{buildroot}%{_bindir}"/*.dll
-
 # Additional docs (not installed by install)
-cp -dp COPYING ChangeLog kBuild/doc/COPYING-FDL-1.3 "%{buildroot}%{pkg_docdir}/"
+%{__cp} -dp COPYING ChangeLog kBuild/doc/COPYING-FDL-1.3 "%{buildroot}%{pkg_docdir}/"
 
 # To make GNU Make we simply copy kmk_gmake.exe, this should be enough
-cp -dp "%{buildroot}%{_bindir}/kmk_gmake.exe" "%{buildroot}%{_bindir}/make.exe"
+%{__cp} -dp "%{buildroot}%{_bindir}/kmk_gmake.exe" "%{buildroot}%{_bindir}/make.exe"
 
 #------------------------------------------------------------------------------
 %clean
 #------------------------------------------------------------------------------
 
-rm -rf "%{buildroot}"
+%{__rm} -rf "%{buildroot}"
 
 #------------------------------------------------------------------------------
 %changelog
+* Wed Jul 26 2017 Dmitriy Kuminov <coding@dmik.org> 0.1.9998-9
+- Use a forked GitHub repository where all previous patches have been applied.
+- Drop changing the default DLL install dir from /lib to /bin (in an RPM
+  Unix-like environment which is our primary target this is not needed).
+- Update sources to SVN r3051 from vendor.
+- Disable annoying wlink warning 1121 for GCC3OMF/GXX3OMF tools.
+- Install qt-Q_OBJECT.sed needed by qt3 and qt4 units.
+- Support SDL RPM install in LIBSDL sdk.
+- Use abbveviated commit hash instead of SVN revision in kmk version strings.
+- Add missing spaces after -i and -d in RC invocation for GCC3OMF/GXX3OMF tools.
+- Add current directory to RC include path for GCC3OMF/GXX3OMF/OPENWATCOM tools.
+- Fix failure to create an import library for a DLL in GXX3OMF tool.
 
 * Thu Dec 17 2015 Dmitriy Kuminov <coding@dmik.org> 0.1.9998-8
 - New SVN release 2803 of version 0.1.9998.
