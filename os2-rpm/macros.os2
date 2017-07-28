@@ -6,23 +6,59 @@
 # Path to OS/2 specific rpm configuration directory containing helper scripts
 %_rpmconfigdir_os2 @RPMCONFIGDIR_OS2@
 
-# OS/2 boot drive
-%os2_boot_drive %(%{_rpmconfigdir_os2}/getbootdrive.exe)
+# System-wide path for OS/2 language files accessed via DPATH env. variable.
+%os2_langdir %{_datadir}/os2/lang
 
-# Converts a Unix path to a DOS path (backward slashes) expanding /@unixroot to
-# a current value of UNIXROOT if it starts the path.
+# System-wide path for OS/2 INF files accessible via BOOKSHELF env. variable.
+%os2_bookdir %{_datadir}/os2/book
+
+# System-wide path for OS/2 HLP files accessible via HELP env. variable.
+%os2_helpdir %{_datadir}/os2/help
+
+# Converts back slashes to forward slashes.
+%os2_fwdslashes() %{lua: print(string.gsub(rpm.expand("%{?**}"), "\\\\", "/"))}
+
+# Converts forward lashes to back slashes.
+%os2_backslashes() %{lua: print(string.gsub(rpm.expand("%{?**}"), "/", "\\\\"))}
+
+# Converts a Unix path to a DOS path (backward slashes) replacing /@unixroot
+# with %UNIXROOT% if it starts the path. Several paths separated by ';' may be
+# given to handle them at once (useful for PATH-like env.vars).
 %os2_dos_path() %{lua:
-  path = rpm.expand("%{?1}")
-  if (string.sub(path, 1, 10) == "/@unixroot" and
-      (string.len(path) == 10 or string.sub(path, 11, 11) == '/')) then
-    path = os.getenv("UNIXROOT") .. string.sub(path, 11)
+  function conv_path(path)
+    if (string.sub(path, 1, 10) == "/@unixroot" and
+        (string.len(path) == 10 or string.sub(path, 11, 11) == '/')) then
+      path = "%UNIXROOT%" .. string.sub(path, 11)
+    end
+    path = string.gsub(path, "/", "\\\\")
+    return path
   end
-  path = string.gsub(path, "/", "\\\\")
-  print(path)
+  path = rpm.expand("%{?**}")
+  seen_first = false
+  for p in string.gmatch(path, "[^;]*") do
+    print((seen_first and ';' or '') .. conv_path(p))
+    seen_first = seen_first or true
+  end
+}
+
+# Same as os2_dos_path but converts backward slashes to forward slashes.
+%os2_dos_path_f() %{os2_fwdslashes %{os2_dos_path %{?**}}}
+
+# Expands DOS-like environment variables (%VAR%) to their current values.
+# NOTE: Don't use in install-time scriptlets unless with -e and as %%{...}.
+%os2_expand_dos_vars() %{lua:
+  str = rpm.expand("%{?**}")
+  str = string.gsub(str, "%%(%a+)%%", os.getenv)
+  print(str)
 }
 
 # Current UNIXROOT value in DOS format (backward slashes)
-%os2_unixroot_path() %{os2_dos_path /@unixroot}
+# NOTE: Don't use in install-time scriptlets unless with -e and as %%{...}.
+%os2_unixroot_path() %{os2_expand_dos_vars %{os2_dos_path /@unixroot}}
+
+# OS/2 boot drive.
+# NOTE: Don't use in install-time scriptlets unless with -e and as %%{...}.
+%os2_boot_drive %(%{_rpmconfigdir_os2}/getbootdrive.exe)
 
 #------------------------------------------------------------------------------
 # Macros needed at package creation time

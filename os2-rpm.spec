@@ -1,7 +1,7 @@
 Summary: OS/2 specific RPM macros and scripts
 Name: os2-rpm
 Version: 0
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: GPLv2+
 Group: Development/System
 Vendor: bww bitwise works GmbH
@@ -81,6 +81,16 @@ done
 %{_rpmconfigdir_macros_d}/macros.scm
 
 %changelog
+* Fri Jul 28 2017 Dmitriy Kuminov <coding@dmik.org> 0-4
+- Add os2_langdir, os2_bookdir and os2_helpdir macros.
+- Make os2_dos_path understand ';' as path separator.
+- Make os2_dos_path replace /@unixroot with %UNIXROOT% rather its current value
+  (build-time values may differ from install-time values so should not be used).
+- Add os2_fwdslashes and os2_backslashes for easy slash conversion in paths.
+- Add os2_expand_dos_vars to expand env.vars (should only be used with -e
+  option in scriplets to cause install-time expansion, as well as os2_boot_drive
+  and os2_unixroot_path).
+
 * Mon Jul 10 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 0-3
 - add a symlink to the *.exe, so old rpm still work
 
