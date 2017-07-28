@@ -1,18 +1,25 @@
 Summary: IBM OS/2 Developer's Toolkit Version 4.5
 Name: os2tk45
 Version: 4.5.2
-Release: 5%{?dist}
+Release: 6%{?dist}
 Group: System Environment/Libraries
 License: IBM
 Vendor: bww bitwise works GmbH
 
 %scm_source github https://github.com/bitwiseworks/%{name} 660fdb07c929623bd9043c88f2734f08c741e714
 
+%global os2_ipfcdir %{_datadir}/os2/ipfc
+%global os2tk45_includedir %{_includedir}/os2tk45
+
 # Act like a meta-package and install all essential subpackages
 Requires: %{name}-headers = %{version}-%{release}
 Requires: %{name}-libs = %{version}-%{release}
 Requires: %{name}-rc = %{version}-%{release}
+Requires: %{name}-utils = %{version}-%{release}
 Requires: %{name}-books = %{version}-%{release}
+
+# For os2_dos_path, os2_langdir etc. macros
+Requires: os2-rpm >= 0-4
 
 %description
 The IBM OS/2 Developer's Toolkit Version 4.5 provides development support
@@ -55,6 +62,21 @@ Provides IBM OS/2 Developer's Toolkit resource compilers. Both 32-bit and 16-bit
 resource compilers (version 5.xxx and 4.xxx, respectively) are included in this
 package.
 
+%package utils
+Summary: IBM OS/2 Developer's Toolkit utilities
+Requires: %{name}-readme = %{version}-%{release}
+
+%description utils
+Provides IBM OS/2 Developer's Toolkit utility programs.
+
+%package ipfc
+Summary: IBM OS/2 Developer's Toolkit IPFC tool
+Requires: %{name}-readme = %{version}-%{release}
+
+%description ipfc
+Provides IBM OS/2 Developer's Toolkit Information Presentation Facility tool
+including the IPF complier and support files.
+
 %package books
 Summary: IBM OS/2 Developer's Toolkit books
 Requires: %{name}-readme = %{version}-%{release}
@@ -70,34 +92,47 @@ Provides IBM OS/2 Developer's Toolkit book files in INF and HLP formats.
 
 %install
 
-%{__mkdir_p} %{buildroot}%{_includedir}/os2tk45
-%{__cp} -pR h/* %{buildroot}%{_includedir}/os2tk45/
+%{__mkdir_p} %{buildroot}%{os2tk45_includedir}
+%{__cp} -pR h/* %{buildroot}%{os2tk45_includedir}
 # copy inc directory inside to avoid one more dir under include
-%{__cp} -pR inc %{buildroot}%{_includedir}/os2tk45/
+%{__cp} -pR inc %{buildroot}%{os2tk45_includedir}
 # remove LIBC stuff, will go to a separate subpackage one day
-%{__rm} -rf %{buildroot}%{_includedir}/os2tk45/libc
+%{__rm} -rf %{buildroot}%{os2tk45_includedir}/libc
 # remove SOM stuff, it will go to a separate subpackage one day
-%{__rm} %{buildroot}%{_includedir}/os2tk45/wincfg.*h
-%{__rm} %{buildroot}%{_includedir}/os2tk45/wp*.*h
+%{__rm} %{buildroot}%{os2tk45_includedir}/wincfg.*h
+%{__rm} %{buildroot}%{os2tk45_includedir}/wp*.*h
 
 %{__mkdir_p} -p %{buildroot}%{_libdir}
-%{__cp} -pR lib/* %{buildroot}%{_libdir}/
+%{__cp} -pR lib/* %{buildroot}%{_libdir}
 # remove LIBC stuff, will go to a separate subpackage one day
 %{__rm} %{buildroot}%{_libdir}/libc*.lib
 # remove cryptol.lib, it will go to a separate subpackage one day
 %{__rm} %{buildroot}%{_libdir}/crypto.lib
 
 %{__mkdir_p} %{buildroot}%{_bindir}
-%{__mkdir_p} %{buildroot}%{_datadir}/os2/lang
+%{__mkdir_p} %{buildroot}%{os2_langdir}
 
-%{__cp} -p bin/rc.exe %{buildroot}%{_bindir}/
-%{__cp} -p bin/rc16.exe %{buildroot}%{_bindir}/
-%{__cp} -p bin/rcpp.* %{buildroot}%{_bindir}/
-%{__cp} -p msg/rc*.msg %{buildroot}%{_datadir}/os2/lang/
-%{__cp} -p msg/messages.msg %{buildroot}%{_datadir}/os2/lang/
+# rc
+%{__cp} -p bin/rc.exe %{buildroot}%{_bindir}
+%{__cp} -p bin/rc16.exe %{buildroot}%{_bindir}
+%{__cp} -p bin/rcpp.* %{buildroot}%{_bindir}
+%{__cp} -p msg/rc*.msg %{buildroot}%{os2_langdir}
+%{__cp} -p msg/messages.msg %{buildroot}%{os2_langdir}
 
-%{__mkdir_p} %{buildroot}%{_datadir}/os2/book
-%{__cp} -p book/* %{buildroot}%{_datadir}/os2/book/
+# utils
+%{__cp} -p bin/exehdr.exe %{buildroot}%{_bindir}
+%{__cp} -p bin/alp.exe %{buildroot}%{_bindir}
+%{__cp} -p bin/alp.msg %{buildroot}%{os2_langdir}
+%{__cp} -p bin/mapsym.exe %{buildroot}%{_bindir}
+
+# ipfc
+%{__mkdir_p} %{buildroot}%{os2_ipfcdir}
+%{__cp} -p bin/ipfc.exe %{buildroot}%{_bindir}
+%{__cp} -p ipfc/* %{buildroot}%{os2_ipfcdir}
+
+# books
+%{__mkdir_p} %{buildroot}%{os2_bookdir}
+%{__cp} -p book/* %{buildroot}%{os2_bookdir}
 
 %files
 # nothing of its own in the meta-package
@@ -107,7 +142,8 @@ Provides IBM OS/2 Developer's Toolkit book files in INF and HLP formats.
 %doc changelog
 
 %files headers
-%{_includedir}/os2tk45
+%dir %{os2tk45_includedir}
+%{os2tk45_includedir}
 
 %files libs
 %{_libdir}/*.lib
@@ -116,28 +152,47 @@ Provides IBM OS/2 Developer's Toolkit book files in INF and HLP formats.
 %{_bindir}/rc.exe
 %{_bindir}/rc16.exe
 %{_bindir}/rcpp.*
-%{_datadir}/os2/lang/rc*.msg
-%{_datadir}/os2/lang/messages.msg
+%{os2_langdir}/rc*.msg
+%{os2_langdir}/messages.msg
+
+%files utils
+%{_bindir}/exehdr.exe
+%{_bindir}/alp.exe
+%{os2_langdir}/alp.msg
+%{_bindir}/mapsym.exe
+
+%files ipfc
+%{_bindir}/ipfc.exe
+%{os2_ipfcdir}/*
 
 %files books
-%{_datadir}/os2/book/*
+%{os2_bookdir}/*
 
 %post headers
-%cube {ADDSTRING "%UNIXROOT%\usr\include\os2tk45\inc;%UNIXROOT%\usr\include\os2tk45\gl;%UNIXROOT%\usr\include\os2tk45;" IN "SET INCLUDE=" (FIRST IFNEW BEFORE ADDBOTTOM RS(%%)} c:\config.sys > NUL
+%cube {ADDSTRING "%{os2_dos_path %{os2tk45_includedir}/inc;%{os2tk45_includedir}/gl;%{os2tk45_includedir}};" IN "SET INCLUDE=" (FIRST IFNEW BEFORE ADDBOTTOM RS(%%)} c:\config.sys > NUL
 
 %postun headers
 if [ "$1" = 0 ] ; then
 # execute only on last uninstall
-%cube {DELSTRING "%UNIXROOT%\usr\include\os2tk45\inc;%UNIXROOT%\usr\include\os2tk45\gl;%UNIXROOT%\usr\include\os2tk45;" IN "SET INCLUDE=" (FIRST RS(%%)} c:\config.sys > NUL
+%cube {DELSTRING "%{os2_dos_path %{os2tk45_includedir}/inc;%{os2tk45_includedir}/gl;%{os2tk45_includedir}};" IN "SET INCLUDE=" (FIRST RS(%%)} c:\config.sys > NUL
+fi
+
+%post ipfc
+%cube {ADDSTRING "%{os2_dos_path %{_datadir}/os2/ipfc};" IN "SET IPFC=" (FIRST IFNEW BEFORE ADDBOTTOM RS(%%)} c:\config.sys > NUL
+
+%postun ipfc
+if [ "$1" = 0 ] ; then
+# execute only on last uninstall
+%cube {DELSTRING "%{os2_dos_path %{_datadir}/os2/ipfc};" IN "SET IPFC=" (FIRST RS(%%)} c:\config.sys > NUL
 fi
 
 %post libs
-%cube {ADDSTRING "%UNIXROOT%\usr\lib;" IN "SET LIB=" (FIRST IFNEW BEFORE ADDBOTTOM RS(%%)} c:\config.sys > NUL
+%cube {ADDSTRING "%{os2_dos_path %{_libdir}};" IN "SET LIB=" (FIRST IFNEW BEFORE ADDBOTTOM RS(%%)} c:\config.sys > NUL
 
 %postun libs
 if [ "$1" = 0 ] ; then
 # execute only on last uninstall
-%cube {DELSTRING "%UNIXROOT%\usr\lib;" IN "SET LIB=" (FIRST RS(%%)} c:\config.sys > NUL
+%cube {DELSTRING "%{os2_dos_path %{_libdir}};" IN "SET LIB=" (FIRST RS(%%)} c:\config.sys > NUL
 fi
 
 %post books
@@ -158,6 +213,11 @@ if [ "$1" = 0 ] ; then
 fi
 
 %changelog
+* Fri Jul 28 2017 Dmitriy Kuminov <coding@dmik.org> 4.5.2-6
+- Add utils sub-package (currently with EXEHDR, ALP and MAPSYM).
+- Add ipfc sub-package with IPFC and support files.
+- Use handy os2_dos_path, os2_langdir etc. macros from os2-rpm.
+
 * Sat Jun 10 2017 Dmitriy Kuminov <coding@dmik.org> 4.5.2-5
 - Add messages.msg to os2tk45-rc sub-package.
 - Brush up %install by using mkdir/cp/rm macros.
