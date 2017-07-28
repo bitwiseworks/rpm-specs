@@ -2,12 +2,12 @@
 Summary: OS/2 - eComStation 2.0 - ArcaOS 5.0 base
 Name: os2-base
 Version: 0.0.0
-Release: 16%{?dist}
+Release: 17%{?dist}
 
 License: free
 
 Requires: os2-release
-Requires: os2-rpm >= 0-2
+Requires: os2-rpm >= 0-4
 
 Provides: ansicall.dll
 Provides: asiacol.dll
@@ -238,7 +238,6 @@ Provides: wpstkmou.dll
 Provides: wpstkmri.dll
 Provides: wpvidsys.dll
 
-
 %description
 Virtual package for OS/2 base shared libraries packaging.
 
@@ -266,12 +265,13 @@ tools from findutils and coreutils to be used instead of default OS/2 tools.
 # nothing to do
 
 %install
-rm -rf $RPM_BUILD_ROOT
-mkdir -p -m 755 $RPM_BUILD_ROOT%{_sysconfdir}/rpm
+%{__rm} -rf $RPM_BUILD_ROOT
+%{__mkdir_p} -m 755 $RPM_BUILD_ROOT%{_sysconfdir}/rpm
 echo i686-OS/2-OS/2 > $RPM_BUILD_ROOT%{_sysconfdir}/rpm/platform
 
-mkdir -p %{buildroot}%{_datadir}/os2/book
-mkdir -p %{buildroot}%{_datadir}/os2/help
+%{__mkdir_p} %{buildroot}%{os2_bookdir}
+%{__mkdir_p} %{buildroot}%{os2_helpdir}
+%{__mkdir_p} %{buildroot}%{os2_langdir}
 
 %clean
 # nothing to do
@@ -280,8 +280,9 @@ mkdir -p %{buildroot}%{_datadir}/os2/help
 %files
 %defattr(-,root,root,-)
 %config(noreplace) %{_sysconfdir}/rpm/platform
-%dir %{_datadir}/os2/book
-%dir %{_datadir}/os2/help
+%dir %{os2_bookdir}
+%dir %{os2_helpdir}
+%dir %{os2_langdir}
 
 %files fhs
 %defattr(-,root,root,-)
@@ -295,35 +296,35 @@ mkdir -p %{buildroot}%{_datadir}/os2/help
 %post
 if [ "$1" = 1 ] ; then
 #execute only on first install
-%cube {ADDSTRING "%UNIXROOT%\usr\sbin;%UNIXROOT%\usr\bin;" IN "SET PATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys c:\config.sys.yum > NUL
-%cube {ADDSTRING "%UNIXROOT%\usr\lib;" IN "LIBPATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
+%cube {ADDSTRING "%{os2_dos_path %{_sbindir};%{_bindir}};" IN "SET PATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys c:\config.sys.yum > NUL
+%cube {ADDSTRING "%{os2_dos_path %{_libdir}};" IN "LIBPATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
 %cube {DELLINE "SET UNIXROOT="} c:\config.sys > NUL
 %cube {ADDLINE "SET UNIXROOT=%UNIXROOT%" (ALWAYS)} c:\config.sys > NUL
 fi
 %cube {ADDLINE "SET TERM=os2" (IFNOT "SET TERM=")} c:\config.sys > NUL
 %cube {ADDLINE "REM [ Default shell values ]" (IFNOT "REM [ Default shell values ]")} c:\config.sys > NUL
-%cube {ADDLINE "SET SHELL=%UNIXROOT%/usr/bin/sh.exe" (IFNOT "SET SHELL=")} c:\config.sys > NUL
-%cube {ADDLINE "SET EMXSHELL=%UNIXROOT%/usr/bin/sh.exe" (IFNOT "SET EMXSHELL=")} c:\config.sys > NUL
-%cube {ADDLINE "SET CONFIG_SHELL=%UNIXROOT%/usr/bin/sh.exe" (IFNOT "SET CONFIG_SHELL=")} c:\config.sys > NUL
-%cube {ADDLINE "SET MAKESHELL=%UNIXROOT%/usr/bin/sh.exe" (IFNOT "SET MAKESHELL=")} c:\config.sys > NUL
-%cube {ADDLINE "SET EXECSHELL=%UNIXROOT%/usr/bin/sh.exe" (IFNOT "SET EXECSHELL=")} c:\config.sys > NUL
+%cube {ADDLINE "SET SHELL=%{os2_dos_path %{_bindir}/sh.exe}" (IFNOT "SET SHELL=")} c:\config.sys > NUL
+%cube {ADDLINE "SET EMXSHELL=%{os2_dos_path %{_bindir}/sh.exe}" (IFNOT "SET EMXSHELL=")} c:\config.sys > NUL
+%cube {ADDLINE "SET CONFIG_SHELL=%{os2_dos_path %{_bindir}/sh.exe}" (IFNOT "SET CONFIG_SHELL=")} c:\config.sys > NUL
+%cube {ADDLINE "SET MAKESHELL=%{os2_dos_path %{_bindir}/sh.exe}" (IFNOT "SET MAKESHELL=")} c:\config.sys > NUL
+%cube {ADDLINE "SET EXECSHELL=%{os2_dos_path %{_bindir}/sh.exe}" (IFNOT "SET EXECSHELL=")} c:\config.sys > NUL
 %cube {ADDLINE "REM [ Temporary directory ]" (IFNOT "REM [ Temporary directory ]")} c:\config.sys > NUL
-%cube {ADDLINE "SET TMP=%UNIXROOT%\var\tmp" (IFNOT "SET TMP=")} c:\config.sys > NUL
-%cube {ADDLINE "SET TEMP=%UNIXROOT%\var\tmp" (IFNOT "SET TEMP=")} c:\config.sys > NUL
-%cube {ADDLINE "SET TMPDIR=%UNIXROOT%\var\tmp" (IFNOT "SET TMPDIR=")} c:\config.sys > NUL
-%cube {ADDSTRING "%UNIXROOT%\usr\share\os2\book;" IN "SET BOOKSHELF=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
-%cube {ADDSTRING "%UNIXROOT%\usr\share\os2\help;" IN "SET HELP=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
-%cube {ADDSTRING "%UNIXROOT%\usr\share\os2\lang;" IN "SET DPATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
+%cube {ADDLINE "SET TMP=%{os2_dos_path /@unixroot/var/tmp}" (IFNOT "SET TMP=")} c:\config.sys > NUL
+%cube {ADDLINE "SET TEMP=%{os2_dos_path /@unixroot/var/tmp}" (IFNOT "SET TEMP=")} c:\config.sys > NUL
+%cube {ADDLINE "SET TMPDIR=%{os2_dos_path /@unixroot/var/tmp}" (IFNOT "SET TMPDIR=")} c:\config.sys > NUL
+%cube {ADDSTRING "%{os2_dos_path %{os2_bookdir}};" IN "SET BOOKSHELF=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
+%cube {ADDSTRING "%{os2_dos_path %{os2_helpdir}};" IN "SET HELP=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
+%cube {ADDSTRING "%{os2_dos_path %{os2_langdir}};" IN "SET DPATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
 
 %postun
 if [ "$1" = 0 ] ; then
 #execute only on last uninstall
-%cube {DELSTRING "%UNIXROOT%\usr\sbin;%UNIXROOT%\usr\bin;" IN "SET PATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
-%cube {DELSTRING "%UNIXROOT%\usr\lib;" IN "LIBPATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
+%cube {DELSTRING "%{os2_dos_path %{_sbindir};%{_bindir}};" IN "SET PATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
+%cube {DELSTRING "%{os2_dos_path %{_libdir}};" IN "LIBPATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
 %cube {DELLINE "SET UNIXROOT="} c:\config.sys > NUL
-%cube {DELSTRING "%UNIXROOT%\usr\share\os2\book;" IN "SET BOOKSHELF=" (FIRST} c:\config.sys > NUL
-%cube {DELSTRING "%UNIXROOT%\usr\share\os2\help;" IN "SET HELP=" (FIRST} c:\config.sys > NUL
-%cube {DELSTRING "%UNIXROOT%\usr\share\os2\lang;" IN "SET DPATH=" (FIRST} c:\config.sys > NUL
+%cube {DELSTRING "%{os2_dos_path %{os2_bookdir}};" IN "SET BOOKSHELF=" (FIRST} c:\config.sys > NUL
+%cube {DELSTRING "%{os2_dos_path %{os2_helpdir}};" IN "SET HELP=" (FIRST} c:\config.sys > NUL
+%cube {DELSTRING "%{os2_dos_path %{os2_langdir}};" IN "SET DPATH=" (FIRST} c:\config.sys > NUL
 fi
 
 %post fhs
@@ -352,6 +353,10 @@ fi
 
 
 %changelog
+* Fri Jul 28 2017 Dmitriy Kuminov <coding@dmik.org> 0.0.0-17
+- Use handy os2_dos_path, os2_langdir etc. macros from os2-rpm.
+- Make os2-base own os2_langdir.
+
 * Fri Jun 9 2017 Dmitriy Kuminov <coding@dmik.org> 0.0.0-16
 - Make os2-rpm a requirement for os2-base (contains essential macros used in scriptlets).
 
