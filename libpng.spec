@@ -1,13 +1,13 @@
 Summary: A library of functions for manipulating PNG image format files
 Name: libpng
-Version: 1.6.28
+Version: 1.6.31
 Release: 1%{?dist}
 License: zlib
 Group: System Environment/Libraries
 URL: http://www.libpng.org/pub/png/
 
 Vendor: bww bitwise works GmbH
-%scm_source  svn http://svn.netlabs.org/repos/ports/libpng/trunk 1984
+%scm_source  svn http://svn.netlabs.org/repos/ports/libpng/trunk 2227
 
 BuildRequires: zlib-devel, pkgconfig
 BuildRequires: libtool, autoconf >= 2.65
@@ -75,6 +75,12 @@ make DESTDIR=$RPM_BUILD_ROOT install
 # We don't ship .la files
 rm -rf $RPM_BUILD_ROOT%{_libdir}/*.la
 
+%check
+#to run make check use "--with check"
+%if %{?_with_check:1}%{!?_with_check:0}
+make check
+%endif
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -108,6 +114,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/pngfix.exe
 
 %changelog
+* Wed Aug 09 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.6.31-1
+- updated libpng to 1.6.31
+
 * Mon Feb 06 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.6.28-1
 - updated libpng to 1.6.28
 - use new scm_source and scm_setup macro
