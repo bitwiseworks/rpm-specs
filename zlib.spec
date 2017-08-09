@@ -1,16 +1,13 @@
-#define svn_url     e:/trees/zlib/trunk
-%define svn_url     http://svn.netlabs.org/repos/ports/zlib/trunk
-%define svn_rev     1948
 
 Summary: The compression and decompression library
 Name: zlib
 Version: 1.2.11
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: zlib and Boost
 Group: System Environment/Libraries
 URL: http://www.zlib.net
 Vendor:  bww bitwise works GmbH
-Source:  %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
+%scm_source  svn http://svn.netlabs.org/repos/ports/zlib/trunk 1948
 
 # DEF files to create forwarders for the legacy package
 Source10:       z.def
@@ -63,14 +60,7 @@ developing applications which use minizip.
 %debug_package
 
 %prep
-%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc
-svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
-%endif
+%scm_setup
 
 # Prepare forwarder DLLs.
 for m in %{SOURCE10}; do
@@ -147,6 +137,9 @@ gcc -Zomf -Zdll -nostdlib z.def -l$RPM_BUILD_ROOT/%{_libdir}/z1.dll -lend -o $RP
 %{_libdir}/pkgconfig/minizip.pc
 
 %changelog
+* Wed Aug 09 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.2.11-2
+- use new scm_source and scm_setup macro
+
 * Tue Jan 24 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.2.11-1
 - update to version 1.2.11
 
