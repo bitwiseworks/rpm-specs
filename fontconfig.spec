@@ -9,8 +9,8 @@
 
 Summary:	Font configuration and customization library
 Name:		fontconfig
-Version:	2.12.1
-Release:	2%{?dist}
+Version:	2.12.4
+Release:	1%{?dist}
 # src/ftglue.[ch] is in Public Domain
 # src/fccache.c contains Public Domain code
 # fc-case/CaseFolding.txt is in the UCD
@@ -20,13 +20,7 @@ Group:		System Environment/Libraries
 #Source:	http://fontconfig.org/release/%{name}-%{version}.tar.bz2
 URL:		http://fontconfig.org
 Vendor:		bww bitwise works GmbH
-
-%define svn_url     http://svn.netlabs.org/repos/ports/fontconfig/trunk
-%define svn_rev     1839
-
-Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
-
-BuildRequires: gcc make subversion zip
+%scm_source     svn http://svn.netlabs.org/repos/ports/fontconfig/trunk 2220
 
 Source1: 30-os2-unsupported.conf
 Source2: 80-os2-tnr-fix.conf
@@ -35,8 +29,7 @@ BuildRequires:	expat-devel
 BuildRequires:	freetype-devel >= %{freetype_version}
 #BuildRequires:	fontpackages-devel
 BuildRequires:	autoconf automake libtool
-BuildRequires:	python python-lxml
-BuildRequires:  python-six
+#BuildRequires:	gperf
 
 #Requires:	fontpackages-filesystem
 Requires:	freetype
@@ -81,14 +74,7 @@ which is useful for developing applications that uses fontconfig.
 %debug_package
 
 %prep
-%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc
-svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
-%endif
+%scm_setup
 
 # Generate configure and friends
 autoreconf -fvi
@@ -155,7 +141,6 @@ LIBPATHSTRICT=T \
 %doc README AUTHORS
 %doc fontconfig-user.txt fontconfig-user.html
 %doc %{_fontconfig_confdir}/README
-%{!?_licensedir:%global license %%doc}
 %license COPYING
 %{_libdir}/fntcnf*.dll
 %{_bindir}/fc-cache.exe
@@ -186,6 +171,11 @@ LIBPATHSTRICT=T \
 %doc fontconfig-devel.txt fontconfig-devel
 
 %changelog
+* Wed Aug 09 2017 Silvan Scherrer <silvan.scherrer@aroa.com> 2.12.4-1
+- Update to version 2.12.4.
+- use new scm_ macros
+- fixes ticket #168, #169
+
 * Fri Nov 25 2016 Silvan Scherrer <silvan.scherrer@aroa.com> 2.12.1-2
 - add buildlevel information to the dll
 
