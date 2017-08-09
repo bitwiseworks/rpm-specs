@@ -1,14 +1,14 @@
 
 Summary: A free and portable font rendering engine
 Name: freetype
-Version: 2.7.1
+Version: 2.8.0
 Release: 1%{?dist}
 License: (FTL or GPLv2+) and BSD and MIT and Public Domain and zlib with acknowledgement
 Group: System Environment/Libraries
 URL: http://www.freetype.org
 
 Vendor: bww bitwise works GmbH
-%scm_source  svn http://svn.netlabs.org/repos/ports/freetype2/trunk 2109
+%scm_source  svn http://svn.netlabs.org/repos/ports/freetype2/trunk 2215
 #Source:  http://download.savannah.gnu.org/releases/freetype/freetype-%{version}.tar.bz2
 #Source1: http://download.savannah.gnu.org/releases/freetype/freetype-doc-%{version}.tar.bz2
 #Source2: http://download.savannah.gnu.org/releases/freetype/ft2demos-%{version}.tar.bz2
@@ -17,6 +17,7 @@ BuildRoot: %{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 BuildRequires: libpng-devel
 BuildRequires: zlib-devel
+BuildRequires: bzip2-devel
 
 Provides: %{name}-bytecode
 
@@ -45,7 +46,6 @@ text-rendering library.
 Summary: FreeType development libraries and header files
 Group: Development/Libraries
 Requires: %{name} = %{version}-%{release}
-Requires: libpng-devel
 
 %description devel
 The freetype-devel package includes the static libraries and header files
@@ -64,14 +64,19 @@ autogen.sh
 rm -f config.mk 
 export LDFLAGS=" -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 export VENDOR="%{vendor}"
-%configure --disable-static
+%configure --disable-static \
+           --with-zlib=yes \
+           --with-bzip2=yes \
+           --with-png=yes \
+           --with-harfbuzz=no
+
 make %{?_smp_mflags}
 
 
 %install
 rm -rf $RPM_BUILD_ROOT
 
-%makeinstall gnulocaledir=$RPM_BUILD_ROOT%{_datadir}/locale
+%make_install gnulocaledir=$RPM_BUILD_ROOT%{_datadir}/locale
 
 # Don't package static a or .la files
 rm -f $RPM_BUILD_ROOT%{_libdir}/lib*.la
@@ -82,16 +87,14 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %files
-%defattr(-,root,root)
+%{!?_licensedir:%global license %%doc}
+%license docs/LICENSE.TXT docs/FTL.TXT docs/GPLv2.TXT
 %{_libdir}/freetyp*.dll
 %doc README
-%doc docs/LICENSE.TXT docs/FTL.TXT docs/GPLv2.TXT
-%doc docs/CHANGES docs/formats.txt
 %doc docs/VERSIONS.TXT
 
 
 #%files demos
-#%defattr(-,root,root)
 #%{_bindir}/ftbench
 #%{_bindir}/ftchkwd
 #%{_bindir}/ftmemchk
@@ -105,18 +108,25 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %files devel
-%defattr(-,root,root)
+%doc docs/CHANGES docs/formats.txt
+#%doc docs/ft2faq.html
 %dir %{_includedir}/freetype2
 %{_datadir}/aclocal/freetype2.m4
 %{_includedir}/freetype2/*
 %{_libdir}/freetype*.a
 %{_bindir}/freetype-config
 %{_libdir}/pkgconfig/freetype2.pc
+#%doc docs/design
+#%doc docs/glyphs
 %doc docs/reference
+#%doc docs/tutorial
 %{_mandir}/man1/*
 
 
 %changelog
+* Wed Aug 09 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.8.0-1
+- updated source to 2.8.0
+
 * Wed Mar 01 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.7.1-1
 - updated source to 2.7.1
 - use new scm_ macros
