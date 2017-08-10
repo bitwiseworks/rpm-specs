@@ -12,10 +12,8 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: autoconf, automake, libtool
 #BuildRequires: check-devel
 
-%define svn_url     http://svn.netlabs.org/repos/ports/expat/trunk
-%define svn_rev     770
-
-Source: %{name}-%{version}-r%{svn_rev}.zip
+Vendor: bww bitwise works GmbH
+%scm_source svn  http://svn.netlabs.org/repos/ports/expat/trunk 770
 
 BuildRequires: gcc make subversion zip
 
@@ -45,21 +43,10 @@ Requires: expat-devel%{?_isa} = %{version}-%{release}
 The expat-static package contains the static version of the expat library.
 Install it if you need to link statically with expat.
 
-%package debug
-Summary: HLL debug data for exception handling support.
-
-%description debug
-HLL debug data for exception handling support.
+%debug_package
 
 %prep
-%if %(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc
-svn export -r %{svn_rev} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" "%{name}-%{version}")
-%endif
+%scm_setup
 
 # make sure configure is updated to properly support OS/2
 buildconf.sh
@@ -109,11 +96,11 @@ rm -rf ${RPM_BUILD_ROOT}
 %exclude %{_libdir}/*_dll.a
 %{_libdir}/*.a
 
-%files debug
-%defattr(-,root,root)
-%{_libdir}/*.dbg
 
 %changelog
+* Thu Aug 10 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.1.0-12
+- use scm_ macros
+
 * Mon Sep 08 2014 yd
 - added debug package with symbolic info for exceptq.
 
