@@ -3,7 +3,7 @@
 Summary: An XML parser library
 Name: expat
 Version: 2.1.0
-Release: 12%{?dist}
+Release: 13%{?dist}
 Group: System Environment/Libraries
 #Source: http://downloads.sourceforge.net/expat/expat-%{version}.tar.gz
 URL: http://www.libexpat.org/
@@ -98,10 +98,10 @@ rm -rf ${RPM_BUILD_ROOT}
 
 
 %changelog
-* Thu Aug 10 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.1.0-12
+* Thu Aug 10 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.1.0-13
 - use scm_ macros
 
-* Mon Sep 08 2014 yd
+* Mon Sep 08 2014 yd 2.1.0-12
 - added debug package with symbolic info for exceptq.
 
 * Wed Sep 3 2014 Dmitriy Kuminov <coding@dmik.org> 2.1.0-11
