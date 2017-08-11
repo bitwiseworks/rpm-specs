@@ -15,6 +15,9 @@ BuildRequires: autoconf, automake, libtool
 Vendor: bww bitwise works GmbH
 %scm_source svn  http://svn.netlabs.org/repos/ports/expat/trunk 770
 
+# DEF files to create forwarders to the old name
+Source10:       expat7.def
+
 BuildRequires: gcc make subversion zip
 
 %description
@@ -51,6 +54,11 @@ Install it if you need to link statically with expat.
 # make sure configure is updated to properly support OS/2
 buildconf.sh
 
+# Prepare forwarder DLLs.
+for m in %{SOURCE10}; do
+  cp ${m} .
+done
+
 %build
 #rm -rf autom4te*.cache
 #libtoolize --copy --force --automake && aclocal && autoheader && autoconf
@@ -68,6 +76,9 @@ chmod 644 README COPYING Changes doc/* examples/*
 make install DESTDIR=$RPM_BUILD_ROOT
 
 rm -f $RPM_BUILD_ROOT%{_libdir}/*.la
+
+# Generate & install forwarder DLLs.
+gcc -Zomf -Zdll -nostdlib expat7.def -l$RPM_BUILD_ROOT/%{_libdir}/expat1.dll -lend -o $RPM_BUILD_ROOT/%{_libdir}/expat7.dll
 
 #%check
 #make check
@@ -100,6 +111,7 @@ rm -rf ${RPM_BUILD_ROOT}
 %changelog
 * Thu Aug 10 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.1.0-13
 - use scm_ macros
+- add a forwarder, as the toolchain changes the name
 
 * Mon Sep 08 2014 yd 2.1.0-12
 - added debug package with symbolic info for exceptq.
