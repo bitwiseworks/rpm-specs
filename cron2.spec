@@ -4,7 +4,7 @@
 
 %define kmk_dist out/os2.x86/release/dist
 
-Summary: unlink rename pending operation
+Summary: daemon to execute scheduled commands
 Name: cron2
 Version: 1.4.2
 Release: 0.0%{?dist}
@@ -18,12 +18,7 @@ Requires: libc >= 0.6.6
 %description
 CRON/2, client/server-based  timed program execution.
 
-%package debug
-Summary: HLL debug data for exception handling support.
-Requires: %{name} = %{version}-%{release}
-
-%description debug
-HLL debug data for exception handling support.
+%debug_package
 
 %prep
 %if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
@@ -73,10 +68,6 @@ WP_START_CRON2_EXEC:WPShadow|Cron/2 Daemon|<WP_START>|SHADOWID=<WP_TOOLS_CRON2_E
 %{_bindir}/*.exe
 %config(noreplace) %{_sysconfdir}/cron2.dat
 %ghost %{_localstatedir}/log/cron2.log
-
-%files debug
-%defattr(-,root,root)
-%{_bindir}/*.dbg
 
 %changelog
 * Tue Aug 25 2015 yd <yd@os2power.com> 1.4.2-1
