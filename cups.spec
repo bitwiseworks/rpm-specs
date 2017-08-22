@@ -1,14 +1,11 @@
 # this spec file is a combination from the fedora cups.spec and the
 # cups.spec as included in cups
 
-#define svn_url     e:/trees/cups/trunk
-%define svn_url     http://svn.netlabs.org/repos/ports/cups/trunk
-%define svn_rev     1564
 %define _strip_opts --compress -i "*.cgi" --debuginfo -i "*.cgi"
 
-%define _without_dbus 1
-%define _without_dnssd 1
-%define _without_systemd 1
+%global _without_dbus 1
+%global _without_dnssd 1
+%global _without_systemd 1
 
 #
 # "$Id: cups.spec.in 9359 2010-11-11 19:09:24Z mike $"
@@ -35,39 +32,39 @@
 #   static   - Enable/disable static libraries (default = enable)
 #   systemd  - Enable/disable systemd support (default = enable)
 
-%{!?_with_dbus: %{!?_without_dbus: %define _with_dbus --with-dbus}}
-%{?_with_dbus: %define _dbus --enable-dbus}
-%{!?_with_dbus: %define _dbus --disable-dbus}
+%{!?_with_dbus: %{!?_without_dbus: %global _with_dbus --with-dbus}}
+%{?_with_dbus: %global _dbus --enable-dbus}
+%{!?_with_dbus: %global _dbus --disable-dbus}
 
-%{!?_with_dnssd: %{!?_without_dnssd: %define _with_dnssd --with-dnssd}}
-%{?_with_dnssd: %define _dnssd --enable-dnssd}
-%{!?_with_dnssd: %define _dnssd --disable-dnssd}
+%{!?_with_dnssd: %{!?_without_dnssd: %global _with_dnssd --with-dnssd}}
+%{?_with_dnssd: %global _dnssd --enable-dnssd}
+%{!?_with_dnssd: %global _dnssd --disable-dnssd}
 
-%{!?_with_libusb1: %{!?_without_libusb1: %define _with_libusb1 --with-libusb1}}
-%{?_with_libusb1: %define _libusb1 --enable-libusb}
-%{!?_with_libusb1: %define _libusb1 --disable-libusb}
+%{!?_with_libusb1: %{!?_without_libusb1: %global _with_libusb1 --with-libusb1}}
+%{?_with_libusb1: %global _libusb1 --enable-libusb}
+%{!?_with_libusb1: %global _libusb1 --disable-libusb}
 
-%{!?_with_static: %{!?_without_static: %define _without_static --without-static}}
-%{?_with_static: %define _static --enable-static}
-%{!?_with_static: %define _static --disable-static}
+%{!?_with_static: %{!?_without_static: %global _without_static --without-static}}
+%{?_with_static: %global _static --enable-static}
+%{!?_with_static: %global _static --disable-static}
 
-%{!?_with_systemd: %{!?_without_systemd: %define _with_systemd --with-systemd}}
-%{?_with_systemd: %define _systemd --enable-systemd}
-%{!?_with_systemd: %define _systemd --disable-systemd}
+%{!?_with_systemd: %{!?_without_systemd: %global _with_systemd --with-systemd}}
+%{?_with_systemd: %global _systemd --enable-systemd}
+%{!?_with_systemd: %global _systemd --disable-systemd}
+
 
 Summary: CUPS
 Name: cups
 Version: 2.1.3
-Release: 7%{?dist}
+Release: 8%{?dist}
 Epoch: 1
 
 License: GPL
 Group: System Environment/Daemons
 
-Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
-
 Url: http://www.cups.org
 Vendor: bww bitwise works GmbH
+%scm_source  svn http://svn.netlabs.org/repos/ports/cups/trunk 2239
 
 # Dependencies...
 Requires: %{name}-filesystem = %{epoch}:%{version}-%{release}
@@ -174,27 +171,22 @@ Sends IPP requests to the specified URI and tests and/or displays the result.
 %debug_package
 
 %prep
-%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc
-svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
-%endif
+%scm_setup
 
 autoconf --force
 
 %build
 export LDFLAGS=" -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
-export LIBS="-lurpo -lpoll"
+export LIBS="-lcx0"
+export VENDOR="%{vendor}"
 # --with-rcdir=no - don't install SysV init script
 # --with-system_groups=admin - add a value to SystemGroups parameter
 CFLAGS="$RPM_OPT_FLAGS" CXXFLAGS="$RPM_OPT_FLAGS" LDFLAGS="$LDFLAGS $RPM_OPT_FLAGS" \
     %configure %{_dbus} %{_dnssd} %{_libusb1} %{_static} \
      --with-rcdir=no \
      --with-system_groups=admin \
-     --with-cupsd_file_perm=755
+     --with-cupsd_file_perm=755 \
+     --with-domainsocket=/socket/cups.sock
 
 # If we got this far, all prerequisite libraries must be here.
 make
@@ -206,12 +198,12 @@ rm -rf $RPM_BUILD_ROOT
 make BUILDROOT=$RPM_BUILD_ROOT install
 
 # rename some files
-mv %{buildroot}%{_mandir}/man1/cancel.1 %{buildroot}%{_mandir}/man1/cancel-cups.1
-mv %{buildroot}%{_mandir}/man1/lp.1 %{buildroot}%{_mandir}/man1/lp-cups.1
-mv %{buildroot}%{_mandir}/man1/lpq.1 %{buildroot}%{_mandir}/man1/lpq-cups.1
-mv %{buildroot}%{_mandir}/man1/lprm.1 %{buildroot}%{_mandir}/man1/lprm-cups.1
-mv %{buildroot}%{_mandir}/man1/lpstat.1 %{buildroot}%{_mandir}/man1/lpstat-cups.1
-mv %{buildroot}%{_mandir}/man8/lpc.8 %{buildroot}%{_mandir}/man8/lpc-cups.8
+mv %{buildroot}%{_mandir}/man1/cancel.1.gz %{buildroot}%{_mandir}/man1/cancel-cups.1.gz
+mv %{buildroot}%{_mandir}/man1/lp.1.gz %{buildroot}%{_mandir}/man1/lp-cups.1.gz
+mv %{buildroot}%{_mandir}/man1/lpq.1.gz %{buildroot}%{_mandir}/man1/lpq-cups.1.gz
+mv %{buildroot}%{_mandir}/man1/lprm.1.gz %{buildroot}%{_mandir}/man1/lprm-cups.1.gz
+mv %{buildroot}%{_mandir}/man1/lpstat.1.gz %{buildroot}%{_mandir}/man1/lpstat-cups.1.gz
+mv %{buildroot}%{_mandir}/man8/lpc.8.gz %{buildroot}%{_mandir}/man8/lpc-cups.8.gz
 
 # Ship an rpm macro for where to put driver executables
 mkdir -p %{buildroot}/%{_rpmconfigdir}/macros.d
@@ -262,18 +254,20 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/cups/daemon/cups-exec.exe
 %dir %{_libdir}/cups/driver
 %dir %{_libdir}/cups/filter
-%{_libdir}/cups/filter/*.exe
+%{_libdir}/cups/filter/*
+%exclude %{_libdir}/cups/filter/*.dbg
 %dir %{_libdir}/cups/monitor
 %{_libdir}/cups/monitor/*.exe
 %dir %{_libdir}/cups/notifier
 %{_libdir}/cups/notifier/*.exe
 
-%{_sbindir}/cups*.exe
+%{_sbindir}/cups*
+%exclude %{_sbindir}/cups*.dbg
 %{_sbindir}/lpadmin.exe
 %{_sbindir}/lpinfo.exe
 %{_sbindir}/lpmove.exe
-%{_sbindir}/accept.exe
-%{_sbindir}/reject.exe
+%{_sbindir}/accept
+%{_sbindir}/reject
 %{_datadir}/cups/drv/*
 %{_datadir}/cups/mime/*
 %{_datadir}/cups/ppdc/*
@@ -318,20 +312,20 @@ rm -rf $RPM_BUILD_ROOT
 
 %dir %{_datadir}/man
 %dir %{_datadir}/man/man1
-%{_datadir}/man/man1/*.1
-%exclude %{_datadir}/man/man1/ppd*.1
-%exclude %{_datadir}/man/man1/cups-config.1
-%exclude %{_datadir}/man/man1/ipptool*.1
-%exclude %{_datadir}/man/man1/cancel-cups*.1
-%exclude %{_datadir}/man/man1/lp*.1
+%{_datadir}/man/man1/*.1.gz
+%exclude %{_datadir}/man/man1/ppd*.1.gz
+%exclude %{_datadir}/man/man1/cups-config.1.gz
+%exclude %{_datadir}/man/man1/ipptool*.1.gz
+%exclude %{_datadir}/man/man1/cancel-cups*.1.gz
+%exclude %{_datadir}/man/man1/lp*.1.gz
 %dir %{_datadir}/man/man5
-%{_datadir}/man/man5/*.5
-%exclude %{_datadir}/man/man5/ppdcfile.5
-%exclude %{_datadir}/man/man5/ipptool*.5
+%{_datadir}/man/man5/*.5.gz
+%exclude %{_datadir}/man/man5/ppdcfile.5.gz
+%exclude %{_datadir}/man/man5/ipptool*.5.gz
 %dir %{_datadir}/man/man8
-%{_datadir}/man/man8/*.8
-%exclude %{_datadir}/man/man8/cups-lpd.8
-%exclude %{_datadir}/man/man8/lpc-cups.8
+%{_datadir}/man/man8/*.8.gz
+%exclude %{_datadir}/man/man8/cups-lpd.8.gz
+%exclude %{_datadir}/man/man8/lpc-cups.8.gz
 
 %dir %{_var}/cache/cups
 %attr(0775,root,root) %dir %{_var}/cache/cups/rss
@@ -346,10 +340,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/cancel.exe
 %{_bindir}/lp*.exe
 %dir %{_datadir}/man/man1
-%{_datadir}/man/man1/lp*.1
-%{_datadir}/man/man1/cancel-cups*.1
+%{_datadir}/man/man1/lp*.1.gz
+%{_datadir}/man/man1/cancel-cups*.1.gz
 %dir %{_datadir}/man/man8
-%{_datadir}/man/man8/lpc-cups.8
+%{_datadir}/man/man8/lpc-cups.8.gz
 
 %files libs
 %doc LICENSE.txt
@@ -382,14 +376,14 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/cups/examples/*
 %dir %{_datadir}/man
 %dir %{_datadir}/man/man1
-%{_datadir}/man/man1/cups-config.1
-%{_datadir}/man/man1/ppd*.1
+%{_datadir}/man/man1/cups-config.1.gz
+%{_datadir}/man/man1/ppd*.1.gz
 %dir %{_datadir}/man/man5
-%{_datadir}/man/man5/ppdcfile.5
+%{_datadir}/man/man5/ppdcfile.5.gz
 %dir %{_datadir}/man/man7
-%{_datadir}/man/man7/backend.7
-%{_datadir}/man/man7/filter.7
-%{_datadir}/man/man7/notifier.7
+%{_datadir}/man/man7/backend.7.gz
+%{_datadir}/man/man7/filter.7.gz
+%{_datadir}/man/man7/notifier.7.gz
 
 %if %{?_with_static:1}%{!?_with_static:0}
 %{_libdir}/*_s.a
@@ -416,7 +410,7 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_libdir}/cups/daemon
 %{_libdir}/cups/daemon/cups-lpd.exe
 %dir %{_datadir}/man/man8
-%{_datadir}/man/man8/cups-lpd.8
+%{_datadir}/man/man8/cups-lpd.8.gz
 
 %files ipptool
 %defattr(-,root,root)
@@ -427,11 +421,18 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_datadir}/cups/ipptool
 %{_datadir}/cups/ipptool/*
 %dir %{_datadir}/man/man1
-%{_datadir}/man/man1/ipptool*.1
+%{_datadir}/man/man1/ipptool*.1.gz
 %dir %{_datadir}/man/man5
-%{_datadir}/man/man5/ipptool*.5
+%{_datadir}/man/man5/ipptool*.5.gz
 
 %changelog
+* Tue Aug 22 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.1.3-8
+- add bldlevel to the dll
+- fix search for ppd in cups-driver
+- change LIBS
+- change /@unixroot/var/run/cups/cups.sock to /socket/cups.sock
+- adjust spec to scm_ macros usage
+
 * Thu May 12 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.1.3-7
 - fix timestamps absence in the jobs part of the webinterface
 
