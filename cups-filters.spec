@@ -1,7 +1,7 @@
 Summary: OpenPrinting CUPS filters and backends
 Name:    cups-filters
 Version: 1.13.3
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 # For a breakdown of the licensing, see COPYING file
 # GPLv2:   filters: commandto*, imagetoraster, pdftops, rasterto*,
@@ -16,7 +16,7 @@ License: GPLv2 and GPLv2+ and GPLv3 and GPLv3+ and LGPLv2+ and MIT
 
 Url:     http://www.linuxfoundation.org/collaborate/workgroups/openprinting/cups-filters
 Vendor:  bww bitwise works GmbH
-%scm_source  svn http://svn.netlabs.org/repos/ports/cups-filter/trunk 2017
+%scm_source  svn http://svn.netlabs.org/repos/ports/cups-filter/trunk 2238
 
 Requires: cups-filters-libs = %{version}-%{release}
 
@@ -160,7 +160,7 @@ cp -p fontembed/README %{buildroot}%{_pkgdocdir}/fontembed/
 
 # LSB3.2 requires /usr/bin/foomatic-rip,
 # create it temporarily as a relative symlink
-ln -sf ../lib/cups/filter/foomatic-rip %{buildroot}%{_bindir}/foomatic-rip
+#ln -sf ../lib/cups/filter/foomatic-rip.exe %{buildroot}%{_bindir}/foomatic-rip
 
 # imagetobrf is going to be mapped as /usr/lib/cups/filter/imagetoubrl
 #ln -sf imagetobrf %{buildroot}%{_cups_serverbin}/filter/imagetoubrl
@@ -294,6 +294,9 @@ fi
 %{_libdir}/fontembed*_dll.a
 
 %changelog
+* Tue Aug 22 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.13.3-2
+- fix symlink
+
 * Tue Feb 14 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.13.3-1
 - use printf instead of echo -e
 - add bldlevel to the dll
