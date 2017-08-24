@@ -1,32 +1,25 @@
 Summary: The GNU data compression program
 Name: gzip
-Version: 1.4
-Release: 6%{?dist}
+Version: 1.8
+Release: 1%{?dist}
 # info pages are under GFDL license
 License: GPLv3+ and GFDL
 Group: Applications/File
-Source: http://ftp.gnu.org/gnu/gzip/gzip-%{version}.tar.gz
 
-Patch0: gzip-1.3.12-openbsd-owl-tmp.patch
-Patch1: gzip-1.3.5-zforce.patch
-Patch2: gzip-1.3.9-stderr.patch
-Patch3: gzip-1.3.10-zgreppipe.patch
-Patch4: gzip-1.3.13-rsync.patch
-Patch5: gzip-1.3.9-addsuffix.patch
-Patch6: gzip-1.3.5-cve-2006-4338.patch
-Patch7: gzip-1.3.13-cve-2006-4337.patch
-Patch8: gzip-1.3.5-cve-2006-4337_len.patch
-# Fixed in upstream code.
-# http://thread.gmane.org/gmane.comp.gnu.gzip.bugs/378
-Patch11: gzip-1.3.13-noemptysuffix.patch
-
-Patch100: gzip-os2.diff
+Vendor: bww bitwise works GmbH
+%scm_source github https://github.com/bitwiseworks/gzip-os2 %{version}-os2
 
 URL: http://www.gzip.org/
-#Requires: /sbin/install-info
-#Requires: mktemp less
-#BuildRequires: texinfo
-Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+# Requires should not be added for gzip wrappers (eg. zdiff, zgrep,
+# zless) of another tools, because gzip "extends" the tools by its
+# wrappers much more than it "requires" them.
+Requires: info
+Requires: coreutils
+BuildRequires: texinfo
+BuildRequires: rexx_exe
+Provides: /@unixroot/usr/bin/gunzip
+Provides: /@unixroot/usr/bin/gzip
+Provides: /@unixroot/usr/bin/zcat
 
 %description
 The gzip package contains the popular GNU gzip data compression
@@ -35,68 +28,77 @@ program. Gzipped files have a .gz extension.
 Gzip should be installed on your system, because it is a
 very commonly used data compression program.
 
-%prep
-%setup -q
-%patch0 -p1 -b .owl-tmp~
-%patch1 -p1 -b .zforce~
-%patch2 -p1 -b .stderr~
-%patch3 -p1 -b .nixi~
-%patch4 -p1 -b .rsync~
-%patch5 -p1 -b .addsuffix~
-%patch6 -p1 -b .4338~
-%patch7 -p1 -b .4337~
-%patch8 -p1 -b .4337l~
-%patch11 -p1 -b .noemptysuffix~
+%debug_package
 
-%patch100 -p1 -b .os2~
+%prep
+%scm_setup
+
+autoreconf -fvi
 
 %build
-export MAKESHELL=/@unixroot/usr/bin/sh.exe
-export CONFIG_SHELL=/@unixroot/usr/bin/sh.exe
 export DEFS="NO_ASM"
 export CPPFLAGS="-DHAVE_LSTAT"
-export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zexe -Zargs-wild -Zargs-resp"
-%configure \
-        "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
+export LDFLAGS="-Zhigh-mem -Zomf -Zexe -Zargs-wild -Zargs-resp"
+%configure
 
-make %{?smp_mflags}
+make
 #make gzip.info
 
 %install
 rm -rf ${RPM_BUILD_ROOT}
-%makeinstall
-mkdir -p ${RPM_BUILD_ROOT}%{_bindir}
-#make DESTDIR=${RPM_BUILD_ROOT} install
+%make_install
 
-rm ${RPM_BUILD_ROOT}%{_libdir}/charset.alias
+# Tailor converter scripts to use the right path
+for f in *.cmd ; do
+  # Due to bug in sed 4.2.1-2 -i kills CRLF in processed files, so use redirection
+  %{__sed} \
+-e '/^Parse Source .*$/ d' \
+-e 's|^helperpath = .*$|helperpath = value('UNIXROOT',,'OS2ENVIRONMENT')"\\usr\\bin\\"|' \
+-e 's|@call|@|g' "$f" > "$f.new"
+  %{__rm} "$f"
+  %{__mv} "$f.new" "$f"
+# Pack and install OS/2 Rexx scripts
+  rexx2vio "$f" "%{buildroot}%{_bindir}/${f%.cmd}.exe"
+done
 
-rm ${RPM_BUILD_ROOT}%{_bindir}/gunzip
-rm ${RPM_BUILD_ROOT}%{_bindir}/uncompress
-cp -p ${RPM_BUILD_ROOT}%{_bindir}/gzip.exe ${RPM_BUILD_ROOT}%{_bindir}/gunzip.exe
-cp -p ${RPM_BUILD_ROOT}%{_bindir}/gzip.exe ${RPM_BUILD_ROOT}%{_bindir}/uncompress.exe
-
-#for i in  zcmp zegrep zforce zless znew gzexe zdiff zfgrep zgrep zmore ; do
-#    mv ${RPM_BUILD_ROOT}/@unixroot/bin/$i ${RPM_BUILD_ROOT}%{_bindir}/$i
-#done
 
 gzip -9nf ${RPM_BUILD_ROOT}%{_infodir}/gzip.info*
 
 # we don't ship it, so let's remove it from ${RPM_BUILD_ROOT}
 rm -f ${RPM_BUILD_ROOT}%{_infodir}/dir
 # uncompress is a part of ncompress package
-rm -f ${RPM_BUILD_ROOT}/bin/uncompress
+rm -f ${RPM_BUILD_ROOT}%{_bindir}/uncompress
 
 %clean
 rm -rf ${RPM_BUILD_ROOT}
 
+%post
+if [ -f %{_infodir}/gzip.info* ]; then
+    %{_sbindir}/install-info %{_infodir}/gzip.info.gz %{_infodir}/dir || :
+fi
+
+%preun
+if [ $1 = 0 ]; then
+    if [ -f %{_infodir}/gzip.info* ]; then
+        %{_sbindir}/install-info --delete %{_infodir}/gzip.info.gz %{_infodir}/dir || :
+    fi
+fi
+
 %files
 %defattr(-,root,root)
 %doc NEWS README AUTHORS ChangeLog THANKS TODO
+%{!?_licensedir:%global license %%doc}
+%license COPYING
 %{_bindir}/*
+%exclude %{_bindir}/*.dbg
 %{_mandir}/*/*
 %{_infodir}/gzip.info*
 
 %changelog
+* Thu Aug 24 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.8-1
+- update vendor source to version 1.8
+- move source from netlabs svn to github
+
 * Thu Feb 02 2012 yd
 - Remove symlinks from /bin.
 
