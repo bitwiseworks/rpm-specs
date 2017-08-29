@@ -6,26 +6,29 @@ License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Standard Shared Libraries
 Group:          System/Libraries
 Version:        0.6.6
-Release:        34%{?dist}
+Release:        35%{?dist}
 Url:            http://svn.netlabs.org/libc
 
 Source:         libc-%{version}.zip
-Source1:        libc-emxomf.zip
-# This contains binary build of LIBC with patches from tickets #361-365
-Source2:        libc-hotfix.zip
+Source1:        libc-emxomf-20150207.zip
+# This contains binary build of LIBC with patches from tickets #361-366
+Source2:        libc-hotfix-20170822.zip
 # This contains binary build of emxomfld with patches from ticket #376
-Source3:        libc-emxomfld.zip
+Source3:        libc-emxomfld-20170411.zip
 
 Patch0:         libc.patch
 
 # http://trac.netlabs.org/libc/ticket/377
 Patch1:         libc-dmik-no-bsd.diff
+# http://trac.netlabs.org/libc/ticket/366 (header only)
+Patch2:         libc-dmik-fork_completion_callback-header.diff
 
 # These patches are not actually applied but they record what
 # needs to be done to the stock LIBC 0.6 source in order to build
 # emxomf.exe contained in libc-emxomf.zip
 Patch101:       libc-dmik-emxomf-02-remove-asterisk.diff
 Patch102:       libc-yuri-emxomf-verbose-warnings-3.patch
+Patch103:       libc-dmik-fork_completion_callback.diff
 
 BuildRequires:  rexx_exe
 
@@ -86,6 +89,7 @@ HLL debug data for exception handling support.
 %setup -q -c -a 1 -a 2 -a 3
 %patch0
 %patch1
+%patch2
 
 #replace paths.h wrong macros
 sed -i 's,"/@unixroot/bin,"/@unixroot/usr/bin,g' usr/include/paths.h
@@ -189,6 +193,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/tcpipv4/dbg
 
 %changelog
+* Tue Aug 29 2017 Dmitriy Kuminov <coding@dmik.org> 0.6.6-35
+- Apply patch from ticket #366 to allow using LIBC in fork() callbacks.
+
 * Sat Jun 10 2017 Dmitriy Kuminov <coding@dmik.org> 0.6.6-34
 - Remove BSD defines from sys/param.h and types.h to avoid mistreating OS/2
   as BSD (e.g. by LIBICU's unicode/platform.h).
