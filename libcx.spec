@@ -1,6 +1,6 @@
 Name: libcx
 Summary: kLIBC Extension Library
-Version: 0.5.3
+Version: 0.6.0
 Release: 1%{?dist}
 License: LGPLv2.1+
 Group: System/Libraries
@@ -11,6 +11,9 @@ URL: https://github.com/bitwiseworks/libcx
 
 Obsoletes: libpoll
 Provides: libpoll
+
+# Due to patch from kLIBC #366
+Requires: libc >= 0.6.6-35
 
 %description
 The kLIBC Extension Library extends the functionality of the kLIBC library
@@ -33,30 +36,28 @@ Libraries, header files and documentation for %{name}.
 %prep
 %scm_setup
 
-%define kmk_env \
-    KMK_FLAGS="\
-        KBUILD_VERBOSE=2 \
-        BUILD_TYPE=release \
-        INST_PREFIX=%{_prefix}"
+%global kmk_flags CFLAGS="%{optflags}" LDFLAGS=-Zhigh-mem KBUILD_VERBOSE=2 BUILD_TYPE=release INST_PREFIX="%{_prefix}"
 
 %build
-CFLAGS="$RPM_OPT_FLAGS"
-LDFLAGS="-Zhigh-mem"
-%{kmk_env}
-kmk $KMK_FLAGS CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS"
+kmk %{kmk_flags}
 
 %install
-rm -rf %{buildroot}
-%{kmk_env}
-kmk $KMK_FLAGS DESTDIR="%{buildroot}" install
+%{__rm}  -rf %{buildroot}
+kmk %{kmk_flags} DESTDIR="%{buildroot}" install
 # Remove tests as we don't need them now
-rm -rf %{buildroot}%{_bindir}/tst-*.exe
+%{__rm} -rf %{buildroot}%{_bindir}/tst-*.exe
 # Copy headers (@todo move it to Makefile.kmk)
-mkdir -p %{buildroot}%{_includedir}/sys
+%{__mkdir_p} %{buildroot}%{_includedir}/sys %{buildroot}%{_includedir}/libcx
 echo "#include <sys/poll.h>" > nosys_poll.h
-install -m 644 nosys_poll.h %{buildroot}%{_includedir}/poll.h
-install -m 644 src/poll/poll.h %{buildroot}%{_includedir}/sys
-install -m 644 src/mmap/sys/mman.h %{buildroot}%{_includedir}/sys
+%{__install} -m 644 nosys_poll.h %{buildroot}%{_includedir}/poll.h
+%{__install} -m 644 src/poll/poll.h %{buildroot}%{_includedir}/sys
+%{__install} -m 644 src/mmap/sys/mman.h %{buildroot}%{_includedir}/sys
+%{__install} -m 644 src/exeinfo/libcx/exeinfo.h %{buildroot}%{_includedir}/libcx
+# Dir for LIBCx assertion logs
+%{__mkdir_p} %{buildroot}%{_var}/log/libcx
+
+%check
+kmk  %{kmk_flags} test
 
 %clean
 rm -rf %{buildroot}
@@ -65,6 +66,7 @@ rm -rf %{buildroot}
 %defattr(-,root,root)
 %doc LICENSE README.md CHANGELOG.md
 %{_libdir}/libcx*.dll
+%dir %{_var}/log/libcx
 
 %files devel
 %defattr(-,root,root)
@@ -73,8 +75,14 @@ rm -rf %{buildroot}
 %{_includedir}/poll.h
 %{_includedir}/sys/poll.h
 %{_includedir}/sys/mman.h
+%{_includedir}/libcx/exeinfo.h
 
 %changelog
+* Tue Aug 29 2017 Dmitriy Kuminov <coding@dmik.org> 0.6.0-1
+- Release version 0.6.0
+  (https://github.com/bitwiseworks/libcx/blob/0.6.0/CHANGELOG.md).
+- Add check section to run tests.
+
 * Fri Jun 2 2017 Dmitriy Kuminov <coding@dmik.org> 0.5.3-1
 - Release version 0.5.3
   (https://github.com/bitwiseworks/libcx/blob/0.5.3/CHANGELOG.md).
