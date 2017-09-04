@@ -1,84 +1,114 @@
-#
+a shadow of a file (will geta BWW_%{name}_<ID>_FILE WPS object ID)#
 # Macros for bitwiseworks default WPS object structure
 #
-# bww_folder creates the 5 common WPS objects
-# - Create bitwiseworks Help Center
-# - Create shadow of the apps doc dir in the bitwise help Center
-# - Create bitwiseworks Apps and Ports folder
-# - Create shadow of the bitwise help Center in the Apps and ports folder (if provided)
-# - Create folder for the installed app
+# bww_folder creates:
+#  a folder for the installed app
 #
-# bww_app creates the WPS object for the installed app
-# - Create program object for the installed app in the app folder
-# - Associate file filter with the installed app (if provided)
-# - Associate Icon to the app (if provided)
-# - Create shadow of the installed app on the desktop (if provided)
-#
-# bww_readme creates the WPS object for the readme
-# - Create shadow of a file
-#
-# parameter (-t) (used in bww_folder, bww_app)
-# this is the desired title for the folder or the app, if this parameter is left
-# out, we use %{summary} as the title
-#
-# parameter (-d) (used in bww_folder, bww_readme)
-# use this name as the document directory part
-# If this parameter is not provided, %_defaultdocdir/%{name}-%{version} is used
-#
-# parameter (-e) (used in bww_app)
-# This is the name of the app w/o the extension
-# This parameter is mandatory to create a WPS object
-#
-# parameter (-i) (used in bww_app)
-# Icon for the app. If this parameter is left out, no icon is added
-# The icon has to be copied to /@unixroot/usr/share/os2/icons during installation
-# If this parameter is not provided, no icons are added
-#
-# parameter (-a) (used in bww_app)
-# Associate a file filter (for example -a *.txt) to the app
-# If this parameter is not provided, no associations are added
-#
-# parameter (-s) (used in bww_folder, bww_app)
-# Create a shadow
-# If this parameter is not provided, no shadow is generated
-#
-# parameter (-o) (used in bww_app)
-# App extension including the . like .cmd .bat .sh
-# If this parameter is not provided, then .exe is used
-#
-# parameter (-r) (used in bww_readme)
-# Create a shadow for the provided readme
-# If this parameter is not provided, then no shadow is created
-#
-# parameter (-v) (used in bww_folder)
-# Don't add the version to the folder name
-# If this parameter is not provided, then the version is added
-#
+# %bww_folder -t TITLE [-n PAGKAGE] [-V]
+#  -t TITLE (Mandatory: use TITLE as the folder title)
+#     (TITLE *must* be a %global macro if with spaces)
+#  -n PACKAGE (when provided: associate the folder with PACKAGE, else with %{name})
+#  -V (when provided: don't add the version to the folder title)
 
-%bww_folder(t:d:s:v:)\
-%if %{undefined __bww_folder_done}\
-%define __bww_titleov %{!-t:%{summary}}%{-t:%{-t*}}\
-%define __bww_title %{!-v:%{__bww_titleov} %{version}}%{-v:%{__bww_titleov}}\
-%define __bww_docdir %{!-d:%_defaultdocdir/%{name}-%{version}}%{-d:%{-d*}}\
-%wps_object_create WP_BWWHELP:WPFolder|bww Help|<WP_ASSISTANCE>|TITLE=bitwiseworks Help Center;SHOWALLINTREEVIEW=YES;ICONRESOURCE=60,PMWP.DLL;ICONNRESOURCE=83,PMWP.DLL;BACKGROUND=((/@unixroot/usr/share/os2/bww/bwwfbkg.bmp));\
-%wps_object_create %{name}_BWWHELP:WPShadow|Readme|<WP_BWWHELP>|SHADOWID=((%{__bww_docdir}));\
-%wps_object_create WP_BWWAPPS:WPFolder|bww Apps|<WP_PROGRAMSFOLDER>|TITLE=bitwiseworks Apps and Ports;ICONRESOURCE=1,BWWRES.DLL;ICONNFILE=((/@unixroot/usr/share/os2/bww/bwwfldro.ico));BACKGROUND=((/@unixroot/usr/share/os2/bww/bwwfbkg.bmp));ICONVIEW=FLOWED;\
-%{-s:%{expand:%wps_object_create WP_BWWHELPSHADOW:WPShadow|bitwiseworks Help Center|<WP_BWWAPPS>|SHADOWID=<WP_BWWHELP>;}}\
-%wps_object_create %{name}_FOLDER:WPFolder|%{name}|<WP_BWWAPPS>|TITLE=%{__bww_title};\
-%global __bww_folder_done 1\
-%endif\
+%bww_folder(t:n:V)\
+%{!?-t:%{error:%0: Missing mandatory TITLE parameter}}\
+%bww_create_folder_id\
+%global __bww_title %{-t*}\
+%global __bww_title_ver %{!-V:%{__bww_title} %{version}}%{-V:%{__bww_title}}\
+%wps_object_create %{__bww_folder_id}:WPFolder|%{__bww_folder_name}|<WP_BWWAPPS>|TITLE=%{__bww_title_ver};\
 %{nil}
 
-%bww_app(t:e:s:i:a:o:)\
-%define __bww_exeTitle %{!-t:%{summary}}%{-t:%{-t*}}\
-%define __bww_exeIcon %{!-i:}%{-i:ICONFILE=((/@unixroot/usr/share/os2/icons/%{-i*}));}\
-%define __bww_exeAssoc %{!-a:}%{-a:ASSOCFILTER=%{-a*};}\
-%define __bww_exeName %{!-o:%{-e*}.exe}%{-o:%{-e*}%{-o*}}\
-%{-e:%{expand:%wps_object_create %{-e*}_EXE:WPProgram|%{__bww_exeTitle}|<%{name}_FOLDER>|EXENAME=((%_bindir/%{__bww_exeName}));STARTUPDIR=((%_bindir));TITLE=%{__bww_exeTitle};%{__bww_exeIcon}%{__bww_exeAssoc}}}\
-%{-s:%{-e:%{expand:%wps_object_create %{-e*}_SHADOW:WPShadow|%{__bww_exeTitle}|<WP_DESKTOP>|SHADOWID=<%{-e*}_EXE>;}}}\
+# bww_app creates:
+#  a object in the bww folder (will get a BWW_%{name}_<ID>_APP WPS object ID)
+#  a shadow of the object on the desktop (if requested) (will get a BWW_%{name}_<ID>_APP_SHADOW WPS object ID)
+#
+# %bww_app [ID] -f APP -t TITLE [-n PACKAGE] [-a ASSOCIATIONS] [-i ICON] [-d STARTUPDIR] [-s]
+#  ID (when provided: this ID is added to the WPS id)
+#  -f EXEFILE (Mandatory: fullpath/to/app)
+#  -t TITLE (Mandatory: use TITLE as the app title)
+#     (TITLE *must* be a %global macro if with spaces)
+#  -n PACKAGE (when provided: associate the folder with PACKAGE, else with %{name})
+#  -a ASSOCIATIONS (when provided: associate a file filter to the object)
+#     examples are *.txt or *.txt,*.pdf,*.html
+#  -i ICON (when provided: a icon is added to the object)
+#     The icon has to be copied to /@unixroot/usr/share/os2/icons during
+#     installation!
+#  -d STARTUPDIR (when provided: this value is set as STATUPDIR in the wps object)
+#  -s (when provided: create a shadow on the desktop)
+#
+
+%bww_app(f:t:n:a:i:d:s)\
+%{!-f:%{error:%0: Missing mandatory EXEFILE parameter}}\
+%{!-t:%{error:%0: Missing mandatory TITLE parameter}}\
+%bww_create_folder_id\
+%bww_create_app_id\
+%global __bww_app_title %{-t*}\
+%global __bww_app_icon %{!-i:}%{-i:ICONFILE=((/@unixroot/usr/share/os2/icons/%{-i*}));}\
+%global __bww_app_assoc %{!-a:}%{-a:ASSOCFILTER=%{-a*};}\
+%global __bww_app_startupdir %{!-d:}%{-d:STARTUPDIR=((%{-d*}));}\
+%global __bww_app_name %{-f*}\
+%wps_object_create %{__bww_app_id}:WPProgram|%{__bww_app_title}|<%{__bww_folder_id}>|EXENAME=((%{__bww_app_name}));%{__bww_app_startupdir}TITLE=%{__bww_app_title};%{__bww_app_icon}%{__bww_app_assoc}\
+%{-s:%wps_object_create %{__bww_app_id}_SHADOW:WPShadow|%{__bww_app_title}|<WP_DESKTOP>|SHADOWID=<%{__bww_app_id}>;}\
 %{nil}
 
-%bww_readme(r:d:)\
-%define __bww_docdir %{!-d:%_defaultdocdir/%{name}-%{version}}%{-d:%{-d*}}\
-%{-r:%{expand:%wps_object_create %{name}_README:WPShadow|Readme|<%{name}_FOLDER>|SHADOWID=((%{__bww_docdir}/%{-r*}))}}\
+# bww_readme creates:
+#  a shadow of a readme file (will get a BWW_%{name}_README_FILE WPS ID)
+#
+# %bww_readme -f FILE [-n PACKAGE]
+#  -f FILE (Mandatory: create a shadow for the provided readme FILE)
+#  -n PACKAGE (when provided: associate the folder with PACKAGE, else with %{name})
+
+%bww_readme(f:n:)\
+%bww_file README\
 %{nil}
+
+# bww_license creates:
+#  a shadow of a license file (will get a BWW_%{name}_LICENSE_FILE WPS ID)
+#
+# %bww_license -f LICENSE [-n PACKAGE]
+#  -f FILE (Mandatory: create a shadow for the provided license FILE)
+#  -n PACKAGE (when provided: associate the folder with PACKAGE, else with %{name})
+
+%bww_license(f:n:)\
+%bww_file LICENSE\
+%{nil}
+
+# bww_copyright creates:
+#  a shadow of a copyright file (will get a BWW_%{name}_COPYRIGHT_FILE WPS ID)
+#
+# %bww_copyright -f FILE [-n PACKAGE]
+#  -f FILE (Mandatory: create a shadow for the provided copyright FILE)
+#  -n PACKAGE (when provided: associate the folder with PACKAGE, else with %{name})
+
+%bww_copyright(f:n:)\
+%bww_file COPYRIGHT\
+%{nil}
+
+# bww_file creates:
+#  a shadow of a file (will get a BWW_%{name}_<ID>_FILE WPS object ID)
+#
+# %bww_file ID -f FILE [-n PACKAGE]
+#  ID (Mandatory: the name of the file for the WPS object id)
+#  -f FILE (Mandatory: create a shadow for the provided FILE)
+#  -n PACKAGE (when provided: associate the folder with PACKAGE, else with %{name})
+
+%bww_file(f:n:)\
+%{!?1:%{error:%0: Missing mandatory WPS ID parameter}}\
+%{!-f:%{error:%0: Missing mandatory FILE parameter}}\
+%bww_create_folder_id\
+%global __bww_file_id %{1}\
+%global __bww_file %{-f*}\
+%wps_object_create BWW_%{__bww_folder_name}_%{__bww_file_id}_FILE:WPShadow|%{__bww_file_id}|<%{__bww_folder_id}>|SHADOWID=((%{__bww_file}))\
+%{nil}
+
+
+%bww_create_folder_id(n:)\
+%global __bww_folder_name %{!-n:%{name}}%{-n:%{-n*}}\
+%global __bww_folder_id BWW_%{__bww_folder_name}_FOLDER\
+%{nil}
+
+%bww_create_app_id(n:)\
+%global __bww_pkg_id %{?1:_%{1}}%{!?1:}\
+%global __bww_app_id BWW_%{__bww_folder_name}%{__bww_pkg_id}_APP\
+%{nil}
+

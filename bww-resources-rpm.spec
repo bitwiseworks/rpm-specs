@@ -71,8 +71,18 @@ install -p -m0644 -D bwwfldro.ico $RPM_BUILD_ROOT%{_datadir}/os2/bww/bwwfldro.ic
 rm -rf "$RPM_BUILD_ROOT"
 
 %post
+if [ "$1" -eq 0 ]; then # (upon install)
+    %wps_object_create WP_BWWHELP:WPFolder|bww Help|<WP_ASSISTANCE>|TITLE=bitwiseworks Help Center;SHOWALLINTREEVIEW=YES;ICONRESOURCE=60,PMWP.DLL;ICONNRESOURCE=83,PMWP.DLL;BACKGROUND=((/@unixroot/usr/share/os2/bww/bwwfbkg.bmp));\
+    %wps_object_create WP_BWWDOC:WPShadow|Documentation|<WP_BWWHELP>|SHADOWID=((/@unixroot/usr/share/doc));\
+    %wps_object_create WP_BWWAPPS:WPFolder|bww Apps|<WP_PROGRAMSFOLDER>|TITLE=bitwiseworks Apps and Ports;ICONRESOURCE=1,BWWRES.DLL;ICONNFILE=((/@unixroot/usr/share/os2/bww/bwwfldro.ico));BACKGROUND=((/@unixroot/usr/share/os2/bww/bwwfbkg.bmp));ICONVIEW=FLOWED;\
+    %wps_object_create WP_BWWHELPSHADOW:WPShadow|bitwiseworks Help Center|<WP_BWWAPPS>|SHADOWID=<WP_BWWHELP>;
+fi
+
 
 %postun
+if [ "$1" -eq 0 ]; then # (upon removal)
+    %wps_object_delete_all
+fi
 
 %files
 %defattr(-,root,root,-)
