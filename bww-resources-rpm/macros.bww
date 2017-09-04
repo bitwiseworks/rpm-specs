@@ -1,4 +1,4 @@
-a shadow of a file (will geta BWW_%{name}_<ID>_FILE WPS object ID)#
+#
 # Macros for bitwiseworks default WPS object structure
 #
 # bww_folder creates:
