@@ -1,48 +1,79 @@
 #
-# Macro for bitwiseworks default WPS object structure
+# Macros for bitwiseworks default WPS object structure
 #
-# first create the 5 common WPS objects
-# 1. Create bitwiseworks Help Center
-# 2. Create shadow of the apps doc dir in the bitwise help Center
-# 3. Create bitwiseworks Apps and Ports folder
-# 4. Create shadow of the bitwise help Center in the Apps and ports folder
-# 5. Create folder for the installed app
+# bww_folder creates the 5 common WPS objects
+# - Create bitwiseworks Help Center
+# - Create shadow of the apps doc dir in the bitwise help Center
+# - Create bitwiseworks Apps and Ports folder
+# - Create shadow of the bitwise help Center in the Apps and ports folder (if provided)
+# - Create folder for the installed app
 #
-# then create the WPS objects according to the parameter
-# 6. (-e) Create program object for the installed app in the app folder
-# 7. (-a) Associate file filter with the installed app
-# 8. (-r) Create shadow of readme.txt for the installed app in the app folder
-# 9. (-s) Create shadow of the installed app on the desktop
+# bww_app creates the WPS object for the installed app
+# - Create program object for the installed app in the app folder
+# - Associate file filter with the installed app (if provided)
+# - Associate Icon to the app (if provided)
+# - Create shadow of the installed app on the desktop (if provided)
 #
-# parameter (-t)
-# this is the desired title for the app or the exe, if this parameter is left
+# bww_readme creates the WPS object for the readme
+# - Create shadow of a file
+#
+# parameter (-t) (used in bww_folder, bww_app)
+# this is the desired title for the folder or the app, if this parameter is left
 # out, we use %{summary} as the title
 #
-# parameter (-i)
-# Icon for the exe. If this parameter is left out, no icon is added
+# parameter (-d) (used in bww_folder, bww_readme)
+# use this name as the document directory part
+# If this parameter is not provided, %_defaultdocdir/%{name}-%{version} is used
+#
+# parameter (-e) (used in bww_app)
+# This is the name of the app w/o the extension
+# This parameter is mandatory to create a WPS object
+#
+# parameter (-i) (used in bww_app)
+# Icon for the app. If this parameter is left out, no icon is added
 # The icon has to be copied to /@unixroot/usr/share/os2/icons during installation
+# If this parameter is not provided, no icons are added
 #
-# parameter (-a)
-# Associate a file filter (for example -a *.txt) to the .exe file
+# parameter (-a) (used in bww_app)
+# Associate a file filter (for example -a *.txt) to the app
+# If this parameter is not provided, no associations are added
 #
-%__bww_commonobjects()\
+# parameter (-s) (used in bww_folder, bww_app)
+# Create a shadow
+# If this parameter is not provided, no shadow is generated
+#
+# parameter (-o) (used in bww_app)
+# App extension including the . like .cmd .bat .sh
+# If this parameter is not provided, then .exe is used
+#
+# parameter (-r) (used in bww_readme)
+# Create a shadow for the provided readme
+# If this parameter is not provided, then no shadow is created
+#
+
+%bww_folder(t:d:s:)\
+%if %{undefined __bww_folder_done}\
+%define __bww_title %{!-t:%{summary} %{version}}%{-t:%{-t*}}\
+%define __bww_docdir %{!-d:%_defaultdocdir/%{name}-%{version}}%{-d:%{-d*}}\
 %wps_object_create WP_BWWHELP:WPFolder|bww Help|<WP_ASSISTANCE>|TITLE=bitwiseworks Help Center;SHOWALLINTREEVIEW=YES;ICONRESOURCE=60,PMWP.DLL;ICONNRESOURCE=83,PMWP.DLL;BACKGROUND=((/@unixroot/usr/share/os2/bww/bwwfbkg.bmp));\
-%wps_object_create %{name}_BWWHELP:WPShadow|Readme|<WP_BWWHELP>|SHADOWID=((%_defaultdocdir/%{name}-%{version}));\
+%wps_object_create %{name}_BWWHELP:WPShadow|Readme|<WP_BWWHELP>|SHADOWID=((%{__bww_docdir}));\
 %wps_object_create WP_BWWAPPS:WPFolder|bww Apps|<WP_PROGRAMSFOLDER>|TITLE=bitwiseworks Apps and Ports;ICONRESOURCE=1,BWWRES.DLL;ICONNFILE=((/@unixroot/usr/share/os2/bww/bwwfldro.ico));BACKGROUND=((/@unixroot/usr/share/os2/bww/bwwfbkg.bmp));ICONVIEW=FLOWED;\
-%wps_object_create WP_BWWHELPSHADOW:WPShadow|bitwiseworks Help Center|<WP_BWWAPPS>|SHADOWID=<WP_BWWHELP>;\
+%{-s:%{expand:%wps_object_create WP_BWWHELPSHADOW:WPShadow|bitwiseworks Help Center|<WP_BWWAPPS>|SHADOWID=<WP_BWWHELP>;}}\
 %wps_object_create %{name}_FOLDER:WPFolder|%{name}|<WP_BWWAPPS>|TITLE=%{__bww_title};\
+%global __bww_folder_done 1\
+%endif\
 %{nil}
 
-%bww_folder(e:r:s:t:i:a:)\
-%{-t:%global __bww_title %{-t*}}%{!-t:%global __bww_title %{summary}}\
-%if %{undefined __bww_folder_done}\
-%global __bww_folder_done 1\
-%__bww_commonobjects %{__bww_title}\
-%endif\
-%define __bww_exeTitle %{!-t:%{__bww_title}}%{-t:%{-t*}}\
+%bww_app(t:e:s:i:a:o:)\
+%define __bww_exeTitle %{!-t:%{summary}}%{-t:%{-t*}}\
 %define __bww_exeIcon %{!-i:}%{-i:ICONFILE=((/@unixroot/usr/share/os2/icons/%{-i*}));}\
 %define __bww_exeAssoc %{!-a:}%{-a:ASSOCFILTER=%{-a*};}\
-%{-e:%{expand:%wps_object_create %{-e*}_EXE:WPProgram|%{__bww_exeTitle}|<%{name}_FOLDER>|EXENAME=((%_bindir/%{-e*}.exe));STARTUPDIR=((%_bindir));TITLE=%{__bww_exeTitle};%{__bww_exeIcon}%{__bww_exeAssoc}}}\
-%{-r:%{expand:%wps_object_create %{name}_README:WPShadow|Readme|<%{name}_FOLDER>|SHADOWID=((%_defaultdocdir/%{name}-%{version}/%{-r*}))}}\
-%{-s:%{-e:%{expand:%wps_object_create %{name}_SHADOW:WPShadow|%{__bww_exeTitle}|<WP_DESKTOP>|SHADOWID=<%{-e*}_EXE>;}}}\
+%define __bww_exeName %{!-o:%{-e*}.exe}%{-o:%{-e*}%{-o*}}\
+%{-e:%{expand:%wps_object_create %{-e*}_EXE:WPProgram|%{__bww_exeTitle}|<%{name}_FOLDER>|EXENAME=((%_bindir/%{__bww_exeName}));STARTUPDIR=((%_bindir));TITLE=%{__bww_exeTitle};%{__bww_exeIcon}%{__bww_exeAssoc}}}\
+%{-s:%{-e:%{expand:%wps_object_create %{-e*}_SHADOW:WPShadow|%{__bww_exeTitle}|<WP_DESKTOP>|SHADOWID=<%{-e*}_EXE>;}}}\
+%{nil}
+
+%bww_readme(r:d:)\
+%define __bww_docdir %{!-d:%_defaultdocdir/%{name}-%{version}}%{-d:%{-d*}}\
+%{-r:%{expand:%wps_object_create %{-r*}_README:WPShadow|Readme|<%{name}_FOLDER>|SHADOWID=((%{__bww_docdir}/%{-r*}))}}\
 %{nil}

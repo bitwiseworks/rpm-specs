@@ -30,10 +30,10 @@
 #  -n PACKAGE (when provided: associate the folder with PACKAGE, else with %{name})
 #  -a ASSOCIATIONS (when provided: associate a file filter to the object)
 #     examples are *.txt or *.txt,*.pdf,*.html
-#  -i ICON (when provided: a icon is added to the object)
+#  -i ICON (when provided: an icon is added to the object)
 #     The icon has to be copied to /@unixroot/usr/share/os2/icons during
 #     installation!
-#  -d STARTUPDIR (when provided: this value is set as STATUPDIR in the wps object)
+#  -d STARTUPDIR (when provided: this value is set as STARTUPDIR in the wps object)
 #  -s (when provided: create a shadow on the desktop)
 #
 
