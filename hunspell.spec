@@ -2,8 +2,8 @@
 
 Name:      hunspell
 Summary:   A spell checker and morphological analyzer library
-Version:   1.6.1
-Release:   2%{?dist}
+Version:   1.6.2
+Release:   1%{?dist}
 URL:       https://github.com/hunspell/hunspell
 Group:     System Environment/Libraries
 License:   LGPLv2+ or GPLv2+ or MPLv1.1
@@ -129,6 +129,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/hunspell.5.gz
 
 %changelog
+* Tue Sep 26 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.6.2-1
+- update to upstream version 1.6.2
+- fix hunspell.exe to find dictionaries in the path
+
 * Mon Apr 10 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.6.1-2
 - remove wrong ldconfig in post and postun
 
