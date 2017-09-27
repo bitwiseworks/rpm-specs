@@ -4,7 +4,7 @@
 Summary:       OS/2 LX executable packer
 Name:          lxLite
 Version:       1.3.9
-Release:       1%{?dist}
+Release:       2%{?dist}
 License:       GPL
 Group:         Applications/System
 URL:           http://github.com/bitwiseworks/lxlite
@@ -63,6 +63,7 @@ rm -rf "$RPM_BUILD_ROOT"
 
 %files
 %doc doc/lxLite_documentation.txt doc/gpl.txt doc/whatsnew.txt
+%dir %{_sysconfdir}/%{name}
 %config(noreplace) %{_sysconfdir}/%{name}/*.cfg
 %{_bindir}/lxLite.exe
 %{_datadir}/%{name}/stub*
@@ -73,5 +74,8 @@ rm -rf "$RPM_BUILD_ROOT"
 %exclude %{_bindir}/lxLite.exe
 
 %changelog
+* Tue Sep 26 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.3.9-2
+- create the {_sysconfdir}/lxLite is not available
+
 * Tue Sep 26 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.3.9-1
 - first rpm release
