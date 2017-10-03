@@ -1,7 +1,7 @@
 Summary: OpenPrinting CUPS filters and backends
 Name:    cups-filters
-Version: 1.13.3
-Release: 2%{?dist}
+Version: 1.17.2
+Release: 1%{?dist}
 
 # For a breakdown of the licensing, see COPYING file
 # GPLv2:   filters: commandto*, imagetoraster, pdftops, rasterto*,
@@ -16,7 +16,7 @@ License: GPLv2 and GPLv2+ and GPLv3 and GPLv3+ and LGPLv2+ and MIT
 
 Url:     http://www.linuxfoundation.org/collaborate/workgroups/openprinting/cups-filters
 Vendor:  bww bitwise works GmbH
-%scm_source  svn http://svn.netlabs.org/repos/ports/cups-filter/trunk 2238
+%scm_source  github https://github.com/bitwiseworks/%{name}-os2 master
 
 Requires: cups-filters-libs = %{version}-%{release}
 
@@ -233,6 +233,7 @@ fi
 %attr(0755,root,root) %{_cups_serverbin}/filter/gstopxl
 %attr(0755,root,root) %{_cups_serverbin}/filter/imagetops
 %attr(0755,root,root) %{_cups_serverbin}/filter/texttops
+%attr(0755,root,root) %{_cups_serverbin}/filter/rastertopclm
 %attr(0755,root,root) %{_cups_serverbin}/backend/parallel.exe
 # Serial backend needs to run as root (bug #212577#c4).
 #attr(0700,root,root) %{_cups_serverbin}/backend/serial
@@ -294,6 +295,10 @@ fi
 %{_libdir}/fontembed*_dll.a
 
 %changelog
+* Tue Oct 03 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.17.2-1
+- moved source to github
+- update to vendor version 1.17.2
+
 * Tue Aug 22 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.13.3-2
 - fix symlink
 
