@@ -4,7 +4,7 @@
 Summary:       OS/2 LX executable packer
 Name:          lxlite
 Version:       1.3.9
-Release:       4%{?dist}
+Release:       5%{?dist}
 License:       GPL
 Group:         Applications/System
 URL:           http://github.com/bitwiseworks/lxlite
@@ -21,6 +21,8 @@ This package provides lxLite packer
 %package tools
 Summary:       lxLite utilities
 Requires:      %{name} = %{version}-%{release}
+Obsoletes:     lxLite-tools
+Provides:      lxLite-tools = %{version}-%{release}
 
 %description tools
 This package provides some tools from the lxLite package
@@ -77,9 +79,12 @@ rm -rf "$RPM_BUILD_ROOT"
 %exclude %{_bindir}/lxLite.exe
 
 %changelog
+* Tue Oct 03 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.3.9-5
+- added a provides/obsoletes for lxLite-tools as well
+
 * Tue Oct 03 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.3.9-4
 - renamed package from lxLite to lxlite
-- added a provides for lxLite
+- added a provides/obsoletes for lxLite
 
 * Fri Sep 29 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.3.9-3
 - don't write the help screen to stderr
