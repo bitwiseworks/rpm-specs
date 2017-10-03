@@ -56,7 +56,7 @@
 Summary: CUPS
 Name: cups
 Version: 2.1.3
-Release: 8%{?dist}
+Release: 9%{?dist}
 Epoch: 1
 
 License: GPL
@@ -64,7 +64,7 @@ Group: System Environment/Daemons
 
 Url: http://www.cups.org
 Vendor: bww bitwise works GmbH
-%scm_source  svn http://svn.netlabs.org/repos/ports/cups/trunk 2239
+%scm_source  github https://github.com/bitwiseworks/%{name}-os2 master
 
 # Dependencies...
 Requires: %{name}-filesystem = %{epoch}:%{version}-%{release}
@@ -176,8 +176,8 @@ Sends IPP requests to the specified URI and tests and/or displays the result.
 autoconf --force
 
 %build
-export LDFLAGS=" -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
-export LIBS="-lcx0"
+export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+export LIBS="-lcx"
 export VENDOR="%{vendor}"
 # --with-rcdir=no - don't install SysV init script
 # --with-system_groups=admin - add a value to SystemGroups parameter
@@ -426,6 +426,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/man/man5/ipptool*.5.gz
 
 %changelog
+* Tue Oct 03 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.1.3-9
+- moved source to github
+- fixed a regression of the below /socket/cups.sock change
+
 * Tue Aug 22 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.1.3-8
 - add bldlevel to the dll
 - fix search for ppd in cups-driver
@@ -440,7 +444,7 @@ rm -rf $RPM_BUILD_ROOT
 - disable the use of poll completely (fixes printing of large pdf)
 
 * Fri Apr 29 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.1.3-5
-- fix version info in german indeex.html (upstream bug)
+- fix version info in german index.html (upstream bug)
 - workaround for the webinterface issues (select() hack)
 - remove .exe in httpSeperateURI
 - don't deliver readonly cupsd
