@@ -4,7 +4,7 @@
 Summary:       bitwise works icons and folders
 Name:          bww-resources-rpm
 Version:       1.1.0
-Release:       2%{?dist}
+Release:       3%{?dist}
 License:       Proprietory
 Group:         Applications/System
 URL:           http://www.bitwiseworks.com
@@ -95,6 +95,10 @@ bww-fix-docdir
 %{_libdir}/rpm/macros.d/macros.bww
 
 %changelog
+* Wed Oct 04 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.1.0-3
+- changed bww_doc to bww_docdir
+- changed "Documentation" to "Package Documentation"
+
 * Tue Oct 03 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.1.0-2
 - added bww_changelog macro
 - added a req for os2-rpm >= 0-4 to be sure all exe and symlink are available

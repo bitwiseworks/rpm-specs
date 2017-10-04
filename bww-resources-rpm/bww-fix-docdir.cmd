@@ -4,7 +4,7 @@ prg      = strip(filespec('N',fullprg))
 debug    = (value("DEBUG",,"OS2ENVIRONMENT")<>"")
 if debug then say prg': "'fullprg'"'
 DocFldr  = value("UNIXROOT",,"OS2ENVIRONMENT")"\usr\share\doc"
-LongName = "Documentation"
+LongName = "Package Documentation"
 LenLN    = d2x(length(Longname))
 if debug then say prg': "'Docfldr'"'
 ok = SysSetObjectData(DocFldr, "ALWAYSSORT=YES;DEFAULTSORT=-1;SHOWALLINTREEVIEW=YES;DEFAULTVIEW=TREE;NODELETE=YES;")
