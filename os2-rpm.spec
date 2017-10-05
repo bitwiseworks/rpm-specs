@@ -1,7 +1,7 @@
 Summary: OS/2 specific RPM macros and scripts
 Name: os2-rpm
 Version: 0
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: GPLv2+
 Group: Development/System
 Vendor: bww bitwise works GmbH
@@ -81,6 +81,10 @@ done
 %{_rpmconfigdir_macros_d}/macros.scm
 
 %changelog
+* Wed Oct 4 2017 Dmitriy Kuminov <coding@dmik.org> 0-5
+- Work around kLIBC bug #379 when unzipping archives with long file names
+  in scm_setup.
+
 * Fri Jul 28 2017 Dmitriy Kuminov <coding@dmik.org> 0-4
 - Add os2_langdir, os2_bookdir and os2_helpdir macros.
 - Make os2_dos_path understand ';' as path separator.

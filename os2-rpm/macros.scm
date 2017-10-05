@@ -48,10 +48,10 @@ git -C "$_localfile" archive --format zip --output "%SOURCE0" --prefix "%__sourc
 else\
 git archive --format zip --output "%SOURCE0" --prefix "%__source_dir/" --remote "%__source_url" "%{?__source_rev}"\
 fi\
-unzip -qq "%SOURCE0" "%__source_dir"/RPMBUILD_SOURCE -d .. 2>/dev/null || :\
+(cd .. && unzip -qq "%SOURCE0" "%__source_dir"/RPMBUILD_SOURCE 2>/dev/null) || :\
 %__scm_pre_pack\
 (cd .. && zip -mX "%SOURCE0" "%__source_dir"/RPMBUILD_SOURCE*)\
-unzip -qq "%SOURCE0" -d ..\
+(cd .. && unzip -qq "%SOURCE0")\
 %if %{undefined __source_rev}\
 rm -f "%SOURCE0"\
 %endif\
@@ -74,10 +74,10 @@ BuildRequires: wget zip unzip\
 %setup -n "%__source_dir_github" -Tc\
 rm -f "%SOURCE0"\
 wget -nv "%{__source_url}/archive/%{__source_rev}.zip" -O "%SOURCE0"\
-unzip -qq "%SOURCE0" "%__source_dir_github"/RPMBUILD_SOURCE -d .. 2>/dev/null || :\
+(cd .. && unzip -qq "%SOURCE0" "%__source_dir_github"/RPMBUILD_SOURCE 2>/dev/null) || :\
 %__scm_pre_pack\
 (cd .. && zip -mX "%SOURCE0" "%__source_dir_github"/RPMBUILD_SOURCE*)\
-unzip -qq "%SOURCE0" -d ..\
+(cd .. && unzip -qq "%SOURCE0")\
 %endif
 
 # User-level macros
