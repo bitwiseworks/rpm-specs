@@ -1,18 +1,14 @@
-#define svn_url     e:/trees/ghostscript/trunk
-%define svn_url     http://svn.netlabs.org/repos/ports/ghostscript/trunk
-%define svn_rev     1532
 
 %define _with_freetype 1
 %define gs_ver 9.18
 %define gs_dot_ver 9.18
 %define gs_major 9
-%{expand: %%define build_with_freetype %{?_with_freetype:1}%{!?_with_freetype:0}}
 
 Summary: A PostScript interpreter and renderer
 Name: ghostscript
 Version: %{gs_ver}
 
-Release: 5%{?dist}
+Release: 6%{?dist}
 
 # Included CMap data is Redistributable, no modification permitted,
 # see http://bugzilla.redhat.com/487510
@@ -20,8 +16,7 @@ License: AGPLv3+ and Redistributable, no modification permitted
 URL: http://www.ghostscript.com/
 Group: Applications/Publishing
 Vendor: bww bitwise works GmbH
-
-Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
+%scm_source svn  http://svn.netlabs.org/repos/ports/ghostscript/trunk 2251
 
 Requires: urw-fonts >= 1.1, ghostscript-fonts
 Requires: poppler-data
@@ -41,6 +36,11 @@ BuildRequires: lcms2-devel
 #BuildRequires: openjpeg-devel
 %{?_with_freetype:BuildRequires: freetype-devel}
 BuildRoot: %{_tmppath}/%{name}-%{gs_ver}-root
+
+# as we also deliver a gnu version for license concerns, we have to add 
+# this obsolete, as only this version will get regular updates
+Obsoletes: gnu-ghostscript < %{gs_ver}
+Provides:  gnu-ghostscript = %{gs_ver}
 
 # See bug #83516.
 Conflicts: ttfonts-ja < 1.2-23
@@ -83,14 +83,7 @@ The documentation files that come with ghostscript.
 %debug_package
 
 %prep
-%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc
-svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
-%endif
+%scm_setup
 
 #rm -rf expat freetype icclib jasper jpeg lcms2 libpng openjpeg zlib cups/libs
 rm -rf freetype jpeg libpng zlib cups/libs tiff lcms2
@@ -142,6 +135,7 @@ done
 
 autoconf --force
 export LDFLAGS=" -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+export LIBS="-lcx"
 # --enable-dynamic
 %configure --with-fontpath="$FONTPATH" \
         --with-drivers=ALL --disable-compile-inits --with-system-libtiff \
@@ -158,7 +152,7 @@ cd ..
 # we only do make so and also only make soinstall
 # the original 2nd make and 2nd install is commented out for now
  
-%if %{build_with_freetype}
+%if %{_with_freetype}
 FT_CFLAGS=$(pkg-config --cflags freetype2)
 make so RPM_OPT_FLAGS="$RPM_OPT_FLAGS $EXTRACFLAGS" prefix=%{_prefix} \
         FT_BRIDGE=1 FT_CFLAGS="$FT_CFLAGS" FT_LIB=freetype
@@ -198,7 +192,7 @@ make soinstall \
         CUPSDATA=$RPM_BUILD_ROOT`cups-config --datadir`
 
 # add symlink for scripts
-ln -s %{_bindir}/gsos2.exe %{buildroot}%{_bindir}/gs.exe
+ln -s %{_bindir}/gsos2.exe %{buildroot}%{_bindir}/gs
 rm -f $RPM_BUILD_ROOT%{_libdir}/gsdll2.%{gs_dot_ver}.dll
 rm -f $RPM_BUILD_ROOT%{_libdir}/gsdll2.%{gs_major}.dll
 
@@ -209,7 +203,7 @@ cd ..
 install -m0644 base/gserrors.h $RPM_BUILD_ROOT%{_includedir}/ghostscript/
 
 echo ".so man1/gs.1" > $RPM_BUILD_ROOT/%{_mandir}/man1/ghostscript.1
-ln -sf gs $RPM_BUILD_ROOT%{_bindir}/ghostscript
+ln -sf %{_bindir}/gsos2.exe $RPM_BUILD_ROOT%{_bindir}/ghostscript
 
 # Rename an original cidfmap to cidfmap.GS
 #mv $RPM_BUILD_ROOT%{_datadir}/%{name}/%{gs_dot_ver}/Resource/Init/cidfmap $RPM_BUILD_ROOT%{_datadir}/%{name}/%{gs_dot_ver}/Resource/Init/cidfmap.GS
@@ -305,6 +299,15 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/gs.lib
 
 %changelog
+* Fri Nov 17 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 9.18-6
+- add a obsoletes for the gnu-ghostscript
+- fix softlink
+- use scm_ macros
+- enhance logging and add GS_DEBUG env to write a logfile
+- fix some possible memory leaks
+- fix compile warnings
+- fix a crash with -dUseCIEColor and -dFastWebView switches (borrowed from upstream)
+
 * Fri Apr 8 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 9.18-5
 - add GS_FONTPATH by default
 - exchange \ by / in -sFONTPATH
