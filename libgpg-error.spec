@@ -3,13 +3,13 @@
 Summary: Library for error values used by GnuPG components
 Name: libgpg-error
 Version: 1.28
-Release: 1%{?dist}
+Release: 2%{?dist}
 URL: https://www.gnupg.org/related_software/libgpg-error/
 Group: System Environment/Libraries
 License: LGPLv2+
 
 Vendor:		bww bitwise works GmbH
-%scm_source     github https://github.com/ydario/libgpg-error master-os2
+%scm_source     github https://github.com/bitwiseworks/libgpg-error master-os2
 #scm_source git file://f:/rd/ports/keepassx/libgpg-error master-os2
 
 BuildRequires: gawk, gettext, autoconf, automake, gettext-devel, libtool
@@ -81,5 +81,8 @@ rm -fr $RPM_BUILD_ROOT
 #%{_mandir}/man1/gpg-error-config.*
 
 %changelog
+* Wed Nov 23 2017 yd <yd@os2power.com> 1.28-2
+- disable weak symbols for pthread, fixes pthread locking.
+
 * Tue Nov 22 2017 yd <yd@os2power.com> 1.28-1
 - first public rpm build.
