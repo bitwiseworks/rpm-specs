@@ -1,15 +1,15 @@
 Summary:       Library of functions for manipulating TIFF format image files
 Name:          libtiff
-Version:       4.0.7
-Release:       3%{?dist}
+Version:       4.0.9
+Release:       1%{?dist}
 License:       libtiff
 Group:         System Environment/Libraries
 URL:           http://www.simplesystems.org/libtiff/
 
 Vendor:        bww bitwise works GmbH
-%scm_source  svn http://svn.netlabs.org/repos/ports/libtiff/trunk 1989
+%scm_source  github https://github.com/bitwiseworks/libtiff-os2 %{version}-os2
 
-BuildRequires: zlib-devel libjpeg-devel 
+BuildRequires: zlib-devel libjpeg-devel jbigkit-devel
 BuildRequires: libtool automake autoconf pkgconfig
 
 %description
@@ -85,15 +85,12 @@ rm -rf $RPM_BUILD_ROOT%{_datadir}/doc/
 # no libGL dependency, please
 rm -f $RPM_BUILD_ROOT%{_bindir}/tiffgt
 rm -f $RPM_BUILD_ROOT%{_mandir}/man1/tiffgt.1
-rm -f html/man/tiffgt.1.html
 
 # no sgi2tiff or tiffsv, either
 rm -f $RPM_BUILD_ROOT%{_bindir}/sgi2tiff
 rm -f $RPM_BUILD_ROOT%{_mandir}/man1/sgi2tiff.1
-rm -f html/man/sgi2tiff.1.html
 rm -f $RPM_BUILD_ROOT%{_bindir}/tiffsv
 rm -f $RPM_BUILD_ROOT%{_mandir}/man1/tiffsv.1
-rm -f html/man/tiffsv.1.html
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -103,33 +100,36 @@ rm -rf $RPM_BUILD_ROOT
 #postun -p /sbin/ldconfig
 
 %check
-#LD_LIBRARY_PATH=$PWD:$LD_LIBRARY_PATH make check
+# remember to set beginlibpath by hand for now, as dash doesn't do it so far
+# as soon as it's fixed the below line will work
+export BEGINLIBPATH=%{_builddir}/%{buildsubdir}/libtiff/.libs
+make check
 
 %files
-%defattr(-,root,root,0755)
 %doc COPYRIGHT README RELEASE-DATE VERSION
 %{_libdir}/tiff*.dll
 %exclude %{_libdir}/tiff.dll
 
 %files devel
-%defattr(-,root,root,0755)
 %doc TODO ChangeLog html
 %{_includedir}/*
 %{_libdir}/tiff*_dll.a
-%{_libdir}/pkgconfig/libtiff-4.pc
+%{_libdir}/pkgconfig/libtiff*.pc
 %{_mandir}/man3/*
 
 %files static
-%defattr(-,root,root,0755)
 %{_libdir}/*.a
 %exclude %{_libdir}/*_dll.a
 
 %files tools
-%defattr(-,root,root,0755)
 %{_bindir}/*.exe
 %{_mandir}/man1/*
 
 %changelog
+* Fri Dec 01 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.0.9-1
+- enable jbig encoding
+- updated source to 4.0.9 version
+
 * Wed Feb 15 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.0.7-3
 - obsolete devel, static and tools legacy rpm
 
