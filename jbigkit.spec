@@ -9,7 +9,7 @@ URL:            http://www.cl.cam.ac.uk/~mgk25/jbigkit/
 Vendor:         bww bitwise works GmbH
 %scm_source github http://github.com/bitwiseworks/jbigkit-os2 master
 
-Requires:       jbigkit-libs% = %{version}-%{release}
+Requires:       jbigkit-libs = %{version}-%{release}
 
 %package libs
 Summary:        JBIG1 lossless image compression library
@@ -18,7 +18,7 @@ Group:          Development/Libraries
 %package devel
 Summary:        JBIG1 lossless image compression library -- development files
 Group:          Development/Libraries
-Requires:       jbigkit-libs% = %{version}-%{release}
+Requires:       jbigkit-libs = %{version}-%{release}
 
 %description libs
 JBIG-KIT provides a portable library of compression and decompression
