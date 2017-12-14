@@ -3,8 +3,8 @@
 
 Summary:       bitwise works icons and folders
 Name:          bww-resources-rpm
-Version:       1.1.0
-Release:       3%{?dist}
+Version:       1.1.1
+Release:       1%{?dist}
 License:       Proprietory
 Group:         Applications/System
 URL:           http://www.bitwiseworks.com
@@ -95,6 +95,9 @@ bww-fix-docdir
 %{_libdir}/rpm/macros.d/macros.bww
 
 %changelog
+* Thu Dec 14 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.1.1-1
+- added bww_app_shadow and removed the -s switch from bww_app
+
 * Wed Oct 04 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.1.0-3
 - changed bww_doc to bww_docdir
 - changed "Documentation" to "Package Documentation"

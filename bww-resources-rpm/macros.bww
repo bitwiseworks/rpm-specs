@@ -47,13 +47,6 @@
 
 # bww_app creates:
 #  a object in the bww folder (will get a BWW_%{name}_<ID>_APP WPS object ID)
-#  a shadow of the object on the desktop (if requested) (will get a BWW_%{name}_<ID>_APP_SHADOW WPS object ID)
-#
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# !!!!!! be aware that the -s option (if used) is not the last option. !!!!!!
-# !!!!!! as else the complete object is not generated.                 !!!!!!
-# !!!!!! this looks like a rpm issue                                   !!!!!!
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #
 # %bww_app [ID] -f APP -t TITLE [-n PACKAGE] [-s] [-a ASSOCIATIONS] [-i ICON] [-d STARTUPDIR]
 #  ID (when provided: this ID is added to the WPS id)
@@ -67,10 +60,9 @@
 #     The icon has to be copied to /@unixroot/usr/share/os2/icons during
 #     installation!
 #  -d STARTUPDIR (when provided: this value is set as STARTUPDIR in the wps object)
-#  -s (when provided: create a shadow on the desktop)
 #
 
-%bww_app(f:t:n:a:i:d:s)\
+%bww_app(f:t:n:a:i:d:)\
 %{!-f:%{error:%0: Missing mandatory EXEFILE parameter}}\
 %{!-t:%{error:%0: Missing mandatory TITLE parameter}}\
 %bww_create_folder_id\
@@ -81,7 +73,27 @@
 %global __bww_app_startupdir %{!-d:}%{-d:STARTUPDIR=((%{-d*}));}\
 %global __bww_app_name %{-f*}\
 %wps_object_create %{__bww_app_id}:WPProgram|%{__bww_app_title}|<%{__bww_folder_id}>|EXENAME=((%{__bww_app_name}));%{__bww_app_startupdir}TITLE=%{__bww_app_title};%{__bww_app_icon}%{__bww_app_assoc}\
-%{-s:%wps_object_create %{__bww_app_id}_SHADOW:WPShadow|%{__bww_app_title}|<WP_DESKTOP>|SHADOWID=<%{__bww_app_id}>;}\
+%{nil}
+
+# bww_app_shadow creates:
+#  a shadow of the object on the given WPS destination (will get a BWW_%{name}_<ID>_APP_SHADOW WPS object ID)
+#
+#
+# %bww_app_shadow [ID] -t TITLE [-n PACKAGE] [-d WPSID]
+#  ID (when provided: this ID is added to the WPS id)
+#  -t TITLE (Mandatory: use TITLE as the app title)
+#     (TITLE *must* be a %global macro if with spaces)
+#  -n PACKAGE (when provided: associate the folder with PACKAGE, else with %{name})
+#  -d WPSID (when provided: use this ID as the parent, else use WP_DESKTOP)
+#
+
+%bww_app_shadow(t:n:d:)\
+%{!-t:%{error:%0: Missing mandatory TITLE parameter}}\
+%bww_create_folder_id\
+%bww_create_app_id\
+%global __bww_app_title %{-t*}\
+%global __bww_app_shadowdest %{!-d:WP_DESKTOP}%{-d:%{-d*}}\
+%wps_object_create %{__bww_app_id}_%{__bww_app_shadowdest}_SHADOW:WPShadow|%{__bww_app_title}|<%{__bww_app_shadowdest}>|SHADOWID=<%{__bww_app_id}>;\
 %{nil}
 
 # bww_readme creates:
