@@ -1,7 +1,7 @@
 #
-# Macros for bitwiseworks default WPS object structure
+# Macros for bitwise works default WPS object structure
 #
-# Reserved WPS ID's in this macro
+# Reserved ObjectIDs in this macro
 #  - README
 #  - LICENSE
 #  - COPYRIGHT
@@ -11,27 +11,36 @@
 #  - APP
 #
 #
-# bww_folder creates:
-#  the bww help center as WP_BWWHELP wps id in WP_ASSISTANCE
-#  a shadow of the /@unixroot/usr/share/doc dir as WP_BWWDOC in the bww help center (WP_BWWHELP)
-#  the bww apps folder as WP_BWWAPPS in WP_PROGRAMSFOLDER
-#  a shadow of the bww help center as WP_BWWHELPSHADOW in the bww apps folder (WP_BWWAPPS)
-#  a folder for the installed app
+# bww_folder creates the following objects:
+# 1. The "bitwise works help center" object with an ObjectID of WP_BWWHELP 
+#    located in WP_ASSISTANCE
+# 2. The "Package Documentation" object with an ObjectID of WP_BWWDOC as a
+#    shadow of the /@unixroot/usr/share/doc directory within the "bitwise works
+#    help center" (WP_BWWHELP)
+# 3. The "bitwise works apps and ports" folder with an ObjectID of WP_BWWAPPS
+#    within the "programs" (WP_PROGRAMSFOLDER)
+# 4. A shadow of the "bitwise works help center" with an ObjectID of 
+#    WP_BWWHELPSHADOW in the "bitwise works apps and ports" folder (WP_BWWAPPS)
+# 5. A folder for the installed app within the "bitwise works apps and ports"
+#    (WP_BWWAPPS) folder
 #
-# the first 4 WPS objects are usually only updated and the referenc counter in wps_create is adjusted
-# it is necessary that every app creates the bww_folder first, as else the counters are wrong
+# The WPS objects 1.-4. are normally updated only and the reference counter in
+# wps_create is adjusted. Each app has to ensure the WPS objects 1.-4. exist
+# and therefore creates/updates them first, otherwise the counters would be
+# wrong.
 #
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# !!!!!! be aware that the -V option (if used) is not the last option. !!!!!!
-# !!!!!! as else the complete object is not generated.                 !!!!!!
-# !!!!!! this looks like a rpm issue                                   !!!!!!
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# !!!!!! Make sure the -V option (if used) is not the last option, !!!!!!
+# !!!!!! otherwise the object is not generated.                    !!!!!!
+# !!!!!! This looks like a rpm issue                               !!!!!!
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #
-# %bww_folder -t TITLE [-V] [-n PAGKAGE]
-#  -t TITLE (Mandatory: use TITLE as the folder title)
-#     (TITLE *must* be a %global macro if with spaces)
-#  -n PACKAGE (when provided: associate the folder with PACKAGE, else with %{name})
-#  -V (when provided: don't add the version to the folder title)
+# %bww_folder -t TITLE [-V] [-n PACKAGE]
+#  -t TITLE (Mandatory: Use TITLE as the folder title)
+#     (TITLE *must* be a %global macro if it contains spaces)
+#  -V (Optional: Do not add the version to the folder title)
+#  -n PACKAGE (Optional: Associate the folder with PACKAGE,
+#     otherwise with %{name})
 
 %bww_folder(t:n:V)\
 %{!?-t:%{error:%0: Missing mandatory TITLE parameter}}\
@@ -45,21 +54,23 @@
 %wps_object_create %{__bww_folder_id}:WPFolder|%{__bww_folder_name}|<WP_BWWAPPS>|TITLE=%{__bww_title_ver};\
 %{nil}
 
-# bww_app creates:
-#  a object in the bww folder (will get a BWW_%{name}_<ID>_APP WPS object ID)
+# bww_app:
+# Creates an object in the "bitwise works apps and ports" folder, it will get
+# an ObjectID of BWW_%{name}_<ID>_APP
 #
 # %bww_app [ID] -f APP -t TITLE [-n PACKAGE] [-s] [-a ASSOCIATIONS] [-i ICON] [-d STARTUPDIR]
-#  ID (when provided: this ID is added to the WPS id)
-#  -f EXEFILE (Mandatory: fullpath/to/app)
-#  -t TITLE (Mandatory: use TITLE as the app title)
+#  ID (Optional: This ID is added to the ObjectID)
+#  -f EXEFILE (Mandatory: Full path/to/app)
+#  -t TITLE (Mandatory: Use TITLE as the app title)
 #     (TITLE *must* be a %global macro if with spaces)
-#  -n PACKAGE (when provided: associate the folder with PACKAGE, else with %{name})
-#  -a ASSOCIATIONS (when provided: associate a file filter to the object)
-#     examples are *.txt or *.txt,*.pdf,*.html
-#  -i ICON (when provided: an icon is added to the object)
-#     The icon has to be copied to /@unixroot/usr/share/os2/icons during
+#  -n PACKAGE (Optional: Associate the folder with PACKAGE,
+#     otherwise with %{name})
+#  -a ASSOCIATIONS (Optional: Associate a file filter to the object, for
+#     examples *.txt or *.txt,*.pdf,*.html)
+#  -i ICON (Optional: An icon is added to the object)
+#     The icon file has to be copied to /@unixroot/usr/share/os2/icons during
 #     installation!
-#  -d STARTUPDIR (when provided: this value is set as STARTUPDIR in the wps object)
+#  -d STARTUPDIR (Optional: This value is set as STARTUPDIR in the wps object)
 #
 
 %bww_app(f:t:n:a:i:d:)\
@@ -75,99 +86,105 @@
 %wps_object_create %{__bww_app_id}:WPProgram|%{__bww_app_title}|<%{__bww_folder_id}>|EXENAME=((%{__bww_app_name}));%{__bww_app_startupdir}TITLE=%{__bww_app_title};%{__bww_app_icon}%{__bww_app_assoc}\
 %{nil}
 
-# bww_app_shadow creates:
-#  a shadow of the object on the given WPS destination (will get a BWW_%{name}_<ID>_APP_SHADOW WPS object ID)
+# bww_app_shadow:
+# A shadow of the object will be created in the given WPS destination
+# (will get a BWW_%{name}_<ID>_APP_<ObjectId>_SHADOW WPS object ID)
 #
 #
-# %bww_app_shadow [ID] -t TITLE [-n PACKAGE] [-d WPSID]
-#  ID (when provided: this ID is added to the WPS id)
-#  -t TITLE (Mandatory: use TITLE as the app title)
-#     (TITLE *must* be a %global macro if with spaces)
-#  -n PACKAGE (when provided: associate the folder with PACKAGE, else with %{name})
-#  -d WPSID (when provided: use this ID as the parent, else use WP_DESKTOP)
+# %bww_app_shadow [ID] [-n PACKAGE] [-d ObjectID]
+#  ID (Optional: This ID is added to the ObjectID)
+#  -n PACKAGE (Optional: Associate the folder with PACKAGE,
+#     otherwise with %{name})
+#  -d ObjectID (Optional: Create the shadow within this ObjectID,
+#     otherwise use WP_DESKTOP)
+#
+#  NOTE: Provide the ObjectID without <> brackets, as we add them in here
 #
 
-%bww_app_shadow(t:n:d:)\
-%{!-t:%{error:%0: Missing mandatory TITLE parameter}}\
+%bww_app_shadow(n:d:)\
 %bww_create_folder_id\
 %bww_create_app_id\
-%global __bww_app_title %{-t*}\
 %global __bww_app_shadowdest %{!-d:WP_DESKTOP}%{-d:%{-d*}}\
-%wps_object_create %{__bww_app_id}_%{__bww_app_shadowdest}_SHADOW:WPShadow|%{__bww_app_title}|<%{__bww_app_shadowdest}>|SHADOWID=<%{__bww_app_id}>;\
+%wps_object_create %{__bww_app_id}_%{__bww_app_shadowdest}_SHADOW:WPShadow|NotUsed|<%{__bww_app_shadowdest}>|SHADOWID=<%{__bww_app_id}>;\
 %{nil}
 
-# bww_readme creates:
-#  a shadow of a readme file (will get a BWW_%{name}_README WPS ID)
+# bww_readme:
+# Creates a shadow of a readme file (will get a BWW_%{name}_README ObjectID)
 #
 # %bww_readme -f FILE [-n PACKAGE]
-#  -f FILE (Mandatory: create a shadow for the provided readme FILE)
-#  -n PACKAGE (when provided: associate the folder with PACKAGE, else with %{name})
+#  -f FILE (Mandatory: Create a shadow for the provided readme FILE)
+#  -n PACKAGE (Optional: Associate the folder with PACKAGE,
+#     otherwise with %{name})
 
 %bww_readme(f:n:)\
 %bww_file README\
 %{nil}
 
-# bww_license creates:
-#  a shadow of a license file (will get a BWW_%{name}_LICENSE WPS ID)
+# bww_license:
+# Creates a shadow of a license file (will get a BWW_%{name}_LICENSE ObjectID)
 #
 # %bww_license -f LICENSE [-n PACKAGE]
-#  -f FILE (Mandatory: create a shadow for the provided license FILE)
-#  -n PACKAGE (when provided: associate the folder with PACKAGE, else with %{name})
+#  -f FILE (Mandatory: Create a shadow for the provided license FILE)
+#  -n PACKAGE (Optional: Associate the folder with PACKAGE,
+#     otherwise with %{name})
 
 %bww_license(f:n:)\
 %bww_file LICENSE\
 %{nil}
 
-# bww_copyright creates:
-#  a shadow of a copyright file (will get a BWW_%{name}_COPYRIGHT WPS ID)
+# bww_copyright:
+# Creates a shadow of a copyright file (will get a BWW_%{name}_COPYRIGHT ObjectID)
 #
 # %bww_copyright -f FILE [-n PACKAGE]
-#  -f FILE (Mandatory: create a shadow for the provided copyright FILE)
-#  -n PACKAGE (when provided: associate the folder with PACKAGE, else with %{name})
+#  -f FILE (Mandatory: Create a shadow for the provided copyright FILE)
+#  -n PACKAGE (Optional: Associate the folder with PACKAGE,
+#     otherwise with %{name})
 
 %bww_copyright(f:n:)\
 %bww_file COPYRIGHT\
 %{nil}
 
-# bww_changelog creates:
-#  a shadow of a changelog file (will get a BWW_%{name}_CHANGELOG WPS ID)
+# bww_changelog:
+# Creates a shadow of a changelog file (will get a BWW_%{name}_CHANGELOG ObjectID)
 #
 # %bww_changelog -f FILE [-n PACKAGE]
-#  -f FILE (Mandatory: create a shadow for the provided changelog FILE)
-#  -n PACKAGE (when provided: associate the folder with PACKAGE, else with %{name})
+#  -f FILE (Mandatory: Create a shadow for the provided changelog FILE)
+#  -n PACKAGE (Optional: Associate the folder with PACKAGE,
+#     otherwise with %{name})
 
 %bww_changelog(f:n:)\
 %bww_file CHANGELOG\
 %{nil}
 
-# bww_docdir creates:
-#  a shadow of a doc directory (will get a BWW_%{name}_DOCDIR WPS ID)
+# bww_docdir:
+# Creates a shadow of a doc directory (will get a BWW_%{name}_DOCDIR ObjectID)
 #
 # %bww_docdir -f FILE [-n PACKAGE]
-#  -f FILE (Mandatory: create a shadow for the provided doc FILE (directory in this case))
-#  -n PACKAGE (when provided: associate the folder with PACKAGE, else with %{name})
+#  -f FILE (Mandatory: Create a shadow for the provided doc FILE (directory in this case))
+#  -n PACKAGE (Optional: Associate the folder with PACKAGE,
+#     otherwise with %{name})
 
 %bww_docdir(f:n:)\
 %bww_file DOCDIR\
 %{nil}
 
-# bww_file creates:
-#  a shadow of a file (will get a BWW_%{name}_<ID> WPS object ID)
+# bww_file:
+# Creates a shadow of a file (will get a BWW_%{name}_<ID> ObjectID)
 #
 # %bww_file ID -f FILE [-n PACKAGE]
 #  ID (Mandatory: the name of the file for the WPS object id)
-#  -f FILE (Mandatory: create a shadow for the provided FILE)
-#  -n PACKAGE (when provided: associate the folder with PACKAGE, else with %{name})
+#  -f FILE (Mandatory: Create a shadow for the provided FILE)
+#  -n PACKAGE (Optional: Associate the folder with PACKAGE,
+#     otherwise with %{name})
 
 %bww_file(f:n:)\
-%{!?1:%{error:%0: Missing mandatory WPS ID parameter}}\
+%{!?1:%{error:%0: Missing mandatory ObjectID parameter}}\
 %{!-f:%{error:%0: Missing mandatory FILE parameter}}\
 %bww_create_folder_id\
 %global __bww_file_id %{1}\
 %global __bww_file %{-f*}\
 %wps_object_create BWW_%{__bww_folder_name}_%{__bww_file_id}:WPShadow|%{__bww_file_id}|<%{__bww_folder_id}>|SHADOWID=((%{__bww_file}))\
 %{nil}
-
 
 %bww_create_folder_id(n:)\
 %global __bww_folder_name %{!-n:%{name}}%{-n:%{-n*}}\
@@ -178,4 +195,3 @@
 %global __bww_pkg_id %{?1:_%{1}}%{!?1:}\
 %global __bww_app_id BWW_%{__bww_folder_name}%{__bww_pkg_id}_APP\
 %{nil}
-
