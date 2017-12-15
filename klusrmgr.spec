@@ -3,7 +3,7 @@
 Summary:    kLIBC User Management
 Name:       klusrmgr
 Version:    1.1.3
-Release:    1%{?dist}
+Release:    2%{?dist}
 License:    proprietary
 Group:      Applications/System
 URL:        http://www.netlabs.org/vxapps
@@ -12,7 +12,7 @@ Source:     %{name}-%{version}.zip
 BuildRoot:  %_tmppath/%name-%version-%release-root
 Requires:   wpi4rpm >= 0.9.2
 Requires:   rxcrypt >= 1.0.0
-Requires:   bww-resources-rpm-build  >= 1.0.0
+Requires:   bww-resources-rpm >= 1.1.0
 Obsoletes:  kLIBCum <= 1.0.10
 
 %description
@@ -52,9 +52,10 @@ if [ "$1" -ge 1 ]; then # (upon update)
 fi
 %global title %{summary}
 %bww_folder -t %{title}
-%bww_app -f %{_bindir}/%{name}.exe -s -t %{title} 
+%bww_app -f %{_bindir}/%{name}.exe -t %{title} 
 %bww_readme -f %{_defaultdocdir}/%{name}-%{version}/readme.txt
-%wps_object_create %{name}_WPCFGSHADOW:WPShadow|%{summary}|<WP_CONFIG>|SHADOWID=<BWW_%{name}_APP>;
+%bww_app_shadow -t %{title}
+%bww_app_shadow -t %{title} -d WP_CONFIG
 wpi4rpm add %{vendor}/%{name}/binaries %{version}-%{release}
 klusrmgr -init
 
