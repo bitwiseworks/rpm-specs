@@ -8,7 +8,7 @@ Summary: A PostScript interpreter and renderer
 Name: ghostscript
 Version: %{gs_ver}
 
-Release: 6%{?dist}
+Release: 7%{?dist}
 
 # Included CMap data is Redistributable, no modification permitted,
 # see http://bugzilla.redhat.com/487510
@@ -16,7 +16,7 @@ License: AGPLv3+ and Redistributable, no modification permitted
 URL: http://www.ghostscript.com/
 Group: Applications/Publishing
 Vendor: bww bitwise works GmbH
-%scm_source svn  http://svn.netlabs.org/repos/ports/ghostscript/trunk 2251
+%scm_source github  https://github.com/bitwiseworks/%{name}-os2 master
 
 Requires: urw-fonts >= 1.1, ghostscript-fonts
 Requires: poppler-data
@@ -299,6 +299,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/gs.lib
 
 %changelog
+* Fri Dec 15 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 9.18-7
+- use fork friendly DosLoadModuleEx and DosFreeModuleEx
+- moved source to github
+
 * Fri Nov 17 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 9.18-6
 - add a obsoletes for the gnu-ghostscript
 - fix softlink
