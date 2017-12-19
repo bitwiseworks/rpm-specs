@@ -1,44 +1,62 @@
+%{!?python_sitelib: %define python_sitelib %(python -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
+
+# disable broken /usr/lib/rpm/brp-python-bytecompile
+%define __os_install_post %{nil}
+%define compdir %(pkg-config --variable=completionsdir bash-completion)
+%if "%{compdir}" == ""
+%define compdir "/@unixroot/etc/bash_completion.d"
+%endif
+
 Summary: Creates a common metadata repository
 Name: createrepo
-Version: 0.4.11
-Release: 2
-License: GPL
+Version: 0.10.4
+Release: 1%{?dist}
+License: GPLv2
 Group: System Environment/Base
-Source: %{name}-%{version}.tar.gz
-Patch0: createrepo-os2.patch
-URL: http://linux.duke.edu/metadata/
-BuildRoot: %{_tmppath}/%{name}-%{version}root
+URL: http://createrepo.baseurl.org/
+
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArchitectures: noarch
-Requires: python >= 2.1, rpm-python, rpm >= 0:4.1.1, libxml2-python
-Requires: yum-metadata-parser
+Requires: python >= 2.1, rpm-python, rpm >= 4.1.1, libxml2-python
+Requires: yum-metadata-parser, yum >= 3.4.3, python-deltarpm, deltarpm, pyliblzma
+BuildRequires: python
+
+Vendor: bww bitwise works GmbH
+%scm_source  svn http://svn.netlabs.org/repos/ports/createrepo/trunk 2055
 
 %description
-This utility will generate a common metadata repository from a directory of
-rpm packages
+This utility will generate a common metadata repository from a directory of rpm
+packages.
 
 %prep
-%setup -q
-%patch0 -p1
+%scm_setup
+
+%build
 
 %install
-[ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
-%makeinstall
+rm -rf $RPM_BUILD_ROOT
+make DESTDIR=$RPM_BUILD_ROOT sysconfdir=%{_sysconfdir} install
 
 %clean
-[ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
-
+rm -rf $RPM_BUILD_ROOT
 
 %files
-%defattr(-, root, root)
-%dir %{_datadir}/%{name}
-%doc ChangeLog README COPYING COPYING.lib
-%{_datadir}/%{name}/*
-%{_bindir}/%{name}
+%defattr(-, root, root,-)
+%doc ChangeLog README
+%license COPYING COPYING.lib
+%(dirname %{compdir})
+%{_datadir}/%{name}/
+%{_bindir}/createrepo
 %{_bindir}/modifyrepo
-%{_mandir}/man8/createrepo.8*
+%{_bindir}/mergerepo
+%{_mandir}/*/*
+%{python_sitelib}/createrepo
 
 %changelog
-* Thu Nov 22 2011 yd
+* Tue Dec 19 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.10.4-1
+- update to vendor version 0.10.4
+
+* Tue Nov 22 2011 yd
 - fixed /@unixroot access
 
 * Fri Sep 03 2010 yd
