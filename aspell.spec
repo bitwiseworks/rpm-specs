@@ -1,24 +1,20 @@
-Summary: A spelling checker
+# spec source :http://pkgs.fedoraproject.org/cgit/rpms/aspell.git/tree/aspell.spec
+
+Summary: Spell checker
 Name: aspell
 Version: 0.60.6.1
-Release: 1%{?dist} 
-License: LGPL
+Release: 2%{?dist} 
+License: LGPLv2+ and LGPLv2 and GPLv2+ and BSD
 Group: Applications/Text
 URL: http://aspell.net/
-#define svn_url	    e:/trees/aspell/trunk
-%define svn_url     http://svn.netlabs.org/repos/ports/aspell/trunk
-%define svn_rev     1041
 
-Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
-
-BuildRoot: %{tmpdir}/%{name}-%{version}-root-%(id -u -n)
+Vendor: bww bitwise works GmbH
+%scm_source github https://github.com/bitwiseworks/%{name}-os2 master
 
 BuildRequires: gettext, ncurses-devel, pkgconfig
-#Requires(pre): /sbin/install-info
-#Requires(preun): /sbin/install-info
+Requires(pre): %{_sbindir}/install-info.exe
+Requires(preun): %{_sbindir}/install-info.exe
 Requires: aspell-en
-Provides: pspell < 0.13
-Obsoletes: pspell < 0.13
 
 
 %description
@@ -31,44 +27,36 @@ other technical enhancements over Ispell such as using shared memory for
 dictionaries and intelligently handling personal dictionaries when more
 than one Aspell process is open at once.
 
-%package	devel
-Summary: Static libraries and header files for Aspell development
+%package devel
+Summary: Libraries and header files for Aspell development
 Group: Development/Libraries
 Requires: %{name} = %{version}-%{release}
-#Requires(pre): /sbin/install-info
-#Requires(preun): /sbin/install-info
+Requires(pre): %{_sbindir}/install-info.exe
+Requires(preun): %{_sbindir}/install-info.exe
 Requires: pkgconfig
-Provides: pspell-devel < 0.13
-Obsoletes: pspell-devel < 0.13
 
-%description	devel
+%description devel
 Aspell is a spelling checker. The aspell-devel package includes the
 static libraries and header files needed for Aspell development.
 
-%package debug
-Summary: HLL debug data for exception handling support
 
-%description debug
-%{summary}.
+%debug_package
 
 %prep
-%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{?!svn_rev):0}
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc
-svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
-%endif
+%scm_setup
 
-autoreconf -fi
+autoreconf -fvi
 
 %build
-export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp" ; \
-export LIBS="-ltinfo" ; \
+export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+export LIBS="-ltinfo -lcx"
+export VENDOR="%{vendor}"
 
 %configure --disable-static
 make %{?_smp_mflags}
+cp scripts/aspell-import examples/aspell-import
+cp manual/aspell-import.1 examples/aspell-import.1
+
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -81,36 +69,41 @@ mv ${RPM_BUILD_ROOT}%{_libdir}/aspell-0.60/spell ${RPM_BUILD_ROOT}%{_bindir}
 
 rm -f ${RPM_BUILD_ROOT}%{_libdir}/*.la
 rm -f ${RPM_BUILD_ROOT}%{_libdir}/aspell-0.60/*.la
-chmod 644 ${RPM_BUILD_ROOT}%{_bindir}/aspell-import
+rm -f ${RPM_BUILD_ROOT}%{_bindir}/aspell-import
+rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/aspell-import.1
+rm -f ${RPM_BUILD_ROOT}%{_infodir}/dir
 
 %find_lang %{name}
 
-#%post   
-#/sbin/install-info %{_infodir}/aspell.info.gz %{_infodir}/dir --entry="* Aspell: (aspell). "  || : 
+%post
+# /sbin/ldconfig
+if [ -f %{_infodir}/aspell.info.gz ]; then  
+    %{_sbindir}/install-info %{_infodir}/aspell.info.gz %{_infodir}/dir --entry="* Aspell: (aspell). "  || : 
+fi
 
-#%post        devel
-#/sbin/install-info %{_infodir}/aspell-dev.info.gz %{_infodir}/dir --entry="* Aspell-dev: (aspell-dev). " || :
+%post devel
+if [ -f %{_infodir}/aspell-dev.info.gz ]; then  
+    %{_sbindir}/install-info %{_infodir}/aspell-dev.info.gz %{_infodir}/dir --entry="* Aspell-dev: (aspell-dev). " || :
+fi
 
-#%preun 
-#if [ $1 = 0 ]; then
-#    /sbin/install-info --delete %{_infodir}/aspell.info.gz %{_infodir}/dir 
-#fi
-#exit 0
+%preun
+if [ $1 = 0 ]; then
+    if [ -f %{_infodir}/aspell.info.gz ]; then  
+        %{_sbindir}/install-info --delete %{_infodir}/aspell.info.gz %{_infodir}/dir || :
+    fi
+fi
 
-#%preun       devel
-#if [ $1 = 0 ]; then
-#    /sbin/install-info --delete %{_infodir}/aspell-dev.info.gz %{_infodir}/dir 
-#fi
-#exit 0
+%preun devel
+if [ $1 = 0 ]; then
+    if [ -f %{_infodir}/aspell-dev.info.gz ]; then  
+        %{_sbindir}/install-info --delete %{_infodir}/aspell-dev.info.gz %{_infodir}/dir || :
+    fi
+fi
 
-#%postun
-
-%clean
-rm -rf $RPM_BUILD_ROOT
+#postun -p /sbin/ldconfig
 
 %files -f %{name}.lang
-%defattr(-,root,root)
-%doc README TODO COPYING
+%doc README TODO COPYING examples/aspell-import examples/aspell-import.1
 %dir %{_libdir}/aspell-0.60
 %{_bindir}/a*
 %{_bindir}/ispell
@@ -121,15 +114,14 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/word-list-compress.exe
 %{_libdir}/*.dll
 %{_libdir}/aspell-0.60/*
-%{_datadir}/locale/*/LC_MESSAGES/aspell.mo
+%exclude %{_libdir}/aspell-0.60/*.dbg
 %{_infodir}/aspell.*
-%{_mandir}/man1/aspell*
+%{_mandir}/man1/aspell.1.*
 %{_mandir}/man1/run-with-aspell.1*
 %{_mandir}/man1/word-list-compress.1*
 %{_mandir}/man1/prezip-bin.1*
 
-%files		devel
-%defattr(-,root,root)
+%files devel
 %dir %{_includedir}/pspell
 %{_bindir}/pspell-config
 %{_includedir}/aspell.h
@@ -138,11 +130,13 @@ rm -rf $RPM_BUILD_ROOT
 %{_infodir}/aspell-dev.*
 %{_mandir}/man1/pspell-config.1*
 
-%files debug
-%defattr(-,root,root)
-%{_libdir}/*.dbg
-%{_bindir}/*.dbg
 
 %changelog
+* Wed Dec 20 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.60.6.1-2
+- use new scm_ macros
+- fix loading of filters
+- add bldlevel to the dll
+- move source to github
+
 * Thu Feb 12 2015 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.60.6.1-1
 - first version
