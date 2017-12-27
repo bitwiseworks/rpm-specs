@@ -2,7 +2,7 @@
 
 Name:      icu
 Version:   56.1
-Release:   1%{?dist}
+Release:   2%{?dist}
 Summary:   International Components for Unicode
 Group:     Development/Tools
 License:   MIT and UCD and Public Domain
@@ -14,12 +14,9 @@ URL:       http://www.icu-project.org/
 BuildRequires: autoconf
 Requires: lib%{name}%{?_isa} = %{version}-%{release}
 
-%define svn_url     http://svn.netlabs.org/repos/ports/icu/trunk
-%define svn_rev     1388
+%scm_source svn http://svn.netlabs.org/repos/ports/icu/trunk 1388
 
-Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
-
-BuildRequires: gcc make subversion zip
+BuildRequires: gcc make
 
 Patch4: gennorm2-man.patch
 Patch5: icuinfo-man.patch
@@ -64,14 +61,7 @@ Includes and definitions for developing with icu.
 
 %prep
 
-%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc
-svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
-%endif
+%scm_setup
 
 %patch4 -p1
 %patch5 -p1
@@ -80,6 +70,7 @@ rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
 
 cd source
 autoreconf -fvi
+export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 %configure --with-data-packaging=library --disable-samples \
            --disable-renaming \
            --enable-shared --disable-static
@@ -177,5 +168,9 @@ fi
 #%doc source/__docs/%{name}/html/*
 
 %changelog
+* Wed Dec 27 2017 Dmitriy Kuminov <coding@dmik.org> 56.1-2
+- Build with high memory support.
+- Use scm_source macro and friends.
+
 * Tue Mar 15 2016 Dmitriy Kuminov <coding@dmik.org> 56.1-1
 - Initial package for version 56.1.
