@@ -1,17 +1,17 @@
-%define svn_url     http://svn.netlabs.org/repos/ports/pthread/trunk
-%define svn_rev     1234
-
 %define kmk_dist out/os2.x86/release/dist
 
 Summary: A posix pthread emulation for OS/2-eComStation
 Name: pthread
-Version: 20151229
-Release: 21%{?dist}
+Version: 20171227
+Release: 22%{?dist}
 License: unknown
 Group: Development/Libraries
-Source: %{name}-%{version}-r%{svn_rev}.zip
-Source1: pthread-legacy-os2.zip
 
+%scm_source svn http://svn.netlabs.org/repos/ports/pthread/trunk 2250
+
+BuildRequires: gcc make
+
+Source1: pthread-legacy-os2.zip
 
 %description
 A posix pthread emulation library.
@@ -38,15 +38,11 @@ Requires: %{name} = %{version}-%{release}
 %description debug
 HLL debug data for exception handling support.
 
+%debug_package
+
 %prep
-%if %(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -T -c -a 1
-svn export -r %{svn_rev} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" "%{name}-%{version}")
-%endif
+%scm_setup
+unzip %SOURCE1 -d .
 
 %build
 export KCFLAGS="%{optflags}"
@@ -59,7 +55,7 @@ mkdir -p %{buildroot}%{_libdir}
 mkdir -p %{buildroot}%{_includedir}
 
 cp pthread.dll %{buildroot}%{_libdir}
-cp %{kmk_dist}/bin/pthr01.dll %{buildroot}%{_libdir}
+cp %{kmk_dist}/lib/pthr01.dll %{buildroot}%{_libdir}
 cp %{kmk_dist}/include/pthread.h %{buildroot}%{_includedir}
 cp %{kmk_dist}/lib/pthread*.a %{buildroot}%{_libdir}
 
@@ -85,6 +81,10 @@ rm -rf %{buildroot}
 %{_libdir}/*.dbg
 
 %changelog
+* Wed Dec 27 2017 Dmitriy Kuminov <coding@dmik.org> 20171227-22
+- Remove dangerous DosEnterCritSec usage.
+- Use scm_source macro and friends.
+
 * Tue Dec 29 2015 yd <yd@os2power.com> 20151229-21
 - r1234, enable EXAPIS and mappings for fork() registration.
 
@@ -104,10 +104,10 @@ rm -rf %{buildroot}
 - r812-813, set stack to be at least 2MB for new threads.
 - Pull sources directly from SVN/GIT, ticket#76.
 
-* Fri Apr 25 2014 Dmitriy Kuminov <dmik/coding.org>
+* Fri Apr 25 2014 Dmitriy Kuminov <coding@dmik.org>
 - r720, Return proper POSIX errors in 'key' APIs. Fix pthread_key_delete() return code.
 
-* Thu Apr 24 2014 Dmitriy Kuminov <dmik/coding.org>
+* Thu Apr 24 2014 Dmitriy Kuminov <coding@dmik.org>
 - r718, fix invalid dereference in TlsAlloc and TlsFree.
 
 * Wed Feb 26 2014 komh
