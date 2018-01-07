@@ -2,8 +2,8 @@
 
 Summary:    bwwping subnet monitoring utility
 Name:       bwwping
-Version:    2.0.0
-Release:    2%{?dist}
+Version:    2.0.1
+Release:    1%{?dist}
 License:    proprietary
 Group:      Applications/System
 URL:        http://www.netlabs.org/vxapps
@@ -12,6 +12,7 @@ Source:     %{name}-%{version}.zip
 BuildRoot:  %_tmppath/%name-%version-%release-root
 Requires:   wpi4rpm >= 0.9.2
 Requires:   bww-resources-rpm  >= 1.1.0
+Requires:   rxextras >= 1.g.0
 
 %description
 The purpose of this utility is to monitor hosts on a network.
@@ -65,8 +66,11 @@ fi
 
 
 %changelog
+* Sun Jan 06 2018 hb <herwig.bauernfeind@bitwiseworks.com> 2.0.1-1
+- changed specfile
+
 * Mon Dec 18 2017 hb <herwig.bauernfeind@bitwiseworks.com> 2.0.0-2
-- first public version
+- changed specfile
 
 * Tue Sep 05 2017 hb <herwig.bauernfeind@bitwiseworks.com> 2.0.0-1
 - first public version
