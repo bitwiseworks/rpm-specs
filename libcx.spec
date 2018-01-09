@@ -1,13 +1,13 @@
 Name: libcx
 Summary: kLIBC Extension Library
 Version: 0.6.1
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: LGPLv2.1+
 Group: System/Libraries
 Vendor: bww bitwise works GmbH
 URL: https://github.com/bitwiseworks/libcx
 
-%scm_source github https://github.com/bitwiseworks/libcx %{version}
+%scm_source github https://github.com/bitwiseworks/libcx 9e8e69cfbd12f8c7b12a7a43b009186c5aa358e5
 
 Obsoletes: libpoll
 Provides: libpoll
@@ -53,12 +53,12 @@ echo "#include <sys/poll.h>" > nosys_poll.h
 %{__install} -m 644 src/poll/poll.h %{buildroot}%{_includedir}/sys
 %{__install} -m 644 src/mmap/sys/mman.h %{buildroot}%{_includedir}/sys
 %{__install} -m 644 src/exeinfo/libcx/exeinfo.h %{buildroot}%{_includedir}/libcx
+%{__install} -m 644 src/spawn/libcx/spawn2.h %{buildroot}%{_includedir}/libcx
 # Dir for LIBCx assertion logs
 %{__mkdir_p} %{buildroot}%{_var}/log/libcx
 
 %check
-# No tests for now, spawn2 fails because test-skeleton.c prints stats to stdout.
-#kmk  %{kmk_flags} test
+kmk  %{kmk_flags} test
 
 %clean
 rm -rf %{buildroot}
@@ -78,8 +78,13 @@ rm -rf %{buildroot}
 %{_includedir}/sys/poll.h
 %{_includedir}/sys/mman.h
 %{_includedir}/libcx/exeinfo.h
+%{_includedir}/libcx/spawn2.h
 
 %changelog
+* Mon Jan 8 2018 Dmitriy Kuminov <coding@dmik.org> 0.6.1-2
+- Add missing header libcx/spawn2.h.
+- Enable tests at build time (fixed).
+
 * Wed Dec 27 2017 Dmitriy Kuminov <coding@dmik.org> 0.6.1-1
 - Release version 0.6.1
   (https://github.com/bitwiseworks/libcx/blob/0.6.1/CHANGELOG.md).
