@@ -54,14 +54,16 @@
 Summary: An interpreted, interactive, object-oriented programming language
 Name: %{python}
 Version: 2.7.6
-Release: 18%{?dist}
+Release: 19%{?dist}
 License: Python
 Group: Development/Languages
+Vendor: bww bitwise works GmbH
+
 Requires: %{name}-libs = %{version}-%{release}
 Provides: python-abi = %{pybasever}
 Provides: python(abi) = %{pybasever}
 
-%scm_source svn http://svn.netlabs.org/repos/rpm/python/trunk 1151
+%scm_source svn http://svn.netlabs.org/repos/rpm/python/trunk 1281
 
 %if %{main_python}
 Obsoletes: Distutils
@@ -79,8 +81,10 @@ Obsoletes: python-uuid < 1.31
 Provides: python-uuid = 1.31
 %endif
 
-# Because of fread override that fixes freezes when reading big files on JFS
-Requires: libcx >= 0.5.3
+# Because of spawn2
+Requires: libcx >= 0.6.1-2
+# Because of DosEnterCritSec removal
+Requires: pthread >= 20171227
 
 # YD because of libcx
 Requires: db4 > 4.8.30-6
@@ -110,6 +114,9 @@ BuildRequires: valgrind-devel
 BuildRequires: systemtap-sdt-devel
 %global tapsetdir      /usr/share/systemtap/tapset
 %endif
+
+BuildRequires: libcx-devel >= 0.6.1-2
+BuildRequires: pthread-devel >= 20171227
 
 URL: http://www.python.org/
 
@@ -515,6 +522,15 @@ fi
 # payload file would be unpackaged)
 
 %changelog
+* Mon Jan 8 2018 Dmitriy Kuminov <coding@dmik.org> 2.7.6-19
+- Make sys.executable work for fancy python exe names on OS/2.
+- Enable real os.spawnv* implementation on OS/2.
+- Use LIBCx spawn2 instead of fork in subprocess module to improve performance.
+- Don't flatten case of tempdir (fixes file name comparison in some apps).
+- Support NUMBER_OF_PROCESSORS in multitasking.cpu_count() on OS/2.
+- Fix handling drive letters in urllib.url2pathname and pathname2url on OS/2.
+- Bring pthread dependency back (it's still used).
+
 * Sat Jun 3 2017 Dmitriy Kuminov <coding@dmik.org> 2.7.6-18
 - Put the LIBCx library to LDFLAGS rather than LIBS to have all module DLLs
   linked against it as well.
