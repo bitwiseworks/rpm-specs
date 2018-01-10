@@ -1,9 +1,9 @@
-%define debug_package %{nil}
+%define _strip_opts --no-compress
 
 Summary:    bwwping subnet monitoring utility
 Name:       bwwping
 Version:    2.0.1
-Release:    1%{?dist}
+Release:    2%{?dist}
 License:    proprietary
 Group:      Applications/System
 URL:        http://www.netlabs.org/vxapps
@@ -66,7 +66,10 @@ fi
 
 
 %changelog
-* Sun Jan 06 2018 hb <herwig.bauernfeind@bitwiseworks.com> 2.0.1-1
+* Wed Jan 10 2018 hb <herwig.bauernfeind@bitwiseworks.com> 2.0.1-2
+- changed specfile
+
+* Sun Jan 07 2018 hb <herwig.bauernfeind@bitwiseworks.com> 2.0.1-1
 - changed specfile
 
 * Mon Dec 18 2017 hb <herwig.bauernfeind@bitwiseworks.com> 2.0.0-2
