@@ -1,3 +1,4 @@
+# spec source :http://pkgs.fedoraproject.org/cgit/rpms/hplip.git/tree/hplip.spec
 
 %define without_sane 1
 %define without_dbus 1
@@ -5,13 +6,13 @@
 
 Summary: HP Linux Imaging and Printing Project
 Name: hplip
-Version: 3.16.11
+Version: 3.17.11
 Release: 1%{?dist}
 License: GPLv2+ and MIT and BSD
 
-Url: http://hplipopensource.com/
-%scm_source svn http://svn.netlabs.org/repos/ports/hplip/trunk 2155
+Url: https://developers.hp.com/hp-linux-imaging-and-printing
 Vendor: bww bitwise works GmbH
+%scm_source github  https://github.com/bitwiseworks/%{name}-os2 3.17.11-os2
 
 # @todo: decide if we need that to
 # if we do it as well, also remove the coment in the post section
@@ -25,7 +26,7 @@ Requires: wget
 Requires: python-dbus
 %endif
 #Requires: gnupg
-# /usr/lib/udev/rules.d
+# /etc/udev/rules.d
 #Requires: systemd
 
 BuildRequires: autoconf automake libtool
@@ -45,6 +46,7 @@ BuildRequires: pkgconfig(dbus-1)
 
 # Make sure we get postscriptdriver tags.
 #BuildRequires: python-cups
+BuildRequires: cups
 
 # macros: %%{_tmpfilesdir}, %%{_udevrulesdir}
 #BuildRequires: systemd
@@ -77,6 +79,7 @@ Libraries needed by HPLIP.
 %package gui
 Summary: HPLIP graphical tools
 License: BSD
+#BuildRequires: libappstream-glib
 Requires: python2-PyQt4
 #Requires: python-reportlab
 # hpssd.py
@@ -127,16 +130,16 @@ export VENDOR="%{vendor}"
         --disable-scan-build \
 %endif
         --enable-gui-build \
-        --disable-foomatic-rip-hplip-install  \
-        --enable-qt4 \
-        --enable-hpcups-install --enable-cups-drv-install \
-        --enable-foomatic-drv-install \
-        --enable-hpijs-install \
 %if 0%{!?without_fax:1}
         --enable-fax-build \
 %else
         --enable-fax-build=no \
 %endif
+        --disable-foomatic-rip-hplip-install  \
+        --enable-qt4 \
+        --enable-hpcups-install --enable-cups-drv-install \
+        --enable-foomatic-drv-install \
+        --enable-hpijs-install \
 %if 0%{?without_dbus:1}
         --enable-dbus-build=no \
 %endif
@@ -161,11 +164,15 @@ rm -rf  %{buildroot}%{_sysconfdir}/sane.d \
         %{buildroot}%{_datadir}/hplip/pkservice.py \
         %{buildroot}%{_bindir}/hp-pkservice \
         %{buildroot}%{_datadir}/applications \
+        %{buildroot}%{_datadir}/hplip/locatedriver* \
+        %{buildroot}%{_datadir}/hplip/dat2drv*
 
 rm -f   %{buildroot}%{_bindir}/hp-logcapture \
         %{buildroot}%{_bindir}/hp-doctor \
+        %{buildroot}%{_bindir}/hp-pqdiag \
         %{buildroot}%{_datadir}/hplip/logcapture.py \
-        %{buildroot}%{_datadir}/hplip/doctor.py
+        %{buildroot}%{_datadir}/hplip/doctor.py \
+        %{buildroot}%{_datadir}/hplip/pqdiag.py
 
 rm -f   %{buildroot}%{_bindir}/foomatic-rip \
         %{buildroot}%{_libdir}/cups/filter/foomatic-rip \
@@ -202,6 +209,9 @@ rm -f %{buildroot}%{_datadir}/cups/mime/pstotiff.types
 rm -f %{buildroot}%{_datadir}/hplip/fax/pstotiff*
 rm -rf %{buildroot}%{_libdir}/systemd
 
+# we don't need the exe and the python version (use exe as newer)
+rm -f %{buildroot}%{_cups_serverbin}/filter/hpps
+
 # The systray applet doesn't work properly (displays icon as a
 # window), so don't ship the launcher yet.
 rm -rf %{buildroot}%{_sysconfdir}/xdg
@@ -220,20 +230,14 @@ rm -f  %{buildroot}%{_libdir}/*.a \
 %{_bindir}/hp-clean
 %{_bindir}/hp-colorcal
 %{_bindir}/hp-config_usb_printer
-%{_bindir}/hp-devicesettings
 %{_bindir}/hp-diagnose_plugin
 %{_bindir}/hp-diagnose_queues
 %{_bindir}/hp-fab
-%{_bindir}/hp-faxsetup
 %{_bindir}/hp-firmware
 %{_bindir}/hp-info
 %{_bindir}/hp-levels
-%{_bindir}/hp-linefeedcal
-%{_bindir}/hp-makecopies
 %{_bindir}/hp-makeuri
 %{_bindir}/hp-plugin
-%{_bindir}/hp-pqdiag
-%{_bindir}/hp-printsettings
 %{_bindir}/hp-probe
 %{_bindir}/hp-query
 %{_bindir}/hp-scan
@@ -242,11 +246,9 @@ rm -f  %{buildroot}%{_libdir}/*.a \
 %{_bindir}/hp-testpage
 %{_bindir}/hp-timedate
 %{_bindir}/hp-unload
-%{_bindir}/hp-wificonfig
 %{_cups_serverbin}/backend/*.exe
 # ex-hpijs
 %{_cups_serverbin}/filter/*.exe
-%{_cups_serverbin}/filter/hpps
 %{_cups_serverbin}/filter/pstotiff
 # ex-hpijs
 %{_datadir}/cups/drv/*
@@ -259,14 +261,12 @@ rm -f  %{buildroot}%{_libdir}/*.a \
 %{_datadir}/hplip/clean.py*
 %{_datadir}/hplip/colorcal.py*
 %{_datadir}/hplip/config_usb_printer.py*
-%{_datadir}/hplip/devicesettings.py*
 %{_datadir}/hplip/diagnose_plugin.py*
 %{_datadir}/hplip/diagnose_queues.py*
 %{_datadir}/hplip/fab.py*
 %if 0%{!?without_fax:1}
 %{_datadir}/hplip/fax
 %endif
-%{_datadir}/hplip/faxsetup.py*
 %{_datadir}/hplip/firmware.py*
 %{_datadir}/hplip/hpdio.py*
 %{_datadir}/hplip/hplip_clean.sh
@@ -274,12 +274,8 @@ rm -f  %{buildroot}%{_libdir}/*.a \
 %{_datadir}/hplip/info.py*
 %{_datadir}/hplip/__init__.py*
 %{_datadir}/hplip/levels.py*
-%{_datadir}/hplip/linefeedcal.py*
-%{_datadir}/hplip/makecopies.py*
 %{_datadir}/hplip/makeuri.py*
 %{_datadir}/hplip/plugin.py*
-%{_datadir}/hplip/pqdiag.py*
-%{_datadir}/hplip/printsettings.py*
 %{_datadir}/hplip/probe.py*
 %{_datadir}/hplip/query.py*
 %{_datadir}/hplip/scan.py*
@@ -288,7 +284,6 @@ rm -f  %{buildroot}%{_libdir}/*.a \
 %{_datadir}/hplip/testpage.py*
 %{_datadir}/hplip/timedate.py*
 %{_datadir}/hplip/unload.py*
-%{_datadir}/hplip/wificonfig.py*
 # Directories
 %{_datadir}/hplip/base
 %{_datadir}/hplip/copier
@@ -325,15 +320,27 @@ rm -f  %{buildroot}%{_libdir}/*.a \
 
 %files gui
 %{_bindir}/hp-check
+%{_bindir}/hp-devicesettings
+%{_bindir}/hp-faxsetup
+%{_bindir}/hp-linefeedcal
+%{_bindir}/hp-makecopies
 %{_bindir}/hp-print
+%{_bindir}/hp-printsettings
 %{_bindir}/hp-systray
 %{_bindir}/hp-toolbox
+%{_bindir}/hp-wificonfig
 #%{_datadir}/applications/*.desktop
 # Files
 %{_datadir}/hplip/check.py*
+%{_datadir}/hplip/devicesettings.py*
+%{_datadir}/hplip/faxsetup.py*
+%{_datadir}/hplip/linefeedcal.py*
+%{_datadir}/hplip/makecopies.py*
 %{_datadir}/hplip/print.py*
+%{_datadir}/hplip/printsettings.py*
 %{_datadir}/hplip/systray.py*
 %{_datadir}/hplip/toolbox.py*
+%{_datadir}/hplip/wificonfig.py*
 # Directories
 %{_datadir}/hplip/data/images
 %{_datadir}/hplip/ui4
@@ -341,6 +348,7 @@ rm -f  %{buildroot}%{_libdir}/*.a \
 %if 0%{!?without_sane:1}
 %files -n libsane-hpaio
 %{_libdir}/sane/sane-*.dll
+%config(noreplace) %{_sysconfdir}/sane.d/dll.d/hpaio
 %endif
 
 %post
@@ -351,6 +359,11 @@ rm -f  %{buildroot}%{_libdir}/*.a \
 #%postun libs -p /sbin/ldconfig
 
 %changelog
+* Thu Jan 25 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.17.11-1
+- changed the way python finds USER and HOME env
+- moved source to github
+- updated to version 3.17.11
+
 * Tue Mar 21 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.16.11-1
 - fix gui Requires
 - use new scm_ macros
