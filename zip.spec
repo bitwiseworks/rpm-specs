@@ -1,15 +1,13 @@
 Summary: A file compression and packaging utility compatible with PKZIP
 Name: zip
 Version: 3.0
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: BSD
 Group: Applications/Archiving
-Source: http://downloads.sourceforge.net/infozip/zip30.tar.gz
 URL: http://www.info-zip.org/Zip.html
+Vendor:  bww bitwise works GmbH
 
-Patch0: zip-os2.diff
-
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+%scm_source  svn http://svn.netlabs.org/repos/ports/zip/trunk 2274
 
 %description
 The zip program is a compression and file packaging utility.  Zip is
@@ -20,17 +18,16 @@ MS-DOS systems).
 Install the zip package if you need to compress files using the zip
 program.
 
+%debug_package
+
 %prep
-%setup -q -n zip30
-%patch0 -p1 -b .os2~
+%scm_setup
 
 %build
 export CFLAGS="$RPM_OPT_FLAGS"
-export MAKESHELL="/@unixroot/usr/bin/sh.exe"
 make -f os2/Makefile.os2 prefix=%{_prefix} klibc %{?_smp_mflags}
 
 %install
-export MAKESHELL="/@unixroot/usr/bin/sh.exe"
 rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT%{_bindir} 
 mkdir -p $RPM_BUILD_ROOT%{_mandir}/man1
@@ -55,6 +52,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/zipsplit.1*
 
 %changelog
+* Tue Feb 19 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.0-7
+- use new scm_source and scm_setup macro
+- fix wildcard and current dir processing. Ticket #179
+
 * Wed Jul 24 2013 yd
 - r659, added support for archive bit clearing by Alex Taylor. Ticket:21.
 
