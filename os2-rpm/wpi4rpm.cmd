@@ -1,12 +1,12 @@
 /* WPI4RPM */
-ScriptVer = '0.9.7.0'
+ScriptVer = '0.9.8.0'
 
 /*  Synopsis:
 
     Add or remove fake WarpIN packages to the WarpIN database in order to make 
     sure RPM/YUM/ANPM installed packages keep dependent WPI packages happy.
    
-    (c) 2017 Herwig Bauernfeind for bww bitwise works GmbH.
+    (c) 2017-2018 Herwig Bauernfeind for bww bitwise works GmbH.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -36,13 +36,13 @@ anr       = words(arguments)
 if anr = 0 then arguments = 'HELP'
 Mode      = strip(word(arguments,1))
 if words(Mode) > 1 then do
-    say "wpi4rpm: Parameter parsing error. Aborting..."
+    say "ERROR: wpi4rpm: Parameter parsing error. Aborting..."
     exit -1
 end
 Mode = translate(mode)
 
 if Mode = "ADD" | Mode = "DEL" then do
-    if verbose then say 'wpi4rpm: Mode = "'Mode'"'
+    if verbose then say 'INFO:  wpi4rpm: Mode = "'Mode'"'
     cversion  = word(arguments,words(arguments))
     pRApp     = substr(arguments,length(mode)+2,length(arguments)-(length(mode)+1)-(length(cversion)+1))
     parse var cversion RMV'.'RLV'.'RBL'-'RRV'.' .
@@ -73,7 +73,7 @@ if Mode = "ADD" | Mode = "DEL" then do
     end
 end
 else do
-    say 'WPI4RPM Version 'ScriptVer' (c) 2017 Herwig Bauernfeind for bww bitwise works GmbH.'
+    say 'WPI4RPM Version 'ScriptVer' (c) 2017-2018 Herwig Bauernfeind for bww bitwise works GmbH.'
     say 
     say '  Adds or removes dummy WPI packages to WarpIN database.'
     say 
@@ -99,13 +99,13 @@ WarpINPath = strip(SysIni("USER","WarpIN","Path"),,'00'x)
 ok = SysFileTree(WarpINPath"\DATBAS*",WarpINbas.,"FO")
 select 
     when WarpINbas.0 = 0 then do
-        if verbose then say 'wpi4rpm: WarpINPath = "'WarpINPath'"'
-        say "wpi4rpm: No WarpIN database found."
+        if verbose then say 'INFO:  wpi4rpm: WarpINPath = "'WarpINPath'"'
+        say "ERROR: wpi4rpm: No WarpIN database found."
         exit -2
     end
     when WarpINbas.0 > 1 then do
-        if verbose then say 'wpi4rpm: WarpINPath = "'WarpINPath'"'
-        say "wpi4rpm: WARNING: "WarpINbas.0" WarpIN databases found. Using "WarpINbas.1
+        if verbose then say 'INFO:  wpi4rpm: WarpINPath = "'WarpINPath'"'
+        say "ERROR: wpi4rpm: Warning: "WarpINbas.0" WarpIN databases found. Using "WarpINbas.1
         DatBas = WarpINbas.1
     end
     otherwise DatBas = WarpINbas.1
@@ -113,15 +113,15 @@ end
 
 ok = SysIni(DatBas,"ALL:",WarpINApps.)
 if datatype(WarpINApps.0) <> "NUM" then do
-    if verbose then say 'wpi4rpm: Could not open WarpIN database "'datbas'".'
-    say 'wpi4rpm: Please, close WarpIN and reinstall "'RApp'" again.'
+    if verbose then say 'ERROR: wpi4rpm: Could not open WarpIN database "'datbas'".'
+    say 'ERROR: wpi4rpm: Please, close WarpIN and reinstall "'RApp'" again.'
     exit -3
 end
 AppString = RVendor'\'RApp'\'RPackage'\'RMV'\'RLV'\'RBL'\'RRV
 
 select
     when Mode = "ADD" then do
-        if verbose then say 'wpi4rpm: "'Datbas'" will be used.'
+        if verbose then say 'INFO:  wpi4rpm: "'Datbas'" will be used.'
         InstTime = time()
         InstDate = date('S')
         ihh      = right('0'||d2x(left(InstTime,2)),2)
@@ -141,34 +141,31 @@ select
         ok = SysIni(DatBas, AppString, "InstallDateTime", idt)
         ok = SysIni(DatBas, AppString, "TargetPath", "DEV\NULL"||"00"x)
         ok = SysIni(DatBas, AppString, "WIPackHeader",copies("00"x,16)||"Pck001"||copies("00"x,26))
-        if verbose then say 'wpi4rpm: "'Appstring'" added.'
+        if verbose then say 'INFO:  wpi4rpm: "'Appstring'" added.'
         exit ok
     end
     when mode = "DEL" then do
-        if verbose then say 'wpi4rpm: "'Datbas'" will be used.'
+        if verbose then say 'INFO:  wpi4rpm: "'Datbas'" will be used.'
         do I = 1 to WarpINApps.0
             parse var WarpINApps.I WVendor '\' WApp '\' WPackage '\' WMV '\' WLV '\' WBL '\' WRV
             if WarpINapps.I = appstring then do
                 ok = SysIni(DatBas, WarpINApps.I, "DELETE:")
-                if verbose then say 'wpi4rpm: "'WarpINApps.I'" removed.'
+                if verbose then say 'INFO:  wpi4rpm: "'WarpINApps.I'" removed.'
                 leave
             end
         end
         if I > WarpINApps.0 then do
-            if verbose then say 'wpi4rpm: "'AppString'" not found.'
+            if verbose then say 'ERROR: wpi4rpm: "'AppString'" not found.'
             exit -4
         end
     end
     otherwise do
-        say "wpi4rpm: Unknown command invoked."
-        say "wpi4rpm: Run wpi4rpm help (or /? or /H or -h or --help) to learn about usage."
+        say "ERROR: wpi4rpm: Unknown command invoked. Run wpi4rpm help to learn about usage."
     end
 end
 
 exit 0
 
 errorhandler:
-    say "wpi4rpm: An error occured in line "sigl
-    say "wpi4rpm: "left(strip(sourceline(sigl)),66)'...'
-    say "wpi4rpm: Run wpi4rpm help (or /? or /H or -h or --help) to learn about usage."
+    say "ERROR: wpi4rpm: An error occured in line "sigl" "left(strip(sourceline(sigl)),40)'...'
 exit 255

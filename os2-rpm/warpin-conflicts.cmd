@@ -11,7 +11,9 @@
  * and its version to the standard output. Prints nothing otherwise.
  *
  * Author: Dmitriy Kuminov
- *
+ * Version: 1.3 - 2018-02-19 (Herwig Bauernfeind)
+ *   - Shorten and apply common style to error messages to make the readable
+ *     for ANPM
  * Version: 1.2 - 2012-02-08
  *   - Use WIC -p to get the Package version. This should solve infamous random
  *     errors when accessing the INI file directly from REXX.
@@ -88,13 +90,7 @@ Main: procedure expose (Globals)
     end
     if (ver == '') then exit 0
 
-    say; say 'ERROR:'; say
-    say 'The following WPI package installed on your system conflicts with the'
-    say 'RPM package being installed:'; say
-    say '  'packages.i' (version 'ver')'; say
-    say 'You cannot have both the WPI and the RPM package installed at the same'
-    say 'time. Please de-install the specified WPI package using the WarpIn utility'
-    say 'and try again.'; say
+    say 'ERROR: warpin-conflicts: Please, uninstall WarpIN 'packages.i' (Version 'ver')'
     exit 1
 
 /**
@@ -138,18 +134,11 @@ GetPkgVersion: procedure
             call SysFileDelete temp_file
             if (wic_ver \= '' & rc == 0) then return ver
             if (rc == 5636) then do
-                say; say 'ERROR:'; say
-                say 'Failed to query the WarpIn database because the WarpIn application'
-                say 'is already running.'; say
-                say 'Please close the WarpIn application and try again.'; say
+                say 'ERROR: warpin-conflicts: Please close the WarpIn application and try again.'
                 exit 5
             end
             else if (rc \= 0) then do
-                say; say 'ERROR:'; say
-                say 'Failed to access the WarpIn database. Executing the program'; say
-                say '  'wic_exe; say
-                say 'failed with exit code 'rc'. Please make sure that the WarpIn'
-                say 'application is installed correctly and try again.'; say
+                say 'ERROR: warpin-conflicts: Executing the program 'wic_exe' failed with exit code 'rc
                 exit 5
             end
         end
@@ -170,11 +159,7 @@ GetPkgVersion: procedure
                     end
                 end
                 else do
-                    say; say 'ERROR:'; say
-                    say 'Failed to access the WarpIn database file:'; say
-                    say '  'inis.i; say
-                    say 'Please close the WarpIn application or, if it is not running, make sure'
-                    say 'that this file is not locked by another process, and try again.'; say
+                    say 'ERROR: warpin-conflicts: Failed to access the WarpIn database file 'inis.i
                     exit 5
                 end
             end

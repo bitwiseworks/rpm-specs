@@ -118,13 +118,13 @@ Main: procedure expose (Globals)
         when (cmd == '/RECREATEALL') then cmd = 'RA'
         when (cmd == '/DELETEALL') then cmd = 'DA'
         otherwise do
-            say 'ERROR: Invalid command "'G.Args.1'".'
+            say 'ERROR: wps-object: Invalid command "'G.Args.1'".'
             return 1
         end
     end
 
     if (G.Args.0 < 2) then do
-        say 'ERROR: Missing package name.'
+        say 'ERROR: wps-object: Missing package name.'
         return 1
     end
     pkg = G.Args.2
@@ -136,7 +136,7 @@ Main: procedure expose (Globals)
     end
     else if (cmd == 'C' | cmd == 'D') then do
         if (G.Args.0 < 3) then do
-            say 'ERROR: Missing object ID.'
+            say 'ERROR: wps-object: Missing object ID.'
             return 1
         end
         id = G.Args.3
@@ -147,20 +147,20 @@ Main: procedure expose (Globals)
             if (pos(':', id) > 0) then parse var id id':'spec
             else if (G.Args.0 >= 4) then spec = G.Args.4
             if (spec == '') then do
-                say 'ERROR: Missing object specification.'
+                say 'ERROR: wps-object: Missing object specification.'
                 return 1
             end
         end
 
         if (verify(id, G.InvalidObjectIDChars, 'M') > 0) then do
-            say 'ERROR: Object ID "'id'" contains invalid characters.'
+            say 'ERROR: wps-object: Object ID "'id'" contains invalid characters.'
             return 1
         end
     end
 
     ux = value('UNIXROOT',,'OS2ENVIRONMENT')
     if (ux == '') then do
-        say 'ERROR: UNIXROOT environment variable is not set.'
+        say 'ERROR: wps-object: UNIXROOT environment variable is not set.'
         return 1
     end
 
@@ -172,7 +172,7 @@ Main: procedure expose (Globals)
         G.ObjectRefs = charin(G.ObjectRefsFile, 1, chars(G.ObjectRefsFile))
         if (\FileOk(G.ObjectRefsFile)) then do
             rc = FileErrorCode(G.ObjectRefsFile)
-            say 'ERROR: Could not read "'G.ObjectRefsFile'" (rc='rc').'
+            say 'ERROR: wps-object: Could not read "'G.ObjectRefsFile'" (rc='rc').'
             return rc
         end
         call charout G.ObjectRefsFile
@@ -187,14 +187,14 @@ Main: procedure expose (Globals)
             str = linein(pkgFile)
             if (\FileOk(pkgFile)) then do
                 rc = FileErrorCode(pkgFile)
-                say 'ERROR: Could not read "'pkgFile'" (rc='rc').'
+                say 'ERROR: wps-object: Could not read "'pkgFile'" (rc='rc').'
                 return rc
             end
             parse var str s1':'s2 /* id:spec */
             if (s1 == '' | verify(s1, G.InvalidObjectIDChars, 'M') > 0 |,
                 s2 == '') then do
                 rc = -1
-                say 'ERROR: Line #'i 'in file "'pkgFile'" is invalid.'
+                say 'ERROR: wps-object: Line #'i 'in file "'pkgFile'" is invalid.'
                 return rc
             end
             G.PackageObjects.i = str
@@ -247,7 +247,7 @@ Main: procedure expose (Globals)
             rc = charout(refsFileTmp, G.ObjectRefs)
             if (rc \= 0 | \FileOk(refsFileTmp)) then do
                 rc = FileErrorCode(refsFileTmp)
-                say 'ERROR: Could not write to "'refsFileTmp'" (rc='rc').'
+                say 'ERROR: wps-object: Could not write to "'refsFileTmp'" (rc='rc').'
             end
             else do
                 call lineout refsFileTmp
@@ -264,7 +264,7 @@ Main: procedure expose (Globals)
         if (G.PackageObjects.0 = G.PackageObjects.!removed) then do
             rc = SysFileDelete(pkgFile)
             if (rc \= 0) then do
-                say 'ERROR: Could not delete "'pkgFile'".'
+                say 'ERROR: wps-object: Could not delete "'pkgFile'".'
             end
         end
         else do
@@ -276,7 +276,7 @@ Main: procedure expose (Globals)
                     rc = lineout(pkgFileTmp, G.PackageObjects.i)
                     if (rc \= 0 | \FileOk(pkgFileTmp)) then do
                         rc = FileErrorCode(pkgFileTmp)
-                        say 'ERROR: Could not write to "'pkgFileTmp'" (rc='rc').'
+                        say 'ERROR: wps-object: Could not write to "'pkgFileTmp'" (rc='rc').'
                         leave
                     end
                 end
@@ -309,11 +309,11 @@ CreateObject: procedure expose (Globals)
 
     parse var aSpec class'|'title'|'location'|'setup'|'option
     if (class == '' | title == '' | location == '') then do
-        say 'ERROR: Specification "'aSpec'" is invalid.'
+        say 'ERROR: wps-object: Specification "'aSpec'" is invalid.'
         return 1
     end
     if (pos('OBJECTID=', setup) > 0) then do
-        say 'ERROR: Specification string must not contain OBJECTID.'
+        say 'ERROR: wps-object: Specification string must not contain OBJECTID.'
         return 1
     end
 
@@ -324,7 +324,7 @@ CreateObject: procedure expose (Globals)
 
     rc = SysCreateObject(class, title, location, setup, option)
     if (rc \== 1) then do
-        say 'ERROR: Could not create an object with ID <'aID'> and',
+        say 'ERROR: wps-object: Could not create an object with ID <'aID'> and',
             'specification "'aSpec'".'
         return 1
     end
@@ -372,8 +372,7 @@ CreateObject: procedure expose (Globals)
             end
         end
         if (\ok) then do
-            say 'ERROR: Object reference file "'G.ObjectRefsFile'" is invalid',
-                'near object ID <'aID'>.'
+            say 'ERROR: wps-object: Object reference file "'G.ObjectRefsFile'" is invalid near object ID <'aID'>.'
             G.PackageObjects.!modified = 0
         end
     end
@@ -432,8 +431,7 @@ DeleteObject: procedure expose (Globals)
         end
     end
     if (\ok) then do
-        say 'ERROR: Object reference file "'G.ObjectRefsFile'" is invalid',
-            'near object ID <'aID'>.'
+        say 'ERROR: wps-object: Object reference file "'G.ObjectRefsFile'" is invalid near object ID <'aID'>.'
         G.PackageObjects.!modified = 0
     end
 
@@ -488,7 +486,7 @@ EnsureFileDir: procedure expose (Globals)
     dir = FixDir(filespec('D', aFile)||filespec('P', aFile))
     rc = MakeDir(dir)
     if (rc \= 0) then do
-        say 'ERROR: Could not make directory "'dir'" (rc='rc').'
+        say 'ERROR: wps-object: Could not make directory "'dir'" (rc='rc').'
         return rc
     end
 
@@ -510,7 +508,7 @@ SafeRename: procedure expose (Globals)
     dirFrom = FixDir(filespec('D', aFileFrom)||filespec('P', aFileFrom))
     dirTo = FixDir(filespec('D', aFileTo)||filespec('P', aFileTo))
     if (translate(dirFrom) \== translate(dirTo)) then do
-        say 'ERROR: "'aFileFrom'" and "'aFileTo'" must reside in the same',
+        say 'ERROR: wps-object: "'aFileFrom'" and "'aFileTo'" must reside in the same',
             'directory.'
         return -1
     end
@@ -518,14 +516,14 @@ SafeRename: procedure expose (Globals)
     if (FileExists(aFileTo)) then do
         rc = SysFileDelete(aFileTo)
         if (rc \= 0) then do
-            say 'ERROR: Could not delete "'aFileTo'" (rc='rc').'
+            say 'ERROR: wps-object: Could not delete "'aFileTo'" (rc='rc').'
             return rc
         end
     end
 
     address 'cmd' 'rename 'aFileFrom filespec('N', aFileTo)
     if (rc \= 0) then do
-        say 'ERROR: Could not rename "'aFileFrom'" to "'aFileTo'" (rc='rc').'
+        say 'ERROR: wps-object: Could not rename "'aFileFrom'" to "'aFileTo'" (rc='rc').'
         return rc
     end
 
