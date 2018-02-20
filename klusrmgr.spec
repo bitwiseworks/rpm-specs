@@ -1,9 +1,11 @@
 %define debug_package %{nil}
+# Disable compression completely
+%define _strip_no_compress 1
 
 Summary:    kLIBC User Management
 Name:       klusrmgr
-Version:    1.1.3
-Release:    2%{?dist}
+Version:    1.1.4
+Release:    1%{?dist}
 License:    proprietary
 Group:      Applications/System
 URL:        http://www.netlabs.org/vxapps
@@ -54,8 +56,8 @@ fi
 %bww_folder -t %{title}
 %bww_app -f %{_bindir}/%{name}.exe -t %{title} 
 %bww_readme -f %{_defaultdocdir}/%{name}-%{version}/readme.txt
-%bww_app_shadow -t %{title}
-%bww_app_shadow -t %{title} -d WP_CONFIG
+%bww_app_shadow 
+%bww_app_shadow -d WP_CONFIG
 wpi4rpm add %{vendor}/%{name}/binaries %{version}-%{release}
 klusrmgr -init
 
@@ -74,6 +76,14 @@ fi
 
 
 %changelog
+* Thu Feb 06 2018 hb <herwig.bauernfeind@bitwiseworks.com> 1.1.4-1
+- Fix: Missing msgs from 1.1.x sometimes did not work
+- Fix: Tab order on user page
+- Fix: Verify if passwords match also for new users
+
+* Tue Dec 12 2017 hb <herwig.bauernfeind@bitwiseworks.com> 1.1.3-2
+- fix buglet in package creation
+
 * Tue Dec 12 2017 hb <herwig.bauernfeind@bitwiseworks.com> 1.1.3-1
 - fix -init switch and repair structural bugs and omission introduced by 1.1.x
 
