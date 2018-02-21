@@ -1,7 +1,7 @@
 Summary: OS/2 specific RPM macros and scripts
 Name: os2-rpm
-Version: 0
-Release: 6%{?dist}
+Version: 1
+Release: 1%{?dist}
 License: GPLv2+
 Group: Development/System
 Vendor: bww bitwise works GmbH
@@ -12,7 +12,9 @@ Requires: rpm >= 4.13.0-16
 Requires: cube
 
 Provides: system-rpm-config = %{version}-%{release}
-Provides: wpi4rpm
+# as we integrated the wpi4rpm rpm here, obsolete the old package 
+Obsoletes: wpi4rpm <= 0.9.7
+Provides:  wpi4rpm 
 
 BuildRequires: rexx_exe
 
@@ -25,6 +27,7 @@ Source5: macros.wps
 Source6: wps-object.cmd
 Source7: warpin-conflicts.cmd
 Source8: getbootdrive.cmd
+Source9: wpi4rpm.cmd
 
 # This is necessary due to a silly "Provides: os2-rpm" in os2-rpm-build-0-1
 Conflicts: os2-rpm-build <= 0-1
@@ -84,7 +87,8 @@ done
 %changelog
 * Tue Feb 20 2018 Herwig Bauernfeind <herwig.bauernfeind@bitwiseworks.com> 0-6
 - Unify format of error messages from wps-object, warpin-conflicts and wpi4rpm
-- Integrate wpi4rpm into os2-rpm
+- Integrate wpi4rpm into os2-rpm (as we don't want to add a 
+  Provides wpi4rpm=version, we changed the spec version to 1)
 
 * Wed Oct 4 2017 Dmitriy Kuminov <coding@dmik.org> 0-5
 - Work around kLIBC bug #379 when unzipping archives with long file names
@@ -117,3 +121,4 @@ done
 
 * Thu Apr 6 2017 Dmitriy Kuminov <coding@dmik.org> 0-1
 - Initial release.
+
