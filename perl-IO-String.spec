@@ -56,6 +56,5 @@ chmod -R u+w %{buildroot}/*
 %{_mandir}/man3/*.3*
 
 %changelog
-%changelog
 * Wed Feb 21 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.08-1
 - initial rpm
