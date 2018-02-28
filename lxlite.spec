@@ -4,7 +4,7 @@
 Summary:       OS/2 LX executable packer
 Name:          lxlite
 Version:       1.3.9
-Release:       5%{?dist}
+Release:       6%{?dist}
 License:       GPL
 Group:         Applications/System
 URL:           http://github.com/bitwiseworks/lxlite
@@ -43,7 +43,7 @@ cd ..
 cd src
 cd out
 for f in *.exe ; do
-  install -p -m0644 -D $f  $RPM_BUILD_ROOT%{_bindir}/$f
+  install -p -m0755 -D $f  $RPM_BUILD_ROOT%{_bindir}/$f
 done
 cd ..
 cd ..
@@ -79,6 +79,9 @@ rm -rf "$RPM_BUILD_ROOT"
 %exclude %{_bindir}/lxLite.exe
 
 %changelog
+* Wed Feb 28 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.3.9-6
+- add the executable flag to the exe
+
 * Tue Oct 03 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.3.9-5
 - added a provides/obsoletes for lxLite-tools as well
 
