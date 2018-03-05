@@ -1,6 +1,6 @@
 Name:           perl-libwww-perl
 Version:        6.32
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        A Perl interface to the World-Wide Web
 License:        GPL+ or Artistic
 URL:            http://search.cpan.org/dist/libwww-perl/
@@ -23,7 +23,7 @@ BuildRequires:  perl(base)
 BuildRequires:  perl(Carp)
 # Data::Dump 1.13 not used at tests
 # Data::Dump::Trace not used at tests
-#BuildRequires:  perl(Digest::MD5)
+BuildRequires:  perl(Digest::MD5)
 BuildRequires:  perl(Encode) >= 2.12
 BuildRequires:  perl(Encode::Locale)
 BuildRequires:  perl(Exporter)
@@ -48,15 +48,15 @@ BuildRequires:  perl(LWP::MediaTypes) >= 6
 # Mail::Internet not needed
 BuildRequires:  perl(MIME::Base64) >= 2.1
 # Net::FTP 2.58 not used at tests
-#BuildRequires:  perl(Net::HTTP) >= 6.07
+BuildRequires:  perl(Net::HTTP) >= 6.07
 # Net::NNTP not used at tests
 BuildRequires:  perl(parent)
 BuildRequires:  perl(Scalar::Util)
-#BuildRequires:  perl(Try::Tiny)
+BuildRequires:  perl(Try::Tiny)
 BuildRequires:  perl(URI) >= 1.10
 BuildRequires:  perl(URI::Escape)
 # URI::Heuristic not used at tests
-#BuildRequires:  perl(WWW::RobotRules) >= 6
+BuildRequires:  perl(WWW::RobotRules) >= 6
 # Optional run-time:
 # CPAN::Config not used at tests
 # HTML::Parse not used at tests
@@ -149,5 +149,8 @@ unset PERL_LWP_ENV_HTTP_TEST_URL
 %{_mandir}/man3/*.3*
 
 %changelog
+* Fri Mar 2 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> - 6.32-2
+- enable more BuildRequires
+
 * Thu Feb 22 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> - 6.32-1
 - initial version
