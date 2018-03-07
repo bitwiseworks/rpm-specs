@@ -64,8 +64,6 @@ ln -s %{_fontconfig_templatedir}/%{fontconf} %{buildroot}%{_fontconfig_confdir}/
 #install -Dm 0644 -p %{SOURCE2} \
 #        %{buildroot}%{_datadir}/appdata/%{fontname}.metainfo.xml
 
-%clean
-
 %post
 if [ -x %{_bindir}/fc-cache ]; then \
     %{_bindir}/fc-cache %{_fontdir} || : \

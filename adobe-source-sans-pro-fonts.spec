@@ -75,9 +75,6 @@ ln -s %{_fontconfig_templatedir}/%{fontconf} %{buildroot}%{_fontconfig_confdir}/
 #        %{buildroot}%{_datadir}/appdata/%{fontname}.metainfo.xml
 
 
-%clean
-
-
 %post
 if [ -x %{_bindir}/fc-cache ]; then \
     %{_bindir}/fc-cache %{_fontdir} || : \
