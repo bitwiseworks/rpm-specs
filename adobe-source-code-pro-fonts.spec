@@ -65,13 +65,13 @@ ln -s %{_fontconfig_templatedir}/%{fontconf} %{buildroot}%{_fontconfig_confdir}/
 #        %{buildroot}%{_datadir}/appdata/%{fontname}.metainfo.xml
 
 %post
-if [ -x %{_bindir}/fc-cache ]; then \
-    %{_bindir}/fc-cache %{_fontdir} || : \
+if [ -x %{_bindir}/fc-cache ]; then
+    %{_bindir}/fc-cache %{_fontdir} || :
 fi
 
 %postun
-if [ $1 -eq 0 -a -x %{_bindir}/fc-cache ] ; then \
-    %{_bindir}/fc-cache %{_fontdir} || : \
+if [ $1 -eq 0 -a -x %{_bindir}/fc-cache ] ; then
+    %{_bindir}/fc-cache %{_fontdir} || :
 fi
 
 %files
