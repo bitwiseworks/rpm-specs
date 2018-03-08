@@ -1,44 +1,57 @@
+# Build without documentation per default if built as part of a module.
+%if 0%{?_module_build}
+%bcond_with documentation
+%else
+%bcond_without documentation
+%endif
+
 Summary: A portable x86 assembler which uses Intel-like syntax
 Name: nasm
-Version: 2.11.08
-Release: 2%{?dist}
+Version: 2.13.03
+Release: 1%{?dist}
 License: BSD
 Group: Development/Languages
 URL: http://www.nasm.us
-#define svn_url	    e:/trees/nasm/trunk
-%define svn_url     http://svn.netlabs.org/repos/ports/nasm/trunk
-%define svn_rev     1237
+Vendor: bww bitwise works GmbH
+%scm_source github https://github.com/bitwiseworks/%{name}-os2 %{version}-os2
 
-Source0: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 Source1: http://www.nasm.us/pub/nasm/releasebuilds/%{version}/%{name}-%{version}-xdoc.tar.bz2
 
 BuildRequires: perl
 BuildRequires: autoconf
-#Requires(post): /sbin/install-info
-#Requires(preun): /sbin/install-info
+#BuildRequires: asciidoc
+#BuildRequires: xmlto
+BuildRequires: gcc
+BuildRequires: make
 
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+%if %{with documentation}
+%package doc
+Summary: Documentation for NASM
+BuildRequires: perl(Font::TTF::Font)
+BuildRequires: perl(Sort::Versions)
+BuildRequires: perl(File::Spec)
+BuildRequires: adobe-source-sans-pro-fonts
+BuildRequires: adobe-source-code-pro-fonts
+BuildRequires: ghostscript
+BuildArch: noarch
+# For arch to noarch conversion
+Obsoletes: %{name}-doc < %{version}-%{release}
+%endif
 
 %package rdoff
 Summary: Tools for the RDOFF binary format, sometimes used with NASM
 Group: Development/Tools
-
-%package doc
-Summary: Documentation for NASM
-BuildRequires: texinfo
-#BuildRequires: ghostscript, texinfo
-BuildArch: noarch
-# For arch to noarch conversion
-Obsoletes: %{name}-doc < %{version}-%{release}
 
 %description
 NASM is the Netwide Assembler, a free portable assembler for the Intel
 80x86 microprocessor series, using primarily the traditional Intel
 instruction mnemonics and syntax.
 
+%if %{with documentation}
 %description doc
 This package contains documentation for the Netwide Assembler (NASM),
 in HTML, info, PostScript, and text formats.
+%endif
 
 %description rdoff
 Tools for the operating-system independent RDOFF binary format, which
@@ -48,45 +61,28 @@ include linker, library manager, loader, and information dump.
 %debug_package
 
 %prep
-%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{?!svn_rev):0}
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc
-svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
-%endif
+%scm_setup
 tar xjf %{SOURCE1} --strip-components 1
 
 %build
-sh autogen.sh
+autoreconf
 export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
-# as long as ghostscript is not there as rpm, take care that ps2pdf.cmd and gsos2
-# are found in the path
-export PS2PDF=ps2pdf.cmd
+export LIBS="-lcx"
 %configure
+%if %{with documentation}
 make everything %{?_smp_mflags}
 gzip -9f doc/nasmdoc.ps
 gzip -9f doc/nasmdoc.txt
+%else
+make all %{?_smp_mflags}
+%endif
 
 %install
-rm -rf $RPM_BUILD_ROOT
 make INSTALLROOT=$RPM_BUILD_ROOT install install_rdf
-install -d $RPM_BUILD_ROOT/%{_infodir}
-install -t $RPM_BUILD_ROOT/%{_infodir} doc/info/*
 
 %clean
 rm -rf ${RPM_BUILD_ROOT}
 
-#%post
-#if [ -e %{_infodir}/nasm.info.gz ]; then
-#  /sbin/install-info %{_infodir}/nasm.info.gz  %{_infodir}/dir || :
-#fi
-
-#%preun
-#if [ $1 = 0 -a -e %{_infodir}/nasm.info.gz ]; then
-#  /sbin/install-info --delete %{_infodir}/nasm.info.gz %{_infodir}/dir || :
-#fi
 
 %files
 %doc AUTHORS CHANGES README TODO
@@ -94,10 +90,11 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_bindir}/ndisasm.exe
 %{_mandir}/man1/nasm*
 %{_mandir}/man1/ndisasm*
-%{_infodir}/nasm.info*
 
+%if %{with documentation}
 %files doc
 %doc doc/html doc/nasmdoc.txt.gz doc/nasmdoc.ps.gz doc/nasmdoc.pdf
+%endif
 
 %files rdoff
 %{_bindir}/ldrdf.exe
@@ -114,7 +111,10 @@ rm -rf ${RPM_BUILD_ROOT}
 
 
 %changelog
-* Thu Dec 29 2015 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.11.8-2
+* Wed Feb 21 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.13.03-1
+- updated to vendor version 2.13.03
+
+* Tue Dec 29 2015 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.11.8-2
 - added enhancement from http://sourceforge.net/p/nasm/mailman/message/34609638/
   this is needed for vbox port, see vbox ticket #31 for further reference
 - changed debug creation to latest rpm macros
