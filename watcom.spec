@@ -1,12 +1,17 @@
+%global os2_wipfcdir %{_datadir}/os2/wipfc
+
 Summary: Watcom Compiler tools for gcc
 Name: watcom
-Version: 2.0beta1
-Release: 6%{?dist}
+Version: 2.0beta3
+Release: 1%{?dist}
 License: none
 
 Group: Development/Languages
 
 Source: watcom.zip
+
+# For os2_dos_path, os2_langdir etc. macros
+Requires: os2-rpm >= 0-4
 
 %description
 Watcom tools.
@@ -23,17 +28,57 @@ Summary: Watcom Compiler resource compiler.
 %description wrc
 Watcom Compiler resource compiler.
 
+%package wipfc
+Summary: Watcom Compiler IPFC tool
+
+%description wipfc
+Provides Watcom Compiler Information Presentation Facility tool
+including the IPF complier and support files.
+
+%package debug
+Summary: Watcom Compiler debug package
+
+%description debug
+Watcom Compiler debug package contains the SYM files.
+
+
 %prep
 %setup -q -c
 
+
 %install
 rm -rf %{buildroot}
-mkdir -p $RPM_BUILD_ROOT/%{_bindir}
-cp -p wrc.exe $RPM_BUILD_ROOT%{_bindir}
-cp -p wl.exe $RPM_BUILD_ROOT%{_bindir}
+
+# install exe files
+for f in *.exe ; do
+  install -p -m0755 -D $f %{buildroot}%{_bindir}/$f
+done
+
+# install sym files
+for f in *.sym ; do
+  install -p -m0644 -D $f %{buildroot}%{_bindir}/$f
+done
+
+# ipfc
+cd wipfc
+for f in * ; do
+  install -p -m0644 -D $f %{buildroot}%{os2_wipfcdir}/$f
+done
+cd ..
 
 %clean
 rm -rf %{buildroot}
+
+
+%post wipfc
+%cube {ADDSTRING "%{os2_dos_path %{_datadir}/os2/wipfc};" IN "SET WIPFC=" (FIRST IFNEW BEFORE ADDBOTTOM RS(%%)} c:\config.sys > NUL
+
+%postun wipfc
+if [ "$1" = 0 ] ; then
+# execute only on last uninstall
+%cube {DELSTRING "%{os2_dos_path %{_datadir}/os2/wipfc};" IN "SET WIPFC=" (FIRST RS(%%)} c:\config.sys > NUL
+fi
+
 
 %files wlink-hll
 %defattr(-,root,root)
@@ -45,7 +90,22 @@ rm -rf %{buildroot}
 %{_bindir}/wrc.exe
 %doc wrc.lvl
 
+%files wipfc
+%defattr(-,root,root)
+%{_bindir}/wipfc.exe
+%doc wipfc.lvl
+%{os2_wipfcdir}/*
+
+%files debug
+%{_bindir}/*.sym
+
+
 %changelog
+* Wed Mar 07 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.0beta3-1
+- add the executable flag to the exe
+- add a debug package for sym files
+- added wipfc subpackage
+
 * Fri Jun 20 2014 yd
 - wlink build 20140527, uses highmem allocations.
 
