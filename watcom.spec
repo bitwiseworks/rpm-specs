@@ -3,7 +3,7 @@
 Summary: Watcom Compiler tools for gcc
 Name: watcom
 Version: 2.0beta3
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: none
 
 Group: Development/Languages
@@ -101,6 +101,9 @@ fi
 
 
 %changelog
+* Wed Mar 14 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.0beta3-2
+- change/add the wipfc config files
+
 * Wed Mar 07 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.0beta3-1
 - add the executable flag to the exe
 - add a debug package for sym files
