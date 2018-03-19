@@ -3,7 +3,7 @@
 Summary: Watcom Compiler tools for gcc
 Name: watcom
 Version: 2.0beta3
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: none
 
 Group: Development/Languages
@@ -71,12 +71,12 @@ rm -rf %{buildroot}
 
 
 %post wipfc
-%cube {ADDSTRING "%{os2_dos_path %{_datadir}/os2/wipfc};" IN "SET WIPFC=" (FIRST IFNEW BEFORE ADDBOTTOM RS(%%)} c:\config.sys > NUL
+%cube {ADDSTRING "%{os2_dos_path %{_datadir}/os2/wipfc}" IN "SET WIPFC=" (FIRST IFNEW BEFORE ADDBOTTOM RS(%%)} c:\config.sys > NUL
 
 %postun wipfc
 if [ "$1" = 0 ] ; then
 # execute only on last uninstall
-%cube {DELSTRING "%{os2_dos_path %{_datadir}/os2/wipfc};" IN "SET WIPFC=" (FIRST RS(%%)} c:\config.sys > NUL
+%cube {DELSTRING "%{os2_dos_path %{_datadir}/os2/wipfc}" IN "SET WIPFC=" (FIRST RS(%%)} c:\config.sys > NUL
 fi
 
 
@@ -101,6 +101,9 @@ fi
 
 
 %changelog
+* Mon Mar 19 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.0beta3-3
+- wipfc doesn't line the trailing ; in set wpifc
+
 * Wed Mar 14 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.0beta3-2
 - change/add the wipfc config files
 
