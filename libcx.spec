@@ -1,13 +1,13 @@
 Name: libcx
 Summary: kLIBC Extension Library
-Version: 0.6.1
-Release: 2%{?dist}
+Version: 0.6.2
+Release: 1%{?dist}
 License: LGPLv2.1+
 Group: System/Libraries
 Vendor: bww bitwise works GmbH
 URL: https://github.com/bitwiseworks/libcx
 
-%scm_source github https://github.com/bitwiseworks/libcx 9e8e69cfbd12f8c7b12a7a43b009186c5aa358e5
+%scm_source github https://github.com/bitwiseworks/libcx %{version}
 
 Obsoletes: libpoll
 Provides: libpoll
@@ -81,6 +81,10 @@ rm -rf %{buildroot}
 %{_includedir}/libcx/spawn2.h
 
 %changelog
+* Tue Apr 17 2018 Dmitriy Kuminov <coding@dmik.org> 0.6.2-1
+- Release version 0.6.2
+  (https://github.com/bitwiseworks/libcx/blob/0.6.2/CHANGELOG.md).
+
 * Mon Jan 8 2018 Dmitriy Kuminov <coding@dmik.org> 0.6.1-2
 - Add missing header libcx/spawn2.h.
 - Enable tests at build time (fixed).
