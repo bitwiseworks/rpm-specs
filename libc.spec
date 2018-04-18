@@ -6,13 +6,13 @@ License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Standard Shared Libraries
 Group:          System/Libraries
 Version:        0.6.6
-Release:        35%{?dist}
+Release:        36%{?dist}
 Url:            http://svn.netlabs.org/libc
 
 Source:         libc-%{version}.zip
 Source1:        libc-emxomf-20150207.zip
 # This contains binary build of LIBC with patches from tickets #361-366
-Source2:        libc-hotfix-20170822.zip
+Source2:        libc-hotfix-20180119.zip
 # This contains binary build of emxomfld with patches from ticket #376
 Source3:        libc-emxomfld-20170411.zip
 
@@ -193,6 +193,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/tcpipv4/dbg
 
 %changelog
+* Tue Apr 17 2018 Dmitriy Kuminov <coding@dmik.org> 0.6.6-36
+- Apply patch from ticket #384 to fix DosAllocMemEx(OBJ_LOCATION) bug.
+
 * Tue Aug 29 2017 Dmitriy Kuminov <coding@dmik.org> 0.6.6-35
 - Apply patch from ticket #366 to allow using LIBC in fork() callbacks.
 
