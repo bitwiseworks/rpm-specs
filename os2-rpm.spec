@@ -1,7 +1,7 @@
 Summary: OS/2 specific RPM macros and scripts
 Name: os2-rpm
 Version: 1
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv2+
 Group: Development/System
 Vendor: bww bitwise works GmbH
@@ -85,7 +85,11 @@ done
 %{_rpmconfigdir_macros_d}/macros.scm
 
 %changelog
-* Tue Feb 20 2018 Herwig Bauernfeind <herwig.bauernfeind@bitwiseworks.com> 0-6
+* Mon Apr 23 2018 Dmitriy Kuminov <coding@dmik.org> 1-2
+- Fix os2_fwdslashes and os2_backslashes that would return garbage at the end.
+- Remove useless os2_dos_path_f and add os2_expand_unixroot instead.
+
+* Tue Feb 20 2018 Herwig Bauernfeind <herwig.bauernfeind@bitwiseworks.com> 1-1
 - Unify format of error messages from wps-object, warpin-conflicts and wpi4rpm
 - Integrate wpi4rpm into os2-rpm (as we don't want to add a 
   Provides wpi4rpm=version, we changed the spec version to 1)

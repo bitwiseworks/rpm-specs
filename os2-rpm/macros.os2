@@ -16,14 +16,16 @@
 %os2_helpdir %{_datadir}/os2/help
 
 # Converts back slashes to forward slashes.
-%os2_fwdslashes() %{lua: print(string.gsub(rpm.expand("%{?**}"), "\\\\", "/"))}
+%os2_fwdslashes() %{lua: print((string.gsub(rpm.expand("%{?**}"), "\\\\", "/")))}
 
 # Converts forward lashes to back slashes.
-%os2_backslashes() %{lua: print(string.gsub(rpm.expand("%{?**}"), "/", "\\\\"))}
+%os2_backslashes() %{lua: print((string.gsub(rpm.expand("%{?**}"), "/", "\\\\")))}
 
 # Converts a Unix path to a DOS path (backward slashes) replacing /@unixroot
-# with %UNIXROOT% if it starts the path. Several paths separated by ';' may be
-# given to handle them at once (useful for PATH-like env.vars).
+# with %UNIXROOT% if it starts the path. Note that if %UNIXROOT% per se contains
+# forward slashes, they are not converted (if you need this, use
+# os2_expand_unixroot and os2_backslashes). Several paths separated by ';' may
+# be given to handle them at once (useful for PATH-like env.vars).
 %os2_dos_path() %{lua:
   function conv_path(path)
     if (string.sub(path, 1, 10) == "/@unixroot" and
@@ -41,8 +43,28 @@
   end
 }
 
-# Same as os2_dos_path but converts backward slashes to forward slashes.
-%os2_dos_path_f() %{os2_fwdslashes %{os2_dos_path %{?**}}}
+# Expands /@unixroot to the current value of UNIXROOT if it starts the path
+# and converts all slashes to forward ones. If you need no fowrard slashes and
+# using of %UNIXROOT% instead of the real value is fine, use os2_dos_path as
+# it doesn't reqire -e (see below). Several paths separated by ';' may be
+# given to handle them at once (useful for PATH-like env.vars).
+# NOTE: Don't use in install-time scriptlets unless with -e and as %%{...}.
+%os2_expand_unixroot() %{lua:
+  function conv_path(path)
+    if (string.sub(path, 1, 10) == "/@unixroot" and
+        (string.len(path) == 10 or string.sub(path, 11, 11) == '/')) then
+      path = os.getenv("UNIXROOT") .. string.sub(path, 11)
+    end
+    path = string.gsub(path, "\\\\", "/")
+    return path
+  end
+  path = rpm.expand("%{?**}")
+  seen_first = false
+  for p in string.gmatch(path, "[^;]*") do
+    print((seen_first and ';' or '') .. conv_path(p))
+    seen_first = seen_first or true
+  end
+}
 
 # Expands DOS-like environment variables (%VAR%) to their current values.
 # NOTE: Don't use in install-time scriptlets unless with -e and as %%{...}.
@@ -54,7 +76,7 @@
 
 # Current UNIXROOT value in DOS format (backward slashes)
 # NOTE: Don't use in install-time scriptlets unless with -e and as %%{...}.
-%os2_unixroot_path() %{os2_expand_dos_vars %{os2_dos_path /@unixroot}}
+%os2_unixroot_path() %{os2_backslashes %{os2_expand_unixroot /@unixroot}}
 
 # OS/2 boot drive.
 # NOTE: Don't use in install-time scriptlets unless with -e and as %%{...}.
