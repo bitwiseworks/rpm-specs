@@ -2,12 +2,15 @@
 Summary: OS/2 - eComStation 2.0 - ArcaOS 5.0 base
 Name: os2-base
 Version: 0.0.0
-Release: 17%{?dist}
+Release: 18%{?dist}
 
 License: free
 
 Requires: os2-release
-Requires: os2-rpm >= 0-4
+
+# For os2_expand_unixroot
+BuildRequires: os2-rpm >= 1-2
+Requires: os2-rpm >= 1-2
 
 Provides: ansicall.dll
 Provides: asiacol.dll
@@ -293,7 +296,7 @@ echo i686-OS/2-OS/2 > $RPM_BUILD_ROOT%{_sysconfdir}/rpm/platform
 # no files in a virtual package
 
 
-%post
+%post -e
 if [ "$1" = 1 ] ; then
 #execute only on first install
 %cube {ADDSTRING "%{os2_dos_path %{_sbindir};%{_bindir}};" IN "SET PATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys c:\config.sys.yum > NUL
@@ -303,11 +306,11 @@ if [ "$1" = 1 ] ; then
 fi
 %cube {ADDLINE "SET TERM=os2" (IFNOT "SET TERM=")} c:\config.sys > NUL
 %cube {ADDLINE "REM [ Default shell values ]" (IFNOT "REM [ Default shell values ]")} c:\config.sys > NUL
-%cube {ADDLINE "SET SHELL=%{os2_dos_path %{_bindir}/sh.exe}" (IFNOT "SET SHELL=")} c:\config.sys > NUL
-%cube {ADDLINE "SET EMXSHELL=%{os2_dos_path %{_bindir}/sh.exe}" (IFNOT "SET EMXSHELL=")} c:\config.sys > NUL
-%cube {ADDLINE "SET CONFIG_SHELL=%{os2_dos_path %{_bindir}/sh.exe}" (IFNOT "SET CONFIG_SHELL=")} c:\config.sys > NUL
-%cube {ADDLINE "SET MAKESHELL=%{os2_dos_path %{_bindir}/sh.exe}" (IFNOT "SET MAKESHELL=")} c:\config.sys > NUL
-%cube {ADDLINE "SET EXECSHELL=%{os2_dos_path %{_bindir}/sh.exe}" (IFNOT "SET EXECSHELL=")} c:\config.sys > NUL
+%cube {ADDLINE "SET SHELL=%%{os2_expand_unixroot %%{_bindir}/sh.exe}" (IFNOT "SET SHELL=")} c:\config.sys > NUL
+%cube {ADDLINE "SET EMXSHELL=%%{os2_expand_unixroot %%{_bindir}/sh.exe}" (IFNOT "SET EMXSHELL=")} c:\config.sys > NUL
+%cube {ADDLINE "SET CONFIG_SHELL=%%{os2_expand_unixroot %%{_bindir}/sh.exe}" (IFNOT "SET CONFIG_SHELL=")} c:\config.sys > NUL
+%cube {ADDLINE "SET MAKESHELL=%%{os2_expand_unixroot %%{_bindir}/sh.exe}" (IFNOT "SET MAKESHELL=")} c:\config.sys > NUL
+%cube {ADDLINE "SET EXECSHELL=%%{os2_expand_unixroot %%{_bindir}/sh.exe}" (IFNOT "SET EXECSHELL=")} c:\config.sys > NUL
 %cube {ADDLINE "REM [ Temporary directory ]" (IFNOT "REM [ Temporary directory ]")} c:\config.sys > NUL
 %cube {ADDLINE "SET TMP=%{os2_dos_path /@unixroot/var/tmp}" (IFNOT "SET TMP=")} c:\config.sys > NUL
 %cube {ADDLINE "SET TEMP=%{os2_dos_path /@unixroot/var/tmp}" (IFNOT "SET TEMP=")} c:\config.sys > NUL
@@ -353,6 +356,9 @@ fi
 
 
 %changelog
+* Mon Apr 23 2018 Dmitriy Kuminov <coding@dmik.org> 0.0.0-18
+- Make sure SHELL/EMXSHELL and friends in CONFIG.SYS use forward slashes.
+
 * Fri Jul 28 2017 Dmitriy Kuminov <coding@dmik.org> 0.0.0-17
 - Use handy os2_dos_path, os2_langdir etc. macros from os2-rpm.
 - Make os2-base own os2_langdir.
