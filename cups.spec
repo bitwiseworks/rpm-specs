@@ -427,7 +427,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Mon Nov 27 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.1.3-10
-- add ETC to the env, as else tcpip32.dll doesn't find any dns names
+- add ETC to the env, as otherwise tcpip32.dll doesn't find any dns names
 
 * Tue Oct 03 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.1.3-9
 - moved source to github
