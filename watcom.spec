@@ -102,7 +102,7 @@ fi
 
 %changelog
 * Mon Mar 19 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.0beta3-3
-- wipfc doesn't line the trailing ; in set wpifc
+- wipfc doesn't like the trailing ; in set wpifc
 
 * Wed Mar 14 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.0beta3-2
 - change/add the wipfc config files
