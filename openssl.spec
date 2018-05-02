@@ -124,6 +124,7 @@ sslarch=OS2-KNIX
 # usable on all platforms.  The Configure script already knows to use -fPIC and
 # RPM_OPT_FLAGS, so we can skip specifiying them here.
 
+libs=-lcx
 export CFLAGS="${CFLAGS:-%optflags}"
 export VENDOR="%{vendor}"
 export PERL="%{__perl}"
@@ -133,7 +134,7 @@ export PERL="%{__perl}"
 	zlib enable-camellia enable-seed enable-tlsext enable-rfc3779 \
 	enable-cms enable-md2 enable-rc5 experimental-jpake \
 	no-mdc2 no-ec2m no-gost no-srp \
-	shared  ${sslarch}
+	shared  ${sslarch} ${libs}
 
 # Fedora flage we don't use 
 #	--system-ciphers-file=%{_sysconfdir}/crypto-policies/back-ends/openssl.config \
@@ -354,6 +355,7 @@ rm -rf $RPM_BUILD_ROOT/%{_libdir}/fipscanister.*
 * Wed May 02 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.0.2o-1
 - Update to version 1.0.2o.
 - moved source to github
+- link against libcx
 
 * Wed Mar 01 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.0.2k-1
 - Update to version 1.0.2k.
