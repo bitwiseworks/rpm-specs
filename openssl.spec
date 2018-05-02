@@ -25,24 +25,25 @@
 
 Summary: A general purpose cryptography library with TLS implementation
 Name: openssl
-Version: 1.0.2k
+Version: 1.0.2o
 Release: 1%{?dist}
 
 License: OpenSSL
 Group: System Environment/Libraries
 URL: http://www.openssl.org/
+Vendor: bww bitwise works GmbH
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildRequires: coreutils, perl, sed, zlib-devel, diffutils
 BuildRequires: gcc, make, subversion, zip
 #BuildRequires: krb5-devel, perl-generators, 
 #BuildRequires: lksctp-tools-devel
-#BuildRequires: /usr/bin/pod2man
+BuildRequires: /@unixroot/usr/bin/pod2man
 
 Requires: coreutils
 Requires: %{name}-libs = %{version}-%{release}
 
-%scm_source svn http://svn.netlabs.org/repos/ports/openssl/trunk 2112
+%scm_source github http://github.com/bitwiseworks/openssl-os2 1.0.2o-os2
 
 %description
 The OpenSSL toolkit provides support for secure communications between
@@ -134,14 +135,11 @@ export PERL="%{__perl}"
 	no-mdc2 no-ec2m no-gost no-srp \
 	shared  ${sslarch}
 
-# Original Fedora's openssl-1.0.2h flags:
-#	--prefix=%{_prefix} --openssldir=%{_sysconfdir}/pki/tls ${sslflags} \
+# Fedora flage we don't use 
 #	--system-ciphers-file=%{_sysconfdir}/crypto-policies/back-ends/openssl.config \
-#	zlib sctp enable-camellia enable-seed enable-tlsext enable-rfc3779 \
-#	enable-cms enable-md2 enable-rc5 \
-#	no-mdc2 no-ec2m no-gost no-srp \
+#	sctp \
 #	--with-krb5-flavor=MIT --enginesdir=%{_libdir}/openssl/engines \
-#	--with-krb5-dir=/usr shared  ${sslarch} %{?!nofips:fips}
+#	--with-krb5-dir=/usr %{?!nofips:fips}
 
 # Add -Wa,--noexecstack here so that libcrypto's assembler modules will be
 # marked as not requiring an executable stack.
@@ -353,6 +351,10 @@ rm -rf $RPM_BUILD_ROOT/%{_libdir}/fipscanister.*
 %{_sysconfdir}/pki/tls/misc/tsget
 
 %changelog
+* Wed May 02 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.0.2o-1
+- Update to version 1.0.2o.
+- moved source to github
+
 * Wed Mar 01 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.0.2k-1
 - Update to version 1.0.2k.
 - use new scm_ macros
