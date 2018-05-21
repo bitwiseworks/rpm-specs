@@ -6,7 +6,7 @@ License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Standard Shared Libraries
 Group:          System/Libraries
 Version:        0.6.6
-Release:        36%{?dist}
+Release:        37%{?dist}
 Url:            http://svn.netlabs.org/libc
 
 Source:         libc-%{version}.zip
@@ -171,6 +171,7 @@ rm -rf $RPM_BUILD_ROOT
 %exclude %{_includedir}/libintl.h
 %{_usr}/info
 %{_libdir}
+%exclude %{_libdir}/libc06*.dll
 %exclude %{_libdir}/*.dbg
 %exclude %{_libdir}/dbg
 %exclude %{_libdir}/tcpipv4/dbg
@@ -193,6 +194,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/tcpipv4/dbg
 
 %changelog
+* Mon May 21 2018 Dmitriy Kuminov <coding@dmik.org> 0.6.6-37
+- Make libc-devel not provide libXXX.dll (it's provided by libc).
+
 * Tue Apr 17 2018 Dmitriy Kuminov <coding@dmik.org> 0.6.6-36
 - Apply patch from ticket #384 to fix DosAllocMemEx(OBJ_LOCATION) bug.
 
