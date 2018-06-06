@@ -5,14 +5,14 @@
 Summary:    kLIBC User Management
 Name:       klusrmgr
 Version:    1.1.4
-Release:    1%{?dist}
+Release:    2%{?dist}
 License:    proprietary
 Group:      Applications/System
 URL:        http://www.netlabs.org/vxapps
 Vendor:     bww bitwise works GmbH
 Source:     %{name}-%{version}.zip
 BuildRoot:  %_tmppath/%name-%version-%release-root
-Requires:   wpi4rpm >= 0.9.2
+Requires:   os2-rpm >= 1-2
 Requires:   rxcrypt >= 1.0.0
 Requires:   bww-resources-rpm >= 1.1.0
 Obsoletes:  kLIBCum <= 1.0.10
@@ -35,13 +35,15 @@ unzip -q %{_sourcedir}/%{name}-%{version}.zip
 
 
 %install
-mkdir -p $RPM_BUILD_ROOT%{_bindir}
-cp usr/bin/*.exe $RPM_BUILD_ROOT%{_bindir}
-cp usr/bin/*.EXE $RPM_BUILD_ROOT%{_bindir}
-mkdir -p $RPM_BUILD_ROOT%{_defaultdocdir}/%{name}-%{version}
-cp usr/share/doc/klusrmgr/readme.txt $RPM_BUILD_ROOT%{_defaultdocdir}/%{name}-%{version}
-mkdir -p $RPM_BUILD_ROOT%{_datadir}/os2/lang
-cp usr/share/os2/lang/*.msg $RPM_BUILD_ROOT%{_datadir}/os2/lang
+for f in *.exe *.EXE ; do
+  install -p -m0755 -D $f  $RPM_BUILD_ROOT%{_bindir}/$f
+done
+for f in readme.txt ; do
+  install -p -m0644 -D $f  $RPM_BUILD_ROOT%{_defaultdocdir}/%{name}-%{version}/$f
+done
+for f in *.msg ; do
+  install -p -m0644 -D $f  $RPM_BUILD_ROOT%{_datadir}/os2/lang/$f
+done
 
 
 %clean
@@ -50,7 +52,7 @@ rm -rf "$RPM_BUILD_ROOT"
 %post
 if [ "$1" -ge 1 ]; then # (upon update)
     %wps_object_delete_all
-    wpi4rpm del %{vendor}/%{name}/binaries %{version}-%{release}
+    %{_rpmconfigdir_os2}/wpi4rpm del %{vendor}/%{name}/binaries %{version}-%{release}
 fi
 %global title %{summary}
 %bww_folder -t %{title}
@@ -58,13 +60,13 @@ fi
 %bww_readme -f %{_defaultdocdir}/%{name}-%{version}/readme.txt
 %bww_app_shadow 
 %bww_app_shadow -d WP_CONFIG
-wpi4rpm add %{vendor}/%{name}/binaries %{version}-%{release}
+%{_rpmconfigdir_os2}/wpi4rpm add %{vendor}/%{name}/binaries %{version}-%{release}
 klusrmgr -init
 
 %postun
 if [ "$1" -eq 0 ]; then # (upon removal)
     %wps_object_delete_all
-    wpi4rpm del %{vendor}/%{name}/binaries %{version}-%{release}
+    %{_rpmconfigdir_os2}/wpi4rpm del %{vendor}/%{name}/binaries %{version}-%{release}
 fi
 
 %files
@@ -76,7 +78,10 @@ fi
 
 
 %changelog
-* Thu Feb 06 2018 hb <herwig.bauernfeind@bitwiseworks.com> 1.1.4-1
+* Sun May 27 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.1.4-2
+- fix the location of wpi4rpm
+
+* Tue Feb 06 2018 hb <herwig.bauernfeind@bitwiseworks.com> 1.1.4-1
 - Fix: Missing msgs from 1.1.x sometimes did not work
 - Fix: Tab order on user page
 - Fix: Verify if passwords match also for new users
