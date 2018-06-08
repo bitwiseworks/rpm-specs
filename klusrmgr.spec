@@ -80,6 +80,7 @@ fi
 %changelog
 * Sun May 27 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.1.4-2
 - fix the location of wpi4rpm
+- make klusrmgr -init workable from rpm
 
 * Tue Feb 06 2018 hb <herwig.bauernfeind@bitwiseworks.com> 1.1.4-1
 - Fix: Missing msgs from 1.1.x sometimes did not work
