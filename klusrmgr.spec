@@ -61,7 +61,7 @@ fi
 %bww_app_shadow 
 %bww_app_shadow -d WP_CONFIG
 %{_rpmconfigdir_os2}/wpi4rpm add %{vendor}/%{name}/binaries %{version}-%{release}
-klusrmgr -init
+cmd /c klusrmgr.exe -init
 
 %postun
 if [ "$1" -eq 0 ]; then # (upon removal)
