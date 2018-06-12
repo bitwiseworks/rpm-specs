@@ -1,17 +1,12 @@
-#define svn_url     e:/trees/unzip/trunk
-%define svn_url     http://svn.netlabs.org/repos/ports/unzip/trunk
-%define svn_rev     1929
-
-
 Summary: A utility for unpacking zip files
 Name: unzip
 Version: 6.0
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: BSD
 Group: Applications/Archiving
 Vendor: bww bitwise works GmbH
-Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
+%scm_source svn http://svn.netlabs.org/repos/ports/unzip/trunk 2285
 
 URL: http://www.info-zip.org/UnZip.html
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -34,14 +29,7 @@ a zip archive.
 
 
 %prep
-%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc
-svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
-%endif
+%scm_setup
 
 %build
 make -f os2/Makefile.os2 CFLAGS="$RPM_OPT_FLAGS" klibc %{?_smp_mflags}
@@ -61,6 +49,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/*
 
 %changelog
+* Tue Jun 12 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 6.0-7
+- fix ticket #184
+
 * Thu Jan 19 2017 Herwig Bauernfeild <herwig.bauernfeind@bitwiseworks.com> 6.0-6
 - fix wildcards ticket #136
 
