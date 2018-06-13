@@ -4,8 +4,8 @@
 
 Summary:    kLIBC User Management
 Name:       klusrmgr
-Version:    1.1.4
-Release:    3%{?dist}
+Version:    1.1.5
+Release:    1%{?dist}
 License:    proprietary
 Group:      Applications/System
 URL:        http://www.netlabs.org/vxapps
@@ -78,6 +78,9 @@ fi
 
 
 %changelog
+* Wed Jun 13 2018 hb <herwig.bauernfeind@bitwiseworks.com> 1.1.5-1
+- disable potentially dangeraous operations in case Samba User Manager is found
+
 * Fri Jun 8 2018 hb <herwig.bauernfeind@bitwiseworks.com> 1.1.4-3
 - make klusrmgr -init workable from rpm (fix by Silvan Scherrer)
 
