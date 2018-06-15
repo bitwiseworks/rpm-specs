@@ -21,31 +21,20 @@ unzip -q %{_sourcedir}/%{name}-%{version}.zip
 
 %build
 
-
 %install
-mkdir -p $RPM_BUILD_ROOT%{_bindir}
-cp *.exe $RPM_BUILD_ROOT%{_bindir}
-mkdir -p $RPM_BUILD_ROOT%{_defaultdocdir}/%{name}-%{version}
-cp readme.txt $RPM_BUILD_ROOT%{_defaultdocdir}/%{name}-%{version}
+rm -rf %{buildroot}
+for f in *.exe ; do
+  install -p -m 0755 -D $f  $RPM_BUILD_ROOT%{_bindir}/$f
+done
 
 %clean
 rm -rf "$RPM_BUILD_ROOT"
 
-%post
-if [ "$1" -ge 1 ]; then # (upon update)
-    %wps_object_delete_all
-fi
-
-%postun
-if [ "$1" -eq 0 ]; then # (upon removal)
-    %wps_object_delete_all
-fi
-
 %files
 %defattr(-,root,root,-)
-%_defaultdocdir/%{name}-%{version}/readme.txt
+%doc readme.txt
 %_bindir/*.exe
 
 %changelog
-* Fri Jun 15 2018 Yuri Dario <yd@os2power.com> 1.0.0-1
+* Fri Jun 15 2018 herwig Bauernfeind <herwig.bauernfeind@bitwiseworks.com> 1.0.0-1
 - first public rpm version
