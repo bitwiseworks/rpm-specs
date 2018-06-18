@@ -54,7 +54,7 @@
 Summary: An interpreted, interactive, object-oriented programming language
 Name: %{python}
 Version: 2.7.6
-Release: 20%{?dist}
+Release: 21%{?dist}
 License: Python
 Group: Development/Languages
 Vendor: bww bitwise works GmbH
@@ -105,7 +105,7 @@ BuildRequires: bzip2 pkgconfig tcl-devel
 BuildRequires: bzip2-devel sqlite-devel
 BuildRequires: autoconf
 BuildRequires: db4-devel >= 4.8
-#BuildRequires: libffi-devel
+BuildRequires: libffi-devel
 %if 0%{?with_valgrind}
 BuildRequires: valgrind-devel
 %endif
@@ -371,8 +371,8 @@ rm -fr %{buildroot}
 %post
 if [ "$1" = 1 ] ; then
 #execute only on first install
-%cube {DELLINE "SET PYTHONPATH="} c:\config.sys > NUL
-%cube {DELLINE "SET PYTHONHOME="} c:\config.sys > NUL
+%cube {DELLINE "SET PYTHONPATH="} %{os2_config_sys} > NUL
+%cube {DELLINE "SET PYTHONHOME="} %{os2_config_sys} > NUL
 fi
 
 
@@ -522,7 +522,10 @@ fi
 # payload file would be unpackaged)
 
 %changelog
-* Tue Apr 18 2018 Dmitriy Kuminov <coding@dmik.org> 2.7.6-20.
+* Mon Jun 18 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.7.6-21
+- use %{os2_config_sys} macro instead of fixed c:\config.sys
+
+* Wed Apr 18 2018 Dmitriy Kuminov <coding@dmik.org> 2.7.6-20.
 - Understand `*module.pyd` and `*module.dll` extensions for Python modules.
 - Improve handling of BEGINLIBPATH and other pseudo-env vars (#299).
 
