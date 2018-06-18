@@ -2,7 +2,7 @@
 Summary: OS/2 - eComStation 2.0 - ArcaOS 5.0 base
 Name: os2-base
 Version: 0.0.0
-Release: 18%{?dist}
+Release: 19%{?dist}
 
 License: free
 
@@ -299,35 +299,35 @@ echo i686-OS/2-OS/2 > $RPM_BUILD_ROOT%{_sysconfdir}/rpm/platform
 %post -e
 if [ "$1" = 1 ] ; then
 #execute only on first install
-%cube {ADDSTRING "%{os2_dos_path %{_sbindir};%{_bindir}};" IN "SET PATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys c:\config.sys.yum > NUL
-%cube {ADDSTRING "%{os2_dos_path %{_libdir}};" IN "LIBPATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
-%cube {DELLINE "SET UNIXROOT="} c:\config.sys > NUL
-%cube {ADDLINE "SET UNIXROOT=%UNIXROOT%" (ALWAYS)} c:\config.sys > NUL
+%cube {ADDSTRING "%{os2_dos_path %{_sbindir};%{_bindir}};" IN "SET PATH=" (FIRST IFNEW BEFORE RS(%%)} %{os2_config_sys} %{os2_config_sys}.yum > NUL
+%cube {ADDSTRING "%{os2_dos_path %{_libdir}};" IN "LIBPATH=" (FIRST IFNEW BEFORE RS(%%)} %{os2_config_sys} > NUL
+%cube {DELLINE "SET UNIXROOT="} %{os2_config_sys} > NUL
+%cube {ADDLINE "SET UNIXROOT=%UNIXROOT%" (ALWAYS)} %{os2_config_sys} > NUL
 fi
-%cube {ADDLINE "SET TERM=os2" (IFNOT "SET TERM=")} c:\config.sys > NUL
-%cube {ADDLINE "REM [ Default shell values ]" (IFNOT "REM [ Default shell values ]")} c:\config.sys > NUL
-%cube {ADDLINE "SET SHELL=%%{os2_expand_unixroot %%{_bindir}/sh.exe}" (IFNOT "SET SHELL=")} c:\config.sys > NUL
-%cube {ADDLINE "SET EMXSHELL=%%{os2_expand_unixroot %%{_bindir}/sh.exe}" (IFNOT "SET EMXSHELL=")} c:\config.sys > NUL
-%cube {ADDLINE "SET CONFIG_SHELL=%%{os2_expand_unixroot %%{_bindir}/sh.exe}" (IFNOT "SET CONFIG_SHELL=")} c:\config.sys > NUL
-%cube {ADDLINE "SET MAKESHELL=%%{os2_expand_unixroot %%{_bindir}/sh.exe}" (IFNOT "SET MAKESHELL=")} c:\config.sys > NUL
-%cube {ADDLINE "SET EXECSHELL=%%{os2_expand_unixroot %%{_bindir}/sh.exe}" (IFNOT "SET EXECSHELL=")} c:\config.sys > NUL
-%cube {ADDLINE "REM [ Temporary directory ]" (IFNOT "REM [ Temporary directory ]")} c:\config.sys > NUL
-%cube {ADDLINE "SET TMP=%{os2_dos_path /@unixroot/var/tmp}" (IFNOT "SET TMP=")} c:\config.sys > NUL
-%cube {ADDLINE "SET TEMP=%{os2_dos_path /@unixroot/var/tmp}" (IFNOT "SET TEMP=")} c:\config.sys > NUL
-%cube {ADDLINE "SET TMPDIR=%{os2_dos_path /@unixroot/var/tmp}" (IFNOT "SET TMPDIR=")} c:\config.sys > NUL
-%cube {ADDSTRING "%{os2_dos_path %{os2_bookdir}};" IN "SET BOOKSHELF=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
-%cube {ADDSTRING "%{os2_dos_path %{os2_helpdir}};" IN "SET HELP=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
-%cube {ADDSTRING "%{os2_dos_path %{os2_langdir}};" IN "SET DPATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
+%cube {ADDLINE "SET TERM=os2" (IFNOT "SET TERM=")} %{os2_config_sys} > NUL
+%cube {ADDLINE "REM [ Default shell values ]" (IFNOT "REM [ Default shell values ]")} %{os2_config_sys} > NUL
+%cube {ADDLINE "SET SHELL=%%{os2_expand_unixroot %%{_bindir}/sh.exe}" (IFNOT "SET SHELL=")} %{os2_config_sys} > NUL
+%cube {ADDLINE "SET EMXSHELL=%%{os2_expand_unixroot %%{_bindir}/sh.exe}" (IFNOT "SET EMXSHELL=")} %{os2_config_sys} > NUL
+%cube {ADDLINE "SET CONFIG_SHELL=%%{os2_expand_unixroot %%{_bindir}/sh.exe}" (IFNOT "SET CONFIG_SHELL=")} %{os2_config_sys} > NUL
+%cube {ADDLINE "SET MAKESHELL=%%{os2_expand_unixroot %%{_bindir}/sh.exe}" (IFNOT "SET MAKESHELL=")} %{os2_config_sys} > NUL
+%cube {ADDLINE "SET EXECSHELL=%%{os2_expand_unixroot %%{_bindir}/sh.exe}" (IFNOT "SET EXECSHELL=")} %{os2_config_sys} > NUL
+%cube {ADDLINE "REM [ Temporary directory ]" (IFNOT "REM [ Temporary directory ]")} %{os2_config_sys} > NUL
+%cube {ADDLINE "SET TMP=%{os2_dos_path /@unixroot/var/tmp}" (IFNOT "SET TMP=")} %{os2_config_sys} > NUL
+%cube {ADDLINE "SET TEMP=%{os2_dos_path /@unixroot/var/tmp}" (IFNOT "SET TEMP=")} %{os2_config_sys} > NUL
+%cube {ADDLINE "SET TMPDIR=%{os2_dos_path /@unixroot/var/tmp}" (IFNOT "SET TMPDIR=")} %{os2_config_sys} > NUL
+%cube {ADDSTRING "%{os2_dos_path %{os2_bookdir}};" IN "SET BOOKSHELF=" (FIRST IFNEW BEFORE RS(%%)} %{os2_config_sys} > NUL
+%cube {ADDSTRING "%{os2_dos_path %{os2_helpdir}};" IN "SET HELP=" (FIRST IFNEW BEFORE RS(%%)} %{os2_config_sys} > NUL
+%cube {ADDSTRING "%{os2_dos_path %{os2_langdir}};" IN "SET DPATH=" (FIRST IFNEW BEFORE RS(%%)} %{os2_config_sys} > NUL
 
 %postun
 if [ "$1" = 0 ] ; then
 #execute only on last uninstall
-%cube {DELSTRING "%{os2_dos_path %{_sbindir};%{_bindir}};" IN "SET PATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
-%cube {DELSTRING "%{os2_dos_path %{_libdir}};" IN "LIBPATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
-%cube {DELLINE "SET UNIXROOT="} c:\config.sys > NUL
-%cube {DELSTRING "%{os2_dos_path %{os2_bookdir}};" IN "SET BOOKSHELF=" (FIRST} c:\config.sys > NUL
-%cube {DELSTRING "%{os2_dos_path %{os2_helpdir}};" IN "SET HELP=" (FIRST} c:\config.sys > NUL
-%cube {DELSTRING "%{os2_dos_path %{os2_langdir}};" IN "SET DPATH=" (FIRST} c:\config.sys > NUL
+%cube {DELSTRING "%{os2_dos_path %{_sbindir};%{_bindir}};" IN "SET PATH=" (FIRST IFNEW BEFORE RS(%%)} %{os2_config_sys} > NUL
+%cube {DELSTRING "%{os2_dos_path %{_libdir}};" IN "LIBPATH=" (FIRST IFNEW BEFORE RS(%%)} %{os2_config_sys} > NUL
+%cube {DELLINE "SET UNIXROOT="} %{os2_config_sys} > NUL
+%cube {DELSTRING "%{os2_dos_path %{os2_bookdir}};" IN "SET BOOKSHELF=" (FIRST} %{os2_config_sys} > NUL
+%cube {DELSTRING "%{os2_dos_path %{os2_helpdir}};" IN "SET HELP=" (FIRST} %{os2_config_sys} > NUL
+%cube {DELSTRING "%{os2_dos_path %{os2_langdir}};" IN "SET DPATH=" (FIRST} %{os2_config_sys} > NUL
 fi
 
 %post fhs
@@ -345,17 +345,20 @@ fi
 %post unixtools-path
 if [ "$1" = 1 ] ; then
 #execute only on first install
-%cube {ADDSTRING "%UNIXROOT%\usr\libexec\bin;" IN "SET PATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys c:\config.sys.yum > NUL
+%cube {ADDSTRING "%UNIXROOT%\usr\libexec\bin;" IN "SET PATH=" (FIRST IFNEW BEFORE RS(%%)} %{os2_config_sys} %{os2_config_sys}.yum > NUL
 fi
 
 %postun unixtools-path
 if [ "$1" = 0 ] ; then
 #execute only on last uninstall
-%cube {DELSTRING "%UNIXROOT%\usr\libexec\bin;" IN "SET PATH=" (FIRST IFNEW BEFORE RS(%%)} c:\config.sys > NUL
+%cube {DELSTRING "%UNIXROOT%\usr\libexec\bin;" IN "SET PATH=" (FIRST IFNEW BEFORE RS(%%)} %{os2_config_sys} > NUL
 fi
 
 
 %changelog
+* Mon Jun 18 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.0.0-19
+- use %{os2_config_sys} macro instead of fixed c:\config.sys
+
 * Mon Apr 23 2018 Dmitriy Kuminov <coding@dmik.org> 0.0.0-18
 - Make sure SHELL/EMXSHELL and friends in CONFIG.SYS use forward slashes.
 
