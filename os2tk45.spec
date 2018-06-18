@@ -1,7 +1,7 @@
 Summary: IBM OS/2 Developer's Toolkit Version 4.5
 Name: os2tk45
 Version: 4.5.2
-Release: 6%{?dist}
+Release: 7%{?dist}
 Group: System Environment/Libraries
 License: IBM
 Vendor: bww bitwise works GmbH
@@ -169,50 +169,53 @@ Provides IBM OS/2 Developer's Toolkit book files in INF and HLP formats.
 %{os2_bookdir}/*
 
 %post headers
-%cube {ADDSTRING "%{os2_dos_path %{os2tk45_includedir}/inc;%{os2tk45_includedir}/gl;%{os2tk45_includedir}};" IN "SET INCLUDE=" (FIRST IFNEW BEFORE ADDBOTTOM RS(%%)} c:\config.sys > NUL
+%cube {ADDSTRING "%{os2_dos_path %{os2tk45_includedir}/inc;%{os2tk45_includedir}/gl;%{os2tk45_includedir}};" IN "SET INCLUDE=" (FIRST IFNEW BEFORE ADDBOTTOM RS(%%)} %{os2_config_sys} > NUL
 
 %postun headers
 if [ "$1" = 0 ] ; then
 # execute only on last uninstall
-%cube {DELSTRING "%{os2_dos_path %{os2tk45_includedir}/inc;%{os2tk45_includedir}/gl;%{os2tk45_includedir}};" IN "SET INCLUDE=" (FIRST RS(%%)} c:\config.sys > NUL
+%cube {DELSTRING "%{os2_dos_path %{os2tk45_includedir}/inc;%{os2tk45_includedir}/gl;%{os2tk45_includedir}};" IN "SET INCLUDE=" (FIRST RS(%%)} %{os2_config_sys} > NUL
 fi
 
 %post ipfc
-%cube {ADDSTRING "%{os2_dos_path %{_datadir}/os2/ipfc};" IN "SET IPFC=" (FIRST IFNEW BEFORE ADDBOTTOM RS(%%)} c:\config.sys > NUL
+%cube {ADDSTRING "%{os2_dos_path %{_datadir}/os2/ipfc};" IN "SET IPFC=" (FIRST IFNEW BEFORE ADDBOTTOM RS(%%)} %{os2_config_sys} > NUL
 
 %postun ipfc
 if [ "$1" = 0 ] ; then
 # execute only on last uninstall
-%cube {DELSTRING "%{os2_dos_path %{_datadir}/os2/ipfc};" IN "SET IPFC=" (FIRST RS(%%)} c:\config.sys > NUL
+%cube {DELSTRING "%{os2_dos_path %{_datadir}/os2/ipfc};" IN "SET IPFC=" (FIRST RS(%%)} %{os2_config_sys} > NUL
 fi
 
 %post libs
-%cube {ADDSTRING "%{os2_dos_path %{_libdir}};" IN "SET LIB=" (FIRST IFNEW BEFORE ADDBOTTOM RS(%%)} c:\config.sys > NUL
+%cube {ADDSTRING "%{os2_dos_path %{_libdir}};" IN "SET LIB=" (FIRST IFNEW BEFORE ADDBOTTOM RS(%%)} %{os2_config_sys} > NUL
 
 %postun libs
 if [ "$1" = 0 ] ; then
 # execute only on last uninstall
-%cube {DELSTRING "%{os2_dos_path %{_libdir}};" IN "SET LIB=" (FIRST RS(%%)} c:\config.sys > NUL
+%cube {DELSTRING "%{os2_dos_path %{_libdir}};" IN "SET LIB=" (FIRST RS(%%)} %{os2_config_sys} > NUL
 fi
 
 %post books
-%cube {REPLINE "SET CPREF=" WITH "SET CPREF=CP1.INF+CP2.INF+CP3.INF" (ADDBOTTOM} c:\config.sys > NUL
-%cube {REPLINE "SET GPIREF=" WITH "SET GPIREF=GPI1.INF+GPI2.INF+GPI3.INF+GPI4.INF" (ADDBOTTOM} c:\config.sys > NUL
-%cube {REPLINE "SET MMREF=" WITH "SET MMREF=MMREF1.INF+MMREF2.INF+MMREF3.INF" (ADDBOTTOM} c:\config.sys > NUL
-%cube {REPLINE "SET PMREF=" WITH "SET PMREF=PM1.INF+PM2.INF+PM3.INF+PM4.INF+PM5.INF" (ADDBOTTOM} c:\config.sys > NUL
-%cube {REPLINE "SET WPSREF=" WITH "SET WPSREF=WPS1.INF+WPS2.INF+WPS3.INF" (ADDBOTTOM} c:\config.sys > NUL
+%cube {REPLINE "SET CPREF=" WITH "SET CPREF=CP1.INF+CP2.INF+CP3.INF" (ADDBOTTOM} %{os2_config_sys} > NUL
+%cube {REPLINE "SET GPIREF=" WITH "SET GPIREF=GPI1.INF+GPI2.INF+GPI3.INF+GPI4.INF" (ADDBOTTOM} %{os2_config_sys} > NUL
+%cube {REPLINE "SET MMREF=" WITH "SET MMREF=MMREF1.INF+MMREF2.INF+MMREF3.INF" (ADDBOTTOM} %{os2_config_sys} > NUL
+%cube {REPLINE "SET PMREF=" WITH "SET PMREF=PM1.INF+PM2.INF+PM3.INF+PM4.INF+PM5.INF" (ADDBOTTOM} %{os2_config_sys} > NUL
+%cube {REPLINE "SET WPSREF=" WITH "SET WPSREF=WPS1.INF+WPS2.INF+WPS3.INF" (ADDBOTTOM} %{os2_config_sys} > NUL
 
 %postun books
 if [ "$1" = 0 ] ; then
 # execute only on last uninstall
-%cube {DELLINE "SET CPREF="} c:\config.sys > NUL
-%cube {DELLINE "SET GPIREF="} c:\config.sys > NUL
-%cube {DELLINE "SET MMREF="} c:\config.sys > NUL
-%cube {DELLINE "SET PMREF="} c:\config.sys > NUL
-%cube {DELLINE "SET WPSREF="} c:\config.sys > NUL
+%cube {DELLINE "SET CPREF="} %{os2_config_sys} > NUL
+%cube {DELLINE "SET GPIREF="} %{os2_config_sys} > NUL
+%cube {DELLINE "SET MMREF="} %{os2_config_sys} > NUL
+%cube {DELLINE "SET PMREF="} %{os2_config_sys} > NUL
+%cube {DELLINE "SET WPSREF="} %{os2_config_sys} > NUL
 fi
 
 %changelog
+* Mon Jun 18 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.5.2-7
+- use %{os2_config_sys} macro instead of fixed c:\config.sys
+
 * Fri Jul 28 2017 Dmitriy Kuminov <coding@dmik.org> 4.5.2-6
 - Add utils sub-package (currently with EXEHDR, ALP and MAPSYM).
 - Add ipfc sub-package with IPFC and support files.
