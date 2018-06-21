@@ -2,13 +2,13 @@
 
 Name:           qpdfview
 Version:        0.4.17
-Release:        3%{?prerelease}%{?dist}
+Release:        4%{?prerelease}%{?dist}
 License:        GPLv2+
 Summary:        Tabbed PDF Viewer
 Url:            https://launchpad.net/qpdfview
 
 Vendor:         bww bitwise works GmbH
-%scm_source github https://github.com/bitwiseworks/qpdfview %{version}
+%scm_source github https://github.com/bitwiseworks/qpdfview-os2 master
 
 Requires:       bww-resources-rpm
 Requires:       libqt4
@@ -85,10 +85,11 @@ if [ "$1" -ge 1 ]; then # (upon update)
     %wps_object_delete_all
 fi
 # for the definition of the parameters see macros.bww
-%define title Tabbed PDF viewer
-%bww_folder -s Y -d %_defaultdocdir/%{name}-common-%{version} -t %{title}
-%bww_app -e %{name} -s Y -a *.pdf,*.ps,*.eps,*.djvu,*.djv -t %{title}
-%bww_readme -r README -d %_defaultdocdir/%{name}-common-%{version}
+%global title %{summary}
+%bww_folder -t %{title}
+%bww_app -f %{_bindir}/%{name}.exe -t %{title} -a *.pdf,*.ps,*.eps,*.djvu,*.djv
+%bww_app_shadow
+%bww_readme -f %_defaultdocdir/%{name}-common-%{version}/README
 
 
 %postun
@@ -110,6 +111,10 @@ fi
 %{_mandir}/man?/*
 
 %changelog
+* Thu Jun 21 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.4.17-4.beta1
+- rebuild with latest macro.bww to fix several glitches
+- fix a printing issue with umlaut in file names
+
 * Wed Jun 28 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.4.17-3.beta1
 - rebuild with latest macro.bww to fix an install glitch
 
