@@ -1,10 +1,11 @@
 %global prerelease beta1
+%global title Tabbed PDF Viewer
 
 Name:           qpdfview
 Version:        0.4.17
-Release:        4%{?prerelease}%{?dist}
+Release:        5%{?prerelease}%{?dist}
 License:        GPLv2+
-Summary:        Tabbed PDF Viewer
+Summary:        %{title}
 Url:            https://launchpad.net/qpdfview
 
 Vendor:         bww bitwise works GmbH
@@ -85,7 +86,6 @@ if [ "$1" -ge 1 ]; then # (upon update)
     %wps_object_delete_all
 fi
 # for the definition of the parameters see macros.bww
-%global title %{summary}
 %bww_folder -t %{title}
 %bww_app -f %{_bindir}/%{name}.exe -t %{title} -a *.pdf,*.ps,*.eps,*.djvu,*.djv
 %bww_app_shadow
@@ -111,6 +111,9 @@ fi
 %{_mandir}/man?/*
 
 %changelog
+* Thu Jun 21 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.4.17-5.beta1
+- fix a glitch in the folder description
+
 * Thu Jun 21 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.4.17-4.beta1
 - rebuild with latest macro.bww to fix several glitches
 - fix a printing issue with umlaut in file names
