@@ -1,0 +1,5 @@
+%highmem()\
+%global _options %{1}\
+%global _file %{2}\
+cmd /c highmem -%_options "%os2_dos_path %_file"\
+%nil
