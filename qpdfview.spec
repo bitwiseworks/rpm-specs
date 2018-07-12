@@ -1,9 +1,9 @@
-%global prerelease beta1
+%global prerelease beta2
 %global title Tabbed PDF Viewer
 
 Name:           qpdfview
 Version:        0.4.17
-Release:        5%{?prerelease}%{?dist}
+Release:        6%{?prerelease}%{?dist}
 License:        GPLv2+
 Summary:        %{title}
 Url:            https://launchpad.net/qpdfview
@@ -111,6 +111,9 @@ fi
 %{_mandir}/man?/*
 
 %changelog
+* Thu Jul 12 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.4.17-6.beta2
+- updated to latest vendor version
+
 * Thu Jun 21 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.4.17-5.beta1
 - fix a glitch in the folder description
 
