@@ -3,7 +3,7 @@
 Summary: Spell checker
 Name: aspell
 Version: 0.60.6.1
-Release: 3%{?dist} 
+Release: 4%{?dist} 
 License: LGPLv2+ and LGPLv2 and GPLv2+ and BSD
 Group: Applications/Text
 URL: http://aspell.net/
@@ -49,8 +49,8 @@ autoreconf -fvi
 
 %build
 export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
-#export LIBS="-ltinfo -lcx"
-export LIBS="-ltinfo"
+export LIBS="-ltinfo -lcx"
+#export LIBS="-ltinfo"
 export VENDOR="%{vendor}"
 
 %configure --disable-static
@@ -133,6 +133,9 @@ fi
 
 
 %changelog
+* Mon Jul 16 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.60.6.1-4
+- reenable -lcx
+
 * Wed May 23 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.60.6.1-3
 - don't use -lcx, as it crashes in mmap
 
