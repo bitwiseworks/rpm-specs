@@ -3,14 +3,14 @@
 
 Summary: Library providing XML and HTML support
 Name: libxml2
-Version: 2.9.4
-Release: 3%{?dist}
+Version: 2.9.8
+Release: 1%{?dist}
 License: MIT
 Group: Development/Libraries
 URL: http://xmlsoft.org/
 Vendor: bww bitwise works GmbH
 
-%scm_source  svn http://svn.netlabs.org/repos/ports/xml2/trunk 2188
+%scm_source  github http://github.com/bitwiseworks/%{name}-os2 master
 
 # DEF files to create forwarders for the legacy package
 Source10:       libxml2.def
@@ -237,6 +237,10 @@ rm -fr %{buildroot}
 %endif # with_python3
 
 %changelog
+* Thu Jul 26 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.9.8-1
+- update to vendor version 2.9.8
+- moved source to github
+
 * Thu May 04 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.9.4-3
 - prefix /etc path with /@unixroot
 - use the new scm_source and scm_setup macros
