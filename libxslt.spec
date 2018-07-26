@@ -1,17 +1,13 @@
-#define svn_url     e:/trees/libxml2/trunk
-%define svn_url     http://svn.netlabs.org/repos/ports/xslt/trunk
-%define svn_rev     1829
-
 Summary: Library providing the Gnome XSLT engine
 Name: libxslt
-Version: 1.1.29
-Release: 2%{?dist}%{?extra_release}
+Version: 1.1.32
+Release: 1%{?dist}%{?extra_release}
 License: MIT
 Group: Development/Libraries
 URL: http://xmlsoft.org/XSLT/
 Vendor: bww bitwise works GmbH
 
-Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
+%scm_source  github http://github.com/bitwiseworks/%{name}-os2 master
 
 # DEF files to create forwarders for the legacy package
 Source10:       libxslt.def
@@ -65,14 +61,7 @@ with XPath functions written in Python.
 %debug_package
 
 %prep
-%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{?!svn_rev):0}
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc
-svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
-%endif
+%scm_setup
 
 # Prepare forwarder DLLs.
 for m in %{SOURCE10} %{SOURCE11}; do
@@ -158,6 +147,11 @@ rm -fr %{buildroot}
 %doc python/tests/*.xsl
 
 %changelog
+* Thu Jul 26 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.1.32-1
+- update to vendor version 1.1.32
+- moved source to github
+- use the new scm_source and scm_setup macros
+
 * Wed Nov 30 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.1.29-2
 - add -nostdlib to forwarders, to need less heap
 
