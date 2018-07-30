@@ -4,7 +4,7 @@
 
 Summary:    kLIBC User Management
 Name:       klusrmgr
-Version:    1.1.5
+Version:    1.1.6
 Release:    1%{?dist}
 License:    proprietary
 Group:      Applications/System
@@ -29,22 +29,18 @@ pwd.db and spwd.db using the pwdmkdb.exe utility.
 
 %prep
 %setup -n "%{name}-%{version}" -Tc
-unzip -q %{_sourcedir}/%{name}-%{version}.zip
+unzip -qj %{_sourcedir}/%{name}-%{version}.zip
 
 %build
 
 
 %install
-for f in *.exe *.EXE ; do
+for f in *.exe *.EXE *.cmd ; do
   install -p -m0755 -D $f  $RPM_BUILD_ROOT%{_bindir}/$f
-done
-for f in readme.txt ; do
-  install -p -m0644 -D $f  $RPM_BUILD_ROOT%{_defaultdocdir}/%{name}-%{version}/$f
 done
 for f in *.msg ; do
   install -p -m0644 -D $f  $RPM_BUILD_ROOT%{_datadir}/os2/lang/$f
 done
-
 
 %clean
 rm -rf "$RPM_BUILD_ROOT"
@@ -71,13 +67,17 @@ fi
 
 %files
 %defattr(-,root,root,-)
-%_defaultdocdir/%{name}-%{version}/readme.txt
+%doc readme.txt
+%_bindir/*.cmd
 %_bindir/*.exe
 %_bindir/*.EXE
 %_datadir/os2/lang/*.msg
 
 
 %changelog
+* Mon Jul 30 2018 hb <herwig.bauernfeind@bitwiseworks.com> 1.1.6-1
+- add usermod and groupmod commands from Samba
+
 * Wed Jun 13 2018 hb <herwig.bauernfeind@bitwiseworks.com> 1.1.5-1
 - disable potentially dangeraous operations in case Samba User Manager is found
 
