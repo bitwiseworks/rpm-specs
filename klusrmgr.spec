@@ -1,10 +1,11 @@
 %define debug_package %{nil}
 # Disable compression completely
 %define _strip_no_compress 1
+%global exename klUsrMgr.EXE
 
 Summary:    kLIBC User Management
 Name:       klusrmgr
-Version:    1.1.6
+Version:    1.2.0
 Release:    1%{?dist}
 License:    proprietary
 Group:      Applications/System
@@ -31,19 +32,28 @@ pwd.db and spwd.db using the pwdmkdb.exe utility.
 %setup -n "%{name}-%{version}" -Tc
 unzip -qj %{_sourcedir}/%{name}-%{version}.zip
 
+
 %build
+# rexx2vio usermod.cmd usermod.exe
+# rexx2vio groupmod.cmd groupmod.exe
 
 
 %install
-for f in *.exe *.EXE *.cmd ; do
-  install -p -m0755 -D $f  $RPM_BUILD_ROOT%{_bindir}/$f
+for f in useradd userdel userren groupadd groupdel *.exe ; do
+  install -p -m0755 -D $f $RPM_BUILD_ROOT%{_bindir}/$f
 done
+
+# don't change the case of the klusrmgr.exe name
+install -p -m0755 -D %{name}.EXE $RPM_BUILD_ROOT%{_bindir}/%{exename}
+
 for f in *.msg ; do
-  install -p -m0644 -D $f  $RPM_BUILD_ROOT%{_datadir}/os2/lang/$f
+  install -p -m0644 -D $f $RPM_BUILD_ROOT%{_datadir}/os2/lang/$f
 done
+
 
 %clean
 rm -rf "$RPM_BUILD_ROOT"
+
 
 %post
 if [ "$1" -ge 1 ]; then # (upon update)
@@ -52,12 +62,13 @@ if [ "$1" -ge 1 ]; then # (upon update)
 fi
 %global title %{summary}
 %bww_folder -t %{title}
-%bww_app -f %{_bindir}/%{name}.exe -t %{title} 
+%bww_app -f %{_bindir}/%{exename} -t %{title} 
 %bww_readme -f %{_defaultdocdir}/%{name}-%{version}/readme.txt
 %bww_app_shadow 
 %bww_app_shadow -d WP_CONFIG
 %{_rpmconfigdir_os2}/wpi4rpm add %{vendor}/%{name}/binaries %{version}-%{release}
 cmd /c klusrmgr.exe -init
+
 
 %postun
 if [ "$1" -eq 0 ]; then # (upon removal)
@@ -65,16 +76,19 @@ if [ "$1" -eq 0 ]; then # (upon removal)
     %{_rpmconfigdir_os2}/wpi4rpm del %{vendor}/%{name}/binaries %{version}-%{release}
 fi
 
+
 %files
 %defattr(-,root,root,-)
 %doc readme.txt
-%_bindir/*.cmd
-%_bindir/*.exe
-%_bindir/*.EXE
+%_bindir/*
 %_datadir/os2/lang/*.msg
 
 
 %changelog
+* Tue Aug 09 2018 hb <herwig.bauernfeind@bitwiseworks.com> 1.2.0-1
+- add useradd and friend shell scripts as wrapper to usermod/groupmod (Silvan)
+- changed usermod and groupmod to accept a lot more options
+
 * Mon Jul 30 2018 hb <herwig.bauernfeind@bitwiseworks.com> 1.1.6-1
 - add usermod and groupmod commands from Samba
 
