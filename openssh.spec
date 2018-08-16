@@ -71,7 +71,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %global openssh_ver 7.7p1
-%global openssh_rel 1
+%global openssh_rel 2
 %global pam_ssh_agent_ver 0.10.3
 %global pam_ssh_agent_rel 4
 
@@ -146,7 +146,7 @@ Group: Applications/Internet
 Summary: An open source SSH server daemon
 Group: System Environment/Daemons
 Requires: openssh = %{version}-%{release}
-#Requires(pre): /usr/sbin/useradd
+Requires: klusrmgr >= 1.2.0
 #Requires: pam >= 1.0.1-3
 #Requires: fipscheck-lib%{_isa} >= 1.3.0
 #Requires: crypto-policies >= 20180306-1
@@ -417,12 +417,14 @@ popd
 
 %pre
 #getent group ssh_keys >/dev/null || groupadd -r ssh_keys || :
+groupadd -r ssh_keys || :
 
 %pre server
 #getent group sshd >/dev/null || groupadd -g %{sshd_uid} -r sshd || :
+groupadd -g %{sshd_uid} -r sshd || :
 #getent passwd sshd >/dev/null || \
-#  useradd -c "Privilege-separated SSH" -u %{sshd_uid} -g sshd \
-#  -s /sbin/nologin -r -d /var/empty/sshd sshd 2> /dev/null || :
+useradd -c "Privilege-separated SSH" -u %{sshd_uid} -g sshd \
+  -s /usr/sbin/nologin -r -d /@unixroot/var/empty/sshd sshd 2> /dev/null || :
 
 %post server
 #%systemd_post sshd.service sshd.socket
@@ -532,6 +534,9 @@ popd
 %endif
 
 %changelog
+* Thu Aug 16 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 7.7p1-2
+- create the needed user and group 
+
 * Fri Jul 27 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 7.7p1-1
-- Update to version 1.0.2o.
+- Update to version 7.7.p1.
 - moved source to github
