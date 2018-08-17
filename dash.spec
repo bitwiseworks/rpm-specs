@@ -2,7 +2,7 @@
 
 Name:           dash
 Version:        0.5.9.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Small and fast POSIX-compliant shell
 Group:          System Environment/Shells
 # BSD: DASH in general
@@ -14,7 +14,7 @@ URL:            http://gondor.apana.org.au/~herbert/%{name}/
 #Source0:        http://gondor.apana.org.au/~herbert/%{name}/files/%{name}-%{version}.tar.gz
 
 %define svn_url     http://svn.netlabs.org/repos/ports/dash/trunk
-%define svn_rev     1846
+%define svn_rev     2298
 
 Source: %{name}-%{version}-r%{svn_rev}.zip
 
@@ -91,15 +91,19 @@ ln -s %{_mandir}/man1/%{name}.1 %{buildroot}%{_mandir}/man1/sh.1
 %files
 %doc COPYING ChangeLog
 %{_bindir}/%{name}.exe
-%{_mandir}/man1/%{name}.1
+%{_mandir}/man1/%{name}.1*
 
 %files sh
 %{_bindir}/sh
 %{_bindir}/sh.exe
-%{_mandir}/man1/sh.1
+%{_mandir}/man1/sh.1*
 
 %changelog
-* Mon Nov 28 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.5.9.1-1
+* Fri Aug 17 2018 Dmitriy Kuminov <coding@dmik.org> 0.5.9.1-2
+- Add support for BEGINLIBPATH and friends (#161).
+- Fix broken `cd x:` command (#163).
+
+* Mon Nov 28 2016 Dmitriy Kuminov <coding@dmik.org> 0.5.9.1-1
 - Update to version 0.5.9.1.
 - Increase stack size to 8 MB to fix crashes with too big here-docs.
 - Link against LIBCx 0.4.
