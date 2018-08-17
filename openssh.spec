@@ -71,7 +71,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %global openssh_ver 7.7p1
-%global openssh_rel 2
+%global openssh_rel 3
 %global pam_ssh_agent_ver 0.10.3
 %global pam_ssh_agent_rel 4
 
@@ -534,6 +534,9 @@ useradd -c "Privilege-separated SSH" -u %{sshd_uid} -g sshd \
 %endif
 
 %changelog
+* Fri Aug 17 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 7.7p1-3
+- use socketpair() instead of pipe()
+
 * Thu Aug 16 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 7.7p1-2
 - create the needed user and group 
 
