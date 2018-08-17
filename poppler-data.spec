@@ -1,81 +1,94 @@
+# =============================================================================
 
-## to bootstrap and avoid the circular dependency with ghostscript
-## define this to be the ghostscript version
-#define gs_bootstrap 9.10
+Name:             poppler-data
+Summary:          Encoding files for use with poppler 
+Version:          0.4.9
+Release:          1%{?dist}
 
-Summary: Encoding files 
-Name:    poppler-data
-Version: 0.4.7
-Release: 2%{?dist}
+# NOTE: The licensing details are explained in COPYING file in source archive.
+License:          BSD and GPLv2
 
-# The cMap data files installed by the poppler-data package are
-# under the COPYING.adobe license
-# cidToUnicode, nameToUnicode and unicodeMap data files
-# are under the COPYING.gpl2 license
-# Identity-UTF16-H is GPLv3+ (from GPL ghostscript)
-License: BSD and GPLv2 and GPLv3+
-URL:     http://poppler.freedesktop.org/
-Source0: http://poppler.freedesktop.org/poppler-data-%{version}.tar.gz
-Source1: http://downloads.sourceforge.net/project/cmap.adobe/cmapresources_identity0.tar.z
-# extracted from ghostscript-9.05 tarball
-Source2: Identity-UTF16-H
+URL:              https://poppler.freedesktop.org/
+Source:           https://poppler.freedesktop.org/poppler-data-%{version}.tar.gz
 
-BuildArch: noarch
+BuildArch:        noarch
+BuildRequires:    git
 
-%if ! 0%{?gs_bootstrap:1}
-BuildRequires: ghostscript
+# =============================================================================
+
+# NOTE: 'autosetup' macro (below) uses 'git' for applying the patches:
+#       ->> All the patches should be provided in 'git format-patch' format.
+#       ->> Auxiliary repository will be created during 'fedpkg prep', you
+#           can see all the applied patches there via 'git log'.
+
+# Upstream patches -- official upstream patches released by upstream since the
+# ----------------    last rebase that are necessary for any reason:
+#Patch000: example000.patch
+
+
+# Downstream patches -- these should be always included when doing rebase:
+# ------------------
+#Patch100: example100.patch
+
+
+# Downstream patches for RHEL -- patches that we keep only in RHEL for various
+# ---------------------------    reasons, but are not enabled in Fedora:
+%if %{defined rhel} || %{defined centos}
+#Patch200: example200.patch
 %endif
-%global gs_ver %(gs --version 2> \\dev\\nul || echo %{gs_bootstrap})
-BuildRequires: pkgconfig
+
+
+
+# Patches to be removed -- deprecated functionality which shall be removed at
+# ---------------------    some point in the future:
+
 
 %description
-This package consists of encoding files for poppler.  When installed,
-the encoding files enables poppler to correctly render CJK and Cyrillic 
-properly.
+This package consists of encoding files for use with poppler. The encoding
+files are optional and poppler will automatically read them if they are present.
 
-%package devel
-Summary: Developer files for %{name}
-Requires: %{name} = %{version}-%{release}
+When installed, the encoding files enables poppler to correctly render both CJK
+and Cyrrilic characters properly.
+
+# === SUBPACKAGES =============================================================
+
+%package          devel
+Summary:          Devel files for %{name}
+Requires:         %{name} = %{version}-%{release}
+BuildRequires:    pkgconfig
+
 %description devel
-%{summary}.
+This sub-package currently contains only pkgconfig file, which can be used with
+pkgconfig utility allowing your software to be build with poppler-data.
 
+# === BUILD INSTRUCTIONS ======================================================
 
 %prep
-%setup -q -a 1
+#autosetup -S git
+%setup -q
 
+# NOTE: Nothing to do here - we are packaging the content only.
 %build
-# intentionally left blank
 
 %install
-make install  DESTDIR=%{buildroot} datadir=%{_datadir}
+%make_install prefix=%{_prefix}
 
-# manually install Identity-* files
-# http://bugzilla.redhat.com/842351
-install -m644 -p %{SOURCE2} ai0/CMap/Identity-* %{buildroot}%{_datadir}/poppler/cMap/
-
-# create cmap symlinks for ghostscript
-mkdir -p %{buildroot}%{_datadir}/ghostscript/%{gs_ver}/Resource/CMap/
-cmap_files=$(find %{buildroot}%{_datadir}/poppler/cMap/ -type f | sed -e "s|%{buildroot}%{_datadir}|../../../..|g")
-cd %{buildroot}%{_datadir}/ghostscript/%{gs_ver}/Resource/CMap/
-for target in ${cmap_files} ; do
-ln -s $target
-test -f $(basename $target)
-done
-#popd
-
+# === PACKAGING INSTRUCTIONS ==================================================
 
 %files
-%doc COPYING COPYING.adobe COPYING.gpl2 README
+%license COPYING COPYING.adobe COPYING.gpl2
 %{_datadir}/poppler/
-%dir %{_datadir}/ghostscript/%{gs_ver}
-%dir %{_datadir}/ghostscript/%{gs_ver}/Resource
-%{_datadir}/ghostscript/%{gs_ver}/Resource/CMap/
 
 %files devel
 %{_datadir}/pkgconfig/poppler-data.pc
 
+# =============================================================================
 
 %changelog
+* Fri Aug 17 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.4.9-1
+- updated to version 0.4.9
+- adjusted the spec according to fedora
+
 * Tue Mar 28 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.4.7-2
 - rebuild for ghostscript 9.18
 
