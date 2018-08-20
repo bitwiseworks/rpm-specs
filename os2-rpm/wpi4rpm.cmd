@@ -1,11 +1,20 @@
 /* WPI4RPM */
-ScriptVer = '0.9.8.0'
+
+ScriptVer = '0.9.9.1'
 
 /*  Synopsis:
 
     Add or remove fake WarpIN packages to the WarpIN database in order to make 
     sure RPM/YUM/ANPM installed packages keep dependent WPI packages happy.
    
+    Author: Herwig Bauernfeind
+
+    Version: 0.9.9.1 - 2018-08-20 (Silvan Scherrer)
+    - adjust the app not found message in the DEL routine
+
+    Version: 0.9.9.0 - 2018-08-19 (Herwig Bauernfeind)
+    - Delete all WarpIN packages of a given vendor/app/package combination
+
     (c) 2017-2018 Herwig Bauernfeind for bww bitwise works GmbH.
 
     This program is free software: you can redistribute it and/or modify
@@ -146,15 +155,16 @@ select
     end
     when mode = "DEL" then do
         if verbose then say 'INFO:  wpi4rpm: "'Datbas'" will be used.'
+        AppRemoved = 0
         do I = 1 to WarpINApps.0
             parse var WarpINApps.I WVendor '\' WApp '\' WPackage '\' WMV '\' WLV '\' WBL '\' WRV
-            if WarpINapps.I = appstring then do
+            if pos(WVendor'\'WApp'\'WPackage'\', AppString) = 1 then do
                 ok = SysIni(DatBas, WarpINApps.I, "DELETE:")
+                AppRemoved = 1
                 if verbose then say 'INFO:  wpi4rpm: "'WarpINApps.I'" removed.'
-                leave
             end
         end
-        if I > WarpINApps.0 then do
+        if (WarpINApps.0 = 0 & AppRemoved = 0) then do
             if verbose then say 'ERROR: wpi4rpm: "'AppString'" not found.'
             exit -4
         end

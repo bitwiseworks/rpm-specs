@@ -1,7 +1,7 @@
 Summary: OS/2 specific RPM macros and scripts
 Name: os2-rpm
 Version: 1
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv2+
 Group: Development/System
 Vendor: bww bitwise works GmbH
@@ -56,6 +56,12 @@ the OS/2 operating system.
 # Note: we put the value of _rpmconfigdir_os2 unexpanded.
 %{__sed} -e 's|@RPMCONFIGDIR_OS2@|%%{_rpmconfigdir}/%%{_vendor}|' -i macros.os2
 
+%build
+# create a exe out of the cmd files
+for f in *.cmd ; do
+  rexx2vio "$f" "${f%.cmd}.exe"
+done
+
 %install
 %{__mkdir_p} %{buildroot}%{_rpmconfigdir_os2}
 %{__install} -p -m 644 macros.os2 %{buildroot}%{_rpmconfigdir_os2}/macros
@@ -65,17 +71,22 @@ the OS/2 operating system.
 %{__install} -p -m 644 -t %{buildroot}%{_rpmconfigdir_macros_d} \
   macros.scm macros.cfg macros.wps
 
-# Pack and install OS/2 Rexx scripts
-for f in *.cmd ; do
-  rexx2vio "$f" "%{buildroot}%{_rpmconfigdir_os2}/${f%.cmd}.exe"
-  ln -sf %{_rpmconfigdir_os2}/${f%.cmd}.exe %{buildroot}%{_libdir}/rpm/${f%.cmd}.exe
+# install OS/2 Rexx scripts
+for f in *.exe ; do
+  %{__install} -p -m 755 $f %{buildroot}%{_rpmconfigdir_os2}/$f
+  ln -sf %{_rpmconfigdir_os2}/$f %{buildroot}%{_libdir}/rpm/${f%.exe}
 done
+%{__install} -D -p -m 755 wpi4rpm.exe %{buildroot}%{_bindir}/wpi4rpm.exe
 
 %files
 %dir %{_rpmconfigdir_os2}
 %{_rpmconfigdir_os2}/macros
 %{_rpmconfigdir_os2}/*.exe
-%{_libdir}/rpm/*.exe
+%{_libdir}/rpm/wpi4rpm
+%{_libdir}/rpm/warpin-conflicts
+%{_libdir}/rpm/wps-object
+%{_libdir}/rpm/getbootdrive
+%{_bindir}/wpi4rpm.exe
 %{_rpmconfigdir_macros_d}/macros.cfg
 %{_rpmconfigdir_macros_d}/macros.wps
 
@@ -85,6 +96,10 @@ done
 %{_rpmconfigdir_macros_d}/macros.scm
 
 %changelog
+* Mon Aug 20 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 1-3
+- copy wpi4rpm also to %{_bindir} ticket #308
+- don't add an extention to symlinks
+
 * Mon Apr 23 2018 Dmitriy Kuminov <coding@dmik.org> 1-2
 - Fix os2_fwdslashes and os2_backslashes that would return garbage at the end.
 - Remove useless os2_dos_path_f and add os2_expand_unixroot instead.
