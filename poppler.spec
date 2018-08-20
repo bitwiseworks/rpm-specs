@@ -1,13 +1,13 @@
 Summary:	PDF rendering library
 Name:		poppler
-Version:	0.52.0
+Version:	0.59.0
 Release:	1%{?dist}
 License:	(GPLv2 or GPLv3) and GPLv2+ and LGPLv2+ and MIT
 Group:		Development/Libraries
 URL:		http://poppler.freedesktop.org/
 
 Vendor:		bww bitwise works GmbH
-%scm_source svn http://svn.netlabs.org/repos/ports/poppler/trunk 2028
+%scm_source svn http://svn.netlabs.org/repos/ports/poppler/trunk 2299
 
 Requires: poppler-data >= 0.4.0
 Requires: nss >= 3.23.0
@@ -169,11 +169,11 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %doc README
 %license COPYING
-%attr(755,root,root) %{_libdir}/popple66.dll
+%attr(755,root,root) %{_libdir}/popple70.dll
 
 %files devel
 %attr(755,root,root) %{_libdir}/poppler_dll.a
-%attr(755,root,root) %{_libdir}/poppler66_dll.a
+%attr(755,root,root) %{_libdir}/poppler70_dll.a
 %{_libdir}/pkgconfig/poppler.pc
 %{_libdir}/pkgconfig/poppler-splash.pc
 %{_libdir}/pkgconfig/poppler-cairo.pc
@@ -215,6 +215,10 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Mon Aug 20 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.59.0-1
+- update to vendor version 0.59.0
+- fix for ticket #185 by Steven H. Levine
+
 * Fri Feb 17 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.52.0-1
 - fix inclusion of dll in main package
 - update to vendor version 0.52.0
