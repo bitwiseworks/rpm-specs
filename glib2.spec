@@ -1,19 +1,16 @@
-#define svn_url     F:/rd/ports/glib/trunk
-%define svn_url     http://svn.netlabs.org/repos/ports/glib/trunk
-%define svn_rev     1643
 
 Name:           glib2
 %define _name glib
 Version:        2.33.12
-Release:        2%{?dist}
+Release:        3%{?dist}
 License:        LGPLv2.1+
 Summary:        A Library with Convenient Functions Written in C
 Url:            http://www.gtk.org/
 Group:          Development/Libraries/C and C++
 Vendor:         bww bitwise works GmbH
 
-Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
-Source1: glib2-legacy.zip
+%scm_source  svn http://svn.netlabs.org/repos/ports/glib/trunk 1643
+#Source1: glib2-legacy.zip
 
 BuildRequires: gcc make subversion zip
 
@@ -64,10 +61,10 @@ to a C programmer and is used by Gtk+ and GNOME.
 #This branding-style package sets default applications in GNOME in
 #openSUSE.
 
-This is a dumb package, which provides only upstream GNOME packages as
-preferred defaults. You most probably don't want this package. You
-probably want to install distribution default glib2-branding and prefer
-distribution wise GNOME defaults.
+#This is a dumb package, which provides only upstream GNOME packages as
+#preferred defaults. You most probably don't want this package. You
+#probably want to install distribution default glib2-branding and prefer
+#distribution wise GNOME defaults.
 
 %package devel
 #'
@@ -153,26 +150,13 @@ Group:          Development/Libraries/C and C++
 This library provides convenient functions, such as lists and hashes,
 to a C programmer and is used by Gtk+ and GNOME.
 
-%package legacy
-Summary: The 2.25 glib2 library.
-
-%description legacy
-The 2.25 glib2 library.
-
 %debug_package
 
 # @todo (dmik) We don't support this macro, put language files into the main package
 #%lang_package
 
 %prep
-%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc -a 1
-svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
-%endif
+%scm_setup
 
 cat > gtk-doc.make <<EOF
 EXTRA_DIST =
@@ -184,8 +168,8 @@ autoreconf -fi
 
 %build
 export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+export LIBS="-lcx -lpthread -llwres"
 export CFLAGS="%optflags -I/@unixroot/usr/include/bind9"
-export LIBS="-lurpo -lmmap -lpthread -llwres"
 %configure \
         --disable-modular-tests \
         --enable-shared --disable-static
@@ -201,12 +185,6 @@ make OPT="$CFLAGS" %{?_smp_mflags}
 #%if 0%{?suse_version} <= 1120
 #%{__rm} %{buildroot}%{_datadir}/locale/en@shaw/LC_MESSAGES/*
 #%endif
-mkdir -p $RPM_BUILD_ROOT%{_datadir}/doc/%{name}-%{version}
-cp AUTHORS $RPM_BUILD_ROOT%{_datadir}/doc/%{name}-%{version}
-cp COPYING $RPM_BUILD_ROOT%{_datadir}/doc/%{name}-%{version}
-cp README $RPM_BUILD_ROOT%{_datadir}/doc/%{name}-%{version}
-cp NEWS $RPM_BUILD_ROOT%{_datadir}/doc/%{name}-%{version}
-cp ChangeLog $RPM_BUILD_ROOT%{_datadir}/doc/%{name}-%{version}
 
 rm $RPM_BUILD_ROOT%{_libdir}/charset.alias
 
@@ -233,12 +211,6 @@ rm $RPM_BUILD_ROOT%{_libdir}/charset.alias
 rm $RPM_BUILD_ROOT%{_libdir}/*.la
 #%endif
 
-# copy legacy files
-cp -p gio2.dll %{buildroot}%{_libdir}
-cp -p glib2.dll %{buildroot}%{_libdir}
-cp -p gmod2.dll %{buildroot}%{_libdir}
-cp -p gobj2.dll %{buildroot}%{_libdir}
-cp -p gthr2.dll %{buildroot}%{_libdir}
 
 %find_lang %{_name}20
 #%fdupes $RPM_BUILD_ROOT
@@ -263,27 +235,22 @@ rm -rf $RPM_BUILD_ROOT
 %files -n libglib-2_0-0
 %defattr(-, root, root)
 %{_libdir}/glib*.dll
-%exclude %{_libdir}/*2.dll
 
 %files -n libgmodule-2_0-0
 %defattr(-, root, root)
 %{_libdir}/gmod*.dll
-%exclude %{_libdir}/*2.dll
 
 %files -n libgobject-2_0-0
 %defattr(-, root, root)
 %{_libdir}/gobj*.dll
-%exclude %{_libdir}/*2.dll
 
 %files -n libgthread-2_0-0
 %defattr(-, root, root)
 %{_libdir}/gthr*.dll
-%exclude %{_libdir}/*2.dll
 
 %files -n libgio-2_0-0
 %defattr(-, root, root)
 %{_libdir}/gio*.dll
-%exclude %{_libdir}/*2.dll
 #%dir %{_libdir}/gio
 #%dir %{_libdir}/gio/modules
 #%ghost %{_libdir}/gio/modules/giomodule.cache
@@ -328,11 +295,14 @@ rm -rf $RPM_BUILD_ROOT
 #%dir %{_datadir}/gdb/auto-load/%{_prefix}
 #%dir %{_datadir}/gdb/auto-load/%{_prefix}/%{_lib}
 
-%files legacy
-%defattr(-,root,root)
-%{_libdir}/*2.dll
 
 %changelog
+* Tue Aug 21 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.33.12-3
+- rebuild with latest tool chain
+- use new scm_ macros
+- use libcx
+- remove legacy package
+
 * Tue Jul 05 2016 yd <yd@os2power.com> 2.33.12-2
 - r1643, use gettext code to embed codepage aliases. ticket#14.
 
