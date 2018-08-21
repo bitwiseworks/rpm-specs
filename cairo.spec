@@ -7,18 +7,15 @@
 Summary:	A 2D graphics library
 Name:		cairo
 Version:	1.12.18
-Release:	3%{?dist}
+Release:	4%{?dist}
 URL:		http://cairographics.org
 #VCS:		git:git://git.freedesktop.org/git/cairo
 #Source0:	http://cairographics.org/releases/%{name}-%{version}.tar.xz
 License:	LGPLv2 or MPLv1.1
 Group:		System Environment/Libraries
-Vendor:     bww bitwise works GmbH
+Vendor:         bww bitwise works GmbH
 
-%define svn_url     http://svn.netlabs.org/repos/ports/cairo/trunk
-%define svn_rev     1578
-
-Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
+%scm_source  svn http://svn.netlabs.org/repos/ports/cairo/trunk 1578
 
 BuildRequires: gcc make subversion zip
 
@@ -32,7 +29,7 @@ BuildRequires: glib2-devel
 #BuildRequires: librsvg2-devel
 #BuildRequires: mesa-libGL-devel
 #BuildRequires: mesa-libEGL-devel
-BuildRequires: libpoll-devel
+BuildRequires: libcx-devel
 BuildRequires: os2tk45-headers
 
 %description
@@ -100,14 +97,7 @@ needed for developing software which uses the cairo Gobject library.
 %debug_package
 
 %prep
-%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc
-svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
-%endif
+%scm_setup
 
 # Generate confuigure and friends
 NOCONFIGURE=1 autogen.sh
@@ -118,7 +108,7 @@ NOCONFIGURE=1 autogen.sh
 export CPPFLAGS="-idirafter %{_includedir}/os2tk45 -DOS2EMX_PLAIN_CHAR"
 export CPPFLAGS="$CPPFLAGS -DOS2_DYNAMIC_DIVE"
 export LDFLAGS="-Zhigh-mem"
-export LIBS="-lurpo -lmmap -lpoll"
+export LIBS="-lcx"
 %configure --disable-static	\
 	--enable-os2		\
 	--enable-ft		\
@@ -194,13 +184,18 @@ rm $RPM_BUILD_ROOT%{_libdir}/*.la
 #%{_libdir}/cairo/
 
 %changelog
-* Sat Jun 18 2016 yd <yd@os2power.com> 1.12.18-2
+* Tue Aug 21 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.12.18-4
+- rebuild with latest tool chain
+- use new scm_ macros
+- use libcx
+
+* Sat Jun 18 2016 yd <yd@os2power.com> 1.12.18-3
 - rebuild for glib2 2.33.
 
 * Thu May 26 2016 Dmitriy Kuminov <coding@dmik.org> 1.12.18-2
 - Fix assertions and SIGABRT on application termination.
 
-* Sat Feb 26 2016 Dmitriy Kuminov <coding@dmik.org> 1.12.18-1
+* Fri Feb 26 2016 Dmitriy Kuminov <coding@dmik.org> 1.12.18-1
 - Update to version 1.12.18.
 
 * Sat Feb 20 2016 Dmitriy Kuminov <coding@dmik.org> 1.12.0-1
