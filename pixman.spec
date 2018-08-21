@@ -2,7 +2,7 @@
 
 Name:           pixman
 Version:        0.32.8
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Pixel manipulation library
 
 Group:          System Environment/Libraries
@@ -10,10 +10,7 @@ License:        MIT
 URL:            http://cgit.freedesktop.org/pixman/
 Vendor:         bww bitwise works GmbH
 
-%define svn_url     http://svn.netlabs.org/repos/ports/pixman/trunk
-%define svn_rev     1232
-
-Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
+%scm_source  svn http://svn.netlabs.org/repos/ports/pixman/trunk 1232
 
 BuildRequires: gcc make subversion zip
 
@@ -32,22 +29,14 @@ Requires: pkgconfig
 Development library for pixman.
 
 %prep
-%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc
-svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
-%endif
+%scm_setup
 
 # Generate confuigure and friends
 NOCONFIGURE=1 autogen.sh
 
 %build
-CFLAGS="%{optflags}" \
-LDFLAGS="-Zhigh-mem" \
-LIBS="-lurpo" \
+export LDFLAGS="-Zhigh-mem"
+export LIBS="-lcx"
 %configure \
   --disable-static
 
@@ -76,6 +65,11 @@ make check %{?_smp_mflags} V=1 ||:
 %{_libdir}/pkgconfig/pixman-1.pc
 
 %changelog
+* Tue Aug 21 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.32.8-4
+- rebuild with latest tool chain
+- use new scm_ macros
+- use libcx
+
 * Tue Mar 1 2016 Dmitriy Kuminov <coding@dmik.org> 0.32.8-3
 - Use respective optimization flags for different architectures.
 
