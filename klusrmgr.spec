@@ -5,7 +5,7 @@
 
 Summary:    kLIBC User Management
 Name:       klusrmgr
-Version:    1.2.0
+Version:    1.2.1
 Release:    1%{?dist}
 License:    proprietary
 Group:      Applications/System
@@ -34,8 +34,8 @@ unzip -qj %{_sourcedir}/%{name}-%{version}.zip
 
 
 %build
-# rexx2vio usermod.cmd usermod.exe
-# rexx2vio groupmod.cmd groupmod.exe
+rexx2vio usermod.cmd usermod.exe
+rexx2vio groupmod.cmd groupmod.exe
 
 
 %install
@@ -85,7 +85,11 @@ fi
 
 
 %changelog
-* Tue Aug 09 2018 hb <herwig.bauernfeind@bitwiseworks.com> 1.2.0-1
+* Tue Sep 04 2018 hb <herwig.bauernfeind@bitwiseworks.com> 1.2.1-1
+- useradd and groupmod are compiled into .exe
+- standardized error messages in usermod and groupmod
+
+* Thu Aug 09 2018 hb <herwig.bauernfeind@bitwiseworks.com> 1.2.0-1
 - add useradd and friend shell scripts as wrapper to usermod/groupmod (Silvan)
 - changed usermod and groupmod to accept a lot more options
 
