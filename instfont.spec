@@ -15,17 +15,15 @@ The purpose of this utility is to install fonts into the WPS.
 
 %prep
 %setup -n "%{name}-%{version}" -Tc
-unzip -q %{_sourcedir}/%{name}-%{version}.zip
+unzip -qj %{_sourcedir}/%{name}-%{version}.zip
 
 %build
 
 
 %install
-mkdir -p $RPM_BUILD_ROOT%{_bindir}
-cp *.exe $RPM_BUILD_ROOT%{_bindir}
-mkdir -p $RPM_BUILD_ROOT%{_defaultdocdir}/%{name}-%{version}
-cp instfont.txt $RPM_BUILD_ROOT%{_defaultdocdir}/%{name}-%{version}
-cp instfont.c $RPM_BUILD_ROOT%{_defaultdocdir}/%{name}-%{version}
+for f in *.exe ; do
+  install -p -m 0755 -D $f  $RPM_BUILD_ROOT%{_bindir}/$f
+done
 wpi4rpm add %{vendor}/%{name}/binaries %{version}-%{release}
 
 %clean
@@ -43,8 +41,7 @@ fi
 
 %files
 %defattr(-,root,root,-)
-%_defaultdocdir/%{name}-%{version}/instfont.txt
-%_defaultdocdir/%{name}-%{version}/instfont.c
+%doc instfont.txt instfont.c
 %_bindir/*.exe
 
 %changelog
