@@ -1,12 +1,12 @@
 Summary: IBM OS/2 Developer's Toolkit Version 4.5
 Name: os2tk45
 Version: 4.5.2
-Release: 7%{?dist}
+Release: 8%{?dist}
 Group: System Environment/Libraries
 License: IBM
 Vendor: bww bitwise works GmbH
 
-%scm_source github https://github.com/bitwiseworks/%{name} 660fdb07c929623bd9043c88f2734f08c741e714
+%scm_source github https://github.com/bitwiseworks/%{name} c0ec7250eded133e9152416a7ae8906c319f7dd6
 
 %global os2_ipfcdir %{_datadir}/os2/ipfc
 %global os2tk45_includedir %{_includedir}/os2tk45
@@ -213,6 +213,10 @@ if [ "$1" = 0 ] ; then
 fi
 
 %changelog
+* Tue Sep 04 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.5.2-8
+- add pdpublic.h ticket #1
+- fix ticket #3
+
 * Mon Jun 18 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.5.2-7
 - use %{os2_config_sys} macro instead of fixed c:\config.sys
 
