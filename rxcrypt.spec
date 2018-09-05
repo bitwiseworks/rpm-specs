@@ -6,7 +6,7 @@
 Summary:    Dmitry A.Steklenev's RxCrypt library
 Name:       rxcrypt
 Version:    1.0.0
-Release:    2%{?dist}
+Release:    3%{?dist}
 License:    Public Domain
 Group:      Applications/System
 URL:        http://glass.ptv.ru
@@ -20,16 +20,14 @@ This Rexx DLL provides a crypt API.
 
 %prep
 %setup -n "%{name}-%{version}" -Tc
-unzip -q %{_sourcedir}/%{name}-%{version}.zip
+unzip -qj %{_sourcedir}/%{name}-%{version}.zip
 
 %build
 
 
 %install
-mkdir -p $RPM_BUILD_ROOT%{_libdir}
-cp usr/lib/*.dll $RPM_BUILD_ROOT%{_libdir}
-mkdir -p $RPM_BUILD_ROOT%{_defaultdocdir}/%{name}-%{version}
-cp usr/share/doc/rxcrypt/* $RPM_BUILD_ROOT%{_defaultdocdir}/%{name}-%{version}
+install -p -m0644 -D rxcrypt.dll  $RPM_BUILD_ROOT%{_libdir}/rxcrypt.dll
+
 
 %clean
 rm -rf "$RPM_BUILD_ROOT"
@@ -52,11 +50,14 @@ fi
 
 %files
 %defattr(-,root,root,-)
-%_defaultdocdir/%{name}-%{version}/*
+%doc *.html *.phtml *.gif crypt.txt sample.cmd rxcryptsrc.zip
 %_libdir/*.dll
 
 
 %changelog
+* Wed Sep 05 2018 hb <herwig.bauernfeind@bitwiseworks.com> 1.0.0-3
+- fix the spec file (Silvan Scherrer)
+
 * Wed Jun 06 2018 hb <herwig.bauernfeind@bitwiseworks.com> 1.0.0-2
 - fix the location of wpi4rpm
 
