@@ -13,8 +13,9 @@ Requires:      cups
 BuildRequires: cups-devel
 BuildRequires: dos2unix
 
-#BuildRequires: python3-cups, cups
-#BuildRequires: jbigkit-devel
+#BuildRequires: python3-cups
+BuildRequires: cups
+BuildRequires: jbigkit-devel
 
 %description
 This driver is usable by all printer devices which understand the QPDL
@@ -43,10 +44,10 @@ done
 
 CXXFLAGS="%{optflags} -fno-strict-aliasing" \
 LDFLAGS="-Zomf -Zhigh-mem -lcx" \
-make all V=1 DISABLE_JBIG=1 DRV_ONLY=1 %{?_smp_mflags}
+make all V=1 DRV_ONLY=1 %{?_smp_mflags}
 
 %install
-make install DISABLE_JBIG=1 DRV_ONLY=1 CUPSDRV=%{_datadir}/cups/drv/splix DESTDIR=%{buildroot}
+make install DRV_ONLY=1 CUPSDRV=%{_datadir}/cups/drv/splix DESTDIR=%{buildroot}
 
 %files
 %license COPYING
@@ -56,5 +57,8 @@ make install DISABLE_JBIG=1 DRV_ONLY=1 CUPSDRV=%{_datadir}/cups/drv/splix DESTDI
 %{_datadir}/cups/drv/splix
 
 %changelog
+* Fri Sep 07 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.0.0-2
+- enable jbigkit
+
 * Sat Feb 11 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.0.0-1
 - initial port
