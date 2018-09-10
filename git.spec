@@ -16,15 +16,18 @@
 
 Name:           git
 Version:        2.11.0
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Fast Version Control System
 License:        GPLv2
 Group:          Development/Tools
 URL:            https://git-scm.com/
 
-%scm_source     svn http://svn.netlabs.org/repos/ports/git/trunk 2163
+%scm_source     svn http://svn.netlabs.org/repos/ports/git/trunk 2284
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+
+# Need newer kLIBC due to CLOEXEC fix
+Requires:       libc >= 0.6.6-38
 
 %if ! %{use_prebuilt_docs} && ! 0%{?_without_docs}
 BuildRequires:  asciidoc >= 8.4.1
@@ -32,7 +35,7 @@ BuildRequires:  xmlto
 %endif
 #BuildRequires:  emacs
 BuildRequires:  expat-devel
-BuildRequires:  gettext
+BuildRequires:  gettext-devel
 BuildRequires:  %{libcurl_devel}
 #BuildRequires:  pcre-devel
 #BuildRequires:  perl-generators
@@ -623,6 +626,10 @@ rm -rf %{buildroot}
 # No files for you!
 
 %changelog
+* Mon Jun 4 2018 Dmitriy Kuminov <coding@dmik.org> 2.11.0-3
+- Make updated file locking fully work on OS/2 (no more chmod errors).
+- Forbid inheriting O_CLOEXEC (e.g. temporary) files on OS/2.
+
 * Thu Apr 6 2017 Dmitriy Kuminov <coding@dmik.org> 2.11.0-2
 - Make git add --interactive output use CRLFs on DOS-like platforms.
 - Remove a lot of outdated OS/2-specific code.
