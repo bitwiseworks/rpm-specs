@@ -1,15 +1,16 @@
 %define debug_package %{nil}
 
 Summary:    Paul Ratcliffe's PR1UTIL library
-Name:       PR1UTIL
+Name:       pr1util
 Version:    1.6.5
-Release:    1%{?dist}
+Release:    2%{?dist}
 License:    Freeware
 Group:      Applications/System
 URL:        http://home.clara.net/orac/os2.htm
 Vendor:     Paul Ratcliffe
 Source:     %{name}-%{version}.zip
 BuildRoot:  %_tmppath/%name-%version-%release-root
+Obsoletes:  PR1UTIL
 Requires:   os2-rpm >= 1-2
 
 %description
@@ -19,7 +20,7 @@ and as such USE OF THIS PROGRAM IS ENTIRELY AT YOUR OWN RISK.
 
 %prep
 %setup -n "%{name}-%{version}" -Tc
-unzip -q %{_sourcedir}/%{name}-%{version}.zip
+unzip -qj %{_sourcedir}/%{name}-%{version}.zip
 
 %build
 
@@ -54,5 +55,7 @@ fi
 
 
 %changelog
+* Tue Sep 11 2018 hb <herwig.bauernfeind@bitwiseworks.com> 1.6.5-2
+- fixed rpm and case 
 * Sun Feb 05 2017 hb <herwig.bauernfeind@bitwiseworks.com> 1.6.5-1
 - final release from Paul Ratcliffe
