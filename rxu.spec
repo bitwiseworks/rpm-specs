@@ -1,9 +1,10 @@
 %define debug_package %{nil}
+%define _strip_opts --no-compress --no-debuginfo
 
 Summary:    Dave Boll's RXU REXX library
-Name:       RXU
+Name:       rxu
 Version:    1.a.0
-Release:    2%{?dist}
+Release:    3%{?dist}
 License:    Freeware
 Group:      System/Libraries
 URL:        http://www.edm2.com/index.php/OS2_API:RXU
@@ -11,6 +12,7 @@ Vendor:     Dave Boll
 Source:     %{name}-%{version}.zip
 BuildRoot:  %_tmppath/%name-%version-%release-root
 Requires:   os2-rpm >= 1-2
+Obsoletes:  RXU
 
 %description
 RXU v1.a - Rich set of Rexx functions which expose most of the OS/2 API set to
@@ -23,14 +25,12 @@ Package includes .INF file and sample Rexx programs.  Freeware.  Uploaded by aut
 
 %prep
 %setup -n "%{name}-%{version}" -Tc
-unzip -q %{_sourcedir}/%{name}-%{version}.zip
+unzip -qj %{_sourcedir}/%{name}-%{version}.zip
 
 %build
 
 
 %install
-mkdir -p $RPM_BUILD_ROOT%{_bindir}
-cp usr/bin/*.exe $RPM_BUILD_ROOT%{_bindir}
 install -p -m0755 -D rxsrs.exe $RPM_BUILD_ROOT%{_bindir}/rxsrs.exe
 install -p -m0644 -D rxu.dll $RPM_BUILD_ROOT%{_libdir}/rxu.dll
 install -p -m0644 -D rxu.inf $RPM_BUILD_ROOT%{_datadir}/os2/book/rxu.inf
@@ -61,6 +61,9 @@ fi
 
 
 %changelog
+* Fri Sep 07 2018 hb <herwig.bauernfeind@bitwiseworks.com> 1.a.0-3
+- Fix spec file (Silvan Scherrer)
+
 * Thu Jun 07 2018 hb <herwig.bauernfeind@bitwiseworks.com> 1.a.0-2
 - Fix location of wpi4rpm and objects
 
