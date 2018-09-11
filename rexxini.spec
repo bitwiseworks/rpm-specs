@@ -3,15 +3,16 @@
 
 
 Summary:    Steven Elliott's REXXINI library
-Name:       REXXINI
+Name:       rexxini
 Version:    1.0.0
-Release:    2%{?dist}
+Release:    3%{?dist}
 License:    Freeware
 Group:      Applications/System
 URL:        http://www.edm2.com/index.php/RexxINI
 Vendor:     Steven Elliott
 Source:     %{name}-%{version}.zip
 BuildRoot:  %_tmppath/%name-%version-%release-root
+Obsoletes:  REXXINI
 Requires:   os2-rpm >= 1-2
 
 %description
@@ -21,7 +22,7 @@ Useful for manipulating and fixing text ini files used by Samba, DOS and windows
 
 %prep
 %setup -n "%{name}-%{version}" -Tc
-unzip -q %{_sourcedir}/%{name}-%{version}.zip
+unzip -jq %{_sourcedir}/%{name}-%{version}.zip
 
 %build
 
@@ -56,6 +57,8 @@ fi
 
 
 %changelog
+* Thu Sep 11 2018 hb <herwig.bauernfeind@bitwiseworks.com> 1.0.0-3
+- fix case and rpm
 * Fri May 12 2017 hb <herwig.bauernfeind@bitwiseworks.com> 1.0.0-2
 - do not lxlite rexxini.dll
 * Sun Feb 05 2017 hb <herwig.bauernfeind@bitwiseworks.com> 1.0.0-1
