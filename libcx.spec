@@ -1,6 +1,6 @@
 Name: libcx
 Summary: kLIBC Extension Library
-Version: 0.6.2
+Version: 0.6.3
 Release: 1%{?dist}
 License: LGPLv2.1+
 Group: System/Libraries
@@ -8,6 +8,7 @@ Vendor: bww bitwise works GmbH
 URL: https://github.com/bitwiseworks/libcx
 
 %scm_source github https://github.com/bitwiseworks/libcx %{version}
+#scm_source git file://D:/Coding/libcx/master XXX
 
 Obsoletes: libpoll
 Provides: libpoll
@@ -53,6 +54,8 @@ echo "#include <sys/poll.h>" > nosys_poll.h
 %{__install} -m 644 src/poll/poll.h %{buildroot}%{_includedir}/sys
 %{__install} -m 644 src/mmap/sys/mman.h %{buildroot}%{_includedir}/sys
 %{__install} -m 644 src/exeinfo/libcx/exeinfo.h %{buildroot}%{_includedir}/libcx
+%{__install} -m 644 src/net/libcx/net.h %{buildroot}%{_includedir}/libcx
+%{__install} -m 644 src/net/ifaddrs.h %{buildroot}%{_includedir}
 %{__install} -m 644 src/spawn/libcx/spawn2.h %{buildroot}%{_includedir}/libcx
 # Dir for LIBCx assertion logs
 %{__mkdir_p} %{buildroot}%{_var}/log/libcx
@@ -75,12 +78,18 @@ rm -rf %{buildroot}
 %{_libdir}/libcx*.a
 %{_bindir}/libcx-stats.exe
 %{_includedir}/poll.h
+%{_includedir}/ifaddrs.h
 %{_includedir}/sys/poll.h
 %{_includedir}/sys/mman.h
 %{_includedir}/libcx/exeinfo.h
+%{_includedir}/libcx/net.h
 %{_includedir}/libcx/spawn2.h
 
 %changelog
+* Tue Sep 11 2018 Dmitriy Kuminov <coding@dmik.org> 0.6.3-1
+- Release version 0.6.3
+  (https://github.com/bitwiseworks/libcx/blob/0.6.3/CHANGELOG.md).
+
 * Tue Apr 17 2018 Dmitriy Kuminov <coding@dmik.org> 0.6.2-1
 - Release version 0.6.2
   (https://github.com/bitwiseworks/libcx/blob/0.6.2/CHANGELOG.md).
