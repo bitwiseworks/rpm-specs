@@ -6,13 +6,13 @@ License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Standard Shared Libraries
 Group:          System/Libraries
 Version:        0.6.6
-Release:        37%{?dist}
+Release:        38%{?dist}
 Url:            http://svn.netlabs.org/libc
 
 Source:         libc-%{version}.zip
 Source1:        libc-emxomf-20150207.zip
-# This contains binary build of LIBC with patches from tickets #361-366
-Source2:        libc-hotfix-20180119.zip
+# This contains binary build of LIBC with patches from tickets #361-36 (see Patch1xx below)
+Source2:        libc-hotfix-20180605.zip
 # This contains binary build of emxomfld with patches from ticket #376
 Source3:        libc-emxomfld-20170411.zip
 
@@ -22,6 +22,8 @@ Patch0:         libc.patch
 Patch1:         libc-dmik-no-bsd.diff
 # http://trac.netlabs.org/libc/ticket/366 (header only)
 Patch2:         libc-dmik-fork_completion_callback-header.diff
+# https://github.com/bitwiseworks/libc/commit/ac12fd8873a2016779f9f08c04bf0498b91bc9ee
+Patch3:         libc-dmik-LONG_LONG_SUPPORTED.diff
 
 # These patches are not actually applied but they record what
 # needs to be done to the stock LIBC 0.6 source in order to build
@@ -29,6 +31,7 @@ Patch2:         libc-dmik-fork_completion_callback-header.diff
 Patch101:       libc-dmik-emxomf-02-remove-asterisk.diff
 Patch102:       libc-yuri-emxomf-verbose-warnings-3.patch
 Patch103:       libc-dmik-fork_completion_callback.diff
+#Patch104:       https://github.com/bitwiseworks/libc/commit/bdb42421f945cee32a272b9e33233e0093e9eb5f
 
 BuildRequires:  rexx_exe
 
@@ -90,6 +93,7 @@ HLL debug data for exception handling support.
 %patch0
 %patch1
 %patch2
+%patch3
 
 #replace paths.h wrong macros
 sed -i 's,"/@unixroot/bin,"/@unixroot/usr/bin,g' usr/include/paths.h
@@ -194,6 +198,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/tcpipv4/dbg
 
 %changelog
+* Tue Jun 5 2018 Dmitriy Kuminov <coding@dmik.org> 0.6.6-38
+- Fix resetting file access mode to O_WRONLY if opened with O_NOINHERIT. GitHub #2.
+- Define __LONG_LONG_SUPPORTED on modern C++ (C++11 and above). GitHub #6.
+
 * Mon May 21 2018 Dmitriy Kuminov <coding@dmik.org> 0.6.6-37
 - Make libc-devel not provide libXXX.dll (it's provided by libc).
 
