@@ -1,13 +1,13 @@
 Summary: A file compression and packaging utility compatible with PKZIP
 Name: zip
 Version: 3.0
-Release: 7%{?dist}
+Release: 8%{?dist}
 License: BSD
 Group: Applications/Archiving
 URL: http://www.info-zip.org/Zip.html
 Vendor:  bww bitwise works GmbH
 
-%scm_source  svn http://svn.netlabs.org/repos/ports/zip/trunk 2274
+%scm_source  svn http://svn.netlabs.org/repos/ports/zip/trunk 2303
 
 %description
 The zip program is a compression and file packaging utility.  Zip is
@@ -52,7 +52,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/zipsplit.1*
 
 %changelog
-* Tue Feb 19 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.0-7
+* Fri Sep 28 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.0-8
+- fix volume label info rpm Ticket #319
+
+* Mon Feb 19 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.0-7
 - use new scm_source and scm_setup macro
 - fix wildcard and current dir processing. Ticket #179
 
