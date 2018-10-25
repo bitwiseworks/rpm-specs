@@ -27,7 +27,7 @@
 Name:           perl
 Version:        %{perl_version}
 # release number must be even higher, because dual-lived modules will be broken otherwise
-Release:        4%{?dist}
+Release:        5%{?dist}
 Epoch:          %{perl_epoch}
 Summary:        Practical Extraction and Report Language
 Group:          Development/Languages
@@ -41,7 +41,7 @@ License:        (GPL+ or Artistic) and (GPLv2+ or Artistic) and Copyright Only a
 Url:            http://www.perl.org/
 Vendor:         bww bitwise works GmbH
 
-%scm_source     svn http://svn.netlabs.org/repos/ports/perl/trunk 2168
+%scm_source     svn http://svn.netlabs.org/repos/ports/perl/trunk 2305
 Source3:        macros.perl
 
 # Update some of the bundled modules
@@ -1717,7 +1717,7 @@ rm -rf $RPM_BUILD_ROOT
 # Filter
 %exclude %{archlib}/auto/Filter/Util
 %exclude %{archlib}/Filter/Util
-%exclude %{privlib}/pod/perlfilter.pod
+%exclude %{privlib}/Pod/perlfilter.pod
 %exclude %{_mandir}/man1/perlfilter.*
 %exclude %{_mandir}/man3/Filter.Util.*
 
@@ -1914,7 +1914,7 @@ rm -rf $RPM_BUILD_ROOT
 
 # Pod-Perldoc
 %exclude %{_bindir}/perldoc
-%exclude %{privlib}/pod/perldoc.pod
+%exclude %{privlib}/Pod/perldoc.pod
 %exclude %{privlib}/Pod/Perldoc.pm
 %exclude %{privlib}/Pod/Perldoc/
 %exclude %{_mandir}/man1/perldoc.1*
@@ -1966,7 +1966,7 @@ rm -rf $RPM_BUILD_ROOT
 %exclude %{_mandir}/man3/Time.Seconds.3*
 
 # Version-Requirements
-%exclude %{privlib}/Version/Requirements.pm
+%exclude %{privlib}/version/Requirements.pm
 %exclude %{_mandir}/man3/version.Requirements.3*
 
 # Socket
@@ -2065,6 +2065,7 @@ rm -rf $RPM_BUILD_ROOT
 %{archlib}/Compress/Raw/Zlib.pm
 %dir %{archlib}/auto/Compress/
 %dir %{archlib}/auto/Compress/Raw/
+%{archlib}/auto/Compress/Raw/Zlib/
 %exclude %{archlib}/auto/Compress/Raw/Zlib/*.dbg
 %{_mandir}/man3/Compress.Raw.Zlib*
 
@@ -2218,7 +2219,7 @@ rm -rf $RPM_BUILD_ROOT
 %{archlib}/auto/Filter/Util
 %exclude %{archlib}/auto/Filter/Util/Call/*.dbg
 %{archlib}/Filter/Util
-%{privlib}/pod/perlfilter.pod
+%{privlib}/Pod/perlfilter.pod
 %{_mandir}/man1/perlfilter.*
 %{_mandir}/man3/Filter.Util.*
 
@@ -2340,6 +2341,7 @@ rm -rf $RPM_BUILD_ROOT
 %files Module-Load
 %{privlib}/Module/Load.pm
 %{_mandir}/man3/Module.Load.*
+%exclude %{_mandir}/man3/Module.Load.Conditional*
 
 %files Module-Load-Conditional
 %{privlib}/Module/Load/
@@ -2425,7 +2427,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files Pod-Perldoc
 %{_bindir}/perldoc
-%{privlib}/pod/perldoc.pod
+%{privlib}/Pod/perldoc.pod
 %{privlib}/Pod/Perldoc.pm
 %{privlib}/Pod/Perldoc/
 %{_mandir}/man1/perldoc.1*
@@ -2490,7 +2492,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man3/Time.Seconds.3*
 
 %files Version-Requirements
-%{privlib}/Version/Requirements.pm
+%{privlib}/version/Requirements.pm
 %{_mandir}/man3/version.Requirements.3*
 
 %files threads
@@ -2511,6 +2513,7 @@ rm -rf $RPM_BUILD_ROOT
 %{privlib}/version.pm
 %{privlib}/version.pod
 %{privlib}/version/
+%exclude %{privlib}/version/Requirements.pm
 %{_mandir}/man3/version.3*
 %{_mandir}/man3/version.Internals.3*
 
@@ -2518,6 +2521,12 @@ rm -rf $RPM_BUILD_ROOT
 # Nothing. Nada. Zilch. Zarro. Uh uh. Nope. Sorry.
 
 %changelog
+* Wed Oct 24 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 5.16.1-5
+- readd zip functionality, which was lost in 5.16.1-4
+- remove duplicate files
+- fix for ticket #67
+- fix for ticket #160
+
 * Thu Apr 6 2017 Dmitriy Kuminov <coding@dmik.org> 5.16.1-4
 - Merge Fedora perl.spec changes for 5.16.1 to generate proper perl(XXX)
   requires and provides and to bring more perl-XXX sub-packages.
