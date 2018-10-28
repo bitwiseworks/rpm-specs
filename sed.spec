@@ -1,22 +1,24 @@
 # -*- coding: utf-8 -*-
-%ifos linux
-%define _bindir /bin
-%endif
 
 Summary: A GNU stream text editor
 Name: sed
-Version: 4.2.1
-Release: 2%{?dist}
+Version: 4.5
+Release: 1%{?dist}
 License: GPLv3+
 Group: Applications/Text
 URL: http://sed.sourceforge.net/
-Source0: ftp://ftp.gnu.org/pub/gnu/sed/sed-%{version}.tar.bz2
+Vendor: bww bitwise works GmbH
+#scm_source github http://github.com/bitwiseworks/%{name}-os2 master-os2
+%scm_source git E:/Trees/%{name}/git master-os2
 Source1: http://sed.sourceforge.net/sedfaq.txt
-Patch0: sed-4.2.1-copy.patch
-Patch1: sed-4.2.1-makecheck.patch
-Patch2: sed-os2.patch
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildRequires: libc-devel
+BuildRequires: libc-devel, libcx-devel, automake, autoconf, gcc
+#BuildRequires: glibc-devel, libacl-devel
+#BuildRequires: perl-Getopt-Long
+
+#Provides: /bin/sed
+
+#copylib
+#Provides: bundled(gnulib)
 
 %description
 The sed (Stream EDitor) editor is a stream or batch (non-interactive)
@@ -25,50 +27,54 @@ operations on the text and outputs the modified text.  The operations
 that sed performs (substitutions, deletions, insertions, etc.) can be
 specified in a script file or from the command line.
 
+%debug_package
+
 %prep
-%setup -q
-%patch0 -p1
-%patch1 -p1
-%patch2 -p1
+%scm_setup
+autoreconf -fvi
 
 %build
-export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
-export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
-export LIBS="-lurpo -lmmap"
-%configure \
-     --without-included-regex \
-    "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
+export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+export LIBS="-lcx0"
+%configure --without-included-regex
+# we need that until we have a later texinfo :(
+touch ./doc/sed.info
 
 make %{_smp_mflags}
 install -m 644 -p %{SOURCE1} sedfaq.txt
 gzip -9 sedfaq.txt
 
-#%check
-#echo ====================TESTING=========================
+%check
+echo ====================TESTING=========================
 #make check
-#echo ====================TESTING END=====================
+echo ====================TESTING END=====================
 
 %install
 rm -rf ${RPM_BUILD_ROOT}
+# we need that until we have a later texinfo :(
+touch ./doc/sed.info
 make DESTDIR=$RPM_BUILD_ROOT install
 rm -f ${RPM_BUILD_ROOT}/%{_infodir}/dir
 rm -f $RPM_BUILD_ROOT/%{_libdir}/charset.alias
 
-#%find_lang %{name}
+# create a symlink to fullfill requires w/o .exe
+ln -s %{_bindir}/%{name}.exe %{buildroot}%{_bindir}/sed
 
-%clean
-rm -rf ${RPM_BUILD_ROOT}
+%find_lang %{name}
 
-%files
-# -f %{name}.lang
-%defattr(-,root,root)
-%doc BUGS NEWS THANKS README AUTHORS sedfaq.txt.gz COPYING COPYING.DOC
+%files -f %{name}.lang
+%{!?_licensedir:%global license %%doc}
+%license COPYING 
+%doc BUGS NEWS THANKS README AUTHORS sedfaq.txt.gz
+%{_bindir}/sed
 %{_bindir}/sed.exe
-%{_infodir}/*.info*
-%{_mandir}/man*/*
-%{_datadir}/locale/*
+%{_infodir}/sed.info*
+%{_mandir}/man1/sed.1*
 
 %changelog
+* Sat Oct 27 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.5-1
+- updated to vendro version 4.5
+
 * Sun Jan 08 2012 yd
 - fixed requirements.
 
