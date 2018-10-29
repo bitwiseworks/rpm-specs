@@ -3,7 +3,7 @@
 Summary: A GNU stream text editor
 Name: sed
 Version: 4.5
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Group: Applications/Text
 URL: http://sed.sourceforge.net/
@@ -72,8 +72,11 @@ ln -s %{_bindir}/%{name}.exe %{buildroot}%{_bindir}/sed
 %{_mandir}/man1/sed.1*
 
 %changelog
+* Mon Oct 29 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.5-2
+- remove all binary stuff, as it broke too much
+
 * Sat Oct 27 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.5-1
-- updated to vendro version 4.5
+- updated to vendor version 4.5
 
 * Sun Jan 08 2012 yd
 - fixed requirements.
