@@ -1,7 +1,7 @@
 Summary:	PDF rendering library
 Name:		poppler
 Version:	0.59.0
-Release:	1%{?dist}
+Release:	2%{?dist}
 License:	(GPLv2 or GPLv3) and GPLv2+ and LGPLv2+ and MIT
 Group:		Development/Libraries
 URL:		http://poppler.freedesktop.org/
@@ -147,9 +147,10 @@ export POPPLER_QT4_TEST_LIBS
 export PATH
 export VENDOR="%{vendor}"
 
+#remove the unmaintained libjpeg stuff when we have a openjpeg2 port
 %configure \
 	--enable-poppler-qt4=yes --enable-zlib=yes \
-	--enable-zlib-uncompress=yes --enable-libopenjpeg=none \
+	--enable-zlib-uncompress=yes --enable-libopenjpeg=unmaintained \
 	--enable-shared --disable-static \
 	--enable-xpdf-headers
 
@@ -215,6 +216,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Fri Nov 2 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.59.0-2
+- enable the unmaintained JPXDecoder for now
+
 * Mon Aug 20 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.59.0-1
 - update to vendor version 0.59.0
 - fix for ticket #185 by Steven H. Levine
