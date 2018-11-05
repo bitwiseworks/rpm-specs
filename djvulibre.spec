@@ -75,7 +75,7 @@ rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
 export CFLAGS="$RPM_OPT_FLAGS -mstackrealign"
 export CXXFLAGS="$RPM_OPT_FLAGS -mstackrealign"
 export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
-export LIBS="-lcx0"
+export LIBS="-lcx"
 export NOCONFIGURE=1
 autogen.sh
 

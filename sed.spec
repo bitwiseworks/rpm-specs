@@ -12,6 +12,7 @@ Vendor: bww bitwise works GmbH
 %scm_source git E:/Trees/%{name}/git master-os2
 Source1: http://sed.sourceforge.net/sedfaq.txt
 BuildRequires: libc-devel, libcx-devel, automake, autoconf, gcc
+BuildRequires: gettext-devel, gettext-common-devel
 #BuildRequires: glibc-devel, libacl-devel
 #BuildRequires: perl-Getopt-Long
 
@@ -35,7 +36,7 @@ autoreconf -fvi
 
 %build
 export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
-export LIBS="-lcx0"
+export LIBS="-lcx"
 %configure --without-included-regex
 # we need that until we have a later texinfo :(
 touch ./doc/sed.info

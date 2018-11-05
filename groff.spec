@@ -101,7 +101,7 @@ autoreconf -fvi
 
 %build
 export LDFLAGS=" -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
-export LIBS="-lcx0"
+export LIBS="-lcx"
 %configure \
     --docdir=%{_pkgdocdir} \
     --with-appresdir=%{_datadir}/X11/app-defaults \
