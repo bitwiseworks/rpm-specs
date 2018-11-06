@@ -7,9 +7,10 @@ Url:        https://github.com/bitwiseworks/kbuild-os2
 Epoch:      1
 
 Version:    0.1.9998
-Release:    9%{?dist}
+Release:    10%{?dist}
 
-%scm_source github https://github.com/bitwiseworks/kbuild-os2 7130a2f60fed139c31dc06710f59a02da990e992
+%scm_source github https://github.com/bitwiseworks/kbuild-os2 618f0f0d11b983d7370226cf885d87afb4d906fa
+#scm_source git file://D:/Coding/kbuild/master 618f0f0d11b983d7370226cf885d87afb4d906fa
 
 %define descr_brief kBuild is a GNU Make fork with a set of scripts to simplify\
 complex build tasks and portable versions of various UNIX tools to ensure\
@@ -18,13 +19,6 @@ cross-platform portability.
 %define pkg_docdir      %{_docdir}/%{name}
 
 BuildRequires: kbuild gettext-devel
-
-#------------------------------------------------------------------------------
-# commons
-#------------------------------------------------------------------------------
-
-# TODO: patch -s (2.6.1-3.oc00) always fails, remove this flag from defaults
-%define _default_patch_flags %nil
 
 #------------------------------------------------------------------------------
 # main package
@@ -124,6 +118,9 @@ cmd /c "kBuild\envos2.cmd" kmk $KMK_FLAGS PATH_INS="%{buildroot}" install
 
 #------------------------------------------------------------------------------
 %changelog
+* Tue Nov 6 2018 Dmitriy Kuminov <coding@dmik.org> 0.1.9998-10
+- Update sources to SVN r3236 from vendor.
+
 * Wed Jul 26 2017 Dmitriy Kuminov <coding@dmik.org> 0.1.9998-9
 - Use a forked GitHub repository where all previous patches have been applied.
 - Drop changing the default DLL install dir from /lib to /bin (in an RPM
