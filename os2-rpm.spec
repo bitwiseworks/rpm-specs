@@ -1,7 +1,7 @@
 Summary: OS/2 specific RPM macros and scripts
 Name: os2-rpm
 Version: 1
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: GPLv2+
 Group: Development/System
 Vendor: bww bitwise works GmbH
@@ -28,6 +28,7 @@ Source6: wps-object.cmd
 Source7: warpin-conflicts.cmd
 Source8: getbootdrive.cmd
 Source9: wpi4rpm.cmd
+Source10: macros.scm_pwd
 
 # This is necessary due to a silly "Provides: os2-rpm" in os2-rpm-build-0-1
 Conflicts: os2-rpm-build <= 0-1
@@ -70,6 +71,8 @@ done
 %{__mkdir_p} %{buildroot}%{_rpmconfigdir_macros_d}
 %{__install} -p -m 644 -t %{buildroot}%{_rpmconfigdir_macros_d} \
   macros.scm macros.cfg macros.wps
+%{__mkdir_p} %{buildroot}%{_sysconfdir}/rpm
+%{__install} -p -m 644 -t %{buildroot}%{_sysconfdir}/rpm macros.scm_pwd
 
 # install OS/2 Rexx scripts
 for f in *.exe ; do
@@ -94,8 +97,12 @@ done
 %{_rpmconfigdir_os2}/brp-strip-os2
 %{_rpmconfigdir_os2}/find-legacy-runtime.sh
 %{_rpmconfigdir_macros_d}/macros.scm
+%config(noreplace) %{_sysconfdir}/rpm/macros.scm_pwd
 
 %changelog
+* Sun Nov 11 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 1-4
+- add the possibility to have password protected github projects
+
 * Mon Aug 20 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 1-3
 - copy wpi4rpm also to %{_bindir} ticket #308
 - don't add an extention to symlinks

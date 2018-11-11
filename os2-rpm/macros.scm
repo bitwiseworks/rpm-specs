@@ -73,7 +73,10 @@ BuildRequires: wget zip unzip\
 %else\
 %setup -n "%__source_dir_github" -Tc\
 rm -f "%SOURCE0"\
-wget -nv "%{__source_url}/archive/%{__source_rev}.zip" -O "%SOURCE0"\
+%global __github_user %{?github_user:--user=%{github_user}}%{?!github_user:}\
+%global __github_password %{?github_password:--password=%{github_password}}%{?!github_password:}\
+%global __github_token %{?github_token:--header="Authorization: token %{github_token}"}%{?!github_token:}\
+wget -nv %__github_user %__github_password %__github_token "%{__source_url}/archive/%{__source_rev}.zip" -O "%SOURCE0"\
 (cd .. && unzip -qq "%SOURCE0" "%__source_dir_github"/RPMBUILD_SOURCE 2>/dev/null) || :\
 %__scm_pre_pack\
 (cd .. && zip -mX "%SOURCE0" "%__source_dir_github"/RPMBUILD_SOURCE*)\
