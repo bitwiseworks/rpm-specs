@@ -10,12 +10,15 @@ License:	LGPL v2+
 Group:		Libraries
 URL:		https://www.gnu.org/software/libiconv/
 Vendor:         bww bitwise works GmbH
-#scm_source github https://github.com/bitwiseworks/%{name}-os2 %{version}-os2
-%scm_source git file://e:/Trees/libiconv/git master-os2
+%scm_source github https://github.com/bitwiseworks/%{name}-os2 %{version}-os2
+#%scm_source git file://e:/Trees/libiconv/git master-os2
 
 BuildRequires:	autoconf >= 2.60
 BuildRequires:	automake
 BuildRequires:	libtool
+
+# for the password stuff, as a private repo
+BuildRequires: os2-rpm-build >= 1-4
 
 %description
 This library provides an iconv() implementation, for use on systems
@@ -30,7 +33,6 @@ Requires:	%{name} = %{version}-%{release}
 
 %description devel
 This package contains libiconv header files.
-%endif
 
 %package static
 Summary:	libiconv static library
@@ -39,6 +41,7 @@ Requires:	%{name}-devel = %{version}-%{release}
 
 %description static
 This package contains static libiconv library.
+%endif
 
 
 %package utils
@@ -83,6 +86,7 @@ rm -f $RPM_BUILD_ROOT/%{_libdir}/*_dll.a
 rm -f $RPM_BUILD_ROOT/%{_includedir}/*.h
 rm -f $RPM_BUILD_ROOT/%{_mandir}/man3/iconv*.3*
 rm -f $RPM_BUILD_ROOT/%{_docdir}/iconv*.html
+rm -f $RPM_BUILD_ROOT/%{_libdir}/charset.a
 %endif
 
 
@@ -106,11 +110,11 @@ rm -f $RPM_BUILD_ROOT/%{_docdir}/iconv*.html
 %{_includedir}/localcharset.h
 %{_mandir}/man3/iconv*.3*
 %{_docdir}/iconv*.html
-%endif
 
 %files static
 %defattr(644,root,root,755)
 %{_libdir}/charset.a
+%endif
 
 %files utils
 %defattr(644,root,root,755)

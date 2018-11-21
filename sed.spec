@@ -8,13 +8,16 @@ License: GPLv3+
 Group: Applications/Text
 URL: http://sed.sourceforge.net/
 Vendor: bww bitwise works GmbH
-#scm_source github http://github.com/bitwiseworks/%{name}-os2 master-os2
-%scm_source git E:/Trees/%{name}/git master-os2
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
+#scm_source git E:/Trees/%{name}/git master-os2
 Source1: http://sed.sourceforge.net/sedfaq.txt
 BuildRequires: libc-devel, libcx-devel, automake, autoconf, gcc
 BuildRequires: gettext-devel, gettext-common-devel
 #BuildRequires: glibc-devel, libacl-devel
 #BuildRequires: perl-Getopt-Long
+
+# for the password stuff, as a private repo
+BuildRequires: os2-rpm-build >= 1-4
 
 #Provides: /bin/sed
 

@@ -281,6 +281,7 @@ fi
 %files libs
 %dir %{_pkgdocdir}/
 %{_pkgdocdir}/COPYING
+%dir %{_pkgdocdir}/fontembed
 %{_pkgdocdir}/fontembed/README
 %{_libdir}/cupsfil*.dll
 %{_libdir}/fontemb*.dll

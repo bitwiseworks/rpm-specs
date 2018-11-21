@@ -9,8 +9,8 @@ License: GPL+
 URL: https://po4a.alioth.debian.org/
 
 Vendor: bww bitwise works GmbH
-#scm_source github https://github.com/bitwiseworks/%{name}-os2 %{version}-os2
-%scm_source git file://e:/Trees/po4a/git master-os2
+%scm_source github https://github.com/bitwiseworks/%{name}-os2 %{version}-os2
+#%scm_source git file://e:/Trees/po4a/git master-os2
 
 BuildArch: noarch
 BuildRequires: %{_bindir}/xsltproc.exe

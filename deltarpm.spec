@@ -91,7 +91,7 @@ export VENDOR="%{vendor}"
 # nothing to do
 %else
 rm -rf %{buildroot}%{_libdir}/python3*
-ln -sf %{python2_sitearch}/_deltrpm.pyd $RPM_BUILD_ROOT%{python2_sitearch}/_deltarpmmodule.pyd
+ln -sf %{python2_sitearch}/_deltrpm.pyd $RPM_BUILD_ROOT%{python2_sitearch}/_%{name}module.pyd
 %endif
 
 %files
