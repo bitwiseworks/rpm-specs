@@ -1,0 +1,10 @@
+#------------------------------------------------------------------------
+# macros to resolve user/pwd for password projected scm repos
+#
+# adjust the below commented out lines to our need
+
+#%github_user
+#%github_password
+# the github token needs to be created in the developer part of your github
+# account personal settings
+#%github_token
