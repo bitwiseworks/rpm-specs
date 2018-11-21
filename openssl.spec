@@ -25,7 +25,7 @@
 
 Summary: A general purpose cryptography library with TLS implementation
 Name: openssl
-Version: 1.0.2o
+Version: 1.0.2q
 Release: 1%{?dist}
 
 License: OpenSSL
@@ -43,7 +43,7 @@ BuildRequires: /@unixroot/usr/bin/pod2man
 Requires: coreutils
 Requires: %{name}-libs = %{version}-%{release}
 
-%scm_source github http://github.com/bitwiseworks/openssl-os2 1.0.2o-os2
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
 
 %description
 The OpenSSL toolkit provides support for secure communications between
@@ -352,6 +352,10 @@ rm -rf $RPM_BUILD_ROOT/%{_libdir}/fipscanister.*
 %{_sysconfdir}/pki/tls/misc/tsget
 
 %changelog
+* Wed Nov 21 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.0.2q-1
+- Update to version 1.0.2q.
+- add a nice buildlevel string
+
 * Wed May 02 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.0.2o-1
 - Update to version 1.0.2o.
 - moved source to github
