@@ -6,7 +6,7 @@
 Summary: Tools for searching and reading man pages
 Name: man-db
 Version: 2.7.6.1
-Release: 1%{?dist}
+Release: 2%{?dist}
 # GPLv2+ .. man-db
 # GPLv3+ .. gnulib
 License: GPLv2+ and GPLv3+
@@ -14,7 +14,7 @@ Group: System Environment/Base
 URL: http://www.nongnu.org/man-db/
 
 Vendor: bww bitwise works GmbH
-%scm_source github https://github.com/bitwiseworks/%{name}-os2 %{version}-os2
+%scm_source github https://github.com/bitwiseworks/%{name}-os2 %{version}-os2-2
 #scm_source git file://e:/Trees/man-db/git master-os2
 
 Obsoletes: man < 2.0
@@ -192,5 +192,8 @@ MAN_NO_LOCALE_WARNING=1 /@unixroot/usr/bin/mandb -q
 %lang(zh_CN)   %{_datadir}/man/zh_CN/man*/*
 
 %changelog
+* Mon Nov 19 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.7.6.1-2
+- fix a crlf issue
+
 * Mon Nov 12 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.7.6.1-1
 - Initial version
