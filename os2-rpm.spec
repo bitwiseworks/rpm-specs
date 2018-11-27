@@ -1,7 +1,7 @@
 Summary: OS/2 specific RPM macros and scripts
 Name: os2-rpm
 Version: 1
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: GPLv2+
 Group: Development/System
 Vendor: bww bitwise works GmbH
@@ -80,13 +80,14 @@ for f in *.exe ; do
   ln -sf %{_rpmconfigdir_os2}/$f %{buildroot}%{_libdir}/rpm/${f%.exe}
 done
 %{__install} -D -p -m 755 wpi4rpm.exe %{buildroot}%{_bindir}/wpi4rpm.exe
+%{__install} -D -p -m 755 warpin-conflicts.exe %{buildroot}%{_libdir}/rpm/warpin-conflicts.exe
 
 %files
 %dir %{_rpmconfigdir_os2}
 %{_rpmconfigdir_os2}/macros
 %{_rpmconfigdir_os2}/*.exe
 %{_libdir}/rpm/wpi4rpm
-%{_libdir}/rpm/warpin-conflicts
+%{_libdir}/rpm/warpin-conflicts*
 %{_libdir}/rpm/wps-object
 %{_libdir}/rpm/getbootdrive
 %{_bindir}/wpi4rpm.exe
@@ -100,6 +101,10 @@ done
 %config(noreplace) %{_sysconfdir}/rpm/macros.scm_pwd
 
 %changelog
+* Tue Nov 27 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 1-5
+- some rather old packages still need warpin-conflicts at the ols location,
+  so copy it there as well ticket #321
+
 * Sun Nov 11 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 1-4
 - add the possibility to have password protected github projects
 
