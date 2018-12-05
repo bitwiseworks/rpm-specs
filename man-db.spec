@@ -6,7 +6,7 @@
 Summary: Tools for searching and reading man pages
 Name: man-db
 Version: 2.7.6.1
-Release: 2%{?dist}
+Release: 3%{?dist}
 # GPLv2+ .. man-db
 # GPLv3+ .. gnulib
 License: GPLv2+ and GPLv3+
@@ -28,6 +28,7 @@ Requires: libiconv-utils
 BuildRequires: db4-devel, gettext, groff, less, libpipeline-devel, zlib-devel
 #BuildRequires: gdbm-devel
 BuildRequires: po4a, perl, perl-version
+Requires: db4 >= 4.8.30-8
 
 %description
 The man-db package includes five tools for browsing man-pages:
@@ -192,6 +193,9 @@ MAN_NO_LOCALE_WARNING=1 /@unixroot/usr/bin/mandb -q
 %lang(zh_CN)   %{_datadir}/man/zh_CN/man*/*
 
 %changelog
+* Wed Dec 05 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.7.6.1-3
+- add a require for at least db4 4.8.30-8 (ticket #322)
+
 * Mon Nov 19 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.7.6.1-2
 - fix a crlf issue
 
