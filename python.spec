@@ -54,7 +54,7 @@
 Summary: An interpreted, interactive, object-oriented programming language
 Name: %{python}
 Version: 2.7.6
-Release: 21%{?dist}
+Release: 22%{?dist}
 License: Python
 Group: Development/Languages
 Vendor: bww bitwise works GmbH
@@ -63,7 +63,7 @@ Requires: %{name}-libs = %{version}-%{release}
 Provides: python-abi = %{pybasever}
 Provides: python(abi) = %{pybasever}
 
-%scm_source svn http://svn.netlabs.org/repos/rpm/python/trunk 1381
+%scm_source svn http://svn.netlabs.org/repos/rpm/python/trunk 1539
 
 %if %{main_python}
 Obsoletes: Distutils
@@ -81,8 +81,8 @@ Obsoletes: python-uuid < 1.31
 Provides: python-uuid = 1.31
 %endif
 
-# Because of spawn2
-Requires: libcx >= 0.6.1-2
+# Because of getaddrinfo
+Requires: libcx >= 0.6.3
 # Because of DosEnterCritSec removal
 Requires: pthread >= 20171227
 
@@ -277,7 +277,7 @@ mkdir -p %{buildroot}%{_prefix} %{buildroot}%{_mandir}
 make install DESTDIR=%{buildroot}
 
 # YD fix binaries
-cp %{buildroot}%{_bindir}/python.exe %{buildroot}%{_bindir}/python
+ln -s %{_bindir}/python.exe %{buildroot}%{_bindir}/python
 rm -f %{buildroot}%{_bindir}/python%{pybasever_cond}.dll
 
 # Junk, no point in putting in -test sub-pkg
@@ -382,7 +382,7 @@ fi
 %{_bindir}/pydoc*
 %{_bindir}/python
 %{_bindir}/python.exe
-%{_bindir}/python2.exe
+%{_bindir}/python2
 %if %{main_python}
 #%{_bindir}/python2
 %endif
@@ -522,6 +522,10 @@ fi
 # payload file would be unpackaged)
 
 %changelog
+* Fri Dec 21 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.7.6-22
+- adjust getaddrinfo and friends to latest libcx
+- don't add .exe to symlinks
+
 * Mon Jun 18 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.7.6-21
 - use %{os2_config_sys} macro instead of fixed c:\config.sys
 
