@@ -1,13 +1,14 @@
 Name:           lcms2
-Version:        2.8
+Version:        2.9
 Release:        1%{?dist}
 Summary:        Color Management Engine
 License:        MIT
 URL:            http://www.littlecms.com/
 
 Vendor:         bww bitwise works GmbH
-%scm_source svn http://svn.netlabs.org/repos/ports/lcms2/trunk 2123
+%scm_source svn http://svn.netlabs.org/repos/ports/lcms2/trunk 2316
 
+BuildRequires:  gcc
 BuildRequires:  libjpeg-devel
 BuildRequires:  libtiff-devel
 BuildRequires:  zlib-devel
@@ -19,7 +20,6 @@ parallel installed with the original (deprecated) lcms.
 
 %package        utils
 Summary:        Utility applications for %{name}
-Group:          Applications/Productivity
 Requires:       %{name} = %{version}-%{release}
 
 %description    utils
@@ -27,7 +27,6 @@ The %{name}-utils package contains utility applications for %{name}.
 
 %package        devel
 Summary:        Development files for LittleCMS
-Group:          Development/Libraries
 Requires:       %{name} = %{version}-%{release}
 Provides:       littlecms-devel = %{version}-%{release}
 
@@ -35,6 +34,7 @@ Provides:       littlecms-devel = %{version}-%{release}
 Development files for LittleCMS.
 
 %debug_package
+
 
 %prep
 %scm_setup
@@ -44,49 +44,55 @@ export NOCONFIGURE=1
 libtoolize -fc
 autogen.sh
 
+
 %build
-export LDFLAGS=" -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+export LDFLAGS=" -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp -lcx"
 export VENDOR="%{vendor}"
 
 %configure --disable-static --enable-shared
 
 make %{?_smp_mflags}
 
+
 %install
-rm -rf ${RPM_BUILD_ROOT}
 make install DESTDIR=${RPM_BUILD_ROOT} INSTALL="install -p"
-find ${RPM_BUILD_ROOT} -type f -name "*.la" -exec rm -f {} ';'
 
-# install docs as this is all we've got
-install -D -m 644 doc/LittleCMS2.?\ tutorial.pdf ${RPM_BUILD_ROOT}/%{_datadir}/doc/lcms2-devel-%{version}/tutorial.pdf
-install -D -m 644 doc/LittleCMS2.?\ API.pdf ${RPM_BUILD_ROOT}%{_datadir}/doc/lcms2-devel-%{version}/api.pdf
-install -D -m 644 doc/LittleCMS2.?\ Plugin\ API.pdf ${RPM_BUILD_ROOT}%{_datadir}/doc/lcms2-devel-%{version}/plugin-api.pdf
+rm -fv %{buildroot}%{_libdir}/lib*.la
 
-%clean
-rm -rf ${RPM_BUILD_ROOT}
+# rename docs (for use with %%doc below)
+cp -af doc/LittleCMS2.?\ API.pdf api.pdf
+cp -af doc/LittleCMS2.?\ Plugin\ API.pdf plugin-api.pdf
+cp -af doc/LittleCMS2.?\ tutorial.pdf tutorial.pdf
 
-#%post -p /sbin/ldconfig
 
-#%postun -p /sbin/ldconfig
+%check
+export BEGINLIBPATH=%{_builddir}/%{buildsubdir}/src/.libs
+make check -k ||:
+
+
+#%ldconfig_scriplets
+
 
 %files
-%defattr(-,root,root,-)
-%doc AUTHORS COPYING
+%doc AUTHORS
+%license COPYING
 %{_libdir}/*.dll
 
 %files utils
-%defattr(-,root,root,-)
 %{_bindir}/*.exe
 %{_mandir}/man1/*
 
 %files devel
-%defattr(-,root,root,-)
-%{_datadir}/doc/lcms2-devel-%{version}/*.pdf
-%{_includedir}/*
+%doc api.pdf plugin-api.pdf tutorial.pdf
+%{_includedir}/lcms2*.h
 %{_libdir}/*.a
-%{_libdir}/pkgconfig/%{name}.pc
+%{_libdir}/pkgconfig/lcms2.pc
+
 
 %changelog
+* Sat Dec 29 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.9-1
+- update to vendor version 2.9
+
 * Fri Mar 03 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.8-1
 - update to vendor version 2.8
 - use scm_ macros
@@ -94,5 +100,5 @@ rm -rf ${RPM_BUILD_ROOT}
 * Wed Mar 16 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.7-1
 - remove dbg files from normal packages
 
-* Thu Feb 16 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.7-0
+* Tue Feb 16 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.7-0
 - First release
