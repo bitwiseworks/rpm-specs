@@ -10,7 +10,7 @@
 Summary: Creates a common metadata repository
 Name: createrepo
 Version: 0.10.4
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv2
 Group: System Environment/Base
 URL: http://createrepo.baseurl.org/
@@ -22,7 +22,7 @@ Requires: yum-metadata-parser, yum >= 3.4.3, python-deltarpm, deltarpm, pyliblzm
 BuildRequires: python
 
 Vendor: bww bitwise works GmbH
-%scm_source  svn http://svn.netlabs.org/repos/ports/createrepo/trunk 2309
+%scm_source  svn http://svn.netlabs.org/repos/ports/createrepo/trunk 2317
 
 %description
 This utility will generate a common metadata repository from a directory of rpm
@@ -53,8 +53,11 @@ rm -rf $RPM_BUILD_ROOT
 %{python_sitelib}/createrepo
 
 %changelog
+* Sun Dec 30 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.10.4-3
+- fix verbose and messages output to stdout (rpm ticket #325)
+
 * Fri Nov 09 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.10.4-2
-- fix amoutn of workers
+- fix amount of workers
 - fix select() issue on stdout/stderr
 
 * Tue Dec 19 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.10.4-1
