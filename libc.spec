@@ -6,13 +6,13 @@ License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Standard Shared Libraries
 Group:          System/Libraries
 Version:        0.6.6
-Release:        38%{?dist}
+Release:        39%{?dist}
 Url:            http://svn.netlabs.org/libc
 
 Source:         libc-%{version}.zip
 Source1:        libc-emxomf-20150207.zip
-# This contains binary build of LIBC with patches from tickets #361-36 (see Patch1xx below)
-Source2:        libc-hotfix-20180605.zip
+# This contains binary build of LIBC with patches from kLIBC tickets (see Patch section below)
+Source2:        libc-hotfix-20181231.zip
 # This contains binary build of emxomfld with patches from ticket #376
 Source3:        libc-emxomfld-20170411.zip
 
@@ -24,14 +24,20 @@ Patch1:         libc-dmik-no-bsd.diff
 Patch2:         libc-dmik-fork_completion_callback-header.diff
 # https://github.com/bitwiseworks/libc/commit/ac12fd8873a2016779f9f08c04bf0498b91bc9ee
 Patch3:         libc-dmik-LONG_LONG_SUPPORTED.diff
+# https://github.com/bitwiseworks/libc commits 516ae41..8e96b78 (headers only)
+Patch4:         libc-ac12fd8-8e96b78.diff
 
-# These patches are not actually applied but they record what
-# needs to be done to the stock LIBC 0.6 source in order to build
-# emxomf.exe contained in libc-emxomf.zip
+# These patches are not actually applied but they record what needs to be done
+# to the stock LIBC 0.6 source in order to build emxomf.exe contained in
+# libc-emxomf.zip and to build the LIBC DLL itself. Note that starting from our
+# move of the kLIBC fork to https://github.com/bitwiseworks/libc, the LIBC DLL
+# provided by our RPMs contains all patches from the commits in that repo
+# (except those parts applied to headers by the patches above), but the repo
+# itself still misses the patches below (and some of the above). This mess will
+# be sorted out once we bulid it completely from sources (soon).
 Patch101:       libc-dmik-emxomf-02-remove-asterisk.diff
 Patch102:       libc-yuri-emxomf-verbose-warnings-3.patch
 Patch103:       libc-dmik-fork_completion_callback.diff
-#Patch104:       https://github.com/bitwiseworks/libc/commit/bdb42421f945cee32a272b9e33233e0093e9eb5f
 
 BuildRequires:  rexx_exe
 
@@ -94,6 +100,7 @@ HLL debug data for exception handling support.
 %patch1
 %patch2
 %patch3
+%patch4
 
 #replace paths.h wrong macros
 sed -i 's,"/@unixroot/bin,"/@unixroot/usr/bin,g' usr/include/paths.h
@@ -198,6 +205,15 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/tcpipv4/dbg
 
 %changelog
+* Mon Dec 31 2018 Dmitriy Kuminov <coding@dmik.org> 0.6.6-39
+- Make readdir return DT_LNK for symlinks (GH #9).
+- Make sure SIGCHLD is raised after a zombie for wait[pid] is created (GH #10).
+- Make reaplath fail on non-existing paths (GH #11).
+- Make stat succeed on file names with trailing spaces (GH #12).
+- Make [f]close return 0 regardless of DosClose result if LIBC handle is freed.
+- Fix typo in dlclose backend that would result in random return values (GH #14).
+- Increase dlerror buffer to 260+64 chars.
+
 * Tue Jun 5 2018 Dmitriy Kuminov <coding@dmik.org> 0.6.6-38
 - Fix resetting file access mode to O_WRONLY if opened with O_NOINHERIT. GitHub #2.
 - Define __LONG_LONG_SUPPORTED on modern C++ (C++11 and above). GitHub #6.
