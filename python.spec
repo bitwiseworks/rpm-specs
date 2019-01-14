@@ -54,7 +54,7 @@
 Summary: An interpreted, interactive, object-oriented programming language
 Name: %{python}
 Version: 2.7.6
-Release: 22%{?dist}
+Release: 23%{?dist}
 License: Python
 Group: Development/Languages
 Vendor: bww bitwise works GmbH
@@ -63,7 +63,7 @@ Requires: %{name}-libs = %{version}-%{release}
 Provides: python-abi = %{pybasever}
 Provides: python(abi) = %{pybasever}
 
-%scm_source svn http://svn.netlabs.org/repos/rpm/python/trunk 1539
+%scm_source svn http://svn.netlabs.org/repos/rpm/python/trunk 1551
 
 %if %{main_python}
 Obsoletes: Distutils
@@ -522,6 +522,9 @@ fi
 # payload file would be unpackaged)
 
 %changelog
+* Mon Jan 14 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.7.6-23
+- fix ticket #326
+
 * Fri Dec 21 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.7.6-22
 - adjust getaddrinfo and friends to latest libcx
 - don't add .exe to symlinks
