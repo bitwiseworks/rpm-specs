@@ -14,9 +14,12 @@
 %global bashcomproot        %{bashcompdir}
 %global use_systemd         0
 
+# only used for thew os/2 build, as we lack some components
+%global remove_nonworking   1
+
 Name:           git
 Version:        2.11.0
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Fast Version Control System
 License:        GPLv2
 Group:          Development/Tools
@@ -35,6 +38,7 @@ BuildRequires:  xmlto
 %endif
 #BuildRequires:  emacs
 BuildRequires:  expat-devel
+BuildRequires:  findutils
 BuildRequires:  gettext-devel
 BuildRequires:  %{libcurl_devel}
 #BuildRequires:  pcre-devel
@@ -49,7 +53,7 @@ BuildRequires:  systemd
 
 Requires:       git-core = %{version}-%{release}
 Requires:       git-core-doc = %{version}-%{release}
-#Requires:       perl(Error)
+Requires:       perl(Error)
 %if ! %{defined perl_bootstrap}
 # TODO Doesn't exist on OS/2 yet.
 #Requires:       perl(Term::ReadKey)
@@ -75,12 +79,16 @@ Group:          Development/Tools
 BuildArch:      noarch
 %endif
 Requires:       git = %{version}-%{release}
+%if ! %{remove_nonworking}
 Requires:       git-cvs = %{version}-%{release}
 Requires:       git-email = %{version}-%{release}
 Requires:       git-gui = %{version}-%{release}
 Requires:       git-svn = %{version}-%{release}
+%endif
 Requires:       git-p4 = %{version}-%{release}
+%if ! %{remove_nonworking}
 Requires:       gitk = %{version}-%{release}
+%endif
 Requires:       perl-Git = %{version}-%{release}
 %if ! %{defined perl_bootstrap}
 # TODO Doesn't exist on OS/2 yet.
@@ -136,7 +144,7 @@ Requires(postun): systemd
 %description daemon
 The git dæmon for supporting git:// access to git repositories
 
-%if 0
+%if ! %{remove_nonworking}
 %package -n gitweb
 Summary:        Simple web interface to git repositories
 Group:          Development/Tools
@@ -160,6 +168,7 @@ Requires:       git = %{version}-%{release}
 %description p4
 %{summary}.
 
+%if ! %{remove_nonworking}
 %package svn
 Summary:        Git tools for importing Subversion repositories
 Group:          Development/Tools
@@ -195,8 +204,9 @@ Requires:       perl(Authen::SASL)
 Requires:       perl(Net::SMTP::SSL)
 %description email
 Git tools for sending email.
+%endif
 
-%if 0
+%if ! %{remove_nonworking}
 
 %package gui
 Summary:        Git GUI tool
@@ -248,7 +258,7 @@ Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $versi
 %description -n perl-Git-SVN
 Perl interface to Git.
 
-%if 0
+%if ! %{remove_nonworking}
 
 %package -n emacs-git
 Summary:        Git version control system support for Emacs
@@ -324,7 +334,7 @@ make %{?_smp_mflags} all
 make %{?_smp_mflags} doc
 %endif
 
-%if 0
+%if ! %{remove_nonworking}
 make -C contrib/emacs
 %endif
 
@@ -345,7 +355,7 @@ cp -a prebuilt_docs/html/* Documentation/
 %endif
 %endif
 
-%if 0
+%if ! %{remove_nonworking}
 
 %global elispdir %{_emacs_sitelispdir}/git
 make -C contrib/emacs install \
@@ -367,13 +377,24 @@ make -C contrib/subtree install-doc
 # it's already part of git-core-doc and it's alone here
 rm -f %{buildroot}%{?_pkgdocdir}%{!?_pkgdocdir:%{_docdir}/%{name}-%{version}}/git-subtree.html
 
-%if 0
+%if ! %{remove_nonworking}
 mkdir -p %{buildroot}%{_sysconfdir}/httpd/conf.d
 install -pm 0644 %{SOURCE12} %{buildroot}%{_sysconfdir}/httpd/conf.d/git.conf
 sed "s|@PROJECTROOT@|%{_var}/lib/git|g" \
     %{SOURCE14} > %{buildroot}%{_sysconfdir}/gitweb.conf
 %else
 rm -rf %{buildroot}%{_var}/www/git/
+%endif
+
+#remove svn, cvs and some more non working stuff
+%if %{remove_nonworking}
+rm -rf %{buildroot}%{_bindir}/git-cvsserver
+rm -rf %{buildroot}%{gitcoredir}/git-cvsexportcommit
+rm -rf %{buildroot}%{gitcoredir}/git-cvsimport
+rm -rf %{buildroot}%{gitcoredir}/git-cvsserver
+rm -rf %{buildroot}%{gitcoredir}/git-remote-testsvn.exe
+rm -rf %{buildroot}%{gitcoredir}/git-send-email
+rm -rf %{buildroot}%{gitcoredir}/git-svn
 %endif
 
 find %{buildroot} -type f -name .packlist -exec rm -f {} ';'
@@ -384,7 +405,7 @@ find %{buildroot} -type f -name perllocal.pod -exec rm -f {} ';'
 find %{buildroot} Documentation -type f -name 'git-archimport*' -exec rm -f {} ';'
 
 exclude_re="archimport|email|git-citool|git-cvs|git-daemon|git-gui|git-remote-bzr|git-remote-hg|gitk|p4|svn"
-(find %{buildroot}%{_bindir} %{buildroot}%{_libexecdir} -type f | grep -vE "$exclude_re" | sed -e s@^%{buildroot}@@) > bin-man-doc-files
+(find %{buildroot}%{_bindir} %{buildroot}%{_libexecdir} -type f -o -type l | grep -vE "$exclude_re" | sed -e s@^%{buildroot}@@) > bin-man-doc-files
 (find %{buildroot}%{_bindir} %{buildroot}%{_libexecdir} -mindepth 1 -type d | grep -vE "$exclude_re" | sed -e 's@^%{buildroot}@%dir @') >> bin-man-doc-files
 (find %{buildroot}%{perl_vendorlib} -type f | sed -e s@^%{buildroot}@@) > perl-git-files
 (find %{buildroot}%{perl_vendorlib} -mindepth 1 -type d | sed -e 's@^%{buildroot}@%dir @') >> perl-git-files
@@ -526,6 +547,7 @@ rm -rf %{buildroot}
 %{!?_without_docs: %{_mandir}/man1/*p4*.1*}
 %{!?_without_docs: %doc Documentation/*p4*.html }
 
+%if ! %{remove_nonworking}
 %files svn
 %defattr(-,root,root)
 %{gitcoredir}/*svn*
@@ -549,8 +571,6 @@ rm -rf %{buildroot}
 %{gitcoredir}/*email*
 %{!?_without_docs: %{_mandir}/man1/*email*.1*}
 %{!?_without_docs: %doc Documentation/*email*.html }
-
-%if 0
 
 %files gui
 %defattr(-,root,root)
@@ -582,7 +602,7 @@ rm -rf %{buildroot}
 %defattr(-,root,root)
 %{!?_without_docs: %{_mandir}/man3/*Git*SVN*.3pm*}
 
-%if 0
+%if ! %{remove_nonworking}
 
 %files -n emacs-git
 %defattr(-,root,root)
@@ -609,11 +629,12 @@ rm -rf %{buildroot}
 %endif
 %endif
 %{gitcoredir}/git-daemon*
+%exclude %{gitcoredir}/*.dbg
 %{_var}/lib/git
 %{!?_without_docs: %{_mandir}/man1/*daemon*.1*}
 %{!?_without_docs: %doc Documentation/*daemon*.html}
 
-%if 0
+%if ! %{remove_nonworking}
 %files -n gitweb
 %defattr(-,root,root)
 %doc gitweb/INSTALL gitweb/README
@@ -626,6 +647,10 @@ rm -rf %{buildroot}
 # No files for you!
 
 %changelog
+* Mon Jan 14 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.11.0-4
+- build with latest tools to overcome a dbg file creation issue (ticket #193)
+- fix git-all rpm (rpm ticket #327)
+
 * Mon Jun 4 2018 Dmitriy Kuminov <coding@dmik.org> 2.11.0-3
 - Make updated file locking fully work on OS/2 (no more chmod errors).
 - Forbid inheriting O_CLOEXEC (e.g. temporary) files on OS/2.
