@@ -47,7 +47,7 @@
 Summary: A GNU collection of binary utilities
 Name: %{?cross}binutils%{?_with_debug:-debug}
 Version: 2.27
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv3+
 Group: Development/Tools
 URL: http://sources.redhat.com/binutils
@@ -80,7 +80,7 @@ Provides: bundled(libiberty)
 %define debug_package %{nil}
 %endif
 
-BuildRequires: gcc
+BuildRequires: gcc make autoconf automake libtool
 
 # Gold needs bison in order to build gold/yyscript.c.
 # Bison needs m4.
@@ -114,8 +114,8 @@ BuildRequires: libstdc++-static
 Conflicts: gcc-c++ < 4.0.0
 
 # The higher of these two numbers determines the default ld.
-%{!?ld_bfd_priority: %define ld_bfd_priority	50}
-%{!?ld_gold_priority:%define ld_gold_priority	30}
+%{!?ld_bfd_priority: %global ld_bfd_priority	50}
+%{!?ld_gold_priority:%global ld_gold_priority	30}
 
 %if "%{build_gold}" == "both"
 Requires(post): coreutils
@@ -154,6 +154,9 @@ Requires: zlib-devel
 Requires: binutils = %{version}-%{release}
 # BZ 1215242: We need touch...
 Requires: coreutils
+
+# To avoid header clashes (demangle.h etc)
+Requires: libc-devel >= 0.6.6-40
 
 %description devel
 This package contains BFD and opcodes static and dynamic libraries.
@@ -311,10 +314,19 @@ make install DESTDIR=%{buildroot} MAKEINFO=true
 make prefix=%{buildroot}%{_prefix} infodir=%{buildroot}%{_infodir} install-info
 %endif
 
-#install -m 644 bfd/libbfd.a %{buildroot}%{_libdir}
-#install -m 644 libiberty/libiberty.a %{buildroot}%{_libdir}
+# Install libiberty stuff as we provide it
+install -m 644 libiberty/libiberty.a %{buildroot}%{_libdir}
 install -m 644 include/libiberty.h %{buildroot}%{_prefix}/include
-#install -m 644 opcodes/libopcodes.a %{buildroot}%{_libdir}
+install -m 644 include/demangle.h %{buildroot}%{_prefix}/include
+install -m 644 include/dyn-string.h %{buildroot}%{_prefix}/include
+install -m 644 include/fibheap.h %{buildroot}%{_prefix}/include
+install -m 644 include/floatformat.h %{buildroot}%{_prefix}/include
+install -m 644 include/hashtab.h %{buildroot}%{_prefix}/include
+install -m 644 include/objalloc.h %{buildroot}%{_prefix}/include
+install -m 644 include/partition.h %{buildroot}%{_prefix}/include
+install -m 644 include/sort.h %{buildroot}%{_prefix}/include
+install -m 644 include/splay-tree.h %{buildroot}%{_prefix}/include
+
 # Remove Windows/Novell only man pages
 rm -f %{buildroot}%{_mandir}/man1/dlltool*
 rm -f %{buildroot}%{_mandir}/man1/nlmconv*
@@ -428,10 +440,6 @@ exit 0
 #%{_bindir}/%{?cross}ld*.exe
 %endif
 %{_mandir}/man1/*
-%{_infodir}/as.info.gz
-%{_infodir}/binutils.info.gz
-%{_infodir}/gprof.info.gz
-#%{_infodir}/ld.info.gz
 %if %{enable_shared}
 %{_libdir}/*.dll
 %endif
@@ -445,7 +453,7 @@ exit 0
 %files devel
 %defattr(-,root,root,-)
 %{_prefix}/include/*
-%{_libdir}/*_dll.a
+%{_libdir}/*.a
 %if %{with docs}
 %{_infodir}/bfd*info*
 %endif # with docs
@@ -453,6 +461,10 @@ exit 0
 %endif # %{isnative}
 
 %changelog
+* Tue Jan 15 2019 Dmitriy Kuminov <coding@dmik.org> 2.27-3
+- Restore installation of libiberty.a (broken by 2.25-1).
+- Install all libibetry headers.
+
 * Thu Jun 15 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.27-2
 - fix ticket #165 (needs to be reverted after gcc issue #27 fix)
 - add bldlevel info to the dll
