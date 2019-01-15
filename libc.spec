@@ -6,7 +6,7 @@ License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Standard Shared Libraries
 Group:          System/Libraries
 Version:        0.6.6
-Release:        39%{?dist}
+Release:        40%{?dist}
 Url:            http://svn.netlabs.org/libc
 
 Source:         libc-%{version}.zip
@@ -147,10 +147,23 @@ rm -f %{buildroot}%{_includedir}/symcat.h
 rm -f %{buildroot}%{_libdir}/libbfd.*
 rm -f %{buildroot}%{_libdir}/libopcodes.*
 
+#remove (old) libiberty headers/libs
+rm -f %{buildroot}%{_includedir}/libiberty.h
+rm -f %{buildroot}%{_includedir}/demangle.h
+rm -f %{buildroot}%{_includedir}/dyn-string.h
+rm -f %{buildroot}%{_includedir}/fibheap.h
+rm -f %{buildroot}%{_includedir}/floatformat.h
+rm -f %{buildroot}%{_includedir}/hashtab.h
+rm -f %{buildroot}%{_includedir}/objalloc.h
+rm -f %{buildroot}%{_includedir}/partition.h
+rm -f %{buildroot}%{_includedir}/sort.h
+rm -f %{buildroot}%{_includedir}/splay-tree.h
+rm -f %{buildroot}%{_includedir}/ternary.h
+rm -f %{buildroot}%{_libdir}/libiberty.*
+
 #remove libstdc++/supc++ static libs (built with gcc 3.x)
 rm -f %{buildroot}%{_libdir}/libstdc++.*
 rm -f %{buildroot}%{_libdir}/libsupc++.*
-rm -f %{buildroot}%{_libdir}/libiberty.*
 
 #remove sys/mman.h (provided by libcx-devel)
 rm -f %{buildroot}%{_includedir}/sys/mman.h
@@ -205,6 +218,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/tcpipv4/dbg
 
 %changelog
+* Tue Jan 15 2019 Dmitriy Kuminov <coding@dmik.org> 0.6.6-40
+- Remove (old) libiberty headers (provided by binutils-devel now).
+
 * Mon Dec 31 2018 Dmitriy Kuminov <coding@dmik.org> 0.6.6-39
 - Make readdir return DT_LNK for symlinks (GH #9).
 - Make sure SIGCHLD is raised after a zombie for wait[pid] is created (GH #10).
