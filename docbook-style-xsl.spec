@@ -1,6 +1,6 @@
 Name: docbook-style-xsl
 Version: 1.79.2
-Release: 1%{?dist}
+Release: 2%{?dist}
 Group: Applications/Text
 
 Summary: Norman Walsh's XSL stylesheets for DocBook XML
@@ -37,9 +37,10 @@ Source2:  https://github.com/docbook/xslt10-stylesheets/releases/download/releas
 #Patch4: docbook-xsl-non-constant-expressions.patch
 #added fixes for passivetex extension and list-item-body(#161371)
 #Patch5: docbook-xsl-list-item-body.patch
-#workaround missing mandir section problem (#727251)
+##workaround missing mandir section problem (#727251)
 #Patch6: docbook-xsl-mandir.patch
-
+#Non-recursive string.subst that doesn't kill smb.conf.5 generation
+Patch7: docbook-style-xsl-non-recursive-string-subst.patch
 
 %description
 These XSL stylesheets allow you to transform any DocBook XML document to
@@ -59,6 +60,7 @@ cd docbook-xsl-%{version}
 #%patch4 -p1 -b .nonconstant
 #%patch5 -p1 -b .listitembody
 #%patch6 -p1 -b .mandir
+%patch7 -p2 -b .non-recursive-subst
 
 cp -p %{SOURCE1} Makefile
 
@@ -138,5 +140,8 @@ if [ "$1" = 0 ]; then
 fi
 
 %changelog
+* Fri Jan 18 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.79.2-2
+- Use non-recursive string.subst to allow building large documents like smb.conf.5
+
 * Thu May 04 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.79.2-1
 - initial port
