@@ -4,7 +4,7 @@
 Summary: Library providing XML and HTML support
 Name: libxml2
 Version: 2.9.8
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: MIT
 Group: Development/Libraries
 URL: http://xmlsoft.org/
@@ -237,6 +237,9 @@ rm -fr %{buildroot}
 %endif # with_python3
 
 %changelog
+* Fri Jan 18 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.9.8-2
+- enable file:// with drive letters
+
 * Thu Jul 26 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.9.8-1
 - update to vendor version 2.9.8
 - moved source to github
