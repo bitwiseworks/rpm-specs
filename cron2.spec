@@ -1,17 +1,14 @@
 #define svn_url     F:/rd/ports/cron2/trunk
-%define svn_url     http://svn.netlabs.org/repos/ports/cron2/trunk
-%define svn_rev     1163
+%scm_source svn http://svn.netlabs.org/repos/ports/cron2/trunk 2323
 
 %define kmk_dist out/os2.x86/release/dist
 
 Summary: daemon to execute scheduled commands
 Name: cron2
 Version: 1.4.2
-Release: 0.0%{?dist}
+Release: 1%{?dist}
 License: This is a FreeWare product.
 Group: Development/Libraries
-
-Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
 Requires: libc >= 0.6.6
 
@@ -21,18 +18,12 @@ CRON/2, client/server-based  timed program execution.
 %debug_package
 
 %prep
-%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc
-svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
-%endif
+%scm_setup
+
+%global kmk_flags CFLAGS="%{optflags}" LDFLAGS=-Zhigh-mem KBUILD_VERBOSE=2 BUILD_TYPE=release INST_PREFIX="%{_prefix}"
 
 %build
-export KCFLAGS="%{optflags}"
-kmk -C src
+kmk -C src %{kmk_flags}
 kmk -C src install
 
 %install
@@ -52,6 +43,9 @@ touch ${RPM_BUILD_ROOT}%{_localstatedir}/log/cron2.log
 rm -rf %{buildroot}
 
 %post
+if [ "$1" -ge 1 ]; then # (upon update)
+  %wps_object_delete_all
+fi
 %wps_object_create_begin
 WP_TOOLS_CRON2_EXEC:WPProgram|Cron/2 Daemon|<WP_TOOLS>|EXENAME=((%_bindir/cron2.exe));STARTUPDIR=((%_bindir));ICONFILE=((%_defaultdocdir/%name-%version/cron2.ico));TITLE=Cron/2 Daemon;
 WP_START_CRON2_EXEC:WPShadow|Cron/2 Daemon|<WP_START>|SHADOWID=<WP_TOOLS_CRON2_EXEC>
@@ -59,7 +53,9 @@ WP_START_CRON2_EXEC:WPShadow|Cron/2 Daemon|<WP_START>|SHADOWID=<WP_TOOLS_CRON2_E
 %wps_object_create_end
 
 %postun
-%wps_object_delete_all
+if [ "$1" = "0" ]; then
+  %wps_object_delete_all
+fi
 
 %files
 %defattr(-,root,root)
@@ -70,6 +66,9 @@ WP_START_CRON2_EXEC:WPShadow|Cron/2 Daemon|<WP_START>|SHADOWID=<WP_TOOLS_CRON2_E
 %ghost %{_localstatedir}/log/cron2.log
 
 %changelog
+* Fri Jan 18 2019 yd <yd@os2power.com> 1.4.2-2
+- fixed dat file parsing
+
 * Tue Aug 25 2015 yd <yd@os2power.com> 1.4.2-1
 - initial build with unixroot support for /@unixroot/etc/cron2.dat and default
   logging to /@unixroot/var/log/cron2.log.
