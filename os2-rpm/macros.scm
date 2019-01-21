@@ -85,11 +85,15 @@ wget -nv %__github_user %__github_password %__github_token "%{__source_url}/arch
 
 # User-level macros
 
+# the __scm_defined was needed for noarch only spec
 %scm_source()\
+%if 0%{!?__scm_defined}\
 %{?SOURCE0:%{error:%0: Source tag is already set to '%SOURCE0'}%{quit}}\
 %{?1:%global __source_scm %1}\
 %{?2:%global __source_url %2}\
 %{?3:%global __source_rev %3}\
+%endif\
+%global __scm_defined 1\
 %{expand:%%{!?__scm_source_%1:%%{error:%0: Invalid SCM type: %{?1}}%{quit}}}\
 %{expand:%%{?__scm_source_%1}}\
 %{nil}
