@@ -4,29 +4,30 @@
 
 %global with_python3 0
 
-%global srcname setuptools
+%global main_name setuptools
 %if 0%{?build_wheel}
-%global python2_wheelname %{srcname}-%{version}-py2.py3-none-any.whl
-%global python2_record %{python2_sitelib}/%{srcname}-%{version}.dist-info/RECORD
+%global python2_wheelname %{main_name}-%{version}-py2.py3-none-any.whl
+%global python2_record %{python2_sitelib}/%{main_name}-%{version}.dist-info/RECORD
 %if 0%{?with_python3}
 %global python3_wheelname %python2_wheelname
-%global python3_record %{python3_sitelib}/%{srcname}-%{version}.dist-info/RECORD
+%global python3_record %{python3_sitelib}/%{main_name}-%{version}.dist-info/RECORD
 %endif
 %endif
 
 Name:           python-setuptools
 Version:        34.4.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Easily build and distribute Python packages
 
 Group:          Applications/System
 License:        MIT
-URL:            https://pypi.python.org/pypi/%{srcname}
+URL:            https://pypi.python.org/pypi/%{main_name}
 Vendor:         bww bitwise works GmbH
-%scm_source github https://github.com/bitwiseworks/%{srcname}-os2 %{version}-os2
+%scm_source github  https://github.com/bitwiseworks/%{main_name}-os2 %{version}-os2
 
 
 BuildArch:      noarch
+BuildRequires:  python-rpm-macros >= 1-3
 BuildRequires:  python2-devel
 BuildRequires:  python2-packaging
 BuildRequires:  python2-appdirs
@@ -216,6 +217,9 @@ LANG=en_US.utf8 PYTHONPATH=$(pwd) py.test-%{python3_version}
 %endif # with_python3
 
 %changelog
+* Mon Jan 21 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 34.4.1-2
+- rebuilt with latest python macros
+
 * Mon May 08 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 34.4.1-1
 - moved source to github
 - rebuilt with latest python macros
