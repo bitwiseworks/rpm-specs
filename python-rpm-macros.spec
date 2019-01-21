@@ -3,7 +3,7 @@
 
 Name:           python-rpm-macros
 Version:        1
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        The unversioned Python RPM macros
 
 License:        MIT
@@ -67,6 +67,9 @@ install -m 644 %{SOURCE0} %{SOURCE1} %{SOURCE2} %{SOURCE3} \
 
 
 %changelog
+* Mon May 08 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 1-3
+- remove .exe from python2 and python3 path, as this is insane
+
 * Mon May 08 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 1-2
 - add .exe to the python2 and python3 exe path
 
