@@ -8,8 +8,7 @@ License: GPLv3+ and GFDL and BSD and MIT
 Group: Applications/Publishing
 URL: http://www.gnu.org/software/groff/
 Vendor: bww bitwise works GmbH
-#scm_source github http://github.com/bitwiseworks/%{name}-os2 master-os2
-%scm_source git E:/Trees/groff/git master-os2
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
 
 Requires: coreutils, groff-base = %{version}-%{release}
 BuildRequires: gcc
