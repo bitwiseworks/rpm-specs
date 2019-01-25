@@ -7,7 +7,7 @@ Group: Development/Libraries
 URL: http://xmlsoft.org/XSLT/
 Vendor: bww bitwise works GmbH
 
-%scm_source  github http://github.com/bitwiseworks/%{name}-os2 master
+%scm_source  github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
 
 # DEF files to create forwarders for the legacy package
 Source10:       libxslt.def
