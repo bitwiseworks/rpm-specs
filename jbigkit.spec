@@ -7,7 +7,7 @@ Group:          Development/Libraries
 License:        GPLv2+
 URL:            http://www.cl.cam.ac.uk/~mgk25/jbigkit/
 Vendor:         bww bitwise works GmbH
-%scm_source github http://github.com/bitwiseworks/jbigkit-os2 master
+%scm_source github http://github.com/bitwiseworks/jbigkit-os2 %{version}-os2
 
 Requires:       jbigkit-libs = %{version}-%{release}
 
