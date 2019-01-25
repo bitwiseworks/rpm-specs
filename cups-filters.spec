@@ -16,7 +16,7 @@ License: GPLv2 and GPLv2+ and GPLv3 and GPLv3+ and LGPLv2+ and MIT
 
 Url:     http://www.linuxfoundation.org/collaborate/workgroups/openprinting/cups-filters
 Vendor:  bww bitwise works GmbH
-%scm_source  github https://github.com/bitwiseworks/%{name}-os2 master
+%scm_source  github https://github.com/bitwiseworks/%{name}-os2 %{version}-os2
 
 Requires: cups-filters-libs = %{version}-%{release}
 
