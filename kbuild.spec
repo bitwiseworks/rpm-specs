@@ -7,10 +7,10 @@ Url:        https://github.com/bitwiseworks/kbuild-os2
 Epoch:      1
 
 Version:    0.1.9998
-Release:    10%{?dist}
+Release:    11%{?dist}
 
-%scm_source github https://github.com/bitwiseworks/kbuild-os2 618f0f0d11b983d7370226cf885d87afb4d906fa
-#scm_source git file://D:/Coding/kbuild/master 618f0f0d11b983d7370226cf885d87afb4d906fa
+%scm_source github https://github.com/bitwiseworks/kbuild-os2 39fbc27f835d463c8a16885c232a76d39d27783b
+#scm_source git file://D:/Coding/kbuild/master 39fbc27f835d463c8a16885c232a76d39d27783b
 
 %define descr_brief kBuild is a GNU Make fork with a set of scripts to simplify\
 complex build tasks and portable versions of various UNIX tools to ensure\
@@ -67,6 +67,7 @@ compatible with the vanilla GNU Make function-wise.
 echo \
 "KBUILD_SVN_URL := %{__source_url}
 KBUILD_SVN_REV := 0x%{lua: print(string.sub(rpm.expand('%{__source_rev}'), 1, 7))}
+KBUILD_SVN_GIT := 1
 " > SvnInfo.kmk
 
 #------------------------------------------------------------------------------
@@ -118,6 +119,13 @@ cmd /c "kBuild\envos2.cmd" kmk $KMK_FLAGS PATH_INS="%{buildroot}" install
 
 #------------------------------------------------------------------------------
 %changelog
+* Fri Jan 25 2019 Dmitriy Kuminov <coding@dmik.org> 0.1.9998-11
+- Backlevel sources to SVN r3137 from vendor. This is the last revision prior
+  to updating kmk to GNU make 4.2.1 sources that produce a plenty of errors on
+  OS/2 (as shown by the previous RPM) and need a lot of porting to be usable.
+- Print git commit hash in hex and with '-git' suffix in version strings
+  instead of a misleading 'r' followed by a dec number (like SVN revision).
+
 * Tue Nov 6 2018 Dmitriy Kuminov <coding@dmik.org> 0.1.9998-10
 - Update sources to SVN r3236 from vendor.
 
@@ -155,7 +163,7 @@ cmd /c "kBuild\envos2.cmd" kmk $KMK_FLAGS PATH_INS="%{buildroot}" install
   - Add switching between RC/WRC in GCC3OMF/GXX3OMF tools based on
     EMXOMFLD_RC_* environment variables [Patch6].
 
-* Mon Oct 16 2012 Dmitriy Kuminov <coding/dmik.org> 0.1.9998.4-1
+* Tue Oct 16 2012 Dmitriy Kuminov <coding/dmik.org> 0.1.9998.4-1
 - New SVN release 2663 of version 0.1.9998.
 
 * Mon Oct 15 2012 Dmitriy Kuminov <coding/dmik.org> 0.1.9998.3-1
