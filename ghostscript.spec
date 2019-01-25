@@ -16,7 +16,7 @@ License: AGPLv3+ and Redistributable, no modification permitted
 URL: http://www.ghostscript.com/
 Group: Applications/Publishing
 Vendor: bww bitwise works GmbH
-%scm_source github  https://github.com/bitwiseworks/%{name}-os2 master
+%scm_source github  https://github.com/bitwiseworks/%{name}-os2 %{version}-os2
 
 Requires: urw-fonts >= 1.1, ghostscript-fonts
 Requires: poppler-data
