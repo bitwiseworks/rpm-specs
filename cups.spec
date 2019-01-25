@@ -64,7 +64,7 @@ Group: System Environment/Daemons
 
 Url: http://www.cups.org
 Vendor: bww bitwise works GmbH
-%scm_source  github https://github.com/bitwiseworks/%{name}-os2 master
+%scm_source  github https://github.com/bitwiseworks/%{name}-os2 %{version}-os2-1
 
 # Dependencies...
 Requires: %{name}-filesystem = %{epoch}:%{version}-%{release}
