@@ -8,7 +8,7 @@ License:	GPL
 Group:		System/Printing
 URL:		http://printer.konicaminolta.net/
 Vendor:         bww bitwise works GmbH
-%scm_source  github https://github.com/bitwiseworks/magicolor-5430DL-os2 master
+%scm_source  github https://github.com/bitwiseworks/magicolor-5430DL-os2 %{version}-os2
 
 BuildRequires:	automake
 BuildRequires:	cups-devel
