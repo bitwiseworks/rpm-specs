@@ -9,7 +9,7 @@ Group: Applications/Text
 URL: http://aspell.net/
 
 Vendor: bww bitwise works GmbH
-%scm_source github https://github.com/bitwiseworks/%{name}-os2 master
+%scm_source github https://github.com/bitwiseworks/%{name}-os2 %{version}-os2
 
 BuildRequires: gettext, ncurses-devel, pkgconfig
 Requires(pre): %{_sbindir}/install-info.exe
