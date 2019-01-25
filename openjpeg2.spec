@@ -12,8 +12,7 @@ Summary:        C-Library for JPEG 2000
 License:        BSD and MIT
 URL:            https://github.com/uclouvain/openjpeg
 Vendor: bww bitwise works GmbH
-#scm_source github http://github.com/bitwiseworks/openjpeg-os2 master-os2
-%scm_source git E:/Trees/openjpeg/git master-os2
+%scm_source github http://github.com/bitwiseworks/openjpeg-os2 %{version}-os2
 %if 0%{?runcheck}
 # git clone git@github.com:uclouvain/openjpeg-data.git
 Source1:        data.tar.xz
