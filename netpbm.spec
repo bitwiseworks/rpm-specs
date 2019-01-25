@@ -7,7 +7,7 @@ License:         BSD and GPLv2 and IJG and MIT and Public Domain
 URL: http://netpbm.sourceforge.net/
 
 Vendor: bww bitwise works GmbH
-%scm_source github https://github.com/bitwiseworks/%{name}-os2 master-os2
+%scm_source github https://github.com/bitwiseworks/%{name}-os2 %{version}-os2
 # https://svn.code.sf.net/p/netpbm/code/advanced netpbm-%%{version}
 # https://svn.code.sf.net/p/netpbm/code/userguide netpbm-%%{version}/userguide
 
