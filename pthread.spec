@@ -1,13 +1,13 @@
 %define kmk_dist out/os2.x86/release/dist
 
-Summary: A posix pthread emulation for OS/2-eComStation
+Summary: A posix pthread emulation for OS/2 and OS/2 based systems
 Name: pthread
-Version: 20171227
-Release: 22%{?dist}
+Version: 20190130
+Release: 23%{?dist}
 License: unknown
 Group: Development/Libraries
 
-%scm_source svn http://svn.netlabs.org/repos/ports/pthread/trunk 2250
+%scm_source svn http://svn.netlabs.org/repos/ports/pthread/trunk 2333
 
 BuildRequires: gcc make
 
@@ -30,13 +30,6 @@ Summary: The previous posix pthread emulation library.
 
 %description legacy
 The previous posix pthread emulation library.
-
-%package debug
-Summary: HLL debug data for exception handling support.
-Requires: %{name} = %{version}-%{release}
-
-%description debug
-HLL debug data for exception handling support.
 
 %debug_package
 
@@ -76,11 +69,14 @@ rm -rf %{buildroot}
 %defattr(-,root,root)
 %{_libdir}/pthread.dll
 
-%files debug
-%defattr(-,root,root)
-%{_libdir}/*.dbg
-
 %changelog
+* Wed Jan 30 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 20190130-23
+- fix ticket #205 (code by KO Myung-Hun)
+- fix ticket #204 (code by kO Myung-Hun)
+- remove exceptq
+- link against libcx
+- add buildlevel info
+
 * Wed Dec 27 2017 Dmitriy Kuminov <coding@dmik.org> 20171227-22
 - Remove dangerous DosEnterCritSec usage.
 - Use scm_source macro and friends.
