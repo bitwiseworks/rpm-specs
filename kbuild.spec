@@ -7,10 +7,10 @@ Url:        https://github.com/bitwiseworks/kbuild-os2
 Epoch:      1
 
 Version:    0.1.9998
-Release:    11%{?dist}
+Release:    12%{?dist}
 
-%scm_source github https://github.com/bitwiseworks/kbuild-os2 39fbc27f835d463c8a16885c232a76d39d27783b
-#scm_source git file://D:/Coding/kbuild/master 39fbc27f835d463c8a16885c232a76d39d27783b
+%scm_source github https://github.com/bitwiseworks/kbuild-os2 d197e375ed672dbe2c78f55313ffe0d826e7a484
+#scm_source git file://D:/Coding/kbuild/master d197e375ed672dbe2c78f55313ffe0d826e7a484
 
 %define descr_brief kBuild is a GNU Make fork with a set of scripts to simplify\
 complex build tasks and portable versions of various UNIX tools to ensure\
@@ -18,7 +18,7 @@ cross-platform portability.
 
 %define pkg_docdir      %{_docdir}/%{name}
 
-BuildRequires: kbuild gettext-devel
+BuildRequires: kbuild gettext-devel libcx-devel
 
 #------------------------------------------------------------------------------
 # main package
@@ -119,6 +119,11 @@ cmd /c "kBuild\envos2.cmd" kmk $KMK_FLAGS PATH_INS="%{buildroot}" install
 
 #------------------------------------------------------------------------------
 %changelog
+* Sat Feb 2 2019 Dmitriy Kuminov <coding@dmik.org> 0.1.9998-12
+- Fix kmk crash when processing some makefiles (e.g. LIBCx ones).
+- Link kmk binaries against LIBCx to install EXCEPTQ handler.
+- Print (significant) leading zeroes of git commit hash in version strings.
+
 * Fri Jan 25 2019 Dmitriy Kuminov <coding@dmik.org> 0.1.9998-11
 - Backlevel sources to SVN r3137 from vendor. This is the last revision prior
   to updating kmk to GNU make 4.2.1 sources that produce a plenty of errors on
