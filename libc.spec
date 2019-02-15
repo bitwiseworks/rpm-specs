@@ -1,45 +1,30 @@
-#disable lxlite strip & debug info generation
-%define __os_install_post	%{nil}
+# Defines the major version (used in the DLL name)
+%define ver_maj 0
+
+# Disable .dbg creation for forwaders and compression fo the main DLL
+# (will be done manually with special compression options)
+%define _strip_opts --debuginfo -x "libc*.dll" --compress -x "libcn%{ver_maj}.dll"
+
+# New Epoch to signify rebranding from kLIBC to LIBC Next with its own versioning
+Epoch:          1
 
 Name:           libc
 License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Standard Shared Libraries
 Group:          System/Libraries
-Version:        0.6.6
-Release:        40%{?dist}
-Url:            http://svn.netlabs.org/libc
+Version:        %{ver_maj}.1.0
+Release:        1%{?dist}
+Vendor:         bww bitwise works GmbH
+Url:            https://github.com/bitwiseworks/libc
 
-Source:         libc-%{version}.zip
-Source1:        libc-emxomf-20150207.zip
-# This contains binary build of LIBC with patches from kLIBC tickets (see Patch section below)
-Source2:        libc-hotfix-20181231.zip
-# This contains binary build of emxomfld with patches from ticket #376
-Source3:        libc-emxomfld-20170411.zip
+%scm_source github https://github.com/bitwiseworks/libc %{version}
+#scm_source git file://D:/Coding/libc/master HEAD
 
-Patch0:         libc.patch
+BuildRequires:  rexx_exe kbuild
+BuildRequires:  gcc unzip sed gawk
 
-# http://trac.netlabs.org/libc/ticket/377
-Patch1:         libc-dmik-no-bsd.diff
-# http://trac.netlabs.org/libc/ticket/366 (header only)
-Patch2:         libc-dmik-fork_completion_callback-header.diff
-# https://github.com/bitwiseworks/libc/commit/ac12fd8873a2016779f9f08c04bf0498b91bc9ee
-Patch3:         libc-dmik-LONG_LONG_SUPPORTED.diff
-# https://github.com/bitwiseworks/libc commits 516ae41..8e96b78 (headers only)
-Patch4:         libc-ac12fd8-8e96b78.diff
-
-# These patches are not actually applied but they record what needs to be done
-# to the stock LIBC 0.6 source in order to build emxomf.exe contained in
-# libc-emxomf.zip and to build the LIBC DLL itself. Note that starting from our
-# move of the kLIBC fork to https://github.com/bitwiseworks/libc, the LIBC DLL
-# provided by our RPMs contains all patches from the commits in that repo
-# (except those parts applied to headers by the patches above), but the repo
-# itself still misses the patches below (and some of the above). This mess will
-# be sorted out once we bulid it completely from sources (soon).
-Patch101:       libc-dmik-emxomf-02-remove-asterisk.diff
-Patch102:       libc-yuri-emxomf-verbose-warnings-3.patch
-Patch103:       libc-dmik-fork_completion_callback.diff
-
-BuildRequires:  rexx_exe
+# for libiberty
+BuildRequires:  binutils-devel >= 2.27-3
 
 # Require kLIBC user management to make programs using Unix user management API
 # (getpwuid() and friends) work correctly.
@@ -57,7 +42,7 @@ interesting to play with and what is requested by porters using kLIBC.
 License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Include Files and Libraries Mandatory for Development
 Group:          Development/Libraries/C and C++
-Requires:       libc = %{version}-%{release}
+Requires:       libc = %{epoch}:%{version}-%{release}
 Obsoletes:      libc-kprofile < %{version}
 
 %description devel
@@ -65,12 +50,15 @@ These libraries are needed to develop programs which use the standard C
 library.
 
 
-%package -n db1-devel
+%package db1-devel
 License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Include Files and Libraries Mandatory for Development (db headers)
 Group:          Development/Libraries/C and C++
+Requires:       libc = %{epoch}:%{version}-%{release}
+Provides:       db1-devel = %{epoch}:%{version}-%{release}
+Obsoletes:      db1-devel < %{epoch}:%{version}-%{release}
 
-%description -n db1-devel
+%description db1-devel
 These libraries are needed to develop programs which use the standard C
 library (db headers).
 
@@ -80,145 +68,151 @@ License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Include Files and Libraries Mandatory for Development (gettext headers)
 Group:          Development/Libraries/C and C++
 Provides:       gettext-devel
-Requires:       libc = %{version}-%{release}
+Requires:       libc = %{epoch}:%{version}-%{release}
 
 %description gettext-devel
 These libraries are needed to develop programs which use the standard C
 library (gettext headers).
 
 
-%package debug
-Summary: HLL debug data for exception handling support.
-
-%description debug
-HLL debug data for exception handling support.
+%debug_package
 
 
 %prep
-%setup -q -c -a 1 -a 2 -a 3
-%patch0
-%patch1
-%patch2
-%patch3
-%patch4
 
-#replace paths.h wrong macros
-sed -i 's,"/@unixroot/bin,"/@unixroot/usr/bin,g' usr/include/paths.h
+%scm_setup
+
+# Check that package version matches the version from the sources
+test "`grep -P -o '(?<=(VH|VM|VL) = )([0-9]+)' < src/emx/version.smak | tr \\\n .`" = "%{version}."
+
+
+%build
+
+# TODO: For now, we still build only a i686 RPM of LIBC even though we could
+# do multiplatform builds by overriding OPTIMIZE_FLAGS. The reason is that
+# LIBC isn't stable with -march=pentium4. See https://github.com/bitwiseworks/libc/issues/30
+# for details. Once we fix that, we should set OPTIMIZE_FLAGS as follows
+# (note -O2 override with -O3 as LIBC wants this):
+#
+#OPTIMIZE_FLAGS="%{lua: print((string.gsub(rpm.expand('%{optflags}'), '-O2', '-O3')))}"
+
+%define kmk_flags \\\
+  NO_STRIP=1 \\\
+  INS="%{buildroot}/@unixroot/usr/" \\\
+  OUT=out/ \\\
+  ASM="%{_builddir}/%{?buildsubdir}/bin/ml.exe -c" \\\
+  SHELL=/@unixroot/usr/bin/sh.exe \\\
+  BUILD_ID="%{lua: print(string.sub(rpm.expand('%{__source_rev}'), 1, 7))}-git" \\\
+  OFFICIAL_VERSION=1
+
+# boostrap everything using the system LIBC build
+kmk -C src/emx MODE=opt %{kmk_flags} tools
+# NOTE: There is a bug in kmk's .NOTPARALLEL processing triggered by $(_STD_WILDWILD) deps for
+# $.stmp-libc-std that causes it to generate libc-std.h out of order so that files including it
+# build earlier. A workaround is to generate this file up front in a separate invocation.
+kmk -C src/emx MODE=opt %{kmk_flags} -f libonly.gmk libc-std.h
+kmk -C src/emx MODE=opt %{kmk_flags} libs
+kmk -C src/emx MODE=opt %{kmk_flags} install
+
+# check that install uses the right dirs
+test -d "%{buildroot}%{_bindir}" -a -d "%{buildroot}%{_libdir}" -a -d "%{buildroot}%{_includedir}"
+
+# build everything again from scratch using the bootstrap LIBC
+%{__rm} -rf out/
+export PATH="%{buildroot}%{_bindir};$PATH"
+export LIBRARY_PATH="%{buildroot}%{_libdir};$LIBRARY_PATH"
+export C_INCLUDE_PATH="%{buildroot}%{_includedir};$C_INCLUDE_PATH"
+export BEGINLIBPATH="%{buildroot}%{_libdir};$BEGINLIBPATH"
+export LIBPATHSTRICT=T
+kmk -C src/emx MODE=opt %{kmk_flags} tools
+kmk -C src/emx MODE=opt %{kmk_flags} -f libonly.gmk libc-std.h
+kmk -C src/emx MODE=opt %{kmk_flags} libs
 
 %install
-rm -rf $RPM_BUILD_ROOT
-mkdir -p %{buildroot}%{_bindir}
-mkdir -p %{buildroot}%{_includedir}
-mkdir -p %{buildroot}%{_libdir}
-mkdir -p %{buildroot}%{_usr}/man
-mkdir -p %{buildroot}%{_usr}/info
 
-cp -p -r usr/bin/* %{buildroot}%{_bindir}
-cp -p -r usr/include/* %{buildroot}%{_includedir}
-cp -p -r usr/lib/* %{buildroot}%{_libdir}
-cp -p -r usr/man/* %{buildroot}%{_usr}/man
-cp -p -r usr/man/* %{buildroot}%{_usr}/info
+%{__rm} -rf %{buildroot}
+kmk -C src/emx MODE=opt %{kmk_flags} install
 
-# add new files
-cp -p -r emxomf.exe %{buildroot}%{_bindir}
-cp -p -r emxomfstrip.exe %{buildroot}%{_bindir}
-cp -p -r os2safe.h %{buildroot}%{_includedir}
-cp -p -r libos2.a %{buildroot}%{_libdir}
+# use special lxlite flags for the main LIBC DLL (see LXLITE.FLAGS in
+# Makefile.gmk for reasoning) - note that we have to strip ourselves too
+# TODO: add a _strip_opts option to override compression options
+emxomfstrip -D %{buildroot}%{_libdir}/libcn%{ver_maj}.dbg %{buildroot}%{_libdir}/libcn%{ver_maj}.dll
+lxlite /F+ /AP:4096 /MRN /MLN /MF1 %{buildroot}%{_libdir}/libcn%{ver_maj}.dll
 
-cp -p -r emxomfld.exe %{buildroot}%{_bindir}
+# don't need this (not used)
+%{__rm} -rf %{buildroot}/@unixroot/usr/i386-pc-os2-emx
 
-# add hotfix DLLs
-cp -p -r libc066.* %{buildroot}%{_libdir}
+# don't need this (some Innotek helper DLL)
+%{__rm} -f %{buildroot}%{_libdir}/innidm.dll
+
+# remove .map files
+%{__rm} -f %{buildroot}%{_libdir}/*.map
 
 # remove ELH and PRF DLLs due to missing kdbglib.dll and kprofile.dll
 # (http://trac.netlabs.org/rpm/ticket/196)
-rm -f %{buildroot}%{_libdir}/libc*.elh
-rm -f %{buildroot}%{_libdir}/libc*.elh.map
-rm -f %{buildroot}%{_libdir}/libc*.prf
-rm -f %{buildroot}%{_libdir}/libc*.prf.map
+%{__rm} -f %{buildroot}%{_libdir}/libc*.elh
+%{__rm} -f %{buildroot}%{_libdir}/libc*.prf
 
-#remove (old) binutils headers/libs
-rm -f %{buildroot}%{_includedir}/ansidecl.h
-rm -f %{buildroot}%{_includedir}/bfd.h
-rm -f %{buildroot}%{_includedir}/bfdlink.h
-rm -f %{buildroot}%{_includedir}/dis-asm.h
-rm -f %{buildroot}%{_includedir}/libiberty.h
-rm -f %{buildroot}%{_includedir}/symcat.h
-rm -f %{buildroot}%{_libdir}/libbfd.*
-rm -f %{buildroot}%{_libdir}/libopcodes.*
+# remove CHKLOG and PRF versions of utility libraries (not used)
+%{__rm} -f %{buildroot}%{_libdir}/lib*_l.*
+%{__rm} -f %{buildroot}%{_libdir}/tcpipv4/lib*_l.*
+%{__rm} -f %{buildroot}%{_libdir}/lib*_p.*
+%{__rm} -f %{buildroot}%{_libdir}/tcpipv4/lib*_p.*
 
-#remove (old) libiberty headers/libs
-rm -f %{buildroot}%{_includedir}/libiberty.h
-rm -f %{buildroot}%{_includedir}/demangle.h
-rm -f %{buildroot}%{_includedir}/dyn-string.h
-rm -f %{buildroot}%{_includedir}/fibheap.h
-rm -f %{buildroot}%{_includedir}/floatformat.h
-rm -f %{buildroot}%{_includedir}/hashtab.h
-rm -f %{buildroot}%{_includedir}/objalloc.h
-rm -f %{buildroot}%{_includedir}/partition.h
-rm -f %{buildroot}%{_includedir}/sort.h
-rm -f %{buildroot}%{_includedir}/splay-tree.h
-rm -f %{buildroot}%{_includedir}/ternary.h
-rm -f %{buildroot}%{_libdir}/libiberty.*
+# remove static versions of LIBC (not supported)
+%{__rm} -f %{buildroot}%{_libdir}/lib*_s.*
+%{__rm} -f %{buildroot}%{_libdir}/libc_app.*
+%{__rm} -f %{buildroot}%{_libdir}/libc_app_*.*
 
-#remove libstdc++/supc++ static libs (built with gcc 3.x)
-rm -f %{buildroot}%{_libdir}/libstdc++.*
-rm -f %{buildroot}%{_libdir}/libsupc++.*
+# remove sys/mman.h (provided by libcx-devel)
+%{__rm} -f %{buildroot}%{_includedir}/sys/mman.h
 
-#remove sys/mman.h (provided by libcx-devel)
-rm -f %{buildroot}%{_includedir}/sys/mman.h
-
-rexx2vio $RPM_BUILD_ROOT%{_bindir}/dllar.cmd $RPM_BUILD_ROOT%{_bindir}/dllar.exe
+# convert & install dllar
+rexx2vio src/misc/dllar.cmd %{buildroot}%{_bindir}/dllar.exe
 
 # build omf libraries
-cd %{buildroot}%{_libdir}
-cmd /c "@MakeOmfLibs.cmd"
+src/misc/MakeOmfLibs.cmd %{buildroot}%{_libdir}
+
 
 %clean
-rm -rf $RPM_BUILD_ROOT
+
+rm -rf "%{buildroot}"
 
 
 %files
-%defattr(-,root,root)
-%doc usr/doc/gcc-3.3.5/*
-%{_libdir}/libc06*.dll
+%doc README.md CHANGELOG.md
+%doc doc/COPYING.* doc/*.os2
+%{_libdir}/libc*.dll
 
-%files devel
-%defattr(-,root,root)
-%doc %{_prefix}/man/man1/*
-%doc %{_prefix}/man/man7/*
+
+%files devel -f %{debug_package_exclude_files}
 %{_bindir}
-%exclude %{_bindir}/*.dbg
 %{_includedir}
 %exclude %{_includedir}/db.h
 %exclude %{_includedir}/ndbm.h
 %exclude %{_includedir}/libintl.h
-%{_usr}/info
 %{_libdir}
-%exclude %{_libdir}/libc06*.dll
-%exclude %{_libdir}/*.dbg
-%exclude %{_libdir}/dbg
-%exclude %{_libdir}/tcpipv4/dbg
-%exclude %{_libdir}/gcc335.dll
+%exclude %{_libdir}/libc*.dll
 
-%files -n db1-devel
-%defattr(-,root,root)
+
+%files db1-devel
 %{_includedir}/db.h
 %{_includedir}/ndbm.h
 
+
 %files gettext-devel
-%defattr(-,root,root)
 %{_includedir}/libintl.h
 
-%files debug
-%defattr(-,root,root)
-%{_bindir}/*.dbg
-%{_libdir}/*.dbg
-%{_libdir}/dbg
-%{_libdir}/tcpipv4/dbg
 
 %changelog
-* Tue Jan 15 2019 Dmitriy Kuminov <coding@dmik.org> 0.6.6-40
+* Fri Feb 15 2019 Dmitriy Kuminov <coding@dmik.org> 1:0.1.0-1
+- Fork kLIBC and rebrand it to LIBC Next with a new versioning scheme and epoch.
+- Release LIBC Next version 0.1.0
+  (https://github.com/bitwiseworks/libc/blob/0.1.0/CHANGELOG.md).
+- Use scm_source macros.
+- Remove a lot of (unused and unneeded) static libs from the devel package.
+
+* Fri Jan 11 2019 Dmitriy Kuminov <coding@dmik.org> 0.6.6-40
 - Remove (old) libiberty headers (provided by binutils-devel now).
 
 * Mon Dec 31 2018 Dmitriy Kuminov <coding@dmik.org> 0.6.6-39
@@ -286,7 +280,7 @@ rm -rf $RPM_BUILD_ROOT
 * Sun Jan 11 2015 yd
 - removed ansidecl.h since it is already in binutils-devel. ticket#103.
 
-* Thu Jan 09 2015 yd
+* Fri Jan 09 2015 yd
 - added new SafeDos* wrappers from trunk r3942 and r3943.
 - added emxomfstrip binary from trunk.
 
@@ -300,7 +294,7 @@ rm -rf $RPM_BUILD_ROOT
 * Wed Jun 25 2014 yd
 - emxomf, merged libc tickets #251, #293, #295.
 
-* Thu Sep 11 2013 yd
+* Wed Sep 11 2013 yd
 - ticket#63: remove gcc335.dll from devel distribution.
 
 * Thu Mar 21 2013 yd
@@ -309,7 +303,7 @@ rm -rf $RPM_BUILD_ROOT
 * Thu Dec 13 2012 yd
 - remove gcc 3.x stdc++/supc++ static libraries.
 
-* Mon May 11 2012 yd
+* Fri May 11 2012 yd
 - remove obsolete binutil headers/libs
 
 * Tue Apr 17 2012 yd
@@ -327,8 +321,8 @@ rm -rf $RPM_BUILD_ROOT
 * Wed Oct 12 2011 yd
 - fixed mmap include
 
-* Wed Sep 05 2011 yd
+* Mon Sep 05 2011 yd
 - removed binutils
 
-* Tue Sep 04 2011 yd
+* Sun Sep 04 2011 yd
 - update to csd4
