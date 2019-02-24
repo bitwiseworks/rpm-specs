@@ -12,7 +12,7 @@ Name:           libc
 License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Standard Shared Libraries
 Group:          System/Libraries
-Version:        %{ver_maj}.1.0
+Version:        %{ver_maj}.1.1
 Release:        1%{?dist}
 Vendor:         bww bitwise works GmbH
 Url:            https://github.com/bitwiseworks/libc
@@ -123,7 +123,13 @@ export PATH="%{buildroot}%{_bindir};$PATH"
 export LIBRARY_PATH="%{buildroot}%{_libdir};$LIBRARY_PATH"
 export C_INCLUDE_PATH="%{buildroot}%{_includedir};$C_INCLUDE_PATH"
 export BEGINLIBPATH="%{buildroot}%{_libdir};$BEGINLIBPATH"
-export LIBPATHSTRICT=T
+# NOTE: we'd like to use LIBPATHSTRICT, but this will lead to problems because processes will end up
+# having two LIBC DLLs in memory (the old one from the boot runtime dragged in by other dependent DLLs
+# which are not also on BEGINLIBPATH) and the just-built one (which will lack calls from these other
+# DLLs). This in turn will lead to a number of side effects and the execution will most likely fail.
+# Therefore we just hope that the boot DLL has all necessary exports. If not, the newly-built one
+# will have to be manually installed and rebooted with in order for the build to complete.
+#export LIBPATHSTRICT=T
 kmk -C src/emx MODE=opt %{kmk_flags} tools
 kmk -C src/emx MODE=opt %{kmk_flags} -f libonly.gmk libc-std.h
 kmk -C src/emx MODE=opt %{kmk_flags} libs
@@ -205,6 +211,11 @@ rm -rf "%{buildroot}"
 
 
 %changelog
+* Sun Feb 24 2019 Dmitriy Kuminov <coding@dmik.org> 1:0.1.1-1
+- Release LIBC Next version 0.1.1
+  (https://github.com/bitwiseworks/libc/blob/0.1.1/CHANGELOG.md).
+- Disable setting LIBPATHSTRICT as it may screw up the build.
+
 * Fri Feb 15 2019 Dmitriy Kuminov <coding@dmik.org> 1:0.1.0-1
 - Fork kLIBC and rebrand it to LIBC Next with a new versioning scheme and epoch.
 - Release LIBC Next version 0.1.0
