@@ -23,8 +23,8 @@ Requires: os2-rpm >= 0-4
 
 %description
 The IBM OS/2 Developer's Toolkit Version 4.5 provides development support
-for new features in the "OS/2 Warp Server for e-business" operating system
-and eComStation.
+for new features in the "OS/2 Warp Server for e-business" operating system,
+ArcaOS and eComStation.
 
 %package readme
 Summary: IBM OS/2 Developer's Toolkit readme
