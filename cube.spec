@@ -3,14 +3,14 @@
 
 Summary: REXX procedure used to modify a CONFIG.SYS-like ASCII file
 Name: cube
-Version: 2.8
+Version: 3.0
 Release: 1%{?dist}
 License: none
 URL: http://www3.sympatico.ca/gjarviseng/cube/
 Group: System Environment/Shells
 Vendor: bww bitwise works GmbH
 
-%scm_source svn http://svn.netlabs.org/repos/cube/trunk 4
+%scm_source svn http://svn.netlabs.org/repos/cube/trunk 9
 
 BuildRequires: rexx_exe
 
@@ -29,8 +29,6 @@ rexx2vio cube.cmd cube.exe
 
 
 %install
-rm -rf %{buildroot}
-mkdir -p $RPM_BUILD_ROOT%{_bindir}
 for f in *.exe ; do
   install -p -m 0755 -D $f  $RPM_BUILD_ROOT%{_bindir}/$f
 done
@@ -47,6 +45,9 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Mon Mar 04 2019 Silvan Scherrer <silvan.scherrer@aroa> 3.0-1
+- fixes ticket #2 (courtesy of RLW)
+
 * Fri Jun 15 2018 Silvan Scherrer <silvan.scherrer@aroa> 2.8-1
 - gather all available sources together and join them
 - install documentation
