@@ -1,5 +1,5 @@
-# for now we don't provide a devel, because it clashes with out libc
-# when we resolve the libc issue this we will build the devel as well
+# for now we don't provide a devel, because it clashes with our libc
+# after we have resolved the libc issue, we will build the devel as well
 %global build_devel 0
 
 Summary:	Character set conversion library
