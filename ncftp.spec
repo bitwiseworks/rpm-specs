@@ -1,13 +1,15 @@
+%global ncftp_ico ncftp_os2.ico
+
 Summary: Improved console FTP client
 Name: ncftp
 Version: 3.2.6
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: Artistic clarified
 Group: Applications/Internet
 URL: http://www.ncftp.com/ncftp/
 
 Vendor:  bww bitwise works GmbH
-%scm_source  svn http://svn.netlabs.org/repos/ports/Ncftp/trunk 2131
+%scm_source  svn http://svn.netlabs.org/repos/ports/Ncftp/trunk 2341
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
@@ -39,7 +41,7 @@ make
 rm -rf %{buildroot}
 mkdir -p %{buildroot}{%{_bindir},%{_mandir}/man1}
 make install DESTDIR=%{buildroot}
-install -p -m0644 -D ncftp_os2.ico $RPM_BUILD_ROOT%{_datadir}/os2/icons/ncftp_os2.ico 
+install -p -m0644 -D %{ncftp_ico} $RPM_BUILD_ROOT%{_datadir}/os2/icons/%{ncftp_ico}
 
 %clean
 rm -rf %{buildroot}
@@ -49,10 +51,12 @@ if [ "$1" -ge 1 ]; then # (upon update)
     %wps_object_delete_all
 fi
 # for the definition of the parameters see macros.bww
-%bww_folder -s Y
-%bww_app -e %{name} -s Y -i ncftp_os2.ico
-%bww_app -e ncftpbookmarks -t bookmarks
-%bww_readme -r README.txt
+%global title %{summary}
+%bww_folder -t %{title}
+%bww_app -f %{_bindir}/%{name}.exe -t %{title} -i %{ncftp_ico}
+%bww_app_shadow
+%bww_app ncftpbookmarks -f %{_bindir}/ncftpbookmarks.exe -t bookmarks
+%bww_readme -f %{_defaultdocdir}/%{name}-%{version}/README.txt
 
 %postun
 if [ "$1" -eq 0 ]; then # (upon removal)
@@ -77,9 +81,14 @@ fi
 %{_mandir}/man1/ncftpbatch.1*
 %{_mandir}/man1/ncftpls.1*
 %{_mandir}/man1/ncftpspooler.1*
-%{_datadir}/os2/icons/ncftp_os2.ico
+%{_datadir}/os2/icons/%{ncftp_ico}
 
 %changelog
+* Mon Mar 04 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.2.6-6
+- rebuild with latest macros.bww
+- rebuild with latext libc and libcx
+- better version to find sa_family
+
 * Wed Jun 28 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.2.6-5
 - rebuild with latest macro.bww
 
