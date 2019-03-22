@@ -2,26 +2,24 @@
 %define minor 5
 %define majorver %{major}.%{minor}
 %define	vers %{majorver}.9
-%{!?sdt:%define sdt 0}
+%{!?sdt:%global sdt 0}
 
 Summary: Tool Command Language, pronounced tickle
 Name: tcl
 Version: %{vers}
-Release: 3%{?dist}
+Release: 4%{?dist}
 Epoch: 1
 License: TCL
 Group: Development/Languages
 URL: http://tcl.sourceforge.net/
-Source0: http://downloads.sourceforge.net/sourceforge/tcl/tcl%{version}-src.tar.gz
+Vendor: bww bitwise works GmbH
 
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+%scm_source svn http://svn.netlabs.org/repos/ports/tcl/trunk 2344
 
-#Buildrequires: autoconf
+Buildrequires: autoconf
 Provides: tcl(abi) = %{majorver}
 Obsoletes: tcl-tcldict <= %{vers}
 Provides: tcl-tcldict = %{vers}
-
-Patch0: tcl-os2.diff
 
 %if %sdt
 BuildRequires: systemtap-sdt-devel
@@ -56,6 +54,7 @@ The package contains the development files and man pages for tcl.
 Summary: Tcl scripting language development environment
 Group: Development/Languages
 Requires: %{name} = %{epoch}:%{version}-%{release}
+Requires: %{name}-devel = %{epoch}:%{version}-%{release}
 
 %description static
 The Tcl (Tool Command Language) provides a powerful platform for
@@ -68,23 +67,25 @@ applications.
 
 The package contains the static library in aout format.
 
-%prep
-%setup -q -n %{name}%{version}
-#chmod -x generic/tclThreadAlloc.c
+%debug_package
 
-%patch0 -p1 -b .os2~
+
+%prep
+%scm_setup
+cd unix
+autoreconf -fvi
+
 
 %build
 cd unix
-#autoconf
-export CONFIG_SITE="/@unixroot/usr/share/config.legacy"
 export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
-export LIBS="-lurpo"
+export LIBS="-lcx"
+export VENDOR="%{vendor}"
 %configure \
 %if %sdt
     --enable-dtrace \
 %endif
-    --disable-shared --enable-static \
+    --disable-shared \
     --enable-load --enable-dll-unloading
 
 make %{?_smp_mflags} TCL_LIBRARY=%{_datadir}/%{name}%{majorver}
@@ -137,6 +138,7 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root,-)
 %{_bindir}/tclsh*
+%exclude %{_bindir}/*.dbg
 %{_datadir}/%{name}%{majorver}
 %{_datadir}/%{name}8
 %{_libdir}/%{name}%{major}%{minor}.dll
@@ -152,15 +154,20 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/*
 %{_libdir}/lib%{name}stub%{majorver}.a
 %{_libdir}/lib%{name}%{majorver}.a
-%{_libdir}/%{name}%{major}%{minor}.dll
 %{_libdir}/%{name}Config.sh
 %{_libdir}/%{name}8.5/%{name}Config.sh
 
 %files static
 %defattr(-,root,root,-)
-%{_includedir}/*
 %{_libdir}/lib%{name}%{majorver}_s.a
 
 %changelog
+* Fri Mar 22 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 8.5.9-4
+- reworked fd handling in the mkstemp() case, to make it work
+- create a nice bldlevel
+- rebuild with latest scm_macros
+- remove the dll from the devel rpm
+- add debug package
+
 * Tue Jun 14 2016 yd <yd@os2power.com> 8.5.9-3
 - rebuild package, fixes ticket#183.
