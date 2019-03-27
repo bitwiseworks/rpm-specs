@@ -5,7 +5,7 @@
 
 Name:           openjpeg2
 Version:        2.3.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        C-Library for JPEG 2000
 
 # windirent.h is MIT, the rest is BSD
@@ -209,6 +209,8 @@ OpenJPEG2 JP3D module command line tools
 %build
 export LDFLAGS="-Zhigh-mem -Zomf -lcx"
 export VENDOR="%{vendor}"
+export CFLAGS="%{optflags} -mno-sse"
+export CXXFLAGS="%{optflags} -mno-sse"
 
 mkdir build
 cd build
@@ -326,5 +328,8 @@ make test -C build
 
 
 %changelog
+* Wed Mar 27 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.3.0-2
+- disable sse
+
 * Fri Nov 2 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.3.0-1
 - initial port
