@@ -2,12 +2,13 @@
 
 Summary: A posix pthread emulation for OS/2 and OS/2 based systems
 Name: pthread
-Version: 20190130
-Release: 23%{?dist}
+Version: 0.1
+Release: 1%{?dist}
 License: unknown
 Group: Development/Libraries
+Epoch: 2
 
-%scm_source svn http://svn.netlabs.org/repos/ports/pthread/trunk 2333
+%scm_source svn http://svn.netlabs.org/repos/ports/pthread/trunk 2346
 
 BuildRequires: gcc make
 
@@ -19,7 +20,7 @@ A posix pthread emulation library.
 %package devel
 Summary: Header files developing apps which will use pthread
 Group: Development/Libraries
-Requires: %{name} = %{version}-%{release}
+Requires: %{name} = %{epoch}:%{version}-%{release}
 
 %description devel
 Header files and a library of pthread functions, for developing apps
@@ -70,6 +71,12 @@ rm -rf %{buildroot}
 %{_libdir}/pthread.dll
 
 %changelog
+* Fri Mar 29 2019 Dmitriy Kuminov <coding@dmik.org> 2:0.1-1
+- Bump epoch to 2 to replace bulky versioning scheme with normal one.
+- Implement key destructors [#182].
+- Make pthread_join survive kLIBC signal delivery.
+- Build against LIBCn (kLIBC successor).
+
 * Wed Jan 30 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 20190130-23
 - fix ticket #205 (code by KO Myung-Hun)
 - fix ticket #204 (code by kO Myung-Hun)
