@@ -30,12 +30,12 @@
 Summary: The RPM package management system
 Name: rpm
 Version: %{rpmver}
-Release: %{?snapver:0.%{snapver}.}17%{?dist}
+Release: %{?snapver:0.%{snapver}.}18%{?dist}
 Group: System Environment/Base
 Url: http://www.rpm.org/
 Vendor: bww bitwise works GmbH
 
-%scm_source svn http://svn.netlabs.org/repos/rpm/rpm/trunk 1184
+%scm_source svn http://svn.netlabs.org/repos/rpm/rpm/trunk 1621
 
 %if %{with int_bdb}
 Source1: db-%{bdbver}.tar.gz
@@ -293,6 +293,7 @@ CFLAGS="$RPM_OPT_FLAGS %{?sanitizer_flags} -DLUA_COMPAT_APIINTCASTS"
 LDFLAGS="%{?__global_ldflags} -Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 LIBS="-lintl -lcx"
 export CPPFLAGS CFLAGS LDFLAGS LIBS
+export VENDOR="%{vendor}"
 
 autoreconf -i -f
 
@@ -493,6 +494,7 @@ make check
 %{rpmhome}/config.*
 %{rpmhome}/macros.p*
 %{rpmhome}/fileattrs/*
+%exclude %{rpmhome}/*.dbg
 
 %files sign
 %{_bindir}/rpmsign.exe
@@ -500,6 +502,7 @@ make check
 
 %files -n python2-%{name}
 %{python_sitearch}/%{name}/
+%exclude %{python_sitearch}/%{name}/*.dbg
 #{python_sitearch}/%{name}_python-*.egg-info
 
 #files -n python3-%{name}
@@ -522,6 +525,10 @@ make check
 %doc doc/librpm/html/*
 
 %changelog
+* Fri Mar 29 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.13.0-18
+- add buildlevel string
+- fix ticket #333
+
 * Fri Jul 10 2017 Dmitriy Kuminov <coding@dmik.org> 4.13.0-17
 - Depend on LIBCx 0.5.3 due to _fread override.
 
