@@ -1,17 +1,21 @@
 Summary: Pattern matching utilities
 Name: grep
-Version: 2.28
+Version: 3.3
 Release: 1%{?dist}
 License: GPLv3+
 URL: http://www.gnu.org/software/grep/
 Group: Applications/Text
 
 Vendor:  bww bitwise works GmbH
-%scm_source  svn http://svn.netlabs.org/repos/ports/grep/trunk 1992
+%scm_source  github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
 
-BuildRequires: pcre-devel >= 3.9-10, gettext
-BuildRequires: texinfo
+BuildRequires: gcc
+BuildRequires: pcre-devel >= 3.9-10, texinfo, gettext
 BuildRequires: autoconf automake
+BuildRequires: libc-devel, libcx-devel
+Provides: /@unixroot/usr/bin/grep
+Provides: /@unixroot/usr/bin/fgrep
+Provides: /@unixtoor/usr/bin/egrep
 
 %description
 The GNU versions of commonly used grep utilities. Grep searches through
@@ -27,15 +31,24 @@ GNU grep is needed by many scripts, so it shall be installed on every system.
 
 %build
 # we do autoreconf even fedora doesn't do it
-autoreconf -fi
+autoreconf -vfi
 export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 export LIBS="-lcx"
+
+%global BUILD_FLAGS $RPM_OPT_FLAGS
+	
+# Currently gcc on ppc uses double-double arithmetic for long double and it
+# does not conform to the IEEE floating-point standard. Thus force
+# long double to be double and conformant.
+%ifarch ppc ppc64
+%global BUILD_FLAGS %{BUILD_FLAGS} -mlong-double-64
+%endif
+
 %configure --without-included-regex --disable-silent-rules \
-  CPPFLAGS="-I%{_includedir}/pcre"
+  CPPFLAGS="-I%{_includedir}/pcre" CFLAGS="%{BUILD_FLAGS}"
 make %{?_smp_mflags}
 
 %install
-rm -rf ${RPM_BUILD_ROOT}
 make %{?_smp_mflags} DESTDIR=$RPM_BUILD_ROOT install
 gzip $RPM_BUILD_ROOT%{_infodir}/grep*
 rm -f $RPM_BUILD_ROOT%{_infodir}/dir
@@ -45,24 +58,9 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 %check
 #make check
 
-%clean
-rm -rf ${RPM_BUILD_ROOT}
-
-%post
-if [ -f %{_infodir}/grep.info.gz ]; then
-  %{_sbindir}/install-info.exe --quiet --info-dir=%{_infodir} %{_infodir}/grep.info.gz || :
-fi
-
-%preun
-if [ $1 = 0 ]; then
-  if [ -f %{_infodir}/grep.info.gz ]; then
-    %{_sbindir}/install-info.exe --quiet --info-dir=%{_infodir} --delete %{_infodir}/grep.info.gz || :
-  fi
-fi
 
 %files -f %{name}.lang
-%defattr(-,root,root)
-%doc AUTHORS THANKS TODO NEWS
+%doc AUTHORS THANKS TODO NEWS README
 %{!?_licensedir:%global license %%doc}
 %license COPYING
 
@@ -72,6 +70,12 @@ fi
 %{_mandir}/*/*
 
 %changelog
+* Mon May 13 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.3-1
+- case insensitive search in --include/--exclude options (ticket #208)
+- update to version 3.3
+- move source to github
+- merge fedora spec with our spec
+
 * Wed Feb 08 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.28-1
 - update to version 2.28
 - use new scm_source and scm_setup macros
