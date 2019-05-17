@@ -4,13 +4,13 @@
 
 Summary: A text file browser similar to more, but better
 Name: less
-Version: 481
-Release: 3%{?dist}
+Version: 530
+Release: 1%{?dist}
 License: GPLv3+ or BSD
 Group: Applications/Text
 URL: http://www.greenwoodsoftware.com/less/
 Vendor:  bww bitwise works GmbH
-Source:  %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
+%scm_source  github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
 
 BuildRequires: ncurses-devel
 BuildRequires: autoconf automake libtool
@@ -31,19 +31,11 @@ files, and you'll use it frequently.
 
 
 %prep
-%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc
-svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
-%endif
-
-autoreconf -fiv
+%scm_setup
 
 
 %build
+autoreconf -fiv
 export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 export LIBS="-lcx"
 %configure
@@ -52,12 +44,8 @@ make %{?_smp_mflags}
 
 
 %install
-rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT
 
-
-%clean
-rm -rf $RPM_BUILD_ROOT
 
 %files
 %doc README NEWS INSTALL
@@ -67,6 +55,10 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Fri May 17 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> - 530-1
+- update source to version 530
+- move source to github
+
 * Fri Oct 21 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 481-3
 - fix to the below bring more keys to work
 - enable ctrl-c by default
