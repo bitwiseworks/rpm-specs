@@ -1,11 +1,11 @@
 Summary: The GNU line editor
 Name: ed
 Version: 1.15
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+ and GFDL
 URL:     http://www.gnu.org/software/ed/
 Vendor:  bww bitwise works GmbH
-%scm_source  github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
+%scm_source  github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2-2
 
 BuildRequires: gcc
 Requires(post): info
@@ -29,7 +29,7 @@ won't use it.
 %build
 export EXEEXT=".exe"
 %configure \
-  LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp -lcx" \
+  LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp -lcx" \
   CFLAGS="%{optflags}"
 make
 
@@ -47,5 +47,8 @@ rm -vrf %{buildroot}%{_infodir}/dir
 %{_infodir}/ed.info*
 
 %changelog
+* Wed May 22 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.15-2
+- remove the -Zbin-files switch
+
 * Tue May 21 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.15-1
 - first rpm version
