@@ -1,21 +1,15 @@
-#define svn_url     e:/trees/bc/trunk
-%define svn_url     http://svn.netlabs.org/repos/ports/bc/trunk
-%define svn_rev     1402
-
 Summary: GNU's bc (a numeric processing language) and dc (a calculator)
 Name: bc
-Version: 1.06
+Version: 1.07.1
 Release: 1%{?dist}
 License: GPL
 URL: http://www.gnu.org/software/bc/
 Group: Applications/Engineering
-Vendor:  bww bitwise works GmbH
-Source:  %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
 
-Requires(post): %{_sbindir}/install-info.exe
-Requires(preun): %{_sbindir}/install-info.exe
-Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root
-BuildRequires: readline-devel, flex
+Vendor:  bww bitwise works GmbH
+%scm_source  github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
+
+BuildRequires: readline-devel, flex, bison, texinfo, ed, dos2unix
 
 %description
 The bc package includes bc and dc. Bc is an arbitrary precision
@@ -29,53 +23,35 @@ if you would like to use its text mode calculator.
 %debug_package
 
 %prep
-%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc
-svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
-%endif
+%scm_setup
 
 %build
 autoreconf -fi
 
-export LDFLAGS=" -Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+export LIBS="-lcx"
+
 %configure --with-readline
 make %{?_smp_mflags}
 
 %install
-rm -rf $RPM_BUILD_ROOT
-
 make install DESTDIR=$RPM_BUILD_ROOT
 rm -f $RPM_BUILD_ROOT/%{_infodir}/dir
 
-%clean
-rm -rf $RPM_BUILD_ROOT
-
-%post
-if [ -f %{_infodir}/bc.info ]; then
-   %{_sbindir}/install-info %{_infodir}/bc.info %{_infodir}/dir --entry="* bc: (bc).                      The GNU RPN calculator language." || :
-   %{_sbindir}/install-info %{_infodir}/dc.info %{_infodir}/dir --entry="* dc: (dc).                      The GNU RPN calculator."|| :
-fi
-
-%preun
-if [ $1 = 0 ]; then
-   if [ -f %{_infodir}/bc.info ]; then
-     %{_sbindir}/install-info --delete %{_infodir}/bc.info %{_infodir}/dir --entry="* bc: (bc).                      The GNU RPN calculator language." || :
-     %{_sbindir}/install-info --delete %{_infodir}/dc.info %{_infodir}/dir --entry="* dc: (dc).                      The GNU RPN calculator." || :
-   fi
-fi
-
 %files
 %defattr(-,root,root,-)
-%doc COPYING COPYING.LIB FAQ AUTHORS NEWS README
+%license COPYING COPYING.LIB
+%doc FAQ AUTHORS NEWS README Examples/
 %{_bindir}/dc.exe
 %{_bindir}/bc.exe
 %{_mandir}/*/*
 %{_infodir}/*
 
 %changelog
+* Wed May 22 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.07.1-1
+- update to latest version
+- moved source to github
+- use scm_ macros
+
 * Thu Mar 17 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.06-1
 - first version
