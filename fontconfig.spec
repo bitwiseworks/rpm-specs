@@ -5,11 +5,11 @@
 %global _fontconfig_confdir %{_sysconfdir}/fonts/conf.d
 %global _fontconfig_templatedir %{_datadir}/fontconfig/conf.avail
 
-%global freetype_version 2.1.4
+%global freetype_version 2.10.0
 
 Summary:	Font configuration and customization library
 Name:		fontconfig
-Version:	2.12.4
+Version:	2.13.1
 Release:	1%{?dist}
 # src/ftglue.[ch] is in Public Domain
 # src/fccache.c contains Public Domain code
@@ -17,10 +17,9 @@ Release:	1%{?dist}
 # otherwise MIT
 License:	MIT and Public Domain and UCD
 Group:		System Environment/Libraries
-#Source:	http://fontconfig.org/release/%{name}-%{version}.tar.bz2
 URL:		http://fontconfig.org
 Vendor:		bww bitwise works GmbH
-%scm_source     svn http://svn.netlabs.org/repos/ports/fontconfig/trunk 2220
+%scm_source     github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
 
 Source1: 30-os2-unsupported.conf
 Source2: 80-os2-tnr-fix.conf
@@ -28,14 +27,15 @@ Source2: 80-os2-tnr-fix.conf
 BuildRequires:	expat-devel
 BuildRequires:	freetype-devel >= %{freetype_version}
 #BuildRequires:	fontpackages-devel
-BuildRequires:	autoconf automake libtool
+BuildRequires:	autoconf automake libtool gettext
 #BuildRequires:	gperf
 
 #Requires:	fontpackages-filesystem
 Requires:	freetype
-Requires(pre):	freetype
+Requires(pre):	freetype >= 2.10.0
 Requires(post):	grep coreutils
 #Requires:	font(:lang=en)
+#Sugests:        dejavu-sans-fonts
 
 # @todo Temporary enforce dependency on the legacy package (that was previously named
 # fontconfig) to have it installed. This should be dropped at some point.
@@ -52,6 +52,7 @@ Group:		Development/Libraries
 Requires:	%{name} = %{version}-%{release}
 Requires:	freetype-devel >= %{freetype_version}
 Requires:	pkgconfig
+Requires:	gettext
 
 %description	devel
 The fontconfig-devel package includes the header files,
@@ -76,9 +77,6 @@ which is useful for developing applications that uses fontconfig.
 %prep
 %scm_setup
 
-# Generate configure and friends
-autoreconf -fvi
-
 %build
 # We don't want to rebuild the docs, but we want to install the included ones.
 export HASDOCBOOK=no
@@ -87,6 +85,9 @@ export LDFLAGS="-Zomf -Zhigh-mem"
 export LIBS="-lcx"
 export VENDOR="%{vendor}"
 
+# Generate configure and friends
+autoreconf -fvi
+
 %configure \
         --with-add-fonts=%{_prefix}/local/share/fonts,%{_datadir}/fonts \
         --disable-static
@@ -94,7 +95,6 @@ export VENDOR="%{vendor}"
 make %{?_smp_mflags} V=1
 
 %install
-rm -rf "$RPM_BUILD_ROOT"
 make install DESTDIR=$RPM_BUILD_ROOT INSTALL="install -p"
 
 find $RPM_BUILD_ROOT -name '*.la' -exec rm -f {} ';'
@@ -109,6 +109,10 @@ ln -s %{_fontconfig_templatedir}/80-os2-tnr-fix.conf $RPM_BUILD_ROOT%{_fontconfi
 mv $RPM_BUILD_ROOT%{_docdir}/fontconfig/* .
 rmdir $RPM_BUILD_ROOT%{_docdir}/fontconfig/
 
+%find_lang %{name}
+%find_lang %{name}-conf
+cat %{name}-conf.lang >> %{name}.lang
+
 %check
 # @todo Some tests will fail if there is no working system config (upstream bug)
 if [ -f "%{_fontconfig_masterdir}/fonts.conf" ] ; then
@@ -118,6 +122,7 @@ export BEGINLIBPATH=%{_builddir}/%{buildsubdir}/src/.libs
 fi
 
 %post
+#%{?ldconfig}
 
 umask 0022
 
@@ -137,7 +142,7 @@ LIBPATHSTRICT=T \
 #%transfiletriggerpostun -- %{_prefix}/local/share/fonts %{_datadir}/fonts
 #%{_bindir}/fc-cache -s
 
-%files
+%files -f %{name}.lang
 %doc README AUTHORS
 %doc fontconfig-user.txt fontconfig-user.html
 %doc %{_fontconfig_confdir}/README
@@ -145,6 +150,7 @@ LIBPATHSTRICT=T \
 %{_libdir}/fntcnf*.dll
 %{_bindir}/fc-cache.exe
 %{_bindir}/fc-cat.exe
+%{_bindir}/fc-conflist.exe
 %{_bindir}/fc-list.exe
 %{_bindir}/fc-match.exe
 %{_bindir}/fc-pattern.exe
@@ -162,15 +168,22 @@ LIBPATHSTRICT=T \
 %{_mandir}/man5/*
 
 %files devel
-%{_libdir}/fontconfig*.a
+%{_libdir}/fontconfig*_dll.a
 %{_libdir}/pkgconfig/*
 %{_includedir}/fontconfig
 %{_mandir}/man3/*
+%{_datadir}/gettext/its/fontconfig.its
+%{_datadir}/gettext/its/fontconfig.loc
 
 %files devel-doc
 %doc fontconfig-devel.txt fontconfig-devel
 
 %changelog
+* Fri May 24 2019 Silvan Scherrer <silvan.scherrer@aroa.com> 2.13.1-1
+- update to version 2.13.1
+- moved source to github
+- adjusted spec according to fedora one
+
 * Wed Aug 09 2017 Silvan Scherrer <silvan.scherrer@aroa.com> 2.12.4-1
 - Update to version 2.12.4.
 - use new scm_ macros
