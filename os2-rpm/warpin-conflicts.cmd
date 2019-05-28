@@ -11,6 +11,8 @@
  * and its version to the standard output. Prints nothing otherwise.
  *
  * Author: Dmitriy Kuminov
+ * Version: 1.4 - 2019-05-27 (Silvan Scherrer)
+ *   - Check for dummy WarpIN entries from wpi4rpm
  * Version: 1.3 - 2018-02-19 (Herwig Bauernfeind)
  *   - Shorten and apply common style to error messages to make the readable
  *     for ANPM
@@ -47,6 +49,12 @@ end
 
 parse arg G.Args
 
+G.WarpInDir = strip(SysIni('USER', 'WarpIN', 'Path'), 'T', '0'x)
+rc = SysFileTree(G.WarpInDir'\DATBAS_?.INI', 'G.inis', 'FO')
+if (rc \== 0) then do
+     G.inis = 0
+end
+
 return Main()
 
 /*------------------------------------------------------------------------------
@@ -66,6 +74,8 @@ Main: procedure expose (Globals)
         ver = GetPkgVersion(G.Args)
         if (ver \== '') then do
             say ver
+            rpmdummy = GetRpmVersion(G.Args, ver)
+            if (rpmdummy == 'Y') then exit 0
             exit 1
         end
         exit 0
@@ -90,6 +100,9 @@ Main: procedure expose (Globals)
     end
     if (ver == '') then exit 0
 
+    rpmdummy = GetRpmVersion(packages.i, ver)
+    if (rpmdummy == 'Y') then exit 0
+
     say 'ERROR: warpin-conflicts: Please, uninstall WarpIN 'packages.i' (Version 'ver')'
     exit 1
 
@@ -100,21 +113,20 @@ Main: procedure expose (Globals)
  * @param aPkgId    Package ID (vendor\application\package).
  * @return          Package version or ''.
  */
-GetPkgVersion: procedure
+GetPkgVersion: procedure expose(Globals)
     parse arg aPkgId
     parse var aPkgId v1'\'a1'\'p1
     if (v1 == '' | a1 == '' | p1 == '') then return ''
     ver = ''
-    WarpInDir = strip(SysIni('USER', 'WarpIN', 'Path'), 'T', '0'x)
-    if (WarpInDir \== '') then do
+    if (G.WarpInDir \== '') then do
         /* first, check if we have WIC that supports -p (1.0.16+) */
         wic_ver = ''
-        wic_exe = stream(WarpInDir'\WIC.EXE', 'C', 'QUERY EXISTS')
+        wic_exe = stream(G.WarpInDir'\WIC.EXE', 'C', 'QUERY EXISTS')
         if (wic_exe \== '') then do
             temp_dir = value('TMP',, 'OS2ENVIRONMENT')
             if (temp_dir = '') then temp_dir = value('TEMP',, 'OS2ENVIRONMENT')
             temp_file = SysTempFileName(temp_dir'\wic?????.tmp')
-            call SysSetExtLibPath WarpInDir';%BEGINLIBPATH%', 'B'
+            call SysSetExtLibPath G.WarpInDir';%BEGINLIBPATH%', 'B'
             address 'cmd' wic_exe '-h 2>nul 1>'temp_file
             if (rc == 0) then do
                 str = linein(temp_file)
@@ -143,10 +155,9 @@ GetPkgVersion: procedure
             end
         end
         /* sad, but we failed with WIC and have to use the old unsatable method... */
-        rc = SysFileTree(WarpInDir'\DATBAS_?.INI', 'inis', 'FO')
-        if (rc == 0) then do
-            do i = 1 to inis.0
-                rc = SysIni(inis.i, 'ALL:', 'apps')
+        if (G.inis \== 0) then do
+            do i = 1 to G.inis.0
+                rc = SysIni(G.inis.i, 'ALL:', 'apps')
                 if (rc == '') then do
                     do j = 1 to apps.0
                         apps.j = strip(apps.j, 'T', '0'x)
@@ -159,10 +170,30 @@ GetPkgVersion: procedure
                     end
                 end
                 else do
-                    say 'ERROR: warpin-conflicts: Failed to access the WarpIn database file 'inis.i
+                    say 'ERROR: warpin-conflicts: Failed to access the WarpIn database file 'G.inis.i
                     exit 5
                 end
             end
         end
     end
     return ''
+
+GetRpmVersion: procedure expose(Globals)
+    parse arg aPkgId, aPkgVer
+
+    app = strip(translate(aPkgId, '', '"')) || '\' || translate(aPkgVer, '\', '.')
+    files = ''
+    if (G.WarpInDir \== '') then do
+        if (G.inis \== 0) then do
+            do i = 1 to G.inis.0
+                files = SysIni(G.inis.i, app, 'Files')
+                if (files \== '') then leave
+            end
+        end
+    end
+    if (files == 'rpmdummy') then do
+       return 'Y'
+    end
+    else do
+       return 'N'
+    end

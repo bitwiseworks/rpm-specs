@@ -1,7 +1,7 @@
 Summary: OS/2 specific RPM macros and scripts
 Name: os2-rpm
 Version: 1
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: GPLv2+
 Group: Development/System
 Vendor: bww bitwise works GmbH
@@ -101,11 +101,14 @@ done
 %config(noreplace) %{_sysconfdir}/rpm/macros.scm_pwd
 
 %changelog
+* Mon May 27 2019 Herwig Bauernfeind <herwig.bauernfeind@bitwiseworks.com> 1-7
+- chg warpin-conflicts to look for rpmdummy entries as well
+
 * Mon Jan 21 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 1-6
 - fix scm_macro to work with noarch only spec as well
 
 * Tue Nov 27 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 1-5
-- some rather old packages still need warpin-conflicts at the ols location,
+- some rather old packages still need warpin-conflicts at the old location,
   so copy it there as well ticket #321
 
 * Sun Nov 11 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 1-4

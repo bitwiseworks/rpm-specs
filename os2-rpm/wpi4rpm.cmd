@@ -1,6 +1,6 @@
 /* WPI4RPM */
 
-ScriptVer = '0.9.9.1'
+ScriptVer = '1.0.0.0'
 
 /*  Synopsis:
 
@@ -50,8 +50,9 @@ if words(Mode) > 1 then do
 end
 Mode = translate(mode)
 
-if Mode = "ADD" | Mode = "DEL" then do
+if Mode = "ADD" | Mode = "DEL" | Mode = "CHK" then do
     if verbose then say 'INFO:  wpi4rpm: Mode = "'Mode'"'
+    if words(arguments) = 2 then arguments = arguments' 99.99.99-99'
     cversion  = word(arguments,words(arguments))
     pRApp     = substr(arguments,length(mode)+2,length(arguments)-(length(mode)+1)-(length(cversion)+1))
     parse var cversion RMV'.'RLV'.'RBL'-'RRV'.' .
@@ -66,7 +67,7 @@ if Mode = "ADD" | Mode = "DEL" then do
     if datatype(RRV) <> "NUM" then RRV = 99
     
     if pos('/',pRApp) = 0 then do
-        RApp = pRApp
+        RApp = strip(pRApp)
         RVendor   = "wpi4rpm" /* We do not add the true vendor on purpose */
         RPackage  = "wpi4rpm" /* We do not add the true packages on purpose */
     end
@@ -82,12 +83,13 @@ if Mode = "ADD" | Mode = "DEL" then do
     end
 end
 else do
-    say 'WPI4RPM Version 'ScriptVer' (c) 2017-2018 Herwig Bauernfeind for bww bitwise works GmbH.'
+    say 'WPI4RPM Version 'ScriptVer' (c) 2017-2019 Herwig Bauernfeind for bww bitwise works GmbH.'
     say 
-    say '  Adds or removes dummy WPI packages to WarpIN database.'
+    say '  Adds dummy, removes or checks for WPI packages in WarpIN database.'
     say 
     say '  wpi4rpm ADD "Vendor/App/Package" x.x.x-x'
     say '  wpi4rpm DEL "Vendor/App/Package" x.x.x-x'
+    say '  wpi4rpm CHK "Vendor/App/Package" [x.x.x-x]'
     say '  wpi4rpm HELP | /? | /H | /HELP | -H | --HELP'
     say 
     say '  Commands are not case sensitive.'
@@ -168,6 +170,20 @@ select
             if verbose then say 'ERROR: wpi4rpm: "'AppString'" not found.'
             exit -4
         end
+    end
+    when mode = "CHK" then do
+        if verbose then say 'INFO:  wpi4rpm: "'Datbas'" will be used.'
+        AppFound = 0
+        do I = 1 to WarpINApps.0
+            parse var WarpINApps.I WVendor '\' WApp '\' WPackage '\' WMV '\' WLV '\' WBL '\' WRV
+            if pos(WApp'\', AppString) > 0 then do
+                if RMV'\'RLV'\'RBL'\'RRV = '99\99\99\99' then Appfound = 1
+                else if pos(WMV'\'WLV'\'WBL'\'WRV, AppString) > 0 then Appfound = 1
+                if verbose then say 'INFO:  wpi4rpm: "'WarpINApps.I'" found.'
+            end
+            if Appfound = 1 then leave
+		end
+		exit AppFound
     end
     otherwise do
         say "ERROR: wpi4rpm: Unknown command invoked. Run wpi4rpm help to learn about usage."
