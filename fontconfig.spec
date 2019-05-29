@@ -5,6 +5,9 @@
 %global _fontconfig_confdir %{_sysconfdir}/fonts/conf.d
 %global _fontconfig_templatedir %{_datadir}/fontconfig/conf.avail
 
+# adjust it when the name changes, as else the build fails
+%global dllName fntcnf1.dll
+
 %global freetype_version 2.10.0
 
 Summary:	Font configuration and customization library
@@ -129,10 +132,14 @@ umask 0022
 mkdir -p %{_localstatedir}/cache/fontconfig
 
 # Force regeneration of all fontconfig cache files
+# we need to copy the dll to a tmp directory, as else it might not work
+# imagine when the dll names is the same and it is loaded while installing
 rm -rf %{_localstatedir}/cache/fontconfig/*
-BEGINLIBPATH="$(echo %{_libdir} | sed -re 's,/@unixroot,'$UNIXROOT',g' -e 's,/,\\,g');$BEGINLIBPATH" \
+cp %{_libdir}/%{dllName} %{_tmppath}
+BEGINLIBPATH="$(echo %{_tmppath} | sed -re 's,/@unixroot,'$UNIXROOT',g' -e 's,/,\\,g');$BEGINLIBPATH" \
 LIBPATHSTRICT=T \
 %{_bindir}/fc-cache -f
+rm -f %{_tmppath}/%{dllName}
 
 %postun
 
@@ -147,7 +154,7 @@ LIBPATHSTRICT=T \
 %doc fontconfig-user.txt fontconfig-user.html
 %doc %{_fontconfig_confdir}/README
 %license COPYING
-%{_libdir}/fntcnf*.dll
+%{_libdir}/%{dllName}
 %{_bindir}/fc-cache.exe
 %{_bindir}/fc-cat.exe
 %{_bindir}/fc-conflist.exe
