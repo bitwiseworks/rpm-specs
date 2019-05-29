@@ -10,7 +10,7 @@
 Summary:	Font configuration and customization library
 Name:		fontconfig
 Version:	2.13.1
-Release:	1%{?dist}
+Release:	2%{?dist}
 # src/ftglue.[ch] is in Public Domain
 # src/fccache.c contains Public Domain code
 # fc-case/CaseFolding.txt is in the UCD
@@ -19,7 +19,7 @@ License:	MIT and Public Domain and UCD
 Group:		System Environment/Libraries
 URL:		http://fontconfig.org
 Vendor:		bww bitwise works GmbH
-%scm_source     github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
+%scm_source     github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2-2
 
 Source1: 30-os2-unsupported.conf
 Source2: 80-os2-tnr-fix.conf
@@ -179,6 +179,9 @@ LIBPATHSTRICT=T \
 %doc fontconfig-devel.txt fontconfig-devel
 
 %changelog
+* Wed May 29 2019 Silvan Scherrer <silvan.scherrer@aroa.com> 2.13.1-2
+- fix a merge glitch, which gave crashes (sorry for that)
+
 * Fri May 24 2019 Silvan Scherrer <silvan.scherrer@aroa.com> 2.13.1-1
 - update to version 2.13.1
 - moved source to github
