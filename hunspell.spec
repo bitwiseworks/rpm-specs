@@ -2,7 +2,7 @@
 
 Name:      hunspell
 Summary:   A spell checker and morphological analyzer library
-Version:   1.6.2
+Version:   1.7.0
 Release:   1%{?dist}
 URL:       https://github.com/hunspell/hunspell
 Group:     System Environment/Libraries
@@ -11,7 +11,8 @@ License:   LGPLv2+ or GPLv2+ or MPLv1.1
 Vendor:    bww bitwise works GmbH
 %scm_source github https://github.com/bitwiseworks/hunspell-os2 %{version}-os2
 
-BuildRequires: ncurses-devel, gettext
+BuildRequires: gcc
+BuildRequires: autoconf, automake, libtool, ncurses-devel, gettext
 BuildRequires: perl-generators
 %ifarch %{ix86} x86_64
 #BuildRequires: valgrind
@@ -38,9 +39,10 @@ Includes and definitions for developing with hunspell
 
 %prep
 %scm_setup
-autoreconf -fvi
 
 %build
+autoreconf -fvi
+
 export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 export LIBS="-lcx -ltinfo"
 export VENDOR="%{vendor}"
@@ -91,16 +93,9 @@ rm -f $RPM_BUILD_ROOT/%{_libdir}/*.la
 mkdir $RPM_BUILD_ROOT/%{_datadir}/myspell
 %find_lang %{name}
 
-%clean
-rm -rf $RPM_BUILD_ROOT
-
-#post -p /sbin/ldconfig
-
-#postun -p /sbin/ldconfig
 
 %files -f %{name}.lang
-%defattr(-,root,root,-)
-%doc README README.myspell COPYING COPYING.LESSER COPYING.MPL AUTHORS AUTHORS.myspell license.hunspell license.myspell THANKS
+%doc README COPYING COPYING.LESSER COPYING.MPL AUTHORS license.hunspell license.myspell THANKS
 %{_libdir}/*.dll
 %{_datadir}/myspell
 %{_bindir}/hunspell.exe
@@ -108,7 +103,6 @@ rm -rf $RPM_BUILD_ROOT
 %lang(hu) %{_mandir}/hu/man1/hunspell.1.gz
 
 %files devel
-%defattr(-,root,root,-)
 %{_includedir}/%{name}
 %{_libdir}/*_dll.a
 %{_bindir}/affixcompress
@@ -129,6 +123,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/hunspell.5.gz
 
 %changelog
+* Wed May 29 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.7.0-1
+- update to upstream version 1.7.0
+
 * Tue Sep 26 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.6.2-1
 - update to upstream version 1.6.2
 - fix hunspell.exe to find dictionaries in the path
