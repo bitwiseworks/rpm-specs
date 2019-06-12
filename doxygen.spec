@@ -1,25 +1,23 @@
-#define svn_url     e:/trees/doxygen/trunk
-%define svn_url     http://svn.netlabs.org/repos/ports/doxygen/trunk
-%define svn_rev     1956
-
 # set this to 1 to enable
 %global with_docs 0
-%global with_search 0
+%global with_latex 0
+%global xapian_core_support OFF
 
 
 Summary: A documentation system for C/C++
 Name:    doxygen
-Version: 1.8.13
-Release: 2%{?dist}
+Version: 1.8.15
+Release: 1%{?dist}
 
 # No version is specified.
 License: GPL+
-Url: http://www.stack.nl/~dimitri/doxygen/index.html
+Url: http://www.doxygen.nl
 Vendor: bww bitwise works GmbH
-Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
+%scm_source  github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
 
+BuildRequires: %{_bindir}/python2
 
-BuildRequires: perl
+BuildRequires: gcc perl
 %if %{with_docs}
 BuildRequires: tex(dvips)
 BuildRequires: tex(latex)
@@ -32,17 +30,19 @@ BuildRequires: tex(tabu.sty)
 BuildRequires: tex(appendix.sty)
 BuildRequires: /@unixroot/usr/bin/epstopdf
 BuildRequires: texlive-epstopdf
+BuildRequires: graphviz
 %endif
 BuildRequires: ghostscript
 BuildRequires: gettext
 BuildRequires: flex
 BuildRequires: bison
 BuildRequires: cmake
-#BuildRequires: graphviz
-%if %{with_search}
+%if %{xapian_core_support} == "ON"
 BuildRequires: xapian-core-devel
+BuildRequires: zlib-devel
 %endif
 Requires: perl
+#Requires: graphviz
 
 %description
 Doxygen can generate an online class browser (in HTML) and/or a
@@ -55,78 +55,95 @@ source files.
 Summary: A GUI for creating and editing configuration files
 Requires: %{name} = %{version}-%{release}
 BuildRequires: libqt4-devel
+
 %description doxywizard
 Doxywizard is a GUI for creating and editing configuration files that
 are used by doxygen.
 
+%if %{with_latex}
+%package latex
+Summary: Support for producing latex/pdf output from doxygen
+Requires: %{name} = %{epoch}:%{version}-%{release}
+Requires: tex(latex)
+Requires: tex(multirow.sty)
+Requires: tex(sectsty.sty)
+Requires: tex(tocloft.sty)
+Requires: tex(xtab.sty)
+Requires: tex(import.sty)
+Requires: tex(tabu.sty)
+Requires: tex(appendix.sty)
+Requires: tex(newunicodechar.sty)
+Requires: texlive-epstopdf-bin	
+
+%description latex
+%{summary}.
+%endif
 
 %debug_package
 
 
 %prep
-%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc
-svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
-%endif
+%scm_setup
 
 
 %build
 export LDFLAGS="-Zhigh-mem -Zomf -lcx"
 export VENDOR="%{vendor}"
 
-mkdir -p build
-cd build
+mkdir -p %{_build}
+cd %{_build}
 #      -DBUILD_SHARED_LIBS=OFF \
 %cmake \
-      -Dbuild_wizard=ON \
-      -Dbuild_xmlparser=ON \
-      -DMAN_INSTALL_DIR=%{_mandir}/man1 \
-      -DCMAKE_INSTALL_PREFIX:PATH=%{_prefix} \
 %if %{with_docs}
       -Dbuild_doc=ON \
+%lse
+      -Dbuild_doc=OFF \
 %endif
-%if %{with_search}
-      -Dbuild_search=ON \
-%endif
+      -Dbuild_wizard=ON \
+      -Dbuild_xmlparser=ON \
+      -Dbuild_search=%{xapian_core_support} \
+      -DMAN_INSTALL_DIR=%{_mandir}/man1 \
+      -DCMAKE_INSTALL_PREFIX:PATH=%{_prefix} \
       ..
 cd ..
 
 %if %{with_docs}
-make docs -C build
+make docs -C %{_build}
 %endif
-make -C build
+make -C %{_build}
 
 
 %install
-make install DESTDIR=%{buildroot} -C build
+make install DESTDIR=%{buildroot} -C %{_build}
 
 # install man pages
-%if %{with_docs}
 mkdir -p %{buildroot}/%{_mandir}/man1
 cp doc/*.1 %{buildroot}/%{_mandir}/man1/
+
+%if %{xapian_core_support} == "OFF"
+rm -f %{buildroot}/%{_mandir}/man1/doxyindexer.1* %{buildroot}/%{_mandir}/man1/doxysearch.1*
 %endif
 
 # remove duplicate
 rm -rf %{buildroot}/%{_docdir}/packages
 
+%check
+#still disabled as we dont have bibtext tools. and one test needs it
+#make tests -C %{_build}
 
 %files
 %doc LANGUAGE.HOWTO README.md
+%license LICENSE
 %if %{with_docs}
-%doc build/latex/doxygen_manual.pdf
-%doc build/html
+%if %{xapian_core_support} == "ON"
+%{_bindir}/doxyindexer.exe
+%{_bindir}/doxysearch*
+%exclude %{_bindir}/*.dbg
+%endif
 %endif
 %{_bindir}/doxygen.exe
-%if %{with_docs}
-%{_bindir}/doxyindexer.exe
-%{_bindir}/doxysearch*.cgi
-%endif
-%if %{with_docs}
 %{_mandir}/man1/doxygen.1*
+%if %{xapian_core_support} == "ON"
 %{_mandir}/man1/doxyindexer.1*
 %{_mandir}/man1/doxysearch.1*
 %endif
@@ -134,12 +151,19 @@ rm -rf %{buildroot}/%{_docdir}/packages
 
 %files doxywizard
 %{_bindir}/doxywizard.exe
-%if %{with_docs}
 %{_mandir}/man1/doxywizard*
+
+%if %{with_latex}
+%files latex
+# intentionally left blank
 %endif
 
-
 %changelog
+* Wed Jun 12 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.8.15-1
+- move source to github
+- use scm_ macros
+- update to version 1.8.15
+
 * Fri Jan 27 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.8.13-2
 - add buildlevel to the exe
 
