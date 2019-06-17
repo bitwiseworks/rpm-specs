@@ -1,27 +1,21 @@
-#define svn_url     e:/trees/bison/trunk
-%define svn_url     http://svn.netlabs.org/repos/ports/bison/trunk
-%define svn_rev     1621
-
 Summary: A GNU general-purpose parser generator
 Name: bison
-Version: 3.0.4
+Version: 3.4.1
 Release: 1%{?dist}
 License: GPLv3+
 Group: Development/Tools
-Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
-URL: http://www.gnu.org/software/bison/
+
+%scm_source github https://github.com/bitwiseworks/%{name}-os2 %{version}-os2
 Vendor: bww bitwise works GmbH
 
 # testsuite dependency
+BuildRequires: gcc
 BuildRequires: autoconf
 BuildRequires: flex
 
-BuildRoot: %{_tmppath}/%{name}-root
+URL: http://www.gnu.org/software/bison/
 BuildRequires: m4 >= 1.4
 #BuildRequires: java-1.6.0-openjdk-devel
-#Requires(post): /sbin/install-info
-#Requires(preun): /sbin/install-info
-
 Requires: m4 >= 1.4
 
 
@@ -64,7 +58,6 @@ simple programs to supply minimal support for the generated parsers.
 
 %package runtime
 Summary: Runtime support files used by Bison-generated parsers
-Group: Development/Libraries
 
 %description runtime
 The bison-runtime package contains files used at runtime by parsers
@@ -76,27 +69,18 @@ Bison manual section for more information.
 %debug_package
 
 %prep
-%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc
-svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
-%endif
-
-# work-around Rpath
-autoreconf -fi
+%scm_setup
 
 %build
+autoreconf -fvi
 export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+export LIBS="-lcx"
 %configure --docdir=%{_docdir}/%{name}-%{version}
 make %{?_smp_mflags}
 
 %check
-export POSIXLY_CORRECT=1
-# checks are still disabled, beside test 385 all work 
-# test 385 gives error 22 in printf()
+# checks are still disabled, even all work
+# but enabling it means a very long buildtime, as tests run slow 
 #make check
 #make maintainer-check
 
@@ -108,36 +92,18 @@ rm -rf $RPM_BUILD_ROOT
 rm -f $RPM_BUILD_ROOT/%{_bindir}/yacc
 rm -f $RPM_BUILD_ROOT/%{_infodir}/dir
 rm -f $RPM_BUILD_ROOT/%{_mandir}/man1/yacc*
-rm -f $RPM_BUILD_ROOT/%{_docdir}/%{name}/examples/calc++/*
-rm -f $RPM_BUILD_ROOT/%{_docdir}/%{name}/examples/mfcalc/*
-rm -f $RPM_BUILD_ROOT/%{_docdir}/%{name}/examples/rpcalc/*
+rm -rf $RPM_BUILD_ROOT/%{_docdir}/%{name}/examples/*
+find $RPM_BUILD_ROOT/%{_datadir}/locale/* -type f -name "bison-gnulib.mo" -exec rm -f {} ';'
 
 %find_lang %{name}
 %find_lang %{name}-runtime
 
 gzip -9nf ${RPM_BUILD_ROOT}%{_infodir}/bison.info*
 
-%post
-#if [ -f %{_infodir}/bison.info.gz ]; then # for --excludedocs
-#   /sbin/install-info %{_infodir}/bison.info.gz %{_infodir}/dir --entry="* bison: (bison).                        The GNU parser generator." || :
-#fi
-
-%preun
-#if [ $1 = 0 ]; then
-#    if [ -f %{_infodir}/bison.info.gz ]; then # for --excludedocs
-#      /sbin/install-info --delete %{_infodir}/bison.info.gz %{_infodir}/dir --entry="* bison: (bison).                        The GNU parser generator." || :
-#    fi
-#fi
-
-
-%clean
-rm -rf $RPM_BUILD_ROOT
-
 
 # The distribution contains also source files. These are used by m4
 # when the target parser file is generated.
 %files -f %{name}.lang
-%defattr(-,root,root)
 %doc AUTHORS ChangeLog NEWS README THANKS TODO COPYING
 %{_mandir}/*/bison*
 %{_datadir}/bison
@@ -149,12 +115,13 @@ rm -rf $RPM_BUILD_ROOT
 %doc COPYING
 
 %files devel
-%doc COPYING
-%defattr(-,root,root)
 %{_libdir}/liby.a
 
 
 %changelog
+* Fri Jun 14 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.4.1-1
+- update to version 3.4.1
+
 * Mon Jun 27 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.0.4-1
 - update to version 3.0.4
 - add debug package
