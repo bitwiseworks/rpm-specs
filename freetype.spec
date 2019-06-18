@@ -1,5 +1,7 @@
 # no demos atm
 %global with_demos 0
+# no mmap support atm, enable it with the next version again!!!
+%global without_mmap 1
 
 # no utf8 conversion
 %global with_convert 0
@@ -7,7 +9,7 @@
 Summary: A free and portable font rendering engine
 Name: freetype
 Version: 2.10.0
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: (FTL or GPLv2+) and BSD and MIT and Public Domain and zlib with acknowledgement
 Group: System Environment/Libraries
 URL: http://www.freetype.org
@@ -75,6 +77,9 @@ rm -f config.mk
 export LDFLAGS=" -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp -lcx"
 export VENDOR="%{vendor}"
 %configure --disable-static \
+%if %{without_mmap}
+           --disable-mmap \
+%endif
            --with-zlib=yes \
            --with-bzip2=yes \
            --with-png=yes \
@@ -164,6 +169,9 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/lib*.la
 
 
 %changelog
+* Fri May 24 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.10.0-2
+- disable mmap for now, as there is still way to much dumb old software around
+
 * Fri May 24 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.10.0-1
 - updated source to 2.10.0
 - moved source to github
