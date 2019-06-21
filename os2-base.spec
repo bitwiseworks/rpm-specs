@@ -1,8 +1,8 @@
 
 Summary: OS/2 - eComStation 2.0 - ArcaOS 5.0 base
 Name: os2-base
-Version: 0.0.0
-Release: 19%{?dist}
+Version: 0.0.1
+Release: 1%{?dist}
 
 License: free
 
@@ -11,6 +11,7 @@ Requires: os2-release
 # For os2_expand_unixroot
 BuildRequires: os2-rpm >= 1-2
 Requires: os2-rpm >= 1-2
+Requires: libc >= 1:0.1.0-1
 
 Provides: ansicall.dll
 Provides: asiacol.dll
@@ -244,14 +245,6 @@ Provides: wpvidsys.dll
 %description
 Virtual package for OS/2 base shared libraries packaging.
 
-%package fhs
-License:        free
-Summary:        Provides a /@unixroot/bin directory for posix compatibility.
-
-%description fhs
-Adds /bin to provide posix directory compatibility for shell script execution
-(as /bin/sh) as FHS http://www.linuxfoundation.org/collaborate/workgroups/lsb/fhs
-
 %package unixtools-path
 License:        free
 Summary:        Makes unix tools from findutils and coreutils first in PATH.
@@ -286,10 +279,6 @@ echo i686-OS/2-OS/2 > $RPM_BUILD_ROOT%{_sysconfdir}/rpm/platform
 %dir %{os2_bookdir}
 %dir %{os2_helpdir}
 %dir %{os2_langdir}
-
-%files fhs
-%defattr(-,root,root,-)
-# no files in a virtual package
 
 %files unixtools-path
 %defattr(-,root,root,-)
@@ -330,18 +319,6 @@ if [ "$1" = 0 ] ; then
 %cube {DELSTRING "%{os2_dos_path %{os2_langdir}};" IN "SET DPATH=" (FIRST} %{os2_config_sys} > NUL
 fi
 
-%post fhs
-if [ "$1" = 1 ] ; then
-#execute only on first install
-ln -s /@unixroot/usr/bin /@unixroot/bin
-fi
-
-%postun fhs
-if [ "$1" = 0 ] ; then
-#execute only on last uninstall
-rm /@unixroot/bin
-fi
-
 %post unixtools-path
 if [ "$1" = 1 ] ; then
 #execute only on first install
@@ -356,6 +333,10 @@ fi
 
 
 %changelog
+* Fri Jun 21 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.0.1-1
+- remove the fhs package, as not needed with libcn
+- add requires to libcn (libc version 1:0.1.0 or better)
+
 * Mon Jun 18 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.0.0-19
 - use %{os2_config_sys} macro instead of fixed c:\config.sys
 
