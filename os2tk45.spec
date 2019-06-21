@@ -1,8 +1,8 @@
 Summary: IBM OS/2 Developer's Toolkit Version 4.5
 Name: os2tk45
 Version: 4.5.2
-Release: 8%{?dist}
-Group: System Environment/Libraries
+Release: 9%{?dist}
+Group: Development/Toolkit
 License: IBM
 Vendor: bww bitwise works GmbH
 
@@ -213,6 +213,9 @@ if [ "$1" = 0 ] ; then
 fi
 
 %changelog
+* Fri Jun 21 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.5.2-9
+- fixes rpm spec ticket #337
+
 * Tue Sep 04 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.5.2-8
 - add pdpublic.h ticket #1
 - fix ticket #3
