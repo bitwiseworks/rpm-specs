@@ -16,6 +16,8 @@
 %bcond_with libimaevm
 # build with new db format
 %bcond_with ndb
+# build with cron?
+%global with_cron 0
 
 %define rpmhome %{_libdir}/rpm
 
@@ -30,12 +32,12 @@
 Summary: The RPM package management system
 Name: rpm
 Version: %{rpmver}
-Release: %{?snapver:0.%{snapver}.}18%{?dist}
+Release: %{?snapver:0.%{snapver}.}19%{?dist}
 Group: System Environment/Base
 Url: http://www.rpm.org/
 Vendor: bww bitwise works GmbH
 
-%scm_source svn http://svn.netlabs.org/repos/rpm/rpm/trunk 1621
+%scm_source svn http://svn.netlabs.org/repos/rpm/rpm/trunk 1657
 
 %if %{with int_bdb}
 Source1: db-%{bdbver}.tar.gz
@@ -238,6 +240,7 @@ BuildArch: noarch
 This package contains API documentation for developing applications
 that will manipulate RPM packages and databases.
 
+%if %{with_cron}
 %package cron
 Summary: Create daily logs of installed packages.
 Group: System Environment/Base
@@ -247,6 +250,7 @@ Requires: crontabs logrotate rpm = %{version}-%{release}
 %description cron
 This package contains a cron job which creates daily logs of installed
 packages on a system.
+%endif
 
 %debug_package
 
@@ -331,9 +335,6 @@ make DESTDIR="$RPM_BUILD_ROOT" install
 # Remove OS/2 import libraries from plugins
 rm ${RPM_BUILD_ROOT}%{_libdir}/rpm-plugins/*_dll.a
 
-# No /bin on OS/2
-mv ${RPM_BUILD_ROOT}/@unixroot/bin/rpm.exe ${RPM_BUILD_ROOT}%{_bindir}/rpm.exe
-
 # Remove elf attr magic (makes no sense on OS/2)
 rm ${RPM_BUILD_ROOT}%{rpmhome}/fileattrs/elf.attr
 
@@ -349,12 +350,14 @@ sed -i \
   -e '/usr/local' \
   ${RPM_BUILD_ROOT}%{rpmhome}/macros
 
+%if %{with_cron}
 # Save list of packages through cron
 mkdir -p ${RPM_BUILD_ROOT}%{_sysconfdir}/cron.daily
 install -m 755 scripts/rpm.daily ${RPM_BUILD_ROOT}%{_sysconfdir}/cron.daily/rpm
 
 mkdir -p ${RPM_BUILD_ROOT}%{_sysconfdir}/logrotate.d
 install -m 644 scripts/rpm.log ${RPM_BUILD_ROOT}%{_sysconfdir}/logrotate.d/rpm
+%endif
 
 #mkdir -p ${RPM_BUILD_ROOT}/usr/lib/tmpfiles.d
 #echo "r /var/lib/rpm/__db.*" > ${RPM_BUILD_ROOT}/usr/lib/tmpfiles.d/rpm.conf
@@ -378,7 +381,7 @@ for dbutil in \
     archive deadlock dump load printlog \
     recover stat upgrade verify
 do
-    ln -s ../../bin/%{dbprefix}_${dbutil} $RPM_BUILD_ROOT/%{rpmhome}/rpmdb_${dbutil}
+    ln -s %{_bindir}/%{dbprefix}_${dbutil}.exe $RPM_BUILD_ROOT/%{rpmhome}/rpmdb_${dbutil}
 done
 %endif
 
@@ -516,20 +519,27 @@ make check
 %{_libdir}/pkgconfig/%{name}.pc
 %{_includedir}/%{name}/
 
+%if %{with_cron}
 %files cron
 %{_sysconfdir}/cron.daily/rpm
 %config(noreplace) %{_sysconfdir}/logrotate.d/rpm
+%endif
 
 %files apidocs
 %license COPYING
 %doc doc/librpm/html/*
 
 %changelog
+* Fri Jun 21 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.13.0-19
+- fix ticket #246 (symlinks)
+- fix ticket #289 (no cron)
+- fix location of rpm.exe
+
 * Fri Mar 29 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.13.0-18
 - add buildlevel string
 - fix ticket #333
 
-* Fri Jul 10 2017 Dmitriy Kuminov <coding@dmik.org> 4.13.0-17
+* Mon Jul 10 2017 Dmitriy Kuminov <coding@dmik.org> 4.13.0-17
 - Depend on LIBCx 0.5.3 due to _fread override.
 
 * Fri Jun 9 2017 Dmitriy Kuminov <coding@dmik.org> 4.13.0-16
