@@ -1,6 +1,6 @@
 Name:           check
-Version:        0.11.0
-Release:        2%{?dist}
+Version:        0.12.0
+Release:        1%{?dist}
 Summary:        A unit test framework for C
 License:        LGPLv2+
 URL:            http://libcheck.github.io/check/
@@ -18,10 +18,6 @@ BuildRequires:  libtool
 BuildRequires:  pkgconfig
 #BuildRequires:  subunit-devel
 BuildRequires:  texinfo
-
-Requires(post): info
-Requires(preun): info
-
 
 %description
 Check is a unit test framework for C. It features a simple interface for 
@@ -62,6 +58,9 @@ programs suitable for use with the Check unit test framework.
 %prep
 %scm_setup
 
+# Get rid of version control files
+find . -name .cvsignore -exec rm {} +
+
 # Regenerate configure
 autoreconf -ivf
 
@@ -86,7 +85,6 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/*.la
 rm -rf $RPM_BUILD_ROOT%{_infodir}/dir
 rm -rf $RPM_BUILD_ROOT%{_docdir}/%{name}
 
-rm -f doc/example/.cvsignore
 
 # Generate & install forwarder DLLs.
 gcc -Zomf -Zdll -nostdlib check.def -l$RPM_BUILD_ROOT/%{_libdir}/check0.dll -lend -o $RPM_BUILD_ROOT/%{_libdir}/check.dll
@@ -100,22 +98,6 @@ gcc -Zomf -Zdll -nostdlib check.def -l$RPM_BUILD_ROOT/%{_libdir}/check0.dll -len
 rm -rf checkmk/test/check_checkmk*
 # these files are empty
 rm -rf checkmk/test/empty_input
-
-
-%post
-#/sbin/ldconfig
-if [ -f %{_infodir}/%{name}.info.gz ]; then
-  %{_sbindir}/install-info \
-    --entry='* Check: (check).               A unit testing framework for C.' \
-    %{_infodir}/%{name}.info.gz %{_infodir}/dir || :
-fi
-
-#%postun -p /sbin/ldconfig
-
-%preun
-if [ $1 = 0 -a -f %{_infodir}/%{name}.info.gz ]; then
-  %{_sbindir}/install-info --delete %{_infodir}/%{name}.info.gz %{_infodir}/dir || :
-fi
 
 
 %files
@@ -144,6 +126,9 @@ fi
 %{_mandir}/man1/checkmk.1*
 
 %changelog
+* Mon Jul 01 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.12.0-1
+- update vendor source to version 0.12.0
+
 * Thu Apr 13 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.11.0-2
 - fix a script error
 
