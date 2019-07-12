@@ -7,7 +7,7 @@ URL: http://sources.freebsd.org/releng/10.0/usr.bin/which/
 
 Group: Applications/System
 
-%scm_source svn http://svn.netlabs.org/repos/ports/which/trunk 733
+#%scm_source svn http://svn.netlabs.org/repos/ports/which/trunk 733
 
 BuildRequires: gcc make
 
