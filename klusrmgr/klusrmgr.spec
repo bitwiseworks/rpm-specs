@@ -5,7 +5,7 @@
 
 Summary:    kLIBC User Management
 Name:       klusrmgr
-Version:    1.2.1
+Version:    1.2.2
 Release:    1%{?dist}
 License:    proprietary
 Group:      Applications/System
@@ -16,6 +16,7 @@ BuildRoot:  %_tmppath/%name-%version-%release-root
 Requires:   os2-rpm >= 1-2
 Requires:   rxcrypt >= 1.0.0
 Requires:   bww-resources-rpm >= 1.1.0
+Requires:   libc >= 1:0.1.2
 Obsoletes:  kLIBCum <= 1.0.10
 
 %description
@@ -25,7 +26,7 @@ These files are found in %UNIXROOT%\etc and have the following names
 - group
 
 These files are syntactically properly maintained and compiled into
-pwd.db and spwd.db using the pwdmkdb.exe utility.
+pwd.db and spwd.db using the pwd_mkdb.exe utility from libc package.
 
 
 %prep
@@ -85,6 +86,10 @@ fi
 
 
 %changelog
+* Fri Jul 12 2019 hb <herwig.bauernfeind@bitwiseworks.com> 1.2.2-1
+- remove pwd_mkdb.exe as in libc now
+- added requires of libc
+
 * Tue Sep 04 2018 hb <herwig.bauernfeind@bitwiseworks.com> 1.2.1-1
 - useradd and groupmod are compiled into .exe
 - standardized error messages in usermod and groupmod
