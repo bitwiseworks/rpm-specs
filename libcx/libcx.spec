@@ -1,6 +1,6 @@
 Name: libcx
 Summary: kLIBC Extension Library
-Version: 0.6.5
+Version: 0.6.6
 Release: 1%{?dist}
 License: LGPLv2.1+
 Group: System/Libraries
@@ -88,6 +88,10 @@ rm -rf %{buildroot}
 %{_includedir}/libcx/spawn2.h
 
 %changelog
+* Mon Jul 15 2019 Dmitriy Kuminov <coding@dmik.org> 0.6.6-1
+- Release version 0.6.6
+  (https://github.com/bitwiseworks/libcx/blob/0.6.6/CHANGELOG.md).
+
 * Fri Mar 29 2019 Dmitriy Kuminov <coding@dmik.org> 0.6.5-1
 - Release version 0.6.5
   (https://github.com/bitwiseworks/libcx/blob/0.6.5/CHANGELOG.md).
