@@ -12,23 +12,28 @@ Name:           libc
 License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Standard Shared Libraries
 Group:          System/Libraries
-Version:        %{ver_maj}.1.1
+Version:        %{ver_maj}.1.2
 Release:        1%{?dist}
 Vendor:         bww bitwise works GmbH
 Url:            https://github.com/bitwiseworks/libc
 
 %scm_source github https://github.com/bitwiseworks/libc %{version}
-#scm_source git file://D:/Coding/libc/master HEAD
+#scm_source git file://D:/Coding/libc/master %{version}
 
 BuildRequires:  rexx_exe kbuild
 BuildRequires:  gcc unzip sed gawk
+
+# we need ourselves for the build (db1-devel is for pwd_mkdb)
+BuildRequires:  libc-devel libc-db1-devel
 
 # for libiberty
 BuildRequires:  binutils-devel >= 2.27-3
 
 # Require kLIBC user management to make programs using Unix user management API
 # (getpwuid() and friends) work correctly.
-Requires:       klusrmgr
+# TODO remove this dependency once master.passwd init is moved from klusrmgr here.
+# Also, move pwd_mkdb.exe to a separate subpackage (libc-tools?) and depend klusrmgr on it.
+Requires:       klusrmgr >= 1.2.2
 
 %description
 kLIBC is a C runtime library in which the coder is exploring The Single Unix
@@ -83,7 +88,7 @@ library (gettext headers).
 %scm_setup
 
 # Check that package version matches the version from the sources
-test "`grep -P -o '(?<=(VH|VM|VL) = )([0-9]+)' < src/emx/version.smak | tr \\\n .`" = "%{version}."
+test "`grep -P -o '(?<=(VH|VM|VL) = )([0-9]+)' < src/emx/version.smak | tr -d \\\r | tr \\\n .`" = "%{version}."
 
 
 %build
@@ -189,6 +194,7 @@ rm -rf "%{buildroot}"
 %doc README.md CHANGELOG.md
 %doc doc/COPYING.* doc/*.os2
 %{_libdir}/libc*.dll
+%{_bindir}/pwd_mkdb.exe
 
 
 %files devel -f %{debug_package_exclude_files}
@@ -199,6 +205,7 @@ rm -rf "%{buildroot}"
 %exclude %{_includedir}/libintl.h
 %{_libdir}
 %exclude %{_libdir}/libc*.dll
+%exclude %{_bindir}/pwd_mkdb.exe
 
 
 %files db1-devel
@@ -211,6 +218,11 @@ rm -rf "%{buildroot}"
 
 
 %changelog
+* Mon Jul 15 2019 Dmitriy Kuminov <coding@dmik.org> 1:0.1.2-1
+- Release LIBC Next version 0.1.2
+  (https://github.com/bitwiseworks/libc/blob/0.1.2/CHANGELOG.md).
+- Fix RPM/real version mismatch check (CRLF problems).
+
 * Sun Feb 24 2019 Dmitriy Kuminov <coding@dmik.org> 1:0.1.1-1
 - Release LIBC Next version 0.1.1
   (https://github.com/bitwiseworks/libc/blob/0.1.1/CHANGELOG.md).
