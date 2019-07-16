@@ -1,39 +1,44 @@
 # bcond default logic is nicely backwards...
-#%bcond_without tcl
-#%bcond_with static
-#%bcond_without check
+%bcond_without tcl
+%bcond_with static
+%bcond_with check
 
-%undefine tcl
-%undefine with_tcl
-%undefine static
-%undefine with_static
+%global without_amalgamation 1
 
-# upstream doesn't provide separate -docs sources for all minor releases
-%define basever 3.7.2
-%define docver %(echo %{basever}|sed -e "s/\\./_/g")
+%define realver 3280000
+%define docver 3280000
+%define rpmver 3.28.0
 
 Summary: Library that implements an embeddable SQL database engine
 Name: sqlite
-Version: %{basever}
-Release: 5%{?dist}
+Version: %{rpmver}
+Release: 1%{?dist}
 License: Public Domain
-Group: Applications/Databases
 URL: http://www.sqlite.org/
-Source0: http://www.sqlite.org/sqlite-%{version}.tar.gz
-Source1: http://www.sqlite.org/sqlite_docs_%{docver}.zip
 
-Patch1: sqlite-os2.diff
+Vendor: bww bitwise works GmbH
 
-BuildRequires: ncurses-devel readline-devel libc-devel
-# libdl patch needs
-#BuildRequires: autoconf
+%scm_source github https://github.com/bitwiseworks/%{name}-os2 master-os2
+Source1: http://www.sqlite.org/2019/sqlite-doc-%{docver}.zip
+
+# DEF files to create forwarders for the legacy package
+Source10:       sqlit3.def
+
+BuildRequires: gcc
+BuildRequires: ncurses-devel readline-devel
+BuildRequires: autoconf
 %if %{with tcl}
-#BuildRequires: /usr/bin/tclsh
-#BuildRequires: tcl-devel
+BuildRequires: /@unixroot/usr/bin/tclsh.exe
+BuildRequires: tcl-devel
 %{!?tcl_version: %global tcl_version 8.5}
 %{!?tcl_sitearch: %global tcl_sitearch %{_libdir}/tcl%{tcl_version}}
 %endif
-BuildRoot: %{_tmppath}/%{name}-root
+
+Requires: %{name}-libs = %{version}-%{release}
+
+# Ensure updates from pre-split work on multi-lib systems
+Obsoletes: %{name} < 3.11.0-1
+Conflicts: %{name} < 3.11.0-1
 
 %description
 SQLite is a C library that implements an SQL database engine. A large
@@ -46,8 +51,7 @@ are named to permit each to be installed on a single host
 
 %package devel
 Summary: Development tools for the sqlite3 embeddable SQL database engine
-Group: Development/Libraries
-Requires: %{name} = %{version}-%{release}
+Requires: %{name}%{?_isa} = %{version}-%{release}
 Requires: pkgconfig
 
 %description devel
@@ -55,9 +59,21 @@ This package contains the header files and development documentation
 for %{name}. If you like to develop programs using %{name}, you will need 
 to install %{name}-devel.
 
+%package libs
+Summary: Shared library for the sqlite3 embeddable SQL database engine.
+
+# Ensure updates from pre-split work on multi-lib systems
+Obsoletes: %{name} < 3.11.0-1
+Conflicts: %{name} < 3.11.0-1
+# we need this version because of the fchown() libc bug in earlier versions
+Requires: libc >= 1:0.1.2
+
+%description libs
+This package contains the shared library for %{name}.
+
 %package doc
 Summary: Documentation for sqlite
-Group: Documentation
+BuildArch: noarch
 
 %description doc
 This package contains most of the static HTML files that comprise the
@@ -66,7 +82,6 @@ C/C++ interface specs and other miscellaneous documentation.
 
 %package -n lemon
 Summary: A parser generator
-Group: Development/Tools
 
 %description -n lemon
 Lemon is an LALR(1) parser generator for C or C++. It does the same
@@ -82,31 +97,54 @@ embedded controllers.
 %if %{with tcl}
 %package tcl
 Summary: Tcl module for the sqlite3 embeddable SQL database engine
-Group: Development/Languages
 Requires: %{name} = %{version}-%{release}
 Requires: tcl(abi) = %{tcl_version}
 
 %description tcl
 This package contains the tcl modules for %{name}.
+
+%package analyzer
+Summary: An analysis program for sqlite3 database files
+Requires: %{name} = %{version}-%{release}
+Requires: tcl(abi) = %{tcl_version}
+
+%description analyzer
+This package contains the analysis program for %{name}.
 %endif
 
+%debug_package
+
 %prep
-%setup -q -a1
-%patch1 -p1 -b .os2~
+%scm_setup
+unzip %{SOURCE1}
+
+# Remove backup-file
+rm -f %{name}-doc-%{docver}/sqlite.css~ || :
+
+autoreconf -fvi
+
+# Prepare forwarder DLLs.
+for m in %{SOURCE10}; do
+  cp ${m} .
+done
 
 %build
-#autoconf
-#export CFLAGS="$RPM_OPT_FLAGS -DSQLITE_ENABLE_COLUMN_METADATA=1 -DSQLITE_DISABLE_DIRSYNC=1 -DSQLITE_ENABLE_FTS3=3 -DSQLITE_ENABLE_RTREE=1 -Wall -fno-strict-aliasing"
-export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
-export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
-export LIBS="-lurpo"
+export CFLAGS="$RPM_OPT_FLAGS $RPM_LD_FLAGS -DSQLITE_ENABLE_COLUMN_METADATA=1 \
+               -DSQLITE_DISABLE_DIRSYNC=1 -DSQLITE_ENABLE_FTS3=3 \
+               -DSQLITE_ENABLE_RTREE=1 -DSQLITE_SECURE_DELETE=1 \
+               -DSQLITE_ENABLE_UNLOCK_NOTIFY=1 -DSQLITE_ENABLE_DBSTAT_VTAB=1 \
+               -DSQLITE_ENABLE_FTS3_PARENTHESIS=1 -DSQLITE_ENABLE_JSON1=1 \
+               -Wall -fno-strict-aliasing"
+export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+export LIBS="-lcx"
+export VENDOR="%{vendor}"
 %configure %{!?with_tcl:--disable-tcl} \
-    --enable-threadsafe \
-    --enable-threads-override-locks \
-    --enable-load-extension \
-    %{?with_tcl:TCLLIBDIR=%{tcl_sitearch}/sqlite3} \
-    --disable-shared \
-    "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
+           --enable-fts5 \
+           --enable-threadsafe \
+           --enable-threads-override-locks \
+           --enable-load-extension \
+           %{?without_amalgamation:--disable-amalgamation} \
+           %{?with_tcl:TCLLIBDIR=%{tcl_sitearch}/sqlite3}
 
 # rpath removal
 #sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
@@ -114,83 +152,98 @@ export LIBS="-lurpo"
 
 make %{?_smp_mflags}
 
-%install
-rm -rf $RPM_BUILD_ROOT
+# Build sqlite3_analyzer
+# depends on tcl
+%if %{with tcl}
+make %{?_smp_mflags} sqlite3_analyzer.exe
+%endif
 
+%install
 make DESTDIR=${RPM_BUILD_ROOT} install
 
 install -D -m0644 sqlite3.1 $RPM_BUILD_ROOT/%{_mandir}/man1/sqlite3.1
 install -D -m0755 lemon.exe $RPM_BUILD_ROOT/%{_bindir}/lemon.exe
 install -D -m0644 tool/lempar.c $RPM_BUILD_ROOT/%{_datadir}/lemon/lempar.c
 
+# Generate & install forwarder DLLs.
+gcc -Zomf -Zdll -nostdlib sqlit3.def -l$RPM_BUILD_ROOT/%{_libdir}/sqlite30.dll -lend -o $RPM_BUILD_ROOT/%{_libdir}/sqlit3.dll
 
 %if %{with tcl}
 # fix up permissions to enable dep extraction
-#chmod 0755 ${RPM_BUILD_ROOT}/%{tcl_sitearch}/sqlite3/*.so
+chmod 0755 ${RPM_BUILD_ROOT}/%{tcl_sitearch}/sqlite3/*.dll
+# Install sqlite3_analyzer
+install -D -m0755 sqlite3_analyzer.exe $RPM_BUILD_ROOT/%{_bindir}/sqlite3_analyzer.exe
 %endif
 
 %if ! %{with static}
 rm -f $RPM_BUILD_ROOT/%{_libdir}/*.la
-rm -f $RPM_BUILD_ROOT/%{_libdir}/*.a
+rm -f $RPM_BUILD_ROOT/%{_libdir}/sqlite3.a
+rm -f $RPM_BUILD_ROOT/%{tcl_sitearch}/sqlite3/tclsqlite3.a
 %endif
 
-# YD install dll
-install -D -m0755 sqlit3.dll $RPM_BUILD_ROOT/%{_libdir}/
-install -D -m0755 .libs/sqlite3.a $RPM_BUILD_ROOT/%{_libdir}/
-install -D -m0755 .libs/sqlite3_s.a $RPM_BUILD_ROOT/%{_libdir}/
-install -D -m0755 .libs/sqlite3.lib $RPM_BUILD_ROOT/%{_libdir}/
+%if %{with check}
+%check
+# XXX shell tests are broken due to loading system libsqlite3, work around...
+export LD_LIBRARY_PATH=`pwd`/.libs
+export MALLOC_CHECK_=3
 
-# YD check requires tcl
-#%if %{with check}
-#%check
-#%ifarch s390 ppc ppc64
-#make test || :
-#%else
-#make test
-#%endif
-#%endif
+# csv01 hangs on all non-intel archs i've tried
+%ifarch x86_64 %{ix86}
+%else
+rm test/csv01.test
+%endif
 
-%clean
-rm -rf $RPM_BUILD_ROOT
+%ifarch s390x ppc64
+rm test/fts3conf.test
+%endif
 
-#%post -p /sbin/ldconfig
+make test
+%endif # with check
 
-#%postun -p /sbin/ldconfig
+#ldconfig_scriptlets libs
 
 %files
-%defattr(-, root, root)
-%doc README
 %{_bindir}/sqlite3.exe
-%{_libdir}/*.dll
 %{_mandir}/man?/*
 
-%files devel
-%defattr(-, root, root)
-%{_includedir}/*.h
+%files libs
+%doc README.md
 %{_libdir}/*.dll
-%{_libdir}/*.a
-%{_libdir}/*.lib
+
+%files devel
+%{_includedir}/*.h
+%{_libdir}/sqlit*_dll.a
 %{_libdir}/pkgconfig/*.pc
 %if %{with static}
-%{_libdir}/*_s.a
+%{_libdir}/sqlite3.a
 %exclude %{_libdir}/*.la
 %endif
 
 %files doc
-%defattr(-, root, root)
-%doc %{name}-%{docver}-docs/*
+%doc %{name}-doc-%{docver}/*
 
 %files -n lemon
-%defattr(-, root, root)
 %{_bindir}/lemon.exe
 %{_datadir}/lemon
 
 %if %{with tcl}
 %files tcl
-%defattr(-, root, root)
 %{tcl_sitearch}/sqlite3
+%exclude %{tcl_sitearch}/sqlite3/*.dbg
+
+%files analyzer
+%{_bindir}/sqlite3_analyzer.exe
 %endif
 
 %changelog
+* Wed Jul 03 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.28.0-1
+- update version to 3.28.0
+
+* Wed Mar 27 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.27.2-1
+- update version to 3.27.2
+- add a nice bldlevel to the dll
+- use the nix codepath where possible
+- use latest scm_ macros
+
 * Mon Jan 16 2012 yd
 - rebuild with libc 0.6.4 runtime.
