@@ -13,7 +13,7 @@
 Summary:	Font configuration and customization library
 Name:		fontconfig
 Version:	2.13.1
-Release:	2%{?dist}
+Release:	3%{?dist}
 # src/ftglue.[ch] is in Public Domain
 # src/fccache.c contains Public Domain code
 # fc-case/CaseFolding.txt is in the UCD
@@ -22,7 +22,7 @@ License:	MIT and Public Domain and UCD
 Group:		System Environment/Libraries
 URL:		http://fontconfig.org
 Vendor:		bww bitwise works GmbH
-%scm_source     github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2-2
+%scm_source     github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2-3
 
 Source1: 30-os2-unsupported.conf
 Source2: 80-os2-tnr-fix.conf
@@ -186,6 +186,9 @@ rm -f %{_tmppath}/%{dllName}
 %doc fontconfig-devel.txt fontconfig-devel
 
 %changelog
+* Mon Aug 5 2019 Silvan Scherrer <silvan.scherrer@aroa.com> 2.13.1-3
+- enable embedded bitmaps and full hinting for Workplace Sans
+
 * Wed May 29 2019 Silvan Scherrer <silvan.scherrer@aroa.com> 2.13.1-2
 - fix a merge glitch, which gave crashes (sorry for that)
 
