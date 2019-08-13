@@ -1,7 +1,7 @@
 Summary: OS/2 specific RPM macros and scripts
 Name: os2-rpm
 Version: 1
-Release: 7%{?dist}
+Release: 8%{?dist}
 License: GPLv2+
 Group: Development/System
 Vendor: bww bitwise works GmbH
@@ -101,6 +101,9 @@ done
 %config(noreplace) %{_sysconfdir}/rpm/macros.scm_pwd
 
 %changelog
+* Mon Aug 12 2019 Dmitriy Kuminov <coding@dmik.org> 1-8
+- scm_setup: Support github tags starting with `v` (nasty GitHub bug).
+
 * Mon May 27 2019 Herwig Bauernfeind <herwig.bauernfeind@bitwiseworks.com> 1-7
 - chg warpin-conflicts to look for rpmdummy entries as well
 

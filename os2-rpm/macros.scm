@@ -67,7 +67,8 @@ BuildRequires: wget zip unzip\
 %__scm_setup_github\
 %{!?__source_rev:%{error:%0: Revision in %%scm_source is required for GitHub}exit 1}\
 %global __source_url_github_name %(URL="%{__source_url}" ; echo ${URL##*/})\
-%global __source_dir_github %{__source_url_github_name}-%{__source_rev}\
+%global __source_url_github_rev %(REV="%{__source_rev}" ; echo ${REV##v})\
+%global __source_dir_github %{__source_url_github_name}-%{__source_url_github_rev}\
 %if %{?__source_rev:%(if test -f "%SOURCE0" ; then echo 1 ; else echo 0 ; fi)}%{!?__source_rev:0}\
 %setup -n "%__source_dir_github" -q\
 %else\
