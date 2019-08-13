@@ -47,11 +47,11 @@
 %bww_create_folder_id\
 %global __bww_title %{-t*}\
 %global __bww_title_ver %{!-V:%{__bww_title} %{version}}%{-V:%{__bww_title}}\
-%wps_object_create WP_BWWHELP:WPFolder|bww Help|<WP_ASSISTANCE>|TITLE=bitwiseworks Help Center;SHOWALLINTREEVIEW=YES;ICONRESOURCE=60,PMWP.DLL;ICONNRESOURCE=83,PMWP.DLL;BACKGROUND=((/@unixroot/usr/share/os2/bww/bwwfbkg.bmp));ALWAYSSORT=YES;DEFAULTSORT=-1;DEFAULTVIEW=TREE;OPEN=TREE;NODELETE=YES;\
+%wps_object_create WP_BWWHELP:WPFolder|bww Help|<WP_ASSISTANCE>|TITLE=bitwiseworks Help Center;SHOWALLINTREEVIEW=YES;ICONRESOURCE=60,PMWP.DLL;ICONNRESOURCE=83,PMWP.DLL;BACKGROUND=((/@unixroot/usr/share/os2/bww/bwwfbkg.bmp));ALWAYSSORT=YES;DEFAULTSORT=-1;DEFAULTVIEW=TREE;NODELETE=YES;\
 %wps_object_create WP_BWWDOC:WPShadow|Package Documentation|<WP_BWWHELP>|SHADOWID=((/@unixroot/usr/share/doc));\
 %wps_object_create WP_BWWAPPS:WPFolder|bww Apps|<WP_PROGRAMSFOLDER>|TITLE=bitwiseworks Apps and Ports;ICONRESOURCE=1,BWWRES.DLL;ICONNFILE=((/@unixroot/usr/share/os2/bww/bwwfldro.ico));BACKGROUND=((/@unixroot/usr/share/os2/bww/bwwfbkg.bmp));ICONVIEW=FLOWED;\
 %wps_object_create WP_BWWHELPSHADOW:WPShadow|bitwiseworks Help Center|<WP_BWWAPPS>|SHADOWID=<WP_BWWHELP>;\
-%wps_object_create %{__bww_folder_id}:WPFolder|%{__bww_folder_name}|<WP_BWWAPPS>|TITLE=%{__bww_title_ver};\
+%wps_object_create %{__bww_folder_id}:WPFolder|%{__bww_folder_name}|<WP_BWWAPPS>|TITLE=%{__bww_title_ver};OPEN=ICON;\
 %{nil}
 
 # bww_app:

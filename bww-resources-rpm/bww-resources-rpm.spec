@@ -3,7 +3,7 @@
 
 Summary:       bitwise works icons and folders
 Name:          bww-resources-rpm
-Version:       1.1.2
+Version:       1.1.3
 Release:       1%{?dist}
 License:       Proprietory
 Group:         Applications/System
@@ -95,6 +95,9 @@ bww-fix-docdir
 %{_libdir}/rpm/macros.d/macros.bww
 
 %changelog
+* Mon Aug 12 2019 Dmitriy Kuminov <coding@dmik.org> 1.1.3-1
+- Open package folder instead of help folder when using bww_folder.
+
 * Fri Dec 15 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.1.2-1
 - adjusted bww_app_shadow a bit
 - reworded the help and info in the macro (no functional change)
