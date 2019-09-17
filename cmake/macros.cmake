@@ -1,6 +1,7 @@
 #
 # Macros for cmake
 #
+%_cmake_shared_libs -DBUILD_SHARED_LIBS:BOOL=ON
 %_cmake_skip_rpath -DCMAKE_SKIP_RPATH:BOOL=ON
 %_cmake_version @@CMAKE_VERSION@@
 %__cmake /@unixroot/usr/bin/cmake
@@ -27,6 +28,6 @@
         -DLIB_INSTALL_DIR:PATH=%{_libdir} \\\
         -DSYSCONF_INSTALL_DIR:PATH=%{_sysconfdir} \\\
         -DSHARE_INSTALL_PREFIX:PATH=%{_datadir} \\\
-        -DBUILD_SHARED_LIBS:BOOL=ON
+	%{?_cmake_shared_libs}
 
 %cmake@@CMAKE_MAJOR_VERSION@@ %cmake
