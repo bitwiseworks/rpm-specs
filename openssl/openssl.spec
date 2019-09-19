@@ -25,7 +25,7 @@
 
 Summary: A general purpose cryptography library with TLS implementation
 Name: openssl
-Version: 1.0.2q
+Version: 1.0.2t
 Release: 1%{?dist}
 
 License: OpenSSL
@@ -352,6 +352,9 @@ rm -rf $RPM_BUILD_ROOT/%{_libdir}/fipscanister.*
 %{_sysconfdir}/pki/tls/misc/tsget
 
 %changelog
+* Wed Sep 18 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.0.2t-1
+- Update to version 1.0.2t.
+
 * Wed Nov 21 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.0.2q-1
 - Update to version 1.0.2q.
 - add a nice buildlevel string
