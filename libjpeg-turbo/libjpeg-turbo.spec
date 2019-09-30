@@ -1,5 +1,5 @@
 Name:           libjpeg-turbo
-Version:        1.5.1
+Version:        2.0.3
 Release:        1%{?dist}
 Summary:        A MMX/SSE2/SIMD accelerated library for manipulating JPEG image files
 License:        IJG
@@ -10,8 +10,8 @@ Vendor:         bww bitwise works GmbH
 # DEF files to create forwarders for the legacy package
 Source10:       jpeg.def
 
-BuildRequires:  autoconf
-BuildRequires:  automake
+BuildRequires:  gcc
+BuildRequires:  cmake
 BuildRequires:  libtool
 BuildRequires:  nasm
 
@@ -73,15 +73,15 @@ for m in %{SOURCE10}; do
 done
 
 %build
-autoreconf -vif
-
 export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 export LIBS="-lcx"
 export VENDOR="%{vendor}"
-%configure --disable-static --enable-shared --with-jpeg8
 
-# we need to tweak the libtool a bit, as else it's not building see also ticket #94
-sed 's/emxexp \\$libobjs \\$convenience/emxexp \\$libobjs/' -i.bak libtool
+%{cmake} -DCMAKE_SKIP_RPATH:BOOL=YES \
+         -DCMAKE_SKIP_INSTALL_RPATH:BOOL=YES \
+         -DENABLE_STATIC:BOOL=NO \
+         -DWITH_JPEG8:BOOL=YES \
+         .
 
 make %{?_smp_mflags} V=1
 
@@ -135,24 +135,24 @@ fi
 
 %check
 # this export is needed, as else the dll for the tests are not found
-export BEGINLIBPATH=%{_builddir}/%{buildsubdir}/.libs
-make test %{?_smp_mflags}
+#export BEGINLIBPATH=%{_builddir}/%{buildsubdir}
+#export LIBPATHSTRICT=T
+#make test %{?_smp_mflags}
 
-#post -p /sbin/ldconfig
-#postun -p /sbin/ldconfig
-
-#post -n turbojpeg -p /sbin/ldconfig
-#postun -n turbojpeg -p /sbin/ldconfig
+#ldconfig_scriptlets
+#ldconfig_scriptlets -n turbojpeg
 
 %files
+%license LICENSE.md
 %doc README.md README.ijg ChangeLog.md
 %{_libdir}/jpeg*.dll
 
 %files devel
-%doc coderules.txt jconfig.txt libjpeg.txt structure.txt example.c
+%doc coderules.txt jconfig.txt libjpeg.txt structure.txt example.txt
 %{_includedir}/jconfig*.h
 %{_includedir}/jerror.h
 %{_includedir}/jmorecfg.h
+%{_includedir}/jpegint.h
 %{_includedir}/jpeglib.h
 %{_libdir}/jpeg*_dll.a
 %{_libdir}/pkgconfig/libjpeg.pc
@@ -174,10 +174,14 @@ make test %{?_smp_mflags}
 %{_libdir}/turbo*.dll
 
 %files -n turbojpeg-devel
+%doc tjexample.c
 %{_includedir}/turbojpeg.h
 %{_libdir}/turbo*_dll.a
 %{_libdir}/pkgconfig/libturbojpeg.pc
 
 %changelog
+* Mon Sep 30 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.0.3-1
+- update version to 2.0.3
+
 * Fri May 12 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.5.1-1
 - Initial version
