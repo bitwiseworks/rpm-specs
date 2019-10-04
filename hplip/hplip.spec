@@ -1,4 +1,8 @@
-# spec source :http://pkgs.fedoraproject.org/cgit/rpms/hplip.git/tree/hplip.spec
+# we don't want to provide private python extension libs
+%{?filter_setup:
+%filter_provides_in %{python2_sitearch}/.*\.so$
+%filter_setup
+}
 
 %define without_sane 1
 %define without_dbus 1
@@ -6,28 +10,47 @@
 
 Summary: HP Linux Imaging and Printing Project
 Name: hplip
-Version: 3.17.11
+Version: 3.19.8
 Release: 1%{?dist}
-License: GPLv2+ and MIT and BSD
+License: GPLv2+ and MIT and BSD and IJG and Public Domain and GPLv2+ with exceptions and ISC
 
 Url: https://developers.hp.com/hp-linux-imaging-and-printing
 Vendor: bww bitwise works GmbH
-%scm_source github  https://github.com/bitwiseworks/%{name}-os2 3.17.11-os2
+%scm_source github  https://github.com/bitwiseworks/%{name}-os2 3.19.8-os2
 
 # @todo: decide if we need that to
-# if we do it as well, also remove the coment in the post section
+# if we do it as well, also remove the comment in the post section
 #Source1: hpcups-update-ppds.sh
 
 Requires: %{name}-libs = %{version}-%{release}
-#Requires: python-pillow
+#Requires: python3-pillow
 Requires: cups
 Requires: wget
 %if 0%{!?without_dbus:1}
-Requires: python-dbus
+Requires: python3-dbus
 %endif
-#Requires: gnupg
-# /etc/udev/rules.d
+# set require directly to /usr/bin/gpg, because gnupg2 and gnupg ships it,
+# but gnupg will be deprecated in the future
+#Requires: %{_bindir}/gpg
+# /usr/lib/udev/rules.d
 #Requires: systemd
+# 1733449 - Scanner on an HP AIO printer is not detected unless libsane-hpaio is installed
+%if 0%{!?without_sane:1}
+Requires: libsane-hpaio
+%endif
+# require coreutils, because timeout binary is needed in post scriptlet,
+# because hpcups-update-ppds script can freeze in certain situation and
+# stop the update
+Requires(post): coreutils
+
+# gcc and gcc-c++ are no longer in buildroot by default
+
+# gcc is needed for compilation of HPAIO scanning backend, HP implementation of
+# IPP and MDNS protocols, hpps driver, hp backend, hpip (image processing 
+# library), multipoint transport driver hpmud
+BuildRequires: gcc
+# gcc-c++ is needed for hpijs, hpcups drivers
+#BuildRequires: gcc-c++
 
 BuildRequires: autoconf automake libtool
 #BuildRequires: net-snmp-devel
@@ -44,16 +67,12 @@ BuildRequires: sane-backends-devel
 BuildRequires: pkgconfig(dbus-1)
 %endif
 
-# Make sure we get postscriptdriver tags.
-#BuildRequires: python-cups
+# Make sure we get postscriptdriver tags - need cups and python3-cups.
 BuildRequires: cups
+#BuildRequires: python3-cups
 
 # macros: %%{_tmpfilesdir}, %%{_udevrulesdir}
 #BuildRequires: systemd
-
-# hpijs was merged into main package in 3.15.7-2
-Obsoletes: hpijs < 1:%{version}-%{release}
-Provides:  hpijs = 1:%{version}-%{release}
 
 %description
 The Hewlett-Packard Linux Imaging and Printing Project provides
@@ -71,7 +90,6 @@ Summary: HPLIP libraries
 License: GPLv2+ and MIT
 Requires: %{name}-common = %{version}-%{release}
 Requires: python
-Obsoletes: %{name}-compat-libs < %{version}-%{release}
 
 %description libs
 Libraries needed by HPLIP.
@@ -81,9 +99,9 @@ Summary: HPLIP graphical tools
 License: BSD
 #BuildRequires: libappstream-glib
 Requires: python2-PyQt4
-#Requires: python-reportlab
+#Requires: python3-reportlab
 # hpssd.py
-#Requires: python-gobject
+#Requires: python3-gobject
 Requires: %{name} = %{version}-%{release}
 %if 0%{!?without_sane:1}
 Requires: libsane-hpaio = %{version}-%{release}
@@ -96,8 +114,6 @@ HPLIP graphical tools.
 %package -n libsane-hpaio
 Summary: SANE driver for scanners in HP's multi-function devices
 License: GPLv2+
-Obsoletes: libsane-hpoj < 0.91
-Provides: libsane-hpoj = 0.91
 Requires: sane-backends
 Requires: %{name}-libs = %{version}-%{release}
 
@@ -110,6 +126,18 @@ SANE driver for scanners in HP's multi-function devices (from HPOJ).
 %prep
 %scm_setup
 
+sed -i.duplex-constraints \
+    -e 's,\(UIConstraints.* \*Duplex\),//\1,' \
+    prnt/drv/hpcups.drv.in
+
+# Change shebang /usr/bin/env python -> /usr/bin/python3 (bug #618351).
+find -name '*.py' -print0 | xargs -0 \
+    sed -i.env-python -e 's,^#!/usr/bin/env python,#!%{__python2},'
+sed -i.env-python -e 's,^#!/usr/bin/env python,#!%{__python2},' \
+    prnt/filters/hpps \
+    fax/filters/pstotiff
+
+rm locatedriver
 
 %build
 # Work-around Makefile.am imperfections.
@@ -135,7 +163,7 @@ export VENDOR="%{vendor}"
 %else
         --enable-fax-build=no \
 %endif
-        --disable-foomatic-rip-hplip-install  \
+        --disable-foomatic-rip-hplip-install \
         --enable-qt4 \
         --enable-hpcups-install --enable-cups-drv-install \
         --enable-foomatic-drv-install \
@@ -157,13 +185,16 @@ make %{?_smp_mflags}
 mkdir -p %{buildroot}%{_bindir}
 make install DESTDIR=%{buildroot}
 
+# Create /run/hplip & /var/lib/hp
+mkdir -p %{buildroot}%{_localstatedir}/run/hplip
+mkdir -p %{buildroot}%{_localstatedir}/lib/hp
+
 # Remove unpackaged files
 rm -rf  %{buildroot}%{_sysconfdir}/sane.d \
         %{buildroot}%{_docdir} \
         %{buildroot}%{_datadir}/hal \
         %{buildroot}%{_datadir}/hplip/pkservice.py \
         %{buildroot}%{_bindir}/hp-pkservice \
-        %{buildroot}%{_datadir}/applications \
         %{buildroot}%{_datadir}/hplip/locatedriver* \
         %{buildroot}%{_datadir}/hplip/dat2drv*
 
@@ -180,6 +211,7 @@ rm -f   %{buildroot}%{_bindir}/foomatic-rip \
         %{buildroot}%{python_sitearch}/*.la \
         %{buildroot}%{_libdir}/sane/*.la \
         %{buildroot}%{_datadir}/cups/model/foomatic-ppds \
+        %{buildroot}%{_datadir}/applications/hplip.desktop \
         %{buildroot}%{_datadir}/ppd/HP/*.ppd
 
 
@@ -193,9 +225,6 @@ find doc/images -type f -exec chmod 644 {} \;
 # SELinux file context (bug #564551).
 %{__mkdir_p} %{buildroot}%{_datadir}/hplip/prnt/plugins
 
-# Create an empty var/run/hplip directory
-%{__mkdir_p} %{buildroot}%{_localstatedir}/run/hplip
-
 # Remove files we don't want to package.
 rm -f %{buildroot}%{_datadir}/hplip/hpaio.desc
 rm -f %{buildroot}%{_datadir}/hplip/hplip-install
@@ -207,18 +236,31 @@ rm -f %{buildroot}%{_bindir}/hp-upgrade
 rm -f %{buildroot}%{_datadir}/hplip/hpijs.drv.in.template
 rm -f %{buildroot}%{_datadir}/cups/mime/pstotiff.types
 rm -f %{buildroot}%{_datadir}/hplip/fax/pstotiff*
+rm -f %{buildroot}%{_unitdir}/hplip-printer@.service
 rm -rf %{buildroot}%{_libdir}/systemd
-
-# we don't need the exe and the python version (use exe as newer)
+rm -rf %{buildroot}%{_datadir}/applications
+# we don't need the exe and the python version of hpps, we remove the python version
 rm -f %{buildroot}%{_cups_serverbin}/filter/hpps
 
 # The systray applet doesn't work properly (displays icon as a
 # window), so don't ship the launcher yet.
-rm -rf %{buildroot}%{_sysconfdir}/xdg
+rm -rf %{buildroot}%{_sysconfdir}/xdg/autostart/hplip-systray.desktop
 
 # as there is no devel package we don't ship the *.a files either
 rm -f  %{buildroot}%{_libdir}/*.a \
        %{buildroot}%{python_sitearch}/*.a
+
+# hp-setup needs to have cups service enabled and running for setups of queues
+%pre
+#%{_bindir}/systemctl start cups &>/dev/null ||:
+#%{_bindir}/systemctl enable cups &>/dev/null ||:
+
+%post
+# timeout is to prevent possible freeze during update
+#%{_bindir}/timeout 10m -k 15m %{_bindir}/hpcups-update-ppds &>/dev/null ||:
+
+%ldconfig_scriptlets libs
+
 
 %files
 %doc COPYING doc/*
@@ -246,9 +288,16 @@ rm -f  %{buildroot}%{_libdir}/*.a \
 %{_bindir}/hp-testpage
 %{_bindir}/hp-timedate
 %{_bindir}/hp-unload
-%{_cups_serverbin}/backend/*.exe
+%{_cups_serverbin}/backend/hp.exe
+%if 0%{!?without_fax:1}
+%{_cups_serverbin}/backend/hpfax.exe
+%endif
 # ex-hpijs
-%{_cups_serverbin}/filter/*.exe
+%{_cups_serverbin}/filter/hpcups.exe
+%if 0%{!?without_fax:1}
+%{_cups_serverbin}/filter/hpcupsfax.exe
+%endif
+%{_cups_serverbin}/filter/hpps.exe
 %{_cups_serverbin}/filter/pstotiff
 # ex-hpijs
 %{_datadir}/cups/drv/*
@@ -298,7 +347,7 @@ rm -f  %{buildroot}%{_libdir}/*.a \
 %{_datadir}/hplip/scan
 %endif
 %{_datadir}/ppd
-#%{_sharedstatedir}/hp
+%{_localstatedir}/lib/hp
 %dir %attr(0775,root,lp) %{_localstatedir}/run/hplip
 #%{_tmpfilesdir}/hplip.conf
 %{_sysconfdir}/udev/rules.d/56-hpmud.rules
@@ -328,6 +377,7 @@ rm -f  %{buildroot}%{_libdir}/*.a \
 %{_bindir}/hp-printsettings
 %{_bindir}/hp-systray
 %{_bindir}/hp-toolbox
+%{_bindir}/hp-uiscan
 %{_bindir}/hp-wificonfig
 #%{_datadir}/applications/*.desktop
 # Files
@@ -340,6 +390,7 @@ rm -f  %{buildroot}%{_libdir}/*.a \
 %{_datadir}/hplip/printsettings.py*
 %{_datadir}/hplip/systray.py*
 %{_datadir}/hplip/toolbox.py*
+%{_datadir}/hplip/uiscan.py*
 %{_datadir}/hplip/wificonfig.py*
 # Directories
 %{_datadir}/hplip/data/images
@@ -351,14 +402,10 @@ rm -f  %{buildroot}%{_libdir}/*.a \
 %config(noreplace) %{_sysconfdir}/sane.d/dll.d/hpaio
 %endif
 
-%post
-#%{_bindir}/hpcups-update-ppds &>/dev/null ||:
-
-#%post libs -p /sbin/ldconfig
-
-#%postun libs -p /sbin/ldconfig
-
 %changelog
+* Wed Oct 02 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.19.8-1
+- update to version 3.19.8
+
 * Thu Jan 25 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.17.11-1
 - changed the way python finds USER and HOME env
 - moved source to github
