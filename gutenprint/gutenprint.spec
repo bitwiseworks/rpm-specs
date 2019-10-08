@@ -1,12 +1,12 @@
 Name:           gutenprint
 Summary:        Printer Drivers Package
-Version:        5.2.12
+Version:        5.3.3
 Release:        1%{?dist}
 URL:            http://gimp-print.sourceforge.net/
 License:        GPLv2+
 
 Vendor:         bww bitwise works GmbH
-%scm_source svn http://svn.netlabs.org/repos/ports/gutenprint/trunk 2159
+%scm_source github http://github.com/bitwiseworks/gutenprint-os2 %{version}-os2
 
 Requires:       %{name}-libs = %{version}-%{release}
 BuildRequires:  cups-libs, cups-devel, cups
@@ -109,7 +109,7 @@ rm -f %{buildroot}%{_libdir}/lib*.la
 
 rm -rf %{buildroot}%{_datadir}/gutenprint/doc
 rm -f %{buildroot}%{_datadir}/foomatic/kitload.log
-rm -rf %{buildroot}%{_libdir}/gutenprint/5.2/modules/*.la
+rm -rf %{buildroot}%{_libdir}/gutenprint/5.3/modules/*.la
 rm -f %{buildroot}%{_sysconfdir}/cups/command.types
 
 %find_lang %{name}
@@ -118,7 +118,7 @@ rm -f %{name}.lang
 %find_lang %{name} --all-name
 cat %{name}-po.lang >>%{name}.lang
 
-echo .so man8/cups-genppd.8 > %{buildroot}%{_mandir}/man8/cups-genppd.5.2.8
+echo .so man8/cups-genppd.8 > %{buildroot}%{_mandir}/man8/cups-genppd.5.3.3
 
 #post libs -p /sbin/ldconfig
 
@@ -134,7 +134,7 @@ exit 0
 %doc COPYING
 %{_bindir}/escputil.exe
 %{_mandir}/man1/escputil.1*
-%{_datadir}/%{name}/5.2
+%{_datadir}/%{name}/5.3
 
 %files doc
 %doc COPYING AUTHORS NEWS README doc/FAQ.html doc/gutenprint-users-manual.odt doc/gutenprint-users-manual.pdf
@@ -148,6 +148,7 @@ exit 0
 %{_includedir}/gutenprint/
 %{_libdir}/*.a
 %{_libdir}/pkgconfig/gutenprint.pc
+%{_libdir}/%{name}/5.3/config.summary
 
 %files extras
 %doc
@@ -164,11 +165,14 @@ exit 0
 %{_bindir}/cups-calibrate.exe
 %{_sbindir}/cups-genppd*.exe
 %{_sbindir}/cups-genppdupdate
-%{_mandir}/man8/cups-calibrate.8*
-%{_mandir}/man8/cups-genppd*.8*
+%{_mandir}/man8/cups-calibrate*
+%{_mandir}/man8/cups-genppd*
 
 
 %changelog
+* Mon Oct 07 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> - 5.3.3-1
+- update gutenprint to version 5.3.3
+
 * Tue Mar 21 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 5.2.12-1
 - use scm_ macros
 - update gutenprint to version 5.2.12
