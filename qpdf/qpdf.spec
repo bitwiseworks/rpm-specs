@@ -1,26 +1,26 @@
 Summary: Command-line tools and library for transforming PDF files
 Name:    qpdf
-Version: 6.0.0
+Version: 9.0.1
 Release: 1%{?dist}
 # MIT: e.g. libqpdf/sha2.c
-License: Artistic 2.0 and MIT
+# upstream uses ASL 2.0 now, but he allowed other to distribute qpdf under
+# old license (see README)
+License: (Artistic 2.0 or ASL 2.0) and MIT
 URL:     http://qpdf.sourceforge.net/
+
 Vendor:	 bww bitwise works GmbH
-#Source0: http://downloads.sourceforge.net/sourceforge/qpdf/qpdf-%{version}.tar.gz
+%scm_source github http://github.com/bitwiseworks/libqpdf-os2 %{version}-os2
 
-#define svn_url	    e:/trees/libqpdf/trunk
-%define svn_url     http://svn.netlabs.org/repos/ports/libqpdf/trunk
-%define svn_rev     1344
-
-Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
-
+BuildRequires: gcc
 BuildRequires: zlib-devel
+BuildRequires: libjpeg-turbo-devel
 BuildRequires: pcre-devel
 
 # for fix-qdf and test suite
 BuildRequires: perl
 # as we disabled the testsuit in the rpm build process we don't need the below
 # requirement
+#BuildRequires: perl-generators
 #BuildRequires: perl(Digest::MD5)
 
 # for autoreconf
@@ -28,22 +28,19 @@ BuildRequires: autoconf
 BuildRequires: automake
 BuildRequires: libtool
 
-Requires: qpdf-libs = %{version}-%{release}
+Requires: %{name}-libs = %{version}-%{release}
 
 %package libs
 Summary: QPDF library for transforming PDF files
-Group:   System Environment/Libraries
 
 %package devel
 Summary: Development files for QPDF library
-Group:   Development/Libraries
-Requires: qpdf-libs = %{version}-%{release}
+Requires: %{name}-libs = %{version}-%{release}
 
 %package doc
 Summary: QPDF Manual
-Group:   Documentation
 BuildArch: noarch
-Requires: qpdf-libs = %{version}-%{release}
+Requires: %{name}-libs = %{version}-%{release}
 
 %description
 QPDF is a command-line program that does structural, content-preserving
@@ -67,41 +64,38 @@ QPDF Manual
 %debug_package
 
 %prep
-%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{?!svn_rev):0}
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc
-svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
-%endif
+%scm_setup
 
 sed -i -e '1s,^#!/usr/bin/env perl,#!/@unixroot/usr/bin/perl,' qpdf/fix-qdf
-sed -i -e '1s,^#!/usr/bin/env perl,#!/@unixroot/usr/bin/perl,' qtest/bin/qtest-driver
 
 %build
-# work-around check-rpaths errors
-export LDFLAGS='-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp'
-autoreconf --verbose --force --install
+export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp -lcx"
+export VENDOR="%{vendor}"
 
-%configure --enable-shared --disable-static\
+# work-around check-rpaths errors
+autoreconf --verbose --force --install
+# automake files needed to be regenerated in 8.4.0 - check if this can be removed
+# in the next qpdf release
+./autogen.sh
+
+%configure --disable-static\
            --enable-show-failed-test-output \
-           --disable-os-secure-random --enable-insecure-random
+           --disable-os-secure-random --enable-insecure-random \
+           --docdir=%{_pkgdocdir}
+
 
 make %{?_smp_mflags}
 
 %install
-make install DESTDIR=%{buildroot}
+%make_install
 
 rm -f %{buildroot}%{_libdir}/libqpdf.la
 
 %check
 #make check
 
-#post libs -p /sbin/ldconfig
-
-#postun libs -p /sbin/ldconfig
-
+#ldconfig_scriptlets libs
+ 
 %files
 %{_bindir}/fix-qdf
 %{_bindir}/qpdf.exe
@@ -109,7 +103,8 @@ rm -f %{buildroot}%{_libdir}/libqpdf.la
 %{_mandir}/man1/*
 
 %files libs
-%doc README TODO ChangeLog Artistic-2.0
+%doc README.md TODO ChangeLog
+%license Artistic-2.0
 %{_libdir}/qpdf*.dll
 
 %files devel
@@ -119,9 +114,12 @@ rm -f %{buildroot}%{_libdir}/libqpdf.la
 %{_libdir}/pkgconfig/libqpdf.pc
 
 %files doc
-%{_defaultdocdir}/qpdf
+%{_pkgdocdir}
 
 
 %changelog
+* Wed Sep 25 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> - 9.0.1-1
+- update to version 9.0.1
+
 * Fri Feb 19 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> - 6.0.0-1
 - initial version
