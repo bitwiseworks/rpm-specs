@@ -1,7 +1,7 @@
 Name:           gutenprint
 Summary:        Printer Drivers Package
 Version:        5.3.3
-Release:        1%{?dist}
+Release:        2%{?dist}
 URL:            http://gimp-print.sourceforge.net/
 License:        GPLv2+
 
@@ -125,7 +125,7 @@ echo .so man8/cups-genppd.8 > %{buildroot}%{_mandir}/man8/cups-genppd.5.3.3
 #postun libs -p /sbin/ldconfig
 
 %post cups
-%{_sbindir}/cups-genppdupdate >/dev/null 2>&1 || :
+%{_sbindir}/cups-genppdupdate -x >/dev/null 2>&1 || :
 #/sbin/service cups reload >/dev/null 2>&1 || :
 exit 0
 
@@ -170,6 +170,9 @@ exit 0
 
 
 %changelog
+* Fri Oct 11 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> - 5.3.3-2
+- update cups ppd files across versions
+
 * Mon Oct 07 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> - 5.3.3-1
 - update gutenprint to version 5.3.3
 
