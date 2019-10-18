@@ -1,6 +1,6 @@
 
 Name: qt5
-Version: 5.11.0
+Version: 5.13.1
 Release: 1%{?dist}
 Summary: Qt5 meta package
 License: GPLv3
@@ -22,7 +22,7 @@ Requires: qt5-qtbase-gui
 #Requires: qt5-qtbase-postgresql
 %endif
 #Requires: qt5-qtconnectivity
-#Requires: qt5-qtdeclarative
+Requires: qt5-qtdeclarative
 #Requires: qt5-qtdoc
 #Requires: qt5-qtgraphicaleffects
 #Requires: qt5-qtimageformats
@@ -33,8 +33,8 @@ Requires: qt5-qtbase-gui
 #Requires: qt5-qtscript
 #Requires: qt5-qtsensors
 #Requires: qt5-qtserialport
-#Requires: qt5-qtsvg
-#Requires: qt5-qttools
+Requires: qt5-qtsvg
+Requires: qt5-qttools
 #Requires: qt5-qtwayland
 #Requires: qt5-qtwebchannel
 ### qtwebengine is not available on all archs, omit for now
@@ -50,33 +50,32 @@ Requires: qt5-qtbase-gui
 
 %package devel
 Summary: Qt5 meta devel package
-# TODO: later, we don't have it all yet.
-#Requires: qt5-rpm-macros
-#Requires: qt5-qttools-static
-#Requires: qt5-qtdeclarative-static
+Requires: qt5-rpm-macros
+Requires: qt5-qttools-static
+Requires: qt5-qtdeclarative-static
 Requires: qt5-qtbase-static
-#Requires: qt5-designer
+Requires: qt5-designer
 #Requires: qt5-qdoc
-#Requires: qt5-qhelpgenerator
-#Requires: qt5-linguist
+Requires: qt5-qhelpgenerator
+Requires: qt5-linguist
+# TODO: later, we don't have it all yet.
 #Requires: qt5-qt3d-devel
 Requires: qt5-qtbase-devel
 #Requires: qt5-qtconnectivity-devel
-#Requires: qt5-qtdeclarative-devel
+Requires: qt5-qtdeclarative-devel
 #Requires: qt5-qtenginio-devel
 #Requires: qt5-qtlocation-devel
 #Requires: qt5-qtmultimedia-devel
 #Requires: qt5-qtscript-devel
 #Requires: qt5-qtsensors-devel
 #Requires: qt5-qtserialport-devel
-#Requires: qt5-qtsvg-devel
-#Requires: qt5-qttools-devel
+Requires: qt5-qtsvg-devel
+Requires: qt5-qttools-devel
 #Requires: qt5-qtwayland-devel
 #Requires: qt5-qtwebchannel-devel
 ##Requires: qt5-qtwebengine-devel
 #Requires: qt5-qtwebkit-devel
 #Requires: qt5-qtwebsockets-devel
-#Requires: qt5-qtx11extras-devel
 #Requires: qt5-qtxmlpatterns-devel
 
 %description devel
@@ -139,5 +138,10 @@ echo "- Qt5 devel meta package" > %{buildroot}%{_docdir}/qt5-devel/README
 
 
 %changelog
+* Thu Oct 17 2019 Dmitriy Kuminov <coding@dmik.org> 5.13.1-1
+- Release version 5.13.1 for OS/2.
+- Add qtsvg, qtdeclarative and qttools to dependencies.
+- Add _qt5_examples_package_* macros.
+
 * Mon Aug 12 2019 Dmitriy Kuminov <coding@dmik.org> 5.11.0-1
 - Initial release.

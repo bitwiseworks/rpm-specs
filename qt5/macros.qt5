@@ -33,3 +33,26 @@
 %qmake_qt5 %{_qt5_qmake} %{?_qt5_qmake_flags}
 
 %qmake_qt5_wrapper @@QMAKE_QT5_WRAPPER@@
+
+%_qt5_examples_package_builddeps\
+BuildRequires: bww-resources-rpm-build >= 1.1.4
+
+%_qt5_examples_package_deps\
+Requires: bww-resources-rpm >= 1.1.4
+
+%_qt5_examples_package_post\
+%post examples\
+if [ "$1" -ge 1 ]; then # (upon update)\
+    %wps_object_delete_all -n %{name}-examples\
+fi\
+%global wps_qt5_examples_title Qt 5 Examples\
+%bww_folder -t %{wps_qt5_examples_title} -n %{name}-examples -s qt5-examples\
+%bww_file EXAMPLES -f %{_qt5_examplesdir} -n %{name}-examples -s qt5-examples\
+%{nil}
+
+%_qt5_examples_package_postun\
+%postun examples\
+if [ "$1" -eq 0 ]; then # (upon removal)\
+    %wps_object_delete_all -n %{name}-examples\
+fi\
+%{nil}
