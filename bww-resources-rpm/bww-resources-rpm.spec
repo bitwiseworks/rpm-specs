@@ -3,7 +3,7 @@
 
 Summary:       bitwise works icons and folders
 Name:          bww-resources-rpm
-Version:       1.1.3
+Version:       1.1.4
 Release:       1%{?dist}
 License:       Proprietory
 Group:         Applications/System
@@ -29,6 +29,7 @@ This package provides bitwise works icons and folder background
 %package build
 Summary:    bww rpm macros for rpm
 Group:      Development/Libraries
+Requires:   %{name} = %{version}-%{release}
 
 %description build
 This package provides bitwise works macros for rpm builds
@@ -95,6 +96,10 @@ bww-fix-docdir
 %{_libdir}/rpm/macros.d/macros.bww
 
 %changelog
+* Thu Oct 17 2019 Dmitriy Kuminov <coding@dmik.org> 1.1.4-1
+- Add -s option to allow for shared folders/objects.
+- Make build sub-package depend on the main one.
+
 * Mon Aug 12 2019 Dmitriy Kuminov <coding@dmik.org> 1.1.3-1
 - Open package folder instead of help folder when using bww_folder.
 
