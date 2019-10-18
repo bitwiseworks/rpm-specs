@@ -21,7 +21,7 @@
 
 Name:    qt5-qtbase
 Summary: Qt5 - QtBase components
-Version: 5.11.0
+Version: 5.13.1
 Release: 1%{?dist}
 
 # See LGPL_EXCEPTIONS.txt, for exception details
@@ -35,7 +35,7 @@ Url:     http://qt-project.org/
 Vendor:  bww bitwise works GmbH
 
 %scm_source github https://github.com/bitwiseworks/qtbase-os2 v%{version}-os2-b1
-#scm_source git file://D:/Coding/qt5/qt5/qtbase cf5bfa0
+#scm_source git file://D:/Coding/qt5/qt5/qtbase xxxxxxx
 
 # Disable debug messages by default.
 Source1: qtlogging.ini
@@ -71,16 +71,14 @@ BuildRequires: pkgconfig(zlib)
 BuildRequires: perl-generators
 BuildRequires: qt5-rpm-macros
 
-BuildRequires: bww-resources-rpm-build >= 1.1.0
 # To support github tags starting with `v` (nasty github bug!)
 BuildRequires: os2-rpm-build >= 1-8
-# To create WPS objects
-BuildRequires: bww-resources-rpm >= 1.1.3
+
+%if 0%{?examples}
+%_qt5_examples_package_builddeps
+%endif
 
 Requires: %{name}-common = %{version}-%{release}
-
-# To create WPS objects (needed at runtime due to resource DLL)
-Requires: bww-resources-rpm >= 1.1.3
 
 %description
 Qt is a software toolkit for developing applications.
@@ -111,18 +109,20 @@ Requires: cups-devel
 %description private-devel
 %{summary}.
 
+%if 0%{?examples}
 %package examples
 Summary: Programming examples for %{name}
 Requires: %{name}%{?_isa} = %{version}-%{release}
+%_qt5_examples_package_deps
 
 %description examples
 %{summary}.
+%endif
 
 %package static
 Summary: Static library files for %{name}
 Requires: %{name}-devel%{?_isa} = %{version}-%{release}
 Requires: pkgconfig(fontconfig)
-Requires: pkgconfig(glib-2.0)
 Requires: pkgconfig(zlib)
 
 %description static
@@ -234,6 +234,8 @@ test -d .git || mkdir .git
   -platform %{platform} \
   -release \
   -shared \
+  -fontconfig \
+  -icu \
   -optimized-qmake \
   %{?openssl} \
   %{!?examples:-nomake examples} \
@@ -399,6 +401,7 @@ make check -k ||:
 %dir %{_qt5_libdir}/cmake/Qt5Xml/
 %dir %{_qt5_docdir}/
 %{_qt5_docdir}/global/
+%{_qt5_docdir}/config/
 %{_qt5_importdir}/
 %{_qt5_translationdir}/
 %if "%{_qt5_prefix}" != "%{_prefix}"
@@ -420,8 +423,7 @@ make check -k ||:
 #dir %{_qt5_plugindir}/platforminputcontexts/
 %dir %{_qt5_plugindir}/platforms/
 %dir %{_qt5_plugindir}/platformthemes/
-# TODO later?
-#dir %{_qt5_plugindir}/printsupport/
+%dir %{_qt5_plugindir}/printsupport/
 %dir %{_qt5_plugindir}/script/
 %dir %{_qt5_plugindir}/sqldrivers/
 %dir %{_qt5_plugindir}/styles/
@@ -520,6 +522,14 @@ make check -k ||:
 %if 0%{?egl}
 %{_qt5_libdir}/cmake/Qt5OpenGL/Qt5OpenGLConfig*.cmake
 %endif
+%{_qt5_libdir}/cmake/Qt5AccessibilitySupport/Qt5AccessibilitySupportConfig*.cmake
+%{_qt5_libdir}/cmake/Qt5Bootstrap/Qt5BootstrapConfig*.cmake
+%{_qt5_libdir}/cmake/Qt5DeviceDiscoverySupport/Qt5DeviceDiscoverySupportConfig*.cmake
+%{_qt5_libdir}/cmake/Qt5EdidSupport/Qt5EdidSupportConfig*.cmake
+%{_qt5_libdir}/cmake/Qt5EventDispatcherSupport/Qt5EventDispatcherSupportConfig*.cmake
+%{_qt5_libdir}/cmake/Qt5FbSupport/Qt5FbSupportConfig*.cmake
+%{_qt5_libdir}/cmake/Qt5FontDatabaseSupport/Qt5FontDatabaseSupportConfig*.cmake
+%{_qt5_libdir}/cmake/Qt5ThemeSupport/Qt5ThemeSupportConfig*.cmake
 %{_qt5_libdir}/cmake/Qt5PrintSupport/Qt5PrintSupportConfig*.cmake
 %{_qt5_libdir}/cmake/Qt5Sql/Qt5SqlConfig*.cmake
 %{_qt5_libdir}/cmake/Qt5Test/Qt5TestConfig*.cmake
@@ -612,20 +622,20 @@ make check -k ||:
 # TODO: No SQL drivers besides sqlite for now (which is part of main pkg)
 %if 0
 %if "%{?ibase}" != "-no-sql-ibase"
-%files ibase
+%files ibase -f %{debug_package_exclude_files}
 %{_qt5_plugindir}/sqldrivers/qsqlibas.dll
 %{_qt5_libdir}/cmake/Qt5Sql/Qt5Sql_QIBaseDriverPlugin.cmake
 %endif
 
-%files mysql
+%files mysql -f %{debug_package_exclude_files}
 %{_qt5_plugindir}/sqldrivers/qsqlmysq.dll
 %{_qt5_libdir}/cmake/Qt5Sql/Qt5Sql_QMYSQLDriverPlugin.cmake
 
-%files odbc
+%files odbc -f %{debug_package_exclude_files}
 %{_qt5_plugindir}/sqldrivers/qsqlodbc.dll
 %{_qt5_libdir}/cmake/Qt5Sql/Qt5Sql_QODBCDriverPlugin.cmake
 
-%files postgresql
+%files postgresql -f %{debug_package_exclude_files}
 %{_qt5_plugindir}/sqldrivers/qsqlpsql.dll
 %{_qt5_libdir}/cmake/Qt5Sql/Qt5Sql_QPSQLDriverPlugin.cmake
 %endif
@@ -675,42 +685,31 @@ make check -k ||:
 %{_qt5_libdir}/cmake/Qt5Gui/Qt5Gui_QMinimalIntegrationPlugin.cmake
 %{_qt5_libdir}/cmake/Qt5Gui/Qt5Gui_QOffscreenIntegrationPlugin.cmake
 %{_qt5_libdir}/cmake/Qt5Gui/Qt5Gui_QOS2IntegrationPlugin.cmake
-%{_qt5_plugindir}/platformthemes/qflatpk.dll
-%{_qt5_libdir}/cmake/Qt5Gui/Qt5Gui_QFlatpakThemePlugin.cmake
-# TODO later?
-#{_qt5_plugindir}/printsupport/libcupsprintersupport.so
-#{_qt5_libdir}/cmake/Qt5PrintSupport/Qt5PrintSupport_QCupsPrinterSupportPlugin.cmake
+%{_qt5_plugindir}/platformthemes/qxdgdp.dll
+%{_qt5_libdir}/cmake/Qt5Gui/Qt5Gui_QXdgDesktopPortalThemePlugin.cmake
+%{_qt5_plugindir}/printsupport/cupsprn.dll
+%{_qt5_libdir}/cmake/Qt5PrintSupport/Qt5PrintSupport_QCupsPrinterSupportPlugin.cmake
 
 
 %post
+# We used to install some WPS objects in 5.11.0, make sure they are gone with an update.
 if [ "$1" -ge 1 ]; then # (upon update)
     %wps_object_delete_all
 fi
-%global title Qt 5 Base
-%bww_folder -t %{title}
-%bww_readme -f %{_defaultdocdir}/%{name}-%{version}/README.md
-%bww_changelog -f %{_defaultdocdir}/%{name}-%{version}/CHANGELOG.md
 
-%postun
-if [ "$1" -eq 0 ]; then # (upon removal)
-    %wps_object_delete_all
-fi
-
-%post examples
-if [ "$1" -ge 1 ]; then # (upon update)
-    %wps_object_delete_all -n %{name}-examples
-fi
-%global title Qt 5 Base Examples
-%bww_folder -t %{title} -n %{name}-examples
-%bww_readme -f %{_qt5_examplesdir}/README -n %{name}-examples
-%bww_file EXAMPLES -f %{_qt5_examplesdir} -n %{name}-examples
-
-%postun examples
-if [ "$1" -eq 0 ]; then # (upon removal)
-    %wps_object_delete_all -n %{name}-examples
-fi
-
+%if 0%{?examples}
+%_qt5_examples_package_post
+%_qt5_examples_package_postun
+%endif
 
 %changelog
+* Thu Oct 17 2019 Dmitriy Kuminov <coding@dmik.org> 5.13.1-1
+- Release version 5.13.1 Beta 1 for OS/2.
+  (https://github.com/bitwiseworks/qtbase-os2/blob/v5.13.1-os2-b1/CHANGELOG.md).
+- Remove glib dependency from static sub-package (not needed on OS/2).
+- Configure explicitly for fontconfig and ICU as we expose explicit deps.
+- Enable debug logging in qtlogging.ini by default (it's more expected by apps).
+- Don't install READMEs in Programs/bitwiseworks Apps and Ports.
+
 * Mon Aug 12 2019 Dmitriy Kuminov <coding@dmik.org> 5.11.0-1
 - Initial release.
