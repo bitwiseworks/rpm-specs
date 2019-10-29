@@ -1,113 +1,142 @@
-# this spec file is a combination from the fedora cups.spec and the
-# cups.spec as included in cups
-
 %define _strip_opts --compress -i "*.cgi" --debuginfo -i "*.cgi"
 
-%global _without_dbus 1
-%global _without_dnssd 1
-%global _without_systemd 1
+%global use_alternatives 0
+%global lspp 0
+%global dbus 0
+%global dnsds 0
+%global gnutls 0
+%global systemd 0
+%global openldap 0
+%global krb5 0
+%global php 0
+%global used_on_os2 0
 
-#
-# "$Id: cups.spec.in 9359 2010-11-11 19:09:24Z mike $"
-#
-#   RPM "spec" file for CUPS.
-#
-#   Original version by Jason McMullan <jmcc@ontv.com>.
-#
-#   Copyright 2007-2015 by Apple Inc.
-#   Copyright 1999-2007 by Easy Software Products, all rights reserved.
-#
-#   These coded instructions, statements, and computer programs are the
-#   property of Apple Inc. and are protected by Federal copyright
-#   law.  Distribution and use rights are outlined in the file "LICENSE.txt"
-#   which should have been included with this file.  If this file is
-#   file is missing or damaged, see the license at "http://www.cups.org/".
-#
+# {_exec_prefix}/lib/cups is correct, even on x86_64.
+# It is not used for shared objects but for executables.
+# It's more of a libexec-style ({_libexecdir}) usage,
+# but we use lib for compatibility with 3rd party drivers (at upstream request).
+%global cups_serverbin %{_exec_prefix}/lib/cups
 
-# Conditional build options (--with name/--without name):
-#
-#   dbus     - Enable/disable DBUS support (default = enable)
-#   dnssd    - Enable/disable DNS-SD support (default = enable)
-#   libusb1  - Enable/disable LIBUSB 1.0 support (default = enable)
-#   static   - Enable/disable static libraries (default = enable)
-#   systemd  - Enable/disable systemd support (default = enable)
+#%%global prever rc1
+#%%global VERSION %%{version}%%{prever}
+%global VERSION %{version}
 
-%{!?_with_dbus: %{!?_without_dbus: %global _with_dbus --with-dbus}}
-%{?_with_dbus: %global _dbus --enable-dbus}
-%{!?_with_dbus: %global _dbus --disable-dbus}
-
-%{!?_with_dnssd: %{!?_without_dnssd: %global _with_dnssd --with-dnssd}}
-%{?_with_dnssd: %global _dnssd --enable-dnssd}
-%{!?_with_dnssd: %global _dnssd --disable-dnssd}
-
-%{!?_with_libusb1: %{!?_without_libusb1: %global _with_libusb1 --with-libusb1}}
-%{?_with_libusb1: %global _libusb1 --enable-libusb}
-%{!?_with_libusb1: %global _libusb1 --disable-libusb}
-
-%{!?_with_static: %{!?_without_static: %global _without_static --without-static}}
-%{?_with_static: %global _static --enable-static}
-%{!?_with_static: %global _static --disable-static}
-
-%{!?_with_systemd: %{!?_without_systemd: %global _with_systemd --with-systemd}}
-%{?_with_systemd: %global _systemd --enable-systemd}
-%{!?_with_systemd: %global _systemd --disable-systemd}
-
-
-Summary: CUPS
+Summary: CUPS printing system
 Name: cups
-Version: 2.1.3
-Release: 10%{?dist}
 Epoch: 1
+Version: 2.2.12
+Release: 1%{?dist}
 
-License: GPL
-Group: System Environment/Daemons
-
+License: GPLv2+ and LGPLv2+ with exceptions and AML
 Url: http://www.cups.org
-Vendor: bww bitwise works GmbH
-%scm_source  github https://github.com/bitwiseworks/%{name}-os2 %{version}-os2-1
 
-# Dependencies...
+Vendor: bww bitwise works GmbH
+#scm_source  github https://github.com/bitwiseworks/%{name}-os2 %{version}-os2
+%scm_source  git e:/Trees/cups/git master
+Source8:  macros.%{name}
+
 Requires: %{name}-filesystem = %{epoch}:%{version}-%{release}
 Requires: %{name}-libs = %{epoch}:%{version}-%{release}
 Requires: %{name}-client = %{epoch}:%{version}-%{release}
+Requires: %{name}-ipptool = %{epoch}:%{version}-%{release}
 
 Provides: cupsddk, cupsddk-drivers
 
-# Make sure we have some filters for converting to raster format
+%if %{used_on_os2}
+BuildRequires: pam-devel
+%endif
+#BuildRequires: pkgconf-pkg-config
+BuildRequires: pkgconfig
+%if %{gnutls}
+BuildRequires: pkgconfig(gnutls)
+%endif
+%if %{openldap}
+BuildRequires: libacl-devel
+BuildRequires: openldap-devel
+%endif
+#BuildRequires: pkgconfig(libusb-1.0)
+BuildRequires: libusb1 >= 1.0.16
+%if %{krb5}
+BuildRequires: krb5-devel
+%endif
+%if %{dnsds}
+BuildRequires: pkgconfig(avahi-client)
+%endif
+%if %{systemd}
+BuildRequires: systemd
+BuildRequires: pkgconfig(libsystemd)
+%endif
+%if %{dbus}
+BuildRequires: pkgconfig(dbus-1)
+%endif
+BuildRequires: automake
+# needed for decompressing functions when reading from gzipped ppds
+BuildRequires: zlib-devel
+
+# gcc and gcc-c++ is no longer in buildroot by default
+# gcc for most of files
+BuildRequires: gcc
+# gcc-c++ for ppdc and cups-driverd
+#Buildrequires: gcc-c++
+
+# Make sure we get postscriptdriver tags.
+#BuildRequires: python3-cups
+
+%if %{lspp}
+BuildRequires: libselinux-devel
+BuildRequires: audit-libs-devel
+%endif
+
+%if %{dbus}
+Requires: dbus
+%endif
+
+# Requires working PrivateTmp (bug #807672)
+%if %{systemd}
+Requires(pre): systemd
+Requires(post): systemd
+%endif
+Requires(post): grep, sed
+%if %{systemd}
+Requires(preun): systemd
+Requires(postun): systemd
+%endif
+
+# We ship udev rules which use setfacl.
+%if %{systemd}
+Requires: systemd
+Requires: acl
+%endif
+
+# Make sure we have some filters for converting to raster format.
 Requires: cups-filters
 
-%if %{?_with_dbus:1}%{!?_with_dbus:0}
-BuildRequires: dbus-devel
+%package client
+Summary: CUPS printing system - client programs
+License: GPLv2
+Requires: %{name}-libs = %{epoch}:%{version}-%{release}
+%if %{use_alternatives}
+Provides: /@unixroot/usr/bin/lpq /@unixroot/usr/bin/lpr /@unixroot/usr/bin/lp /@unixroot/usr/bin/cancel /@unixroot/usr/bin/lprm /@unixroot/usr/bin/lpstat
+Requires: /@unixroot/usr/sbin/alternatives
 %endif
-
-%if %{?_with_dnssd:1}%{!?_with_dnssd:0}
-BuildRequires: avahi-devel
-%endif
-
-%if %{?_with_libusb1:1}%{!?_with_libusb1:0}
-BuildRequires: libusb1-devel >= 1.0
-%endif
-
-%if %{?_with_systemd:1}%{!?_with_systemd:0}
-BuildRequires: systemd-devel
-%endif
-
-BuildRequires: libpng-devel, libjpeg-devel, libtiff-devel
-BuildRequires: openssl-devel, zlib-devel
-BuildRequires: libpoll-devel
-
-# Use buildroot so as not to disturb the version already installed
-BuildRoot: %{_tmppath}/%{name}-root
+Provides: lpr
 
 %package devel
 Summary: CUPS printing system - development environment
-Group: Development/Libraries
+License: LGPLv2
 Requires: %{name}-libs = %{epoch}:%{version}-%{release}
+%if %{gnutls}
+Requires: gnutls-devel
+%endif
+%if %{krb5}
+Requires: krb5-devel
+%endif
+Requires: zlib-devel
 Provides: cupsddk-devel
 
 %package libs
-Summary: CUPS printing system - shared libraries
-Group: System Environment/Libraries
+Summary: CUPS printing system - libraries
+License: LGPLv2 and zlib
 
 %package filesystem
 Summary: CUPS printing system - directory layout
@@ -115,7 +144,6 @@ BuildArch: noarch
 
 %package lpd
 Summary: CUPS printing system - lpd emulation
-Group: System Environment/Daemons
 Requires: %{name} = %{epoch}:%{version}-%{release}
 Requires: %{name}-libs = %{epoch}:%{version}-%{release}
 Provides: lpd
@@ -124,10 +152,6 @@ Provides: lpd
 Summary: CUPS printing system - tool for performing IPP requests
 Requires: %{name} = %{epoch}:%{version}-%{release}
 
-%package client
-Summary: CUPS printing system - client programs
-Requires: %{name}-libs = %{epoch}:%{version}-%{release}
-Provides: lpr
 
 %description
 CUPS printing system provides a portable printing layer for
@@ -173,259 +197,434 @@ Sends IPP requests to the specified URI and tests and/or displays the result.
 %prep
 %scm_setup
 
-autoconf --force
+%if %{used_on_os2}
+# if cupsd is set to log into /var/log/cups, then 'MaxLogSize 0' needs to be
+# in cupsd.conf to disable cupsd logrotate functionality and use logrotated
+sed -i -e '1iMaxLogSize 0' conf/cupsd.conf.in
+
+# Log to the system journal by default (bug #1078781, bug #1519331).
+sed -i -e 's,^ErrorLog .*$,ErrorLog syslog,' conf/cups-files.conf.in
+sed -i -e 's,^AccessLog .*$,AccessLog syslog,' conf/cups-files.conf.in
+sed -i -e 's,^PageLog .*,PageLog syslog,' conf/cups-files.conf.in
+
+# Add comment text mentioning syslog is systemd journal (bug #1358589)
+sed -i -e 's,\"syslog\",\"syslog\" \(syslog means systemd journal by default\),' conf/cups-files.conf.in
+
+# Add group wheel to SystemGroups (bug #1405669)
+sed -i -e 's,^SystemGroup .*$, SystemGroup sys root wheel,' conf/cups-files.conf.in
+
+# Let's look at the compilation command lines.
+perl -pi -e "s,^.SILENT:,," Makedefs.in
+
+f=CREDITS.md
+mv "$f" "$f"~
+iconv -f MACINTOSH -t UTF-8 "$f"~ > "$f"
+rm -f "$f"~
+%endif
+
+aclocal -I config-scripts
+autoconf -f -I config-scripts
 
 %build
 export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 export LIBS="-lcx"
 export VENDOR="%{vendor}"
-# --with-rcdir=no - don't install SysV init script
-# --with-system_groups=admin - add a value to SystemGroups parameter
-CFLAGS="$RPM_OPT_FLAGS" CXXFLAGS="$RPM_OPT_FLAGS" LDFLAGS="$LDFLAGS $RPM_OPT_FLAGS" \
-    %configure %{_dbus} %{_dnssd} %{_libusb1} %{_static} \
-     --with-rcdir=no \
-     --with-system_groups=admin \
-     --with-cupsd_file_perm=755 \
-     --with-domainsocket=/socket/cups.sock
+
+# cups can use different compiler if it is installed, so set to GCC for to be sure
+export CC=gcc
+export CXX=g++
+export CFLAGS="$RPM_OPT_FLAGS" CXXFLAGS="$RPM_OPT_FLAGS"
+export LDFLAGS="$LDFLAGS $RPM_OPT_FLAGS"
+%configure --with-docdir=%{_datadir}/%{name}/www --enable-debug \
+%if %{lspp}
+	--enable-lspp \
+%endif
+	--with-exe-file-perm=0755 \
+	--with-cupsd-file-perm=0755 \
+	--with-log-file-perm=0600 \
+	--enable-relro \
+%if %{dbus}
+	--with-dbusdir=%{_sysconfdir}/dbus-1 \
+%endif
+%if %{php}
+	--with-php=/@unixroot/usr/bin/php-cgi \
+%endif
+%if %{dnsds}
+	--enable-avahi \
+%endif
+	--enable-threads \
+%if %{gnutls}
+	--enable-gnutls \
+%endif
+	--enable-webif \
+	--with-xinetd=no \
+	--with-access-log-level=actions \
+	--enable-page-logging \
+	--with-system_groups=admin \
+	--with-domainsocket=/socket/cups.sock \
+	--enable-debug-printfs \
+	localedir=%{_datadir}/locale
 
 # If we got this far, all prerequisite libraries must be here.
-make
+make %{?_smp_mflags}
 
 %install
-# Make sure the RPM_BUILD_ROOT directory exists.
-rm -rf $RPM_BUILD_ROOT
+make BUILDROOT=%{buildroot} install
 
-make BUILDROOT=$RPM_BUILD_ROOT install
+rm -rf	%{buildroot}%{_initddir} \
+	%{buildroot}%{_sysconfdir}/init.d \
+	%{buildroot}%{_sysconfdir}/rc.d
+%if %{systemd}
+mkdir -p %{buildroot}%{_unitdir}
+%endif
 
-# rename some files
-mv %{buildroot}%{_mandir}/man1/cancel.1.gz %{buildroot}%{_mandir}/man1/cancel-cups.1.gz
-mv %{buildroot}%{_mandir}/man1/lp.1.gz %{buildroot}%{_mandir}/man1/lp-cups.1.gz
-mv %{buildroot}%{_mandir}/man1/lpq.1.gz %{buildroot}%{_mandir}/man1/lpq-cups.1.gz
-mv %{buildroot}%{_mandir}/man1/lprm.1.gz %{buildroot}%{_mandir}/man1/lprm-cups.1.gz
-mv %{buildroot}%{_mandir}/man1/lpstat.1.gz %{buildroot}%{_mandir}/man1/lpstat-cups.1.gz
-mv %{buildroot}%{_mandir}/man8/lpc.8.gz %{buildroot}%{_mandir}/man8/lpc-cups.8.gz
+%if %{used_on_os2}
+find %{buildroot}%{_datadir}/cups/model -name "*.ppd" |xargs gzip -n9f
+%endif
+
+%if %{use_alternatives}
+pushd %{buildroot}%{_bindir}
+for i in cancel lp lpq lpr lprm lpstat; do
+	mv $i $i.cups
+done
+
+cd %{buildroot}%{_sbindir}
+mv lpc lpc.cups
+cd %{buildroot}%{_mandir}/man1
+for i in cancel lp lpq lpr lprm lpstat; do
+	mv $i.1 $i-cups.1
+done
+cd %{buildroot}%{_mandir}/man8
+
+mv lpc.8 lpc-cups.8
+popd
+%endif
+
+%if %{systemd}
+mv %{buildroot}%{_unitdir}/org.cups.cupsd.path %{buildroot}%{_unitdir}/cups.path
+mv %{buildroot}%{_unitdir}/org.cups.cupsd.service %{buildroot}%{_unitdir}/cups.service
+mv %{buildroot}%{_unitdir}/org.cups.cupsd.socket %{buildroot}%{_unitdir}/cups.socket
+mv %{buildroot}%{_unitdir}/org.cups.cups-lpd.socket %{buildroot}%{_unitdir}/cups-lpd.socket
+mv %{buildroot}%{_unitdir}/org.cups.cups-lpd@.service %{buildroot}%{_unitdir}/cups-lpd@.service
+sed -i -e "s,org.cups.cupsd,cups,g" %{buildroot}%{_unitdir}/cups.service
+%endif
 
 # Ship an rpm macro for where to put driver executables
-mkdir -p %{buildroot}/%{_rpmconfigdir}/macros.d
-install -m 0644 %{_builddir}/%{buildsubdir}/macros.cups %{buildroot}%{_rpmconfigdir}/macros.d
+mkdir -p %{buildroot}%{_rpmconfigdir}/macros.d
+install -m 0644 %{SOURCE8} %{buildroot}%{_rpmconfigdir}/macros.d
 
-%clean
-rm -rf $RPM_BUILD_ROOT
+# Ship a printers.conf file, and a client.conf file.  That way, they get
+# their SELinux file contexts set correctly.
+touch %{buildroot}%{_sysconfdir}/cups/printers.conf
+touch %{buildroot}%{_sysconfdir}/cups/classes.conf
+touch %{buildroot}%{_sysconfdir}/cups/client.conf
+touch %{buildroot}%{_sysconfdir}/cups/subscriptions.conf
+touch %{buildroot}%{_sysconfdir}/cups/lpoptions
 
-%files
-%doc README.txt CREDITS.txt CHANGES.txt
-%docdir %{_datadir}/doc/cups
-%defattr(-,root,root)
-%dir %{_sysconfdir}/cups
-%config(noreplace) %{_sysconfdir}/cups/*.conf
-%{_sysconfdir}/cups/cups-files.conf.default
-%{_sysconfdir}/cups/cupsd.conf.default
-%{_sysconfdir}/cups/snmp.conf.default
-%dir %{_sysconfdir}/cups/interfaces
-%dir %{_sysconfdir}/cups/ppd
-%attr(0700,root,root) %dir %{_sysconfdir}/cups/ssl
+# LSB 3.2 printer driver directory
+mkdir -p %{buildroot}%{_datadir}/ppd
 
-%if %{?_with_dbus:1}%{!?_with_dbus:0}
-# DBUS
-%{_sysconfdir}/dbus-1/system.d/*
+# Remove unshipped files.
+rm -rf %{buildroot}%{_mandir}/cat? %{buildroot}%{_mandir}/*/cat?
+rm -f %{buildroot}%{_datadir}/applications/cups.desktop
+rm -rf %{buildroot}%{_datadir}/icons
+# there are pdf-banners shipped with cups-filters (#919489)
+rm -rf %{buildroot}%{_datadir}/cups/banners
+rm -f %{buildroot}%{_datadir}/cups/data/testprint
+
+%if %{used_on_os2}
+# install /usr/lib/tmpfiles.d/cups.conf (bug #656566, bug #893834)
+mkdir -p ${RPM_BUILD_ROOT}%{_tmpfilesdir}
+cat > ${RPM_BUILD_ROOT}%{_tmpfilesdir}/cups.conf <<EOF
+# See tmpfiles.d(5) for details
+
+d /run/cups 0755 root lp -
+d /run/cups/certs 0511 lp sys -
+
+d /var/spool/cups/tmp - - - 30d
+EOF
+
+# /usr/lib/tmpfiles.d/cups-lp.conf (bug #812641)
+cat > ${RPM_BUILD_ROOT}%{_tmpfilesdir}/cups-lp.conf <<EOF
+# Legacy parallel port character device nodes, to trigger the
+# auto-loading of the kernel module on access.
+#
+# See tmpfiles.d(5) for details
+
+c /dev/lp0 0660 root lp - 6:0
+c /dev/lp1 0660 root lp - 6:1
+c /dev/lp2 0660 root lp - 6:2
+c /dev/lp3 0660 root lp - 6:3
+EOF
 %endif
 
-%{_bindir}/cupstestdsc.exe
+find %{buildroot} -type f -o -type l | sed '
+s:.*\('%{_datadir}'/\)\([^/_]\+\)\(.*\.po$\):%lang(\2) \1\2\3:
+/^%lang(C)/d
+/^\([^%].*\)/d
+' > %{name}.lang
+
+%post
+%if %{systemd}
+%systemd_post %{name}.path %{name}.socket %{name}.service
+%endif
+
+# Remove old-style certs directory; new-style is /var/run
+# (see bug #194581 for why this is necessary).
+rm -rf %{_sysconfdir}/cups/certs
+rm -f %{_localstatedir}/cache/cups/*.ipp %{_localstatedir}/cache/cups/*.cache
+
+# Previous migration script unnecessarily put PageLogFormat into cups-files.conf
+# (see bug #1148995)
+FILE=%{_sysconfdir}/cups/cups-files.conf
+for keyword in PageLogFormat; do
+    sed -i -e "s,^$keyword,#$keyword,i" "$FILE" || :
+done
+
+
+exit 0
+
+%post client
+%if %{use_alternatives}
+/@unixroot/usr/sbin/alternatives --install %{_bindir}/lpr print %{_bindir}/lpr.cups 40 \
+	 --slave %{_bindir}/lp print-lp %{_bindir}/lp.cups \
+	 --slave %{_bindir}/lpq print-lpq %{_bindir}/lpq.cups \
+	 --slave %{_bindir}/lprm print-lprm %{_bindir}/lprm.cups \
+	 --slave %{_bindir}/lpstat print-lpstat %{_bindir}/lpstat.cups \
+	 --slave %{_bindir}/cancel print-cancel %{_bindir}/cancel.cups \
+	 --slave %{_sbindir}/lpc print-lpc %{_sbindir}/lpc.cups \
+	 --slave %{_mandir}/man1/cancel.1.gz print-cancelman %{_mandir}/man1/cancel-cups.1.gz \
+	 --slave %{_mandir}/man1/lp.1.gz print-lpman %{_mandir}/man1/lp-cups.1.gz \
+	 --slave %{_mandir}/man8/lpc.8.gz print-lpcman %{_mandir}/man8/lpc-cups.8.gz \
+	 --slave %{_mandir}/man1/lpq.1.gz print-lpqman %{_mandir}/man1/lpq-cups.1.gz \
+	 --slave %{_mandir}/man1/lpr.1.gz print-lprman %{_mandir}/man1/lpr-cups.1.gz \
+	 --slave %{_mandir}/man1/lprm.1.gz print-lprmman %{_mandir}/man1/lprm-cups.1.gz \
+	 --slave %{_mandir}/man1/lpstat.1.gz print-lpstatman %{_mandir}/man1/lpstat-cups.1.gz
+%endif
+exit 0
+
+%post lpd
+%if %{systemd}
+%systemd_post cups-lpd.socket
+%endif
+exit 0
+
+#ldconfig_scriptlets libs
+
+%preun
+%if %{systemd}
+%systemd_preun %{name}.path %{name}.socket %{name}.service
+%endif
+exit 0
+
+%preun client
+%if %{use_alternatives}
+if [ $1 -eq 0 ] ; then
+	/@unixtool/usr/sbin/alternatives --remove print %{_bindir}/lpr.cups
+fi
+%endif
+exit 0
+
+%preun lpd
+%if %{systemd}
+%systemd_preun cups-lpd.socket
+%endif
+exit 0
+
+%postun
+%if %{systemd}
+%systemd_postun_with_restart %{name}.path %{name}.socket %{name}.service
+%endif
+exit 0
+
+%postun lpd
+%if %{systemd}
+%systemd_postun_with_restart cups-lpd.socket
+%endif
+exit 0
+
+
+%files -f %{name}.lang
+%doc README.md CREDITS.md CHANGES.md
+%dir %attr(0755,root,lp) %{_sysconfdir}/cups
+%dir %attr(0755,root,lp) %{_localstatedir}/run/cups
+%dir %attr(0511,lp,sys) %{_localstatedir}/run/cups/certs
+%if %{used_on_os2}
+%{_tmpfilesdir}/cups.conf
+%{_tmpfilesdir}/cups-lp.conf
+%endif
+%verify(not md5 size mtime) %config(noreplace) %attr(0640,root,lp) %{_sysconfdir}/cups/cupsd.conf
+%attr(0640,root,lp) %{_sysconfdir}/cups/cupsd.conf.default
+%verify(not md5 size mtime) %config(noreplace) %attr(0640,root,lp) %{_sysconfdir}/cups/cups-files.conf
+%attr(0640,root,lp) %{_sysconfdir}/cups/cups-files.conf.default
+%verify(not md5 size mtime) %config(noreplace) %attr(0644,root,lp) %{_sysconfdir}/cups/client.conf
+%verify(not md5 size mtime) %config(noreplace) %attr(0600,root,lp) %{_sysconfdir}/cups/classes.conf
+%verify(not md5 size mtime) %config(noreplace) %attr(0600,root,lp) %{_sysconfdir}/cups/printers.conf
+%verify(not md5 size mtime) %config(noreplace) %attr(0644,root,lp) %{_sysconfdir}/cups/snmp.conf
+%attr(0640,root,lp) %{_sysconfdir}/cups/snmp.conf.default
+%verify(not md5 size mtime) %config(noreplace) %attr(0640,root,lp) %{_sysconfdir}/cups/subscriptions.conf
+#%%{_sysconfdir}/cups/interfaces
+%verify(not md5 size mtime) %config(noreplace) %attr(0644,root,lp) %{_sysconfdir}/cups/lpoptions
+%dir %attr(0755,root,lp) %{_sysconfdir}/cups/ppd
+%dir %attr(0700,root,lp) %{_sysconfdir}/cups/ssl
+%if %{used_on_os2}
+%config(noreplace) %{_sysconfdir}/pam.d/cups
+%config(noreplace) %{_sysconfdir}/logrotate.d/cups
+%endif
+%dir %{_datadir}/%{name}/www
+%dir %{_datadir}/%{name}/www/de
+%dir %{_datadir}/%{name}/www/es
+%dir %{_datadir}/%{name}/www/ja
+%dir %{_datadir}/%{name}/www/ru
+%{_datadir}/%{name}/www/images
+%{_datadir}/%{name}/www/*.css
+# 1658673 - html files cannot be docs, because CUPS web ui will not have
+# introduction page on Fedora Docker image (because rpms are installed
+# without docs there because of space reasons)
+%{_datadir}/%{name}/www/index.html
+%{_datadir}/%{name}/www/help
+%{_datadir}/%{name}/www/robots.txt
+%{_datadir}/%{name}/www/de/index.html
+%{_datadir}/%{name}/www/es/index.html
+%{_datadir}/%{name}/www/ja/index.html
+%{_datadir}/%{name}/www/ru/index.html
+%{_datadir}/%{name}/www/pt_BR/index.html
+%{_datadir}/%{name}/www/apple-touch-icon.png
+%dir %{_datadir}/%{name}/usb
+%{_datadir}/%{name}/usb/org.cups.usb-quirks
+%if %{systemd}
+%{_unitdir}/%{name}.service
+%{_unitdir}/%{name}.socket
+%{_unitdir}/%{name}.path
+%endif
 %{_bindir}/cupstestppd.exe
-%dir %{_libdir}/cups
-%dir %{_libdir}/cups/backend
-%if %{?_with_dnssd:1}%{!?_with_dnssd:0}
-# DNS-SD
-%{_libdir}/cups/backend/dnssd
+%{_bindir}/cupstestdsc.exe
+%{_bindir}/ppd*.exe
+%{cups_serverbin}/backend/*
+%exclude %{cups_serverbin}/backend/*.dbg
+%{cups_serverbin}/cgi-bin
+%exclude %{cups_serverbin}/cgi-bin/*.dbg
+%dir %{cups_serverbin}/daemon
+%{cups_serverbin}/daemon/cups-deviced.exe
+%{cups_serverbin}/daemon/cups-driverd.exe
+%{cups_serverbin}/daemon/cups-exec.exe
+%{cups_serverbin}/notifier
+%exclude %{cups_serverbin}/notifier/*.dbg
+%{cups_serverbin}/filter
+%exclude %{cups_serverbin}/filter/*.dbg
+%{cups_serverbin}/monitor/*.exe
+%{_mandir}/man[1578]/*
+# client subpackage
+%exclude %{_mandir}/man1/lp*.1.gz
+%if %{use_alternatives}
+%exclude %{_mandir}/man1/cancel-cups.1.gz
+%exclude %{_mandir}/man8/lpc-cups.8.gz
+%else
+%exclude %{_mandir}/man1/cancel.1.gz
+%exclude %{_mandir}/man8/lpc.8.gz
 %endif
-%{_libdir}/cups/backend/http
-#{_libdir}/cups/backend/https
-%attr(0700,root,root) %{_libdir}/cups/backend/ipp.exe
-#{_libdir}/cups/backend/ipps
-%attr(0700,root,root) %{_libdir}/cups/backend/lpd.exe
-%{_libdir}/cups/backend/snmp.exe
-%{_libdir}/cups/backend/socket.exe
-%{_libdir}/cups/backend/usb.exe
-%dir %{_libdir}/cups/cgi-bin
-%{_libdir}/cups/cgi-bin/*.cgi
-%dir %{_libdir}/cups/daemon
-%{_libdir}/cups/daemon/cups-deviced.exe
-%{_libdir}/cups/daemon/cups-driverd.exe
-%{_libdir}/cups/daemon/cups-exec.exe
-%dir %{_libdir}/cups/driver
-%dir %{_libdir}/cups/filter
-%{_libdir}/cups/filter/*
-%exclude %{_libdir}/cups/filter/*.dbg
-%dir %{_libdir}/cups/monitor
-%{_libdir}/cups/monitor/*.exe
-%dir %{_libdir}/cups/notifier
-%{_libdir}/cups/notifier/*.exe
-
-%{_sbindir}/cups*
-%exclude %{_sbindir}/cups*.dbg
-%{_sbindir}/lpadmin.exe
-%{_sbindir}/lpinfo.exe
-%{_sbindir}/lpmove.exe
-%{_sbindir}/accept
-%{_sbindir}/reject
-%{_datadir}/cups/drv/*
-%{_datadir}/cups/mime/*
-%{_datadir}/cups/ppdc/*
+# devel subpackage
+%exclude %{_mandir}/man1/cups-config.1.gz
+# ipptool subpackage
+%exclude %{_mandir}/man1/ipptool.1.gz
+%exclude %{_mandir}/man5/ipptoolfile.5.gz
+# lpd subpackage
+%exclude %{_mandir}/man8/cups-lpd.8.gz
+%{_sbindir}/*
+%exclude %{_sbindir}/*.dbg
+# client subpackage
+%if %{use_alternatives}
+%exclude %{_sbindir}/lpc.cups.exe
+%else
+%exclude %{_sbindir}/lpc.exe
+%endif
 %dir %{_datadir}/cups/templates
-%{_datadir}/cups/templates/*
-%if %{?_with_libusb1:1}%{!?_with_libusb1:0}
-# LIBUSB quirks files
-%dir %{_datadir}/cups/usb
-%{_datadir}/cups/usb/*
+%dir %{_datadir}/cups/templates/de
+%dir %{_datadir}/cups/templates/es
+%dir %{_datadir}/cups/templates/ja
+%dir %{_datadir}/cups/templates/ru
+%dir %{_datadir}/cups/templates/pt_BR
+%{_datadir}/cups/templates/*.tmpl
+%{_datadir}/cups/templates/de/*.tmpl
+%{_datadir}/cups/templates/fr/*.tmpl
+%{_datadir}/cups/templates/es/*.tmpl
+%{_datadir}/cups/templates/ja/*.tmpl
+%{_datadir}/cups/templates/ru/*.tmpl
+%{_datadir}/cups/templates/pt_BR/*.tmpl
+%dir %attr(1770,root,lp) %{_localstatedir}/spool/cups/tmp
+%dir %attr(0710,root,lp) %{_localstatedir}/spool/cups
+%dir %attr(0755,lp,sys) %{_localstatedir}/log/cups
+%if %{dbus}
+%config(noreplace) %{_sysconfdir}/dbus-1/system.d/cups.conf
 %endif
-
-%dir %{_datadir}/doc/cups
-%{_datadir}/doc/cups/*.*
-%dir %{_datadir}/doc/cups/help
-%{_datadir}/doc/cups/help/accounting.html
-%{_datadir}/doc/cups/help/cgi.html
-%{_datadir}/doc/cups/help/glossary.html
-%{_datadir}/doc/cups/help/kerberos.html
-%{_datadir}/doc/cups/help/license.html
-%{_datadir}/doc/cups/help/man-*.html
-%{_datadir}/doc/cups/help/network.html
-%{_datadir}/doc/cups/help/options.html
-%{_datadir}/doc/cups/help/overview.html
-%{_datadir}/doc/cups/help/policies.html
-%{_datadir}/doc/cups/help/ref-*.html
-%{_datadir}/doc/cups/help/security.html
-%{_datadir}/doc/cups/help/sharing.html
-%{_datadir}/doc/cups/help/translation.html
-%dir %{_datadir}/doc/cups/images
-%{_datadir}/doc/cups/images/*
-
-%dir %{_datadir}/doc/cups/de
-%{_datadir}/doc/cups/de/*
-%dir %{_datadir}/doc/cups/es
-%{_datadir}/doc/cups/es/*
-%dir %{_datadir}/doc/cups/ja
-%{_datadir}/doc/cups/ja/*
-%dir %{_datadir}/doc/cups/ru
-%{_datadir}/doc/cups/ru/*
-
-%{_datadir}/locale/*
-
-%dir %{_datadir}/man
-%dir %{_datadir}/man/man1
-%{_datadir}/man/man1/*.1.gz
-%exclude %{_datadir}/man/man1/ppd*.1.gz
-%exclude %{_datadir}/man/man1/cups-config.1.gz
-%exclude %{_datadir}/man/man1/ipptool*.1.gz
-%exclude %{_datadir}/man/man1/cancel-cups*.1.gz
-%exclude %{_datadir}/man/man1/lp*.1.gz
-%dir %{_datadir}/man/man5
-%{_datadir}/man/man5/*.5.gz
-%exclude %{_datadir}/man/man5/ppdcfile.5.gz
-%exclude %{_datadir}/man/man5/ipptool*.5.gz
-%dir %{_datadir}/man/man8
-%{_datadir}/man/man8/*.8.gz
-%exclude %{_datadir}/man/man8/cups-lpd.8.gz
-%exclude %{_datadir}/man/man8/lpc-cups.8.gz
-
-%dir %{_var}/cache/cups
-%attr(0775,root,root) %dir %{_var}/cache/cups/rss
-%dir %{_var}/log/cups
-%dir %{_var}/run/cups
-#attr(0711,root,root) %dir %{_var}/run/cups/certs
-%attr(0710,root,root) %dir %{_var}/spool/cups
-%attr(1770,root,root) %dir %{_var}/spool/cups/tmp
+%{_datadir}/cups/drv/sample.drv
+%{_datadir}/cups/examples
+%{_datadir}/cups/mime/mime.types
+%{_datadir}/cups/mime/mime.convs
+%{_datadir}/cups/ppdc/*.defs
+%{_datadir}/cups/ppdc/*.h
 
 %files client
 %{_sbindir}/lpc.exe
 %{_bindir}/cancel.exe
 %{_bindir}/lp*.exe
-%dir %{_datadir}/man/man1
-%{_datadir}/man/man1/lp*.1.gz
-%{_datadir}/man/man1/cancel-cups*.1.gz
-%dir %{_datadir}/man/man8
-%{_datadir}/man/man8/lpc-cups.8.gz
+%if %{use_alternatives}
+%{_mandir}/man1/lp*.1.gz
+%{_mandir}/man1/cancel-cups*.1.gz
+%{_mandir}/man8/lpc-cups.8.gz
+%else
+%{_mandir}/man1/lp*.1.gz
+%{_mandir}/man1/cancel*.1.gz
+%{_mandir}/man8/lpc.8.gz
+%endif
 
 %files libs
 %doc LICENSE.txt
-%defattr(-,root,root)
 %{_libdir}/*.dll
 
 %files filesystem
-%dir %{_libdir}/cups
-%dir %{_libdir}/cups/backend
-%dir %{_libdir}/cups/driver
-%dir %{_libdir}/cups/filter
+%dir %{cups_serverbin}
+%dir %{cups_serverbin}/backend
+%dir %{cups_serverbin}/driver
+%dir %{cups_serverbin}/filter
 %dir %{_datadir}/cups
 %dir %{_datadir}/cups/data
 %dir %{_datadir}/cups/drv
 %dir %{_datadir}/cups/mime
 %dir %{_datadir}/cups/model
 %dir %{_datadir}/cups/ppdc
-#dir %{_datadir}/ppd
+%dir %{_datadir}/ppd
 
 %files devel
-%defattr(-,root,root)
 %{_bindir}/cups-config
-%{_bindir}/ppd*.exe
 %{_libdir}/*.a
-%dir %{_includedir}/cups
 %{_includedir}/cups/*
+%{_mandir}/man1/cups-config.1.gz
 %{_rpmconfigdir}/macros.d/macros.cups
 
-%dir %{_datadir}/cups/examples
-%{_datadir}/cups/examples/*
-%dir %{_datadir}/man
-%dir %{_datadir}/man/man1
-%{_datadir}/man/man1/cups-config.1.gz
-%{_datadir}/man/man1/ppd*.1.gz
-%dir %{_datadir}/man/man5
-%{_datadir}/man/man5/ppdcfile.5.gz
-%dir %{_datadir}/man/man7
-%{_datadir}/man/man7/backend.7.gz
-%{_datadir}/man/man7/filter.7.gz
-%{_datadir}/man/man7/notifier.7.gz
-
-%if %{?_with_static:1}%{!?_with_static:0}
-%{_libdir}/*_s.a
-%endif
-
-%dir %{_datadir}/doc/cups/help
-%{_datadir}/doc/cups/help/api*.html
-%{_datadir}/doc/cups/help/postscript-driver.html
-%{_datadir}/doc/cups/help/ppd-compiler.html
-%{_datadir}/doc/cups/help/raster-driver.html
-%{_datadir}/doc/cups/help/spec*.html
-
 %files lpd
-%defattr(-,root,root)
-%if %{?_with_systemd:1}%{!?_with_systemd:0}
-# SystemD
-%{_libdir}/systemd/system/org.cups.cups-lpd*
-%else
-# Legacy xinetd
-#{_sysconfdir}/xinetd.d/cups-lpd
+%if %{systemd}
+%{_unitdir}/cups-lpd.socket
+%{_unitdir}/cups-lpd@.service
 %endif
-
-%dir %{_libdir}/cups
-%dir %{_libdir}/cups/daemon
-%{_libdir}/cups/daemon/cups-lpd.exe
-%dir %{_datadir}/man/man8
+%{cups_serverbin}/daemon/cups-lpd.exe
 %{_datadir}/man/man8/cups-lpd.8.gz
 
 %files ipptool
-%defattr(-,root,root)
-%if %{?_with_dnssd:1}%{!?_with_dnssd:0}
+%if %{dnsds}
 %{_bindir}/ippfind.exe
 %endif
 %{_bindir}/ipptool.exe
 %dir %{_datadir}/cups/ipptool
 %{_datadir}/cups/ipptool/*
-%dir %{_datadir}/man/man1
-%{_datadir}/man/man1/ipptool*.1.gz
-%dir %{_datadir}/man/man5
-%{_datadir}/man/man5/ipptool*.5.gz
+%{_mandir}/man1/ipptool.1.gz
+%{_mandir}/man5/ipptoolfile.5.gz
 
 %changelog
+* Fri Oct 25 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.2.12-1
+- update to version 2.2.12
+- reworked spec file heavily
+
 * Mon Nov 27 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.1.3-10
 - add ETC to the env, as otherwise tcpip32.dll doesn't find any dns names
 
