@@ -3,7 +3,7 @@
 Summary: Produces a document with syntax highlighting
 Name: source-highlight
 Version: 3.1.9
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 URL: http://www.gnu.org/software/src-highlite/
 #BuildRequires: bison, flex, boost-devel
@@ -68,7 +68,7 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 find $RPM_BUILD_ROOT -type f -name "*.la" -exec rm -f {} ';'
 #find $RPM_BUILD_ROOT -type f -name "*.a" -exec rm -f {} ';'
 
-echo -e "\ncxx = cpp.lang" >> $RPM_BUILD_ROOT%{_datadir}/source-highlight/lang.map
+echo "\ncxx = cpp.lang" >> $RPM_BUILD_ROOT%{_datadir}/source-highlight/lang.map
 
 %if %{bash}
 bashcompdir=$(pkg-config --variable=completionsdir bash-completion)
@@ -105,5 +105,8 @@ rm -rf $RPM_BUILD_ROOT%{_sysconfdir}/bash_completion.d
 %{_includedir}/srchilite/*.h
 
 %changelog
+* Fri Nov 01 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.1.9-2
+- fix a echo issue
+
 * Wed Oct 30 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.1.9-1
 - first release
