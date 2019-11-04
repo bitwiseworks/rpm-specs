@@ -1,13 +1,13 @@
 Summary:	PDF rendering library
 Name:		poppler
-Version:	0.59.0
-Release:	3%{?dist}
+Version:	0.61.1
+Release:	1%{?dist}
 License:	(GPLv2 or GPLv3) and GPLv2+ and LGPLv2+ and MIT
 Group:		Development/Libraries
 URL:		http://poppler.freedesktop.org/
 
 Vendor:		bww bitwise works GmbH
-%scm_source svn http://svn.netlabs.org/repos/ports/poppler/trunk 2299
+%scm_source github http://github.com/bitwiseworks/poppler-os2 0.6x-os2
 
 Requires: poppler-data >= 0.4.0
 Requires: nss >= 3.23.0
@@ -19,16 +19,14 @@ BuildRequires:  openjpeg2-devel
 BuildRequires:  cairo-devel
 BuildRequires:  lcms2-devel
 BuildRequires:	libqt4-devel
-#BuildRequires:	libqt5-devel
+BuildRequires:	qt5-qtbase-devel
 BuildRequires:  libtiff-devel
 BuildRequires:  libpng-devel
 BuildRequires:  nss-devel >= 3.23.0
 BuildRequires:  freetype-devel >= 2.5.3
 BuildRequires:  fontconfig-devel >= 2.11.94
 
-BuildRequires:	autoconf
-BuildRequires:	automake
-BuildRequires:	libtool
+BuildRequires:	cmake >= 3.10
 BuildRequires:  pkgconfig
 BuildRequires:	zlib-devel
 
@@ -67,22 +65,22 @@ Requires:	qt4-devel-kit
 %description qt-devel
 %{summary}.
 
-#%package qt5
-#Summary: Qt5 wrapper for poppler
-#Group:   System Environment/Libraries
-#Requires: %{name} = %{version}-%{release}
-#%{?_qt5:Requires: qt5-qtbase >= %{_qt5_version}}
-#%description qt5
-#%{summary}.
+%package qt5
+Summary: Qt5 wrapper for poppler
+Group:   System Environment/Libraries
+Requires: %{name} = %{version}-%{release}
+%{?_qt5:Requires: qt5-qtbase >= %{_qt5_version}}
+%description qt5
+%{summary}.
 
-#%package qt5-devel
-#Summary: Development files for Qt5 wrapper
-#Group:   Development/Libraries
-#Requires: %{name}-qt5 = %{version}-%{release}
-#Requires: %{name}-devel = %{version}-%{release}
-#Requires: qt5-qtbase-devel
-#%description qt5-devel
-#%{summary}.
+%package qt5-devel
+Summary: Development files for Qt5 wrapper
+Group:   Development/Libraries
+Requires: %{name}-qt5 = %{version}-%{release}
+Requires: %{name}-devel = %{version}-%{release}
+Requires: qt5-qtbase-devel
+%description qt5-devel
+%{summary}.
 
 %package cpp
 Summary: Pure C++ wrapper for poppler
@@ -125,55 +123,35 @@ Requires:	%{name}-glib = %{version}-%{release}
 %prep
 %scm_setup
 
-# hammer to nuke rpaths, recheck on new releases
-autoreconf -fvi
-
 %build
-
-# these defines needs to go, as soon as we have a pkg-conf for qt
-POPPLER_QT4_CFLAGS='-D__OS2__'
-POPPLER_QT4_LIBS='-lQtCore4 -lQtGui4 -lQtNetwork4 -lQtXml4'
-POPPLER_QT4_TEST_CFLAGS=$POPPLER_QT4_CFLAGS
-POPPLER_QT4_TEST_LIBS=$POPPLER_QT4_LIBS
-PATH=$PATH';/@unixroot/usr/lib/qt4/bin'
-
-LDFLAGS=" -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp -lcx"
-
-export LDFLAGS
-export POPPLER_QT4_CFLAGS
-export POPPLER_QT4_LIBS
-export POPPLER_QT4_TEST_CFLAGS
-export POPPLER_QT4_TEST_LIBS
-export PATH
+export CFLAGS="%{optflags}"
+export CXXFLAGS="%{optflags}"
+export LDFLAGS="-Zomf -Zhigh-mem -lcx %{?__global_ldflags}"
 export VENDOR="%{vendor}"
 
-%configure \
-	--enable-poppler-qt4=yes --enable-zlib=yes \
-	--enable-zlib-uncompress=yes \
-	--enable-shared --disable-static \
-	--enable-xpdf-headers
+mkdir build
+cd build
+
+cmake  -DCMAKE_INSTALL_PREFIX:PATH=/@unixroot/usr \
+    -DCMAKE_SKIP_RPATH:BOOL=YES \
+    -DCMAKE_SKIP_INSTALL_RPATH:BOOL=YES \
+    -DENABLE_XPDF_HEADERS:BOOL=YES \
+    ..
 
 %{__make} %{?_smp_mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT
+%make_install -C build CMAKE_DOC_DIR=%{buildroot}%{_pkgdocdir}
 
-%{__make} install \
-	DESTDIR=$RPM_BUILD_ROOT
-
-rm -rf $RPM_BUILD_ROOT%{_libdir}/lib*.la
-
-%clean
-rm -rf $RPM_BUILD_ROOT
 
 %files
 %doc README
 %license COPYING
-%attr(755,root,root) %{_libdir}/popple70.dll
+%attr(755,root,root) %{_libdir}/popple72.dll
 
 %files devel
 %attr(755,root,root) %{_libdir}/poppler_dll.a
-%attr(755,root,root) %{_libdir}/poppler70_dll.a
 %{_libdir}/pkgconfig/poppler.pc
 %{_libdir}/pkgconfig/poppler-splash.pc
 %{_libdir}/pkgconfig/poppler-cairo.pc
@@ -188,24 +166,24 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/poppq4*.dll
 
 %files qt-devel
-%attr(755,root,root) %{_libdir}/poppler-qt4*_dll.a
+%attr(755,root,root) %{_libdir}/poppler-qt4_dll.a
 %{_libdir}/pkgconfig/poppler-qt4.pc
 %{_includedir}/poppler/qt4/
 
-#%files qt5
-#%attr(755,root,root) %{_libdir}/poppq5*.dll
+%files qt5
+%attr(755,root,root) %{_libdir}/poppq5*.dll
 
-#%files qt5-devel
-#%attr(755,root,root) %{_libdir}/poppler-qt5*_dll.a
-#%{_libdir}/pkgconfig/poppler-qt5.pc
-#%{_includedir}/poppler/qt5/
+%files qt5-devel
+%attr(755,root,root) %{_libdir}/poppler-qt5_dll.a
+%{_libdir}/pkgconfig/poppler-qt5.pc
+%{_includedir}/poppler/qt5/
 
 %files cpp
 %attr(755,root,root) %{_libdir}/popplc*.dll
 
 %files cpp-devel
 %{_libdir}/pkgconfig/poppler-cpp.pc
-%attr(755,root,root) %{_libdir}/poppler-cpp*_dll.a
+%attr(755,root,root) %{_libdir}/poppler-cpp_dll.a
 %{_includedir}/poppler/cpp
 
 %files utils
@@ -215,6 +193,10 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Mon Sep 23 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.61.1-1
+- update to vendor version 0.61.1
+- include qt5 backend
+
 * Tue Nov 20 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.59.0-3
 - enable openjpeg2
 
