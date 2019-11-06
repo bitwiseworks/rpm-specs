@@ -1,0 +1,2 @@
+# Classic REXX needs CRLF in .cmd
+*.cmd text eol=crlf
