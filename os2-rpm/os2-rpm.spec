@@ -1,7 +1,7 @@
 Summary: OS/2 specific RPM macros and scripts
 Name: os2-rpm
 Version: 1
-Release: 8%{?dist}
+Release: 9%{?dist}
 License: GPLv2+
 Group: Development/System
 Vendor: bww bitwise works GmbH
@@ -101,6 +101,9 @@ done
 %config(noreplace) %{_sysconfdir}/rpm/macros.scm_pwd
 
 %changelog
+* Thu Nov 07 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 1-9
+- fix a CRLF vs LF issue in getbootdrive.cmd
+
 * Mon Aug 12 2019 Dmitriy Kuminov <coding@dmik.org> 1-8
 - scm_setup: Support github tags starting with `v` (nasty GitHub bug).
 
