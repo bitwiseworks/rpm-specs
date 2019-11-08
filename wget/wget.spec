@@ -1,26 +1,21 @@
 Summary: A utility for retrieving files using the HTTP or FTP protocols
 Name: wget
-Version: 1.18
-Release: 3%{?dist}
+Version: 1.20.3
+Release: 1%{?dist}
 License: GPLv3+
-Group: Applications/Internet
 Url: http://www.gnu.org/software/wget/
 
 Vendor:  bww bitwise works GmbH
-%scm_source  svn http://svn.netlabs.org/repos/ports/wget/trunk 1982
-
+%scm_source  github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
 
 Provides: webclient
 Requires: libcx >= 0.4
-Requires(post): %{_sbindir}/install-info.exe
-Requires(preun): %{_sbindir}/install-info.exe
 # needed for test suite
 #BuildRequires: perl-HTTP-Daemon, python2
 BuildRequires: openssl-devel, pkgconfig, texinfo
 BuildRequires: gettext >= 0.19, autoconf
-BuildRequires: libidn-devel, libpsl-devel
-#BuildRequires: libuuid-devel, libmetalink-devel, perl-podlators
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+BuildRequires: libidn-devel, libpsl-devel, gcc, zlib-devel
+#BuildRequires: gnutls-devel, libidn2-devel, perl-podlators, libmetalink-devel, gpgme-devel
 
 %description
 GNU Wget is a file retrieval utility which can use either the HTTP or
@@ -44,7 +39,9 @@ autoreconf -fvi
 %build
 export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 export LIBS="-lcx"
-#    --with-metalink
+#    --with-ssl=gnutls \
+#    --with-metalink \
+#    --enable-ipv6 \
 %configure \
     --with-ssl=openssl \
     --with-openssl \
@@ -65,37 +62,20 @@ rm -f $RPM_BUILD_ROOT/%{_infodir}/dir
 
 %find_lang %{name}
 
-
 %check
 #make check
 
-
-%post
-if [ -f %{_infodir}/wget.info.gz ]; then
-  %{_sbindir}/install-info.exe %{_infodir}/wget.info.gz %{_infodir}/dir || :
-fi
-
-%preun
-if [ "$1" = 0 ]; then
-  if [ -f %{_infodir}/wget.info.gz ]; then
-    %{_sbindir}/install-info.exe --delete %{_infodir}/wget.info.gz %{_infodir}/dir || :
-  fi
-fi
-
-
-%clean
-rm -rf $RPM_BUILD_ROOT
-
-
 %files -f %{name}.lang
-%defattr(-,root,root)
 %doc AUTHORS MAILING-LIST NEWS README COPYING doc/sample.wgetrc
 %config(noreplace) %{_sysconfdir}/wgetrc
-#{_mandir}/man1/wget.*
+%{_mandir}/man1/wget.*
 %{_bindir}/wget.exe
 %{_infodir}/*
 
 %changelog
+* Fri Nov 08 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.20.3-1
+- update to version 1.20.3
+
 * Wed Feb 08 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.18-3
 - workaround libc ticket #310 pathconf()
 - use the new scm_source and scm_setup macros
