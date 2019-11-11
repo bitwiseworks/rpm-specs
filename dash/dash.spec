@@ -1,8 +1,8 @@
 # Note: this .spec is borrowed from dash-0.5.8-2.fc23.src.rpm
 
 Name:           dash
-Version:        0.5.9.1
-Release:        2%{?dist}
+Version:        0.5.10.2
+Release:        1%{?dist}
 Summary:        Small and fast POSIX-compliant shell
 Group:          System Environment/Shells
 # BSD: DASH in general
@@ -11,14 +11,11 @@ Group:          System Environment/Shells
 # Copyright only: From src/hetio.h
 License:        BSD and GPLv2+ and Public Domain and Copyright only
 URL:            http://gondor.apana.org.au/~herbert/%{name}/
-#Source0:        http://gondor.apana.org.au/~herbert/%{name}/files/%{name}-%{version}.tar.gz
+Vendor:         bww bitwise works GmbH
 
-%define svn_url     http://svn.netlabs.org/repos/ports/dash/trunk
-%define svn_rev     2298
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
 
-Source: %{name}-%{version}-r%{svn_rev}.zip
-
-BuildRequires: gcc make subversion zip
+BuildRequires: gcc make git zip
 
 BuildRequires: automake
 BuildRequires: exceptq-devel
@@ -33,6 +30,7 @@ Summary:  Installs DASH as the system default POSIX shell.
 Requires: dash
 # @todo See http://trac.netlabs.org/rpm/ticket/137.
 Provides: /@unixroot/bin/sh
+Provides: sh
 Obsoletes: ash-sh
 
 %description sh
@@ -41,14 +39,7 @@ Virtual package that installs DASH as the system default POSIX shell.
 %debug_package
 
 %prep
-%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc
-svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
-%endif
+%scm_setup
 
 # Generate configure and friends
 autogen.sh
@@ -60,7 +51,6 @@ export CFLAGS="$RPM_OPT_FLAGS -DJOBS=0"
 
 # Usual link options
 export LDFLAGS="-Zomf -Zmap -Zhigh-mem -Zargs-wild -Zargs-resp"
-export LD=emxomfld
 
 # Use LIBCx for EXCEPTQ handler
 export LIBS="-lcx"
@@ -99,6 +89,11 @@ ln -s %{_mandir}/man1/%{name}.1 %{buildroot}%{_mandir}/man1/sh.1
 %{_mandir}/man1/sh.1*
 
 %changelog
+* Mon Nov 11 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.5.10.2-1
+- Update to version 0.5.10.2
+- Use scm_ macros
+- dash-sh now provides sh as well
+
 * Fri Aug 17 2018 Dmitriy Kuminov <coding@dmik.org> 0.5.9.1-2
 - Add support for BEGINLIBPATH and friends (#161).
 - Fix broken `cd x:` command (#163).
