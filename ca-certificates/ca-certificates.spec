@@ -36,7 +36,7 @@ Name: ca-certificates
 # because all future versions will start with 2013 or larger.)
 
 Version: 2019.2.32
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: Public Domain
 
 URL: https://fedoraproject.org/wiki/CA-Certificates
@@ -372,6 +372,9 @@ fi
 
 
 %changelog
+* Mon Nov 11 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 2019.2.32-2
+- fix a bashism in ca-legcacy
+
 * Fri Nov 01 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 2019.2.32-1
 - update to latest fedora spec
 - update ca-cert to latest Mozilla cert

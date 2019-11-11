@@ -58,27 +58,27 @@ do_help()
     echo "usage: $0 [check | default | disable | install]"
 }
 
-if [[ $# -eq 0 ]]; then
+if [ $# -eq 0 ]; then
   # no parameters
   do_help
   exit $?
 fi
 
-if [[ "$1" = "install" ]]; then
+if [ "$1" = "install" ]; then
   do_install
   exit $?
 fi
 
-if [[ "$1" = "default" ]]; then
+if [ "$1" = "default" ]; then
   do_default
   exit $?
 fi
-if [[ "$1" = "disable" ]]; then
+if [ "$1" = "disable" ]; then
   do_disable
   exit $?
 fi
 
-if [[ "$1" = "check" ]]; then
+if [ "$1" = "check" ]; then
   do_check
   exit $?
 fi
