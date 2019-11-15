@@ -1,16 +1,28 @@
-# Note: this .spec is borrowed from nspr-4.12.0-1.fc24.src.rpm
+%global nspr_version 4.23.0
+
+# The upstream omits the trailing ".0", while we need it for
+# consistency with the pkg-config version:
+# https://bugzilla.redhat.com/show_bug.cgi?id=1578106
+%{lua:
+rpm.define(string.format("nspr_archive_version %s",
+           string.gsub(rpm.expand("%nspr_version"), "(.*)%.0$", "%1")))
+}
 
 Summary:        Netscape Portable Runtime
 Name:           nspr
-Version:        4.12.0
-Release:        4%{?dist}
+Version:        %{nspr_version}
+Release:        1%{?dist}
 License:        MPLv2.0
 URL:            http://www.mozilla.org/projects/nspr/
-Group:          System Environment/Libraries
 Conflicts:      filesystem < 3
+BuildRequires:  gcc
 Vendor:         bww bitwise works GmbH
 
-%scm_source svn http://svn.netlabs.org/repos/ports/nspr/trunk 2194
+# Sources available at https://ftp.mozilla.org/pub/nspr/releases/
+# When hg tag based snapshots are being used, refer to hg documentation on
+# mozilla.org and check out subdirectory mozilla/nsprpub.
+# see also https://n-2.org/
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
 
 Source1:        nspr-config.xml
 
@@ -20,18 +32,16 @@ Source11:       plc4k.def
 Source12:       plds4k.def
 
 %description
-NSPR provides platform independence for non-GUI operating system
-facilities. These facilities include threads, thread synchronization,
-normal file and network I/O, interval timing and calendar time, basic
+NSPR provides platform independence for non-GUI operating system 
+facilities. These facilities include threads, thread synchronization, 
+normal file and network I/O, interval timing and calendar time, basic 
 memory management (malloc and free) and shared library linking.
 
 %package devel
 Summary:        Development libraries for the Netscape Portable Runtime
-Group:          Development/Libraries
 Requires:       nspr = %{version}-%{release}
 Requires:       pkgconfig
-# @todo We don't have xmlto yet.
-#BuildRequires:  xmlto
+BuildRequires:  xmlto
 Conflicts:      filesystem < 3
 
 %description devel
@@ -39,11 +49,10 @@ Header files for doing development with the Netscape Portable Runtime.
 
 %package legacy
 Summary:        Legacy libraries for Netscape Portable Runtime
-Group:          System Environment/Libraries
 Requires:       nspr = %{version}-%{release}
 
 %description legacy
-NSPR rorwarder libraries with old DLL names ending with 'k'.
+NSPR forwarder libraries with old DLL names ending with 'k'.
 
 %debug_package
 
@@ -57,11 +66,19 @@ NSPR rorwarder libraries with old DLL names ending with 'k'.
 autoconf
 
 %build
-
+export VENDOR="%{vendor}"
 %configure \
                  --prefix=%{_prefix} \
                  --libdir=%{_libdir} \
                  --includedir=%{_includedir}/nspr4 \
+%ifnarch noarch
+%if 0%{__isa_bits} == 64
+                 --enable-64bit \
+%endif
+%endif
+%ifarch armv7l armv7hl armv7nhl
+                 --enable-thumb2 \
+%endif
                  --enable-optimize="$RPM_OPT_FLAGS" \
                  --enable-debug-symbols \
                  --disable-debug
@@ -70,18 +87,21 @@ autoconf
 # (--enable-debug-symbols is still necessary to make sure -g is specified)
 sed -e 's/^MOZ_DEBUG_SYMBOLS = 1$/MOZ_DEBUG_SYMBOLS =/' -i ./config/autoconf.mk
 
-make %{?_smp_mflags}
+# The assembly files are only for legacy atomics, to which we prefer GCC atomics
+%ifarch i686 x86_64
+sed -i '/^PR_MD_ASFILES/d' config/autoconf.mk
+%endif
+make
 
-# @todo We don't have xmlto yet.
-#date +"%e %B %Y" | tr -d '\n' > date.xml
-#echo -n %{version} > version.xml
-#
-#for m in %{SOURCE1}; do
-#  cp ${m} .
-#done
-#for m in nspr-config.xml; do
-#  xmlto man ${m}
-#done
+date +"%e %B %Y" | tr -d '\n' > date.xml
+echo -n %{version} > version.xml
+
+for m in %{SOURCE1}; do
+  cp ${m} .
+done
+for m in nspr-config.xml; do
+  xmlto man ${m}
+done
 
 # Generate forwarder DLLs.
 for m in %{SOURCE10} %{SOURCE11} %{SOURCE12}; do
@@ -114,8 +134,12 @@ DESTDIR=$RPM_BUILD_ROOT \
 # Install forwarder DLLs.
 cp -p *.dll $RPM_BUILD_ROOT/%{_libdir}/
 
-# @todo We don't have xmlto yet.
-#mkdir -p $RPM_BUILD_ROOT%{_mandir}/man1
+mkdir -p $RPM_BUILD_ROOT%{_mandir}/man1 
+
+NSPR_LIBS=`./config/nspr-config --libs`
+NSPR_CFLAGS=`./config/nspr-config --cflags`
+NSPR_VERSION=`./config/nspr-config --version`
+%{__mkdir_p} $RPM_BUILD_ROOT/%{_libdir}/pkgconfig
 
 # Get rid of the things we don't want installed (per upstream)
 %{__rm} -rf \
@@ -131,16 +155,13 @@ cp -p *.dll $RPM_BUILD_ROOT/%{_libdir}/
 %{__rm} -rf \
    $RPM_BUILD_ROOT/%{_libdir}/*.xqs
 
-# @todo We don't have xmlto yet.
-#for f in nspr-config; do
-#   install -c -m 644 ${f}.1 $RPM_BUILD_ROOT%{_mandir}/man1/${f}.1
-#done
+for f in nspr-config; do 
+   install -c -m 644 ${f}.1 $RPM_BUILD_ROOT%{_mandir}/man1/${f}.1
+done
 
-%clean
-%{__rm} -Rf $RPM_BUILD_ROOT
+#ldconfig_scriptlets
 
 %files
-%defattr(-,root,root)
 %{!?_licensedir:%global license %%doc}
 %license LICENSE
 %{_libdir}/nspr4.dll
@@ -148,24 +169,21 @@ cp -p *.dll $RPM_BUILD_ROOT/%{_libdir}/
 %{_libdir}/plds4.dll
 
 %files devel
-%defattr(-, root, root)
 %{_includedir}/nspr4
 %{_libdir}/pkgconfig/nspr.pc
-%{_libdir}/libnspr4.a
-%{_libdir}/libplc4.a
-%{_libdir}/libplds4.a
 %{_bindir}/nspr-config
-# @todo We don't have xmlto yet.
-#%{_mandir}/man*/*
+%{_libdir}/*_dll.a
+%{_mandir}/man*/*
 
 %files legacy
-%defattr(-,root,root)
-%{_libdir}/nspr4k.dll
-%{_libdir}/plc4k.dll
-%{_libdir}/plds4k.dll
+%{_libdir}/*4k.dll
 
 %changelog
-* Thu May 16 2017 Dmitriy Kuminov <coding@dmik.org> - 4.12.0-4
+* Wed Nov 13 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> - 4.23.0-1
+- update to version 4.23
+- adjusted the spec to latest ferora version
+
+* Tue May 16 2017 Dmitriy Kuminov <coding@dmik.org> - 4.12.0-4
 - Use kLIBC APIs for file manipulation functions to bring symlink support and
   other kLIBC I/O extensions (#153).
 - Remove manual EXCEPTQ installation as NSPR is linked against LIBCx now.

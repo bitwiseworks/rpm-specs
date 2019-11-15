@@ -1,17 +1,15 @@
-<?xml version='1.0' encoding='utf-8'?>
-<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
-  "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
+<?xml version="1.0" encoding="windows-1252"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
 <!ENTITY date SYSTEM "date.xml">
 <!ENTITY version SYSTEM "version.xml">
 ]>
-
 <refentry id="nspr-config">
 
   <refentryinfo>
-    <date>&date;</date>
+    <date/>
     <title>Netscape Portable Runtime</title>
     <productname>nspr</productname>
-    <productnumber>&version;</productnumber>
+    <productnumber/>
   </refentryinfo>
 
   <refmeta>
@@ -112,7 +110,7 @@
     <title>Authors</title>
     <para>The NSPR liraries were written and maintained by developers with Netscape, Red Hat,  Sun, Oracle, Mozilla, and Google.</para>
     <para>
-	Authors: Elio Maldonado &lt;emaldona@redhat.com>.
+	Authors: Elio Maldonado &lt;emaldona@redhat.com&gt;.
     </para>
   </refsection>
 
@@ -124,4 +122,3 @@
   </refsection>
 
 </refentry>
-
