@@ -2,7 +2,7 @@
 Summary: OS/2 - eComStation 2.0 - ArcaOS 5.0 base
 Name: os2-base
 Version: 0.0.1
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 License: free
 
@@ -269,9 +269,6 @@ echo i686-OS/2-OS/2 > $RPM_BUILD_ROOT%{_sysconfdir}/rpm/platform
 %{__mkdir_p} %{buildroot}%{os2_helpdir}
 %{__mkdir_p} %{buildroot}%{os2_langdir}
 
-%clean
-# nothing to do
-
 
 %files
 %defattr(-,root,root,-)
@@ -288,51 +285,55 @@ echo i686-OS/2-OS/2 > $RPM_BUILD_ROOT%{_sysconfdir}/rpm/platform
 %post -e
 if [ "$1" = 1 ] ; then
 #execute only on first install
-%cube {ADDSTRING "%{os2_dos_path %{_sbindir};%{_bindir}};" IN "SET PATH=" (FIRST IFNEW BEFORE RS(%%)} %{os2_config_sys} %{os2_config_sys}.yum > NUL
-%cube {ADDSTRING "%{os2_dos_path %{_libdir}};" IN "LIBPATH=" (FIRST IFNEW BEFORE RS(%%)} %{os2_config_sys} > NUL
-%cube {DELLINE "SET UNIXROOT="} %{os2_config_sys} > NUL
-%cube {ADDLINE "SET UNIXROOT=%UNIXROOT%" (ALWAYS)} %{os2_config_sys} > NUL
+%cube {ADDSTRING "%{os2_dos_path %{_sbindir};%{_bindir}};" IN "SET PATH=" (FIRST IFNEW BEFORE RS(%%)} %%{os2_config_sys} %%{os2_config_sys}.yum > NUL
+%cube {ADDSTRING "%{os2_dos_path %{_libdir}};" IN "LIBPATH=" (FIRST IFNEW BEFORE RS(%%)} %%{os2_config_sys} > NUL
+%cube {DELLINE "SET UNIXROOT="} %%{os2_config_sys} > NUL
+%cube {ADDLINE "SET UNIXROOT=%UNIXROOT%" (ALWAYS)} %%{os2_config_sys} > NUL
 fi
-%cube {ADDLINE "SET TERM=os2" (IFNOT "SET TERM=")} %{os2_config_sys} > NUL
-%cube {ADDLINE "REM [ Default shell values ]" (IFNOT "REM [ Default shell values ]")} %{os2_config_sys} > NUL
-%cube {ADDLINE "SET SHELL=%%{os2_expand_unixroot %%{_bindir}/sh.exe}" (IFNOT "SET SHELL=")} %{os2_config_sys} > NUL
-%cube {ADDLINE "SET EMXSHELL=%%{os2_expand_unixroot %%{_bindir}/sh.exe}" (IFNOT "SET EMXSHELL=")} %{os2_config_sys} > NUL
-%cube {ADDLINE "SET CONFIG_SHELL=%%{os2_expand_unixroot %%{_bindir}/sh.exe}" (IFNOT "SET CONFIG_SHELL=")} %{os2_config_sys} > NUL
-%cube {ADDLINE "SET MAKESHELL=%%{os2_expand_unixroot %%{_bindir}/sh.exe}" (IFNOT "SET MAKESHELL=")} %{os2_config_sys} > NUL
-%cube {ADDLINE "SET EXECSHELL=%%{os2_expand_unixroot %%{_bindir}/sh.exe}" (IFNOT "SET EXECSHELL=")} %{os2_config_sys} > NUL
-%cube {ADDLINE "REM [ Temporary directory ]" (IFNOT "REM [ Temporary directory ]")} %{os2_config_sys} > NUL
-%cube {ADDLINE "SET TMP=%{os2_dos_path /@unixroot/var/tmp}" (IFNOT "SET TMP=")} %{os2_config_sys} > NUL
-%cube {ADDLINE "SET TEMP=%{os2_dos_path /@unixroot/var/tmp}" (IFNOT "SET TEMP=")} %{os2_config_sys} > NUL
-%cube {ADDLINE "SET TMPDIR=%{os2_dos_path /@unixroot/var/tmp}" (IFNOT "SET TMPDIR=")} %{os2_config_sys} > NUL
-%cube {ADDSTRING "%{os2_dos_path %{os2_bookdir}};" IN "SET BOOKSHELF=" (FIRST IFNEW BEFORE RS(%%)} %{os2_config_sys} > NUL
-%cube {ADDSTRING "%{os2_dos_path %{os2_helpdir}};" IN "SET HELP=" (FIRST IFNEW BEFORE RS(%%)} %{os2_config_sys} > NUL
-%cube {ADDSTRING "%{os2_dos_path %{os2_langdir}};" IN "SET DPATH=" (FIRST IFNEW BEFORE RS(%%)} %{os2_config_sys} > NUL
+%cube {ADDLINE "SET TERM=os2" (IFNOT "SET TERM=")} %%{os2_config_sys} > NUL
+%cube {ADDLINE "REM [ Default shell values ]" (IFNOT "REM [ Default shell values ]")} %%{os2_config_sys} > NUL
+%cube {ADDLINE "SET SHELL=%%{os2_expand_unixroot %%{_bindir}/sh.exe}" (IFNOT "SET SHELL=")} %%{os2_config_sys} > NUL
+%cube {ADDLINE "SET EMXSHELL=%%{os2_expand_unixroot %%{_bindir}/sh.exe}" (IFNOT "SET EMXSHELL=")} %%{os2_config_sys} > NUL
+%cube {ADDLINE "SET CONFIG_SHELL=%%{os2_expand_unixroot %%{_bindir}/sh.exe}" (IFNOT "SET CONFIG_SHELL=")} %%{os2_config_sys} > NUL
+%cube {ADDLINE "SET MAKESHELL=%%{os2_expand_unixroot %%{_bindir}/sh.exe}" (IFNOT "SET MAKESHELL=")} %%{os2_config_sys} > NUL
+%cube {ADDLINE "SET EXECSHELL=%%{os2_expand_unixroot %%{_bindir}/sh.exe}" (IFNOT "SET EXECSHELL=")} %%{os2_config_sys} > NUL
+%cube {ADDLINE "REM [ Temporary directory ]" (IFNOT "REM [ Temporary directory ]")} %%{os2_config_sys} > NUL
+%cube {ADDLINE "SET TMP=%{os2_dos_path /@unixroot/var/tmp}" (IFNOT "SET TMP=")} %%{os2_config_sys} > NUL
+%cube {ADDLINE "SET TEMP=%{os2_dos_path /@unixroot/var/tmp}" (IFNOT "SET TEMP=")} %%{os2_config_sys} > NUL
+%cube {ADDLINE "SET TMPDIR=%{os2_dos_path /@unixroot/var/tmp}" (IFNOT "SET TMPDIR=")} %%{os2_config_sys} > NUL
+%cube {ADDSTRING "%{os2_dos_path %{os2_bookdir}};" IN "SET BOOKSHELF=" (FIRST IFNEW BEFORE RS(%%)} %%{os2_config_sys} > NUL
+%cube {ADDSTRING "%{os2_dos_path %{os2_helpdir}};" IN "SET HELP=" (FIRST IFNEW BEFORE RS(%%)} %%{os2_config_sys} > NUL
+%cube {ADDSTRING "%{os2_dos_path %{os2_langdir}};" IN "SET DPATH=" (FIRST IFNEW BEFORE RS(%%)} %%{os2_config_sys} > NUL
 
-%postun
+%postun -e
 if [ "$1" = 0 ] ; then
 #execute only on last uninstall
-%cube {DELSTRING "%{os2_dos_path %{_sbindir};%{_bindir}};" IN "SET PATH=" (FIRST IFNEW BEFORE RS(%%)} %{os2_config_sys} > NUL
-%cube {DELSTRING "%{os2_dos_path %{_libdir}};" IN "LIBPATH=" (FIRST IFNEW BEFORE RS(%%)} %{os2_config_sys} > NUL
-%cube {DELLINE "SET UNIXROOT="} %{os2_config_sys} > NUL
-%cube {DELSTRING "%{os2_dos_path %{os2_bookdir}};" IN "SET BOOKSHELF=" (FIRST} %{os2_config_sys} > NUL
-%cube {DELSTRING "%{os2_dos_path %{os2_helpdir}};" IN "SET HELP=" (FIRST} %{os2_config_sys} > NUL
-%cube {DELSTRING "%{os2_dos_path %{os2_langdir}};" IN "SET DPATH=" (FIRST} %{os2_config_sys} > NUL
+%cube {DELSTRING "%{os2_dos_path %{_sbindir};%{_bindir}};" IN "SET PATH=" (FIRST IFNEW BEFORE RS(%%)} %%{os2_config_sys} > NUL
+%cube {DELSTRING "%{os2_dos_path %{_libdir}};" IN "LIBPATH=" (FIRST IFNEW BEFORE RS(%%)} %%{os2_config_sys} > NUL
+%cube {DELLINE "SET UNIXROOT="} %%{os2_config_sys} > NUL
+%cube {DELSTRING "%{os2_dos_path %{os2_bookdir}};" IN "SET BOOKSHELF=" (FIRST} %%{os2_config_sys} > NUL
+%cube {DELSTRING "%{os2_dos_path %{os2_helpdir}};" IN "SET HELP=" (FIRST} %%{os2_config_sys} > NUL
+%cube {DELSTRING "%{os2_dos_path %{os2_langdir}};" IN "SET DPATH=" (FIRST} %%{os2_config_sys} > NUL
 fi
 
-%post unixtools-path
+%post unixtools-path -e
 if [ "$1" = 1 ] ; then
 #execute only on first install
-%cube {ADDSTRING "%UNIXROOT%\usr\libexec\bin;" IN "SET PATH=" (FIRST IFNEW BEFORE RS(%%)} %{os2_config_sys} %{os2_config_sys}.yum > NUL
+%cube {ADDSTRING "%UNIXROOT%\usr\libexec\bin;" IN "SET PATH=" (FIRST IFNEW BEFORE RS(%%)} %%{os2_config_sys} %%{os2_config_sys}.yum > NUL
 fi
 
-%postun unixtools-path
+%postun unixtools-path -e
 if [ "$1" = 0 ] ; then
 #execute only on last uninstall
-%cube {DELSTRING "%UNIXROOT%\usr\libexec\bin;" IN "SET PATH=" (FIRST IFNEW BEFORE RS(%%)} %{os2_config_sys} > NUL
+%cube {DELSTRING "%UNIXROOT%\usr\libexec\bin;" IN "SET PATH=" (FIRST IFNEW BEFORE RS(%%)} %%{os2_config_sys} > NUL
 fi
 
 
 %changelog
+* Mon Nov 18 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.0.1-2
+- fix usage os os2_config_sys macro
+- use -e for all post/pre state
+
 * Fri Jun 21 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.0.1-1
 - remove the fhs package, as not needed with libcn
 - add requires to libcn (libc version 1:0.1.0 or better)
