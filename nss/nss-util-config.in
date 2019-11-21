@@ -109,10 +109,10 @@ if test "$echo_cflags" = "yes"; then
 fi
 
 if test "$echo_libs" = "yes"; then
-      libdirs="-L$libdir"
+      libdirs="$libdir -L$libdir"
       if test -n "$lib_nssutil"; then
 	libdirs="$libdirs -lnssutil${major_version}"
       fi
       echo $libdirs
-fi      
+fi
 

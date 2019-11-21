@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="windows-1252"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
+<!ENTITY date SYSTEM "date.xml">
+<!ENTITY version SYSTEM "version.xml">
+]>
+<refentry id="secmod.db">
+
+  <refentryinfo>
+    <date/>
+    <title>Network Security Services</title>
+    <productname>nss</productname>
+    <productnumber/>
+  </refentryinfo>
+
+  <refmeta>
+    <refentrytitle>secmod.db</refentrytitle>
+    <manvolnum>5</manvolnum>
+  </refmeta>
+
+  <refnamediv>
+    <refname>secmod.db</refname>
+    <refpurpose>Legacy NSS security modules database</refpurpose>
+  </refnamediv>
+
+<refsection id="description">
+    <title>Description</title>
+    <para><emphasis>secmod.db</emphasis> is an NSS security modules database.</para>
+  <para>The security modules database is used to keep track of the NSS security modules. The NSS security modules export their services via the PKCS #11 API which NSS uses as its Services Provider Interface.
+  </para>
+  <para>The command line utility <emphasis>modutil</emphasis> is used for managing PKCS #11 module information both within secmod.db files and within hardware tokens.
+  </para>
+  <para>For new applications the recommended way of tracking security modules is via the pkcs11.txt configuration file used in conjunction the new sqlite-based shared database format for certificate and key databases.
+  </para>
+  </refsection>
+
+  <refsection>
+    <title>Files</title>
+    <para><filename>/etc/pki/nssdb/secmod.db</filename></para>
+  </refsection>
+
+  <refsection>
+    <title>See also</title>
+    <para>modutil(1), cert8.db(5), cert9.db(5), key3.db(5), key4.db(5), pkcs11.txt(5)</para>
+  </refsection>
+
+  <refsection id="authors">
+    <title>Authors</title>
+    <para>The nss libraries were written and maintained by developers with Netscape, Red Hat, Sun, Oracle, Mozilla, and Google.</para>
+    <para>Authors: Elio Maldonado &lt;emaldona@redhat.com&gt;.</para>
+  </refsection>
+
+<!-- don't change -->
+  <refsection id="license">
+    <title>LICENSE</title>
+    <para>Licensed under the Mozilla Public License, v. 2.0.  If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+    </para>
+
+  </refsection>
+
+
+</refentry>
