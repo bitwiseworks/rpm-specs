@@ -91,5 +91,5 @@ PYTHONPATH=%{buildroot}%{python3_sitelib} py.test-%{python3_version} -v -k 'not 
 %endif
 
 %changelog
-* Fri Nov 21 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.3.3-1
+* Fri Nov 22 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.3.3-1
 - first rpm version
