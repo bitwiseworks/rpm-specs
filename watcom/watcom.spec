@@ -3,7 +3,7 @@
 Summary: Watcom Compiler tools for gcc
 Name: watcom
 Version: 2.0beta3
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: none
 
 Group: Development/Languages
@@ -70,13 +70,13 @@ cd ..
 rm -rf %{buildroot}
 
 
-%post wipfc
-%cube {ADDSTRING "%{os2_dos_path %{_datadir}/os2/wipfc}" IN "SET WIPFC=" (FIRST IFNEW BEFORE ADDBOTTOM RS(%%)} %{os2_config_sys} > NUL
+%post wipfc -e
+%cube {ADDSTRING "%{os2_dos_path %{_datadir}/os2/wipfc}" IN "SET WIPFC=" (FIRST IFNEW BEFORE ADDBOTTOM RS(%%)} %%{os2_config_sys} > NUL
 
-%postun wipfc
+%postun wipfc -e
 if [ "$1" = 0 ] ; then
 # execute only on last uninstall
-%cube {DELSTRING "%{os2_dos_path %{_datadir}/os2/wipfc}" IN "SET WIPFC=" (FIRST RS(%%)} %{os2_config_sys} > NUL
+%cube {DELSTRING "%{os2_dos_path %{_datadir}/os2/wipfc}" IN "SET WIPFC=" (FIRST RS(%%)} %%{os2_config_sys} > NUL
 fi
 
 
@@ -101,6 +101,9 @@ fi
 
 
 %changelog
+* Fri Nov 22 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.0beta3-5
+- use -e and %% in scriplets, so it gets expanded right
+
 * Mon Jun 18 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.0beta3-4
 - use %{os2_config_sys} macro instead of fixed c:\config.sys
 
