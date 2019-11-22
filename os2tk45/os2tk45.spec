@@ -1,7 +1,7 @@
 Summary: IBM OS/2 Developer's Toolkit Version 4.5
 Name: os2tk45
 Version: 4.5.2
-Release: 9%{?dist}
+Release: 10%{?dist}
 Group: Development/Toolkit
 License: IBM
 Vendor: bww bitwise works GmbH
@@ -168,51 +168,54 @@ Provides IBM OS/2 Developer's Toolkit book files in INF and HLP formats.
 %files books
 %{os2_bookdir}/*
 
-%post headers
-%cube {ADDSTRING "%{os2_dos_path %{os2tk45_includedir}/inc;%{os2tk45_includedir}/gl;%{os2tk45_includedir}};" IN "SET INCLUDE=" (FIRST IFNEW BEFORE ADDBOTTOM RS(%%)} %{os2_config_sys} > NUL
+%post headers -e
+%cube {ADDSTRING "%{os2_dos_path %{os2tk45_includedir}/inc;%{os2tk45_includedir}/gl;%{os2tk45_includedir}};" IN "SET INCLUDE=" (FIRST IFNEW BEFORE ADDBOTTOM RS(%%)} %%{os2_config_sys} > NUL
 
-%postun headers
+%postun headers -e
 if [ "$1" = 0 ] ; then
 # execute only on last uninstall
-%cube {DELSTRING "%{os2_dos_path %{os2tk45_includedir}/inc;%{os2tk45_includedir}/gl;%{os2tk45_includedir}};" IN "SET INCLUDE=" (FIRST RS(%%)} %{os2_config_sys} > NUL
+%cube {DELSTRING "%{os2_dos_path %{os2tk45_includedir}/inc;%{os2tk45_includedir}/gl;%{os2tk45_includedir}};" IN "SET INCLUDE=" (FIRST RS(%%)} %%{os2_config_sys} > NUL
 fi
 
-%post ipfc
-%cube {ADDSTRING "%{os2_dos_path %{_datadir}/os2/ipfc};" IN "SET IPFC=" (FIRST IFNEW BEFORE ADDBOTTOM RS(%%)} %{os2_config_sys} > NUL
+%post ipfc -e
+%cube {ADDSTRING "%{os2_dos_path %{_datadir}/os2/ipfc};" IN "SET IPFC=" (FIRST IFNEW BEFORE ADDBOTTOM RS(%%)} %%{os2_config_sys} > NUL
 
-%postun ipfc
+%postun ipfc -e
 if [ "$1" = 0 ] ; then
 # execute only on last uninstall
-%cube {DELSTRING "%{os2_dos_path %{_datadir}/os2/ipfc};" IN "SET IPFC=" (FIRST RS(%%)} %{os2_config_sys} > NUL
+%cube {DELSTRING "%{os2_dos_path %{_datadir}/os2/ipfc};" IN "SET IPFC=" (FIRST RS(%%)} %%{os2_config_sys} > NUL
 fi
 
-%post libs
-%cube {ADDSTRING "%{os2_dos_path %{_libdir}};" IN "SET LIB=" (FIRST IFNEW BEFORE ADDBOTTOM RS(%%)} %{os2_config_sys} > NUL
+%post libs -e
+%cube {ADDSTRING "%{os2_dos_path %{_libdir}};" IN "SET LIB=" (FIRST IFNEW BEFORE ADDBOTTOM RS(%%)} %%{os2_config_sys} > NUL
 
-%postun libs
+%postun libs -e
 if [ "$1" = 0 ] ; then
 # execute only on last uninstall
-%cube {DELSTRING "%{os2_dos_path %{_libdir}};" IN "SET LIB=" (FIRST RS(%%)} %{os2_config_sys} > NUL
+%cube {DELSTRING "%{os2_dos_path %{_libdir}};" IN "SET LIB=" (FIRST RS(%%)} %%{os2_config_sys} > NUL
 fi
 
-%post books
-%cube {REPLINE "SET CPREF=" WITH "SET CPREF=CP1.INF+CP2.INF+CP3.INF" (ADDBOTTOM} %{os2_config_sys} > NUL
-%cube {REPLINE "SET GPIREF=" WITH "SET GPIREF=GPI1.INF+GPI2.INF+GPI3.INF+GPI4.INF" (ADDBOTTOM} %{os2_config_sys} > NUL
-%cube {REPLINE "SET MMREF=" WITH "SET MMREF=MMREF1.INF+MMREF2.INF+MMREF3.INF" (ADDBOTTOM} %{os2_config_sys} > NUL
-%cube {REPLINE "SET PMREF=" WITH "SET PMREF=PM1.INF+PM2.INF+PM3.INF+PM4.INF+PM5.INF" (ADDBOTTOM} %{os2_config_sys} > NUL
-%cube {REPLINE "SET WPSREF=" WITH "SET WPSREF=WPS1.INF+WPS2.INF+WPS3.INF" (ADDBOTTOM} %{os2_config_sys} > NUL
+%post books -e
+%cube {REPLINE "SET CPREF=" WITH "SET CPREF=CP1.INF+CP2.INF+CP3.INF" (ADDBOTTOM} %%{os2_config_sys} > NUL
+%cube {REPLINE "SET GPIREF=" WITH "SET GPIREF=GPI1.INF+GPI2.INF+GPI3.INF+GPI4.INF" (ADDBOTTOM} %%{os2_config_sys} > NUL
+%cube {REPLINE "SET MMREF=" WITH "SET MMREF=MMREF1.INF+MMREF2.INF+MMREF3.INF" (ADDBOTTOM} %%{os2_config_sys} > NUL
+%cube {REPLINE "SET PMREF=" WITH "SET PMREF=PM1.INF+PM2.INF+PM3.INF+PM4.INF+PM5.INF" (ADDBOTTOM} %%{os2_config_sys} > NUL
+%cube {REPLINE "SET WPSREF=" WITH "SET WPSREF=WPS1.INF+WPS2.INF+WPS3.INF" (ADDBOTTOM} %%{os2_config_sys} > NUL
 
-%postun books
+%postun books -e
 if [ "$1" = 0 ] ; then
 # execute only on last uninstall
-%cube {DELLINE "SET CPREF="} %{os2_config_sys} > NUL
-%cube {DELLINE "SET GPIREF="} %{os2_config_sys} > NUL
-%cube {DELLINE "SET MMREF="} %{os2_config_sys} > NUL
-%cube {DELLINE "SET PMREF="} %{os2_config_sys} > NUL
-%cube {DELLINE "SET WPSREF="} %{os2_config_sys} > NUL
+%cube {DELLINE "SET CPREF="} %%{os2_config_sys} > NUL
+%cube {DELLINE "SET GPIREF="} %%{os2_config_sys} > NUL
+%cube {DELLINE "SET MMREF="} %%{os2_config_sys} > NUL
+%cube {DELLINE "SET PMREF="} %%{os2_config_sys} > NUL
+%cube {DELLINE "SET WPSREF="} %%{os2_config_sys} > NUL
 fi
 
 %changelog
+* Fri Nov 22 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.5.2-10
+- use -e and %% in scriplets, so it gets expanded right
+
 * Fri Jun 21 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.5.2-9
 - fixes rpm spec ticket #337
 
