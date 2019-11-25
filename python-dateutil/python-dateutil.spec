@@ -4,10 +4,12 @@
 %global with_python3 0
 # we don't have sphinx, and I'm really to lazzy to look at that atm :)
 %global with_doc 0
+# not available right now. needs to be ported and then enabled
+%global with_tzdata 0
 
 Name:           python-%{modname}
 Version:        2.8.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Powerful extensions to the standard datetime module
 
 License:        BSD
@@ -41,7 +43,9 @@ BuildRequires:  python2-freezegun
 BuildRequires:  python2-pytest
 BuildRequires:  python2-six
 %endif
+%if %{with_tzdata}
 Requires:       tzdata
+%endif
 Requires:       python2-six
 %{?python_provide:%python_provide python2-%{modname}}
 
@@ -130,6 +134,9 @@ make -C docs html
 %endif
 
 %changelog
+* Mon Nov 25 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.8.1-2
+- remove tzdata req for now (needs to be ported once)
+
 * Fri Nov 22 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.8.1-1
 - update to version 2.8.1
 - merge spec with latest fedora one
