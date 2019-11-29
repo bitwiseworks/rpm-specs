@@ -3,9 +3,9 @@
 %define _strip_no_compress 1
 %global exename klUsrMgr.EXE
 
-Summary:    kLIBC User Management
+Summary:    (kLIBC) User Manager
 Name:       klusrmgr
-Version:    1.2.2
+Version:    1.3.0
 Release:    1%{?dist}
 License:    proprietary
 Group:      Applications/System
@@ -86,6 +86,10 @@ fi
 
 
 %changelog
+* Sun Nov 17 2019 hb <herwig.bauernfeind@bitwiseworks.com> 1.3.0-1
+- added additional default groups and users
+- internal: Addition of group/user manipulation routines without GUI
+
 * Fri Jul 12 2019 hb <herwig.bauernfeind@bitwiseworks.com> 1.2.2-1
 - remove pwd_mkdb.exe as in libc now
 - added requires of libc
