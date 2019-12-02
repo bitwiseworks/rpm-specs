@@ -1,50 +1,74 @@
-# Note: this .spec is borrowed from automake-1.14.1-4.fc21.src.rpm
+%global api_version 1.16
 
-%global api_version 1.14
+# run "make check" by default
+%bcond_with check
+# Run optional test
+%bcond_with automake_enables_optional_test
 
-%define pkg_docdir  %{_docdir}/%{name}-%{version}
+# remove once %%configure is used instead of ./configure
+%{!?_pkgdocdir: %global _pkgdocdir %{_docdir}/%{name}-%{version}}
 
 Summary:    A GNU tool for automatically creating Makefiles
 Name:       automake
 Version:    %{api_version}.1
-Release:    3%{?dist}
+Release:    1%{?dist}
 
 # docs ~> GFDL, sources ~> GPLv2+, mkinstalldirs ~> PD and install-sh ~> MIT
 License:    GPLv2+ and GFDL and Public Domain and MIT
-
-Group:      Development/Tools
-#Source:     ftp://ftp.gnu.org/gnu/automake/automake-%{version}.tar.xz
-
-%define svn_url     http://svn.netlabs.org/repos/ports/automake/trunk
-%define svn_rev     1006
-
-Source: %{name}-%{version}-r%{svn_rev}.zip
-
-BuildRequires: gcc make subversion zip
+Vendor:     bww bitwise works GmbH
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
 
 URL:        http://www.gnu.org/software/automake/
 Requires:   autoconf >= 2.65
 
+# requirements not detected automatically (#919810)
+Requires:   perl(Thread::Queue)
+Requires:   perl(threads)
+
 BuildRequires:  autoconf >= 2.65
-BuildRequires:  automake
-#Requires(post): /sbin/install-info
-#Requires(preun): /sbin/install-info
+BuildRequires:  coreutils
+BuildRequires:  findutils
+BuildRequires:  help2man
+BuildRequires:  make
+BuildRequires:  perl-generators
+#BuildRequires:  perl-interpreter
+BuildRequires:  perl(Thread::Queue)
+BuildRequires:  perl(threads)
+
 BuildArch:  noarch
 
-# do not run "make check" by default
-%bcond_with check
 
 # for better tests coverage:
 %if %{with check}
-BuildRequires: libtool gettext-devel flex bison texinfo-tex texlive-dvips
-BuildRequires: java-devel-openjdk gcc-gfortran
-BuildRequires: dejagnu expect emacs imake python-docutils vala
-BuildRequires: cscope ncompress sharutils help2man
-BuildRequires: gcc-objc gcc-objc++
+%if %{with automake_enables_optional_test}
+BuildRequires: automake
+BuildRequires: bison
+BuildRequires: cscope
+BuildRequires: dejagnu
+BuildRequires: emacs
+BuildRequires: expect
+BuildRequires: flex
+BuildRequires: gcc-gfortran
+BuildRequires: gettext-devel
+BuildRequires: java-devel-openjdk
+BuildRequires: libtool
+BuildRequires: ncompress
+BuildRequires: sharutils
+BuildREquires: texlive-dvips
+BuildRequires: texinfo-tex
+BuildRequires: vala
 %if !0%{?rhel:1}
-BuildRequires: python-virtualenv lzip
+BuildRequires: gcc-objc
+BuildRequires: gcc-objc++
+BuildRequires: imake
+BuildRequires: lzip
 %endif
 %endif
+%endif
+
+# remove bogus Automake perl dependencies and provides
+%global __requires_exclude %{?__requires_exclude:%__requires_exclude|}^perl\\(Automake::
+%global __provides_exclude %{?__provides_exclude:%__provides_exclude|}^perl\\(Automake::
 
 %description
 Automake is a tool for automatically generating `Makefile.in'
@@ -54,40 +78,28 @@ You should install Automake if you are developing software and would
 like to use its ability to automatically generate GNU standard
 Makefiles.
 
+
 %prep
-%if %(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc
-svn export -r %{svn_rev} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" "%{name}-%{version}")
-%endif
+%scm_setup
 
 # make sure configure is updated to properly support OS/2
-bootstrap.sh
+bootstrap
+
 
 %build
+export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+export LIBS="-lcx"
+export VENDOR="%{vendor}"
 
-# we don't have makeinfo/help2man yet; fake them (this will wipe docs out)
-export MAKEINFO=:
-export HELP2MAN=:
-
-%configure --docdir=%{pkg_docdir}
-
+%configure --docdir=%{_pkgdocdir}
 make V=0 %{?_smp_mflags}
 cp m4/acdir/README README.aclocal
 cp contrib/multilib/README README.multilib
 
-%install
-rm -rf ${buildroot}
-make install DESTDIR=%{buildroot}
 
-# TODO: we use %docdir below instead of %doc because the latter will rm -f the doc directory
-# before installing files into it which kills everything that was already installed there by
-# make install (in this particular case - amhello-*.tar.gz. This was fixed in RPM 4.9.1
-# so the workaround should be undone when we switch to it (currently we use 4.8.1).
-cp -p AUTHORS README THANKS NEWS README.aclocal README.multilib COPYING* %{buildroot}/%{pkg_docdir}
+%install
+%make_install
+
 
 %check
 # %%global TESTS_FLAGS t/preproc-errmsg t/preproc-basics
@@ -96,19 +108,12 @@ make -k %{?_smp_mflags} check %{?TESTS_FLAGS: TESTS="%{TESTS_FLAGS}"} \
     || ( cat ./test-suite.log && false )
 %endif
 
-#%post
-#/sbin/install-info %{_infodir}/automake.info.gz %{_infodir}/dir || :
-
-#%preun
-#if [ $1 = 0 ]; then
-#    /sbin/install-info --delete %{_infodir}/automake.info.gz %{_infodir}/dir || :
-#fi
 
 %files
-#%doc AUTHORS README THANKS NEWS README.aclocal README.multilib COPYING*
-%docdir %{pkg_docdir}
-%{pkg_docdir}/*
-#%exclude %{_infodir}/dir
+%license COPYING*
+%doc AUTHORS README THANKS NEWS README.aclocal README.multilib
+%doc %{_pkgdocdir}/amhello-1.0.tar.gz
+%exclude %{_infodir}/dir
 %exclude %{_datadir}/aclocal
 %{_bindir}/*
 %{_infodir}/*.info*
@@ -117,7 +122,11 @@ make -k %{?_smp_mflags} check %{?TESTS_FLAGS: TESTS="%{TESTS_FLAGS}"} \
 %{_mandir}/man1/*
 
 %changelog
-* Wed Feb 5 2015 Dmitriy Kuminov <coding@dmik.org> 1.14.1-3
+* Mon Dec 2 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.16.1-1
+- update to version 1.16.1
+- cleanup the spec and use scm_ macros and friends
+
+* Thu Feb 5 2015 Dmitriy Kuminov <coding@dmik.org> 1.14.1-3
 - aclocal: Work around 32K program arguments size limit on OS/2.
 
 * Wed Sep 3 2014 Dmitriy Kuminov <coding@dmik.org> 1.14.1-2
