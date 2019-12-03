@@ -56,7 +56,7 @@ rpm.define(string.format("nss_release_tag NSS_%s_RTM",
 Summary:          Network Security Services
 Name:             nss
 Version:          %{nss_version}
-Release:          1%{?dist}
+Release:          2%{?dist}
 License:          MPLv2.0
 URL:              http://www.mozilla.org/projects/security/pki/nss/
 Vendor:           bww bitwise works GmbH
@@ -1035,6 +1035,9 @@ update-crypto-policies &> /dev/null || :
 
 
 %changelog
+* Wed Dec 04 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.47.0-2
+- fix a bug in the nss*config scripts
+
 * Wed Nov 20 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.47.0-1
 - update to version 3.47
 - merge spec from fedora with our version
