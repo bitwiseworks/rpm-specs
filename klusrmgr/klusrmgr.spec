@@ -5,7 +5,7 @@
 
 Summary:    (kLIBC) User Manager
 Name:       klusrmgr
-Version:    1.3.0
+Version:    1.3.1
 Release:    1%{?dist}
 License:    proprietary
 Group:      Applications/System
@@ -86,6 +86,9 @@ fi
 
 
 %changelog
+* Thu Dec 05 2019 hb <herwig.bauernfeind@bitwiseworks.com> 1.3.1-1
+- fix bug upon -init invocation
+
 * Sun Nov 17 2019 hb <herwig.bauernfeind@bitwiseworks.com> 1.3.0-1
 - added additional default groups and users
 - internal: Addition of group/user manipulation routines without GUI
