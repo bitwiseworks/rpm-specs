@@ -1,52 +1,84 @@
+%global with_single 0
+%global with_colors 0
+%global with_tests  0
+
+%if %{with_single}
+%global types separate single
+%else
+%global types separate
+%endif
+
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
-Version: 8.26
-Release: 2%{?dist}
+Version: 8.31
+Release: 1%{?dist}
 License: GPLv3+
-Group:   System Environment/Base
-Url:     http://www.gnu.org/software/coreutils/
+Url:     https://www.gnu.org/software/coreutils/
 
 Vendor:  bww bitwise works GmbH
 
-%scm_source svn http://svn.netlabs.org/repos/ports/coreutils/trunk 2048
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
 
-#BuildRequires: libselinux-devel
-#BuildRequires: libacl-devel
-BuildRequires: gettext bison
-BuildRequires: texinfo
+%if %{with_single}
+# do not make coreutils-single depend on /usr/bin/coreutils
+%global __requires_exclude ^%{_bindir}/coreutils$
+%endif
+
+Conflicts: filesystem < 3
+# To avoid clobbering installs
+%if %{with_single}
+Conflicts: coreutils-single
+%endif
+
+#BuildRequires: attr
 BuildRequires: autoconf
 BuildRequires: automake
-#BuildRequires: libcap-devel
-#BuildRequires: libattr-devel
-BuildRequires: openssl-devel
+BuildRequires: gcc
+BuildRequires: gettext-devel
 BuildRequires: gmp-devel
-#BuildRequires: attr
+#BuildRequires: hostname
+#BuildRequires: libacl-devel
+#BuildRequires: libattr-devel
+#BuildRequires: libcap-devel
+#BuildRequires: libselinux-devel
+#BuildRequires: libselinux-utils
+BuildRequires: openssl-devel
 #BuildRequires: strace
+BuildRequires: texinfo
+
+%if 23 < 0%{?fedora} || 7 < 0%{?rhel}
+# needed by i18n test-cases
+BuildRequires: glibc-langpack-en
+%endif
 
 Requires: %{name}-common = %{version}-%{release}
-#Requires(pre): /sbin/install-info
-#Requires(preun): /sbin/install-info
-#Requires(post): /sbin/install-info
-Requires(post): grep
-Requires:       ncurses
+Requires: ncurses
 
-Provides: fileutils = %{version}-%{release}
-Provides: sh-utils = %{version}-%{release}
-Provides: stat = %{version}-%{release}
-Provides: textutils = %{version}-%{release}
-#old mktemp package had epoch 3, so we have to use 4 for coreutils
-Provides: mktemp = 4:%{version}-%{release}
-Provides: bundled(gnulib)
-Obsoletes: mktemp < 4:%{version}-%{release}
-Obsoletes: fileutils <= 4.1.9
-Obsoletes: sh-utils <= 2.0.12
-Obsoletes: stat <= 3.3
-Obsoletes: textutils <= 2.0.21
+Provides: coreutils-full = %{version}-%{release}
 Obsoletes: %{name} < 8.24-100
 
 %description
 These are the GNU core utilities.  This package is the combination of
 the old GNU fileutils, sh-utils, and textutils packages.
+
+%if %{with_single}
+%package single
+Summary:  coreutils multicall binary
+Suggests: coreutils-common
+Provides: coreutils = %{version}-%{release}
+Provides: coreutils%{?_isa} = %{version}-%{release}
+# To avoid clobbering installs
+Conflicts: coreutils < 8.24-100
+# Note RPM doesn't support separate buildroots for %files
+# http://rpm.org/ticket/874 so use RemovePathPostfixes
+# (new in rpm 4.13) to support separate file sets.
+RemovePathPostfixes: .single
+
+%description single
+These are the GNU core utilities,
+packaged as a single multicall binary.
+%endif
+
 
 %package common
 # yum obsoleting rules explained at:
@@ -58,30 +90,38 @@ Summary:  coreutils common optional components
 Optional though recommended components,
 including documentation and translations.
 
+
 %debug_package
+
 
 %prep
 %scm_setup
+%if %{with_colors}
+# will be modified by coreutils-8.25-DIR_COLORS.patch
+tee DIR_COLORS{,.256color,.lightbgcolor} <src/dircolors.hin >/dev/null
+# git add DIR_COLORS{,.256color,.lightbgcolor}
+# git commit -m "clone DIR_COLORS before patching"
+%endif
 
-#chmod a+x tests/misc/sort-mb-tests.sh tests/df/direct.sh || :
 
-#fix typos/mistakes in localized documentation(#439410, #440056)
-#find ./po/ -name "*.p*" | xargs \
-# sed -i \
-# -e 's/-dpR/-cdpR/'
+%if %{with_tests}
+(echo ">>> Fixing permissions on tests") 2>/dev/null
+find tests -name '*.sh' -perm 0644 -print -exec chmod 0755 '{}' '+'
+(echo "<<< done") 2>/dev/null
+%endif
+
+autoreconf -fiv
+
 
 %build
-
-export CFLAGS="$RPM_OPT_FLAGS -fno-strict-aliasing"
+export VENDOR="%{vendor}"
 export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 export LIBS="-lintl -lcx"
+export CFLAGS="$RPM_OPT_FLAGS -fno-strict-aliasing"
 %{expand:%%global optflags %{optflags} -D_GNU_SOURCE=1}
-# we do autoreconf even fedora doesn't do it
-autoreconf -i -v
 
 # we only do a separate build
-#for type in separate single; do
-for type in separate; do
+for type in %{types}; do
   mkdir $type && \
   (cd $type && ln -s ../configure || exit 1
   if test $type = 'single'; then
@@ -97,20 +137,20 @@ for type in separate; do
              --enable-install-program=arch \
              --with-tty-group \
              DEFAULT_POSIX2_VERSION=200112 alternative=199209 || :
-
   make all %{?_smp_mflags})
 done
 
 
-#%check
-#for type in separate single; do
-#  test $type = 'single' && subdirs='SUBDIRS=.' # Only check gnulib once
-#  (cd $type && make check %{?_smp_mflags} $subdirs)
-#done
+%check
+%if %{with_tests}
+for type in separate single; do
+  test $type = 'single' && subdirs='SUBDIRS=.' # Only check gnulib once
+  (cd $type && make check %{?_smp_mflags} $subdirs)
+done
+%endif
 
 %install
-#for type in separate single; do
-for type in separate; do
+for type in %{types}; do
   install=install
   if test $type = 'single'; then
     subdir=%{_libexecdir}/%{name}; install=install-exec
@@ -134,15 +174,13 @@ for type in separate; do
   fi
 done
 
-# fix japanese catalog file
-if [ -d $RPM_BUILD_ROOT%{_datadir}/locale/ja_JP.EUC/LC_MESSAGES ]; then
-   mkdir -p $RPM_BUILD_ROOT%{_datadir}/locale/ja/LC_MESSAGES
-   mv $RPM_BUILD_ROOT%{_datadir}/locale/ja_JP.EUC/LC_MESSAGES/*mo \
-      $RPM_BUILD_ROOT%{_datadir}/locale/ja/LC_MESSAGES
-   rm -rf $RPM_BUILD_ROOT%{_datadir}/locale/ja_JP.EUC
-fi
-
-bzip2 -9f ChangeLog
+%if %{with_colors}
+mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/profile.d
+install -p -c -m644 DIR_COLORS{,.256color,.lightbgcolor} \
+    $RPM_BUILD_ROOT%{_sysconfdir}
+install -p -c -m644 %SOURCE105 $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/colorls.sh
+install -p -c -m644 %SOURCE106 $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/colorls.csh
+%endif
 
 # {env,cut,readlink} were previously moved from /usr/bin to /bin and linked into
 # this is os/2 specific
@@ -155,63 +193,15 @@ for i in dir date sort hostid; do
   ln -s %{_libexecdir}/bin/$i.exe $RPM_BUILD_ROOT%{_bindir}/$i
 done
 
-# These come from util-linux and/or procps.
-# With coreutils > 8.24 one can just add to --enable-no-install-program
-# rather than manually removing here, since tests depending on
-# built utilities are correctly skipped if not present.
-#for i in kill ; do
-#    rm -f $RPM_BUILD_ROOT{%{_bindir}/$i,%{_mandir}/man1/$i.1}
-#    rm -f $RPM_BUILD_ROOT%{_bindir}/$i.single
-#done
-
-# Compress ChangeLogs from before the fileutils/textutils/etc merge
-bzip2 -f9 old/*/C*
-
-# Use hard links instead of symbolic links for LC_TIME files (bug #246729).
-#find %{buildroot}%{_datadir}/locale -type l | \
-#(while read link
-# do
-#   target=$(readlink "$link")
-#   rm -f "$link"
-#   ln "$(dirname "$link")/$target" "$link"
-# done)
-
 %find_lang %name
+# Add the %%lang(xyz) ownership for the LC_TIME dirs as well...
+grep LC_TIME %name.lang | cut -d'/' -f1-6 | sed -e 's/) /) %%dir /g' >>%name.lang
 
 # (sb) Deal with Installed (but unpackaged) file(s) found
 rm -f $RPM_BUILD_ROOT%{_infodir}/dir
-rm -f $RPM_BUILD_ROOT%{_usr}/lib/charset.alias
 
-%clean
-rm -rf $RPM_BUILD_ROOT
-
-%pre
-# We must deinstall these info files since they're merged in
-# coreutils.info. else their postun'll be run too late
-# and install-info will fail badly because of duplicates
-#for file in sh-utils textutils fileutils; do
-#  if [ -f %{_infodir}/$file.info.gz ]; then
-#    /sbin/install-info --delete %{_infodir}/$file.info.gz --dir=%{_infodir}/dir &> /dev/null || :
-#  fi
-#done
-
-%preun
-#if [ $1 = 0 ]; then
-#  if [ -f %{_infodir}/%{name}.info.gz ]; then
-#    /sbin/install-info --delete %{_infodir}/%{name}.info.gz %{_infodir}/dir || :
-#  fi
-#fi
-
-%post
-#%{_bindir}/grep -v '(sh-utils)\|(fileutils)\|(textutils)' %{_infodir}/dir > \
-#  %{_infodir}/dir.rpmmodify || exit 0
-#    /bin/mv -f %{_infodir}/dir.rpmmodify %{_infodir}/dir
-#if [ -f %{_infodir}/%{name}.info.gz ]; then
-#  /sbin/install-info %{_infodir}/%{name}.info.gz %{_infodir}/dir || :
-#fi
 
 %files
-%defattr(-,root,root,-)
 %_bindir/*
 %_sbindir/chroot.exe
 %{_libexecdir}/*
@@ -219,16 +209,41 @@ rm -rf $RPM_BUILD_ROOT
 %exclude %{_sbindir}/*.dbg
 %exclude %{_libexecdir}/bin/*.dbg
 
+
+%if %{with_single}
+%files single
+%{_bindir}/*.single
+%{_sbindir}/chroot.single
+%dir %{_libexecdir}/coreutils
+%{_libexecdir}/coreutils/*.so.single
+# duplicate the license because coreutils-common does not need to be installed
+%{!?_licensedir:%global license %%doc}
+%license COPYING
+%endif
+
+
 %files common -f %{name}.lang
-%defattr(-,root,root,-)
-#%config(noreplace) %{_sysconfdir}/DIR_COLORS*
-#%config(noreplace) %{_sysconfdir}/profile.d/*
+%if %{with_colors}
+%config(noreplace) %{_sysconfdir}/DIR_COLORS*
+%config(noreplace) %{_sysconfdir}/profile.d/*
+%endif
 %{_infodir}/coreutils*
 %{_mandir}/man*/*
 # The following go to /usr/share/doc/coreutils-common
-%doc ABOUT-NLS COPYING NEWS README THANKS TODO
+%doc ABOUT-NLS NEWS README THANKS TODO
+%license COPYING
+
 
 %changelog
+* Mon Dec 09 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> - 8.31-1
+- update to versiion 8.31
+- fix ticket #1
+- merge spec with fedora one
+
+* Wed Jan 23 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> - 8.26-3
+- enable install-info
+- remove Work around sort stdn close failure (#145), as fixed in libc now
+
 * Thu Feb 23 2017 Dmitriy Kuminov <coding@dmik.org> - 8.26-2
 - Use scm_source and friends.
 - Work around sort stdn close failure (#145).
