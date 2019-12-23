@@ -1,14 +1,14 @@
 Summary:        A library which allows userspace access to USB devices
 Name:           libusb1
 Version:        1.0.21
-Release:        1%{?dist}
+Release:        2%{?dist}
 
 License:        LGPLv2+
 Group:          System Environment/Libraries
 URL:            http://libusb.info/
 
 Vendor:         bww bitwise works GmbH
-%scm_source  svn http://svn.netlabs.org/repos/ports/libusb1/trunk 1938
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2-2
 
 BuildRequires:  usbcalls-devel
 BuildRequires:  doxygen libtool
@@ -53,6 +53,7 @@ autoreconf -ifv
 
 %build
 export LDFLAGS="-Zhigh-mem -Zomf"
+export LIBS="-lcx"
 export VENDOR="%{vendor}"
 
 %configure --disable-static
@@ -97,6 +98,13 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Mon Dec 23 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.0.21-2
+- remove unused poll implementation
+- finetune errorhandling
+- handle the case when we opened the device already, this is to mimik the nix
+  behaviour better (libsane testcases failed because of that)
+
+
 * Mon Dec 12 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.0.21-1
 - update to version 1.0.21
 - add the documention
