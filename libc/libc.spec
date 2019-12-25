@@ -12,7 +12,7 @@ Name:           libc
 License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Standard Shared Libraries
 Group:          System/Libraries
-Version:        %{ver_maj}.1.2
+Version:        %{ver_maj}.1.3
 Release:        1%{?dist}
 Vendor:         bww bitwise works GmbH
 Url:            https://github.com/bitwiseworks/libc
@@ -26,8 +26,8 @@ BuildRequires:  gcc unzip sed gawk
 # we need ourselves for the build (db1-devel is for pwd_mkdb)
 BuildRequires:  libc-devel libc-db1-devel
 
-# for libiberty
-BuildRequires:  binutils-devel >= 2.27-3
+# for libiberty (#49)
+BuildRequires:  binutils-devel >= 2.33.1
 
 # Require kLIBC user management to make programs using Unix user management API
 # (getpwuid() and friends) work correctly.
@@ -218,6 +218,11 @@ rm -rf "%{buildroot}"
 
 
 %changelog
+* Wed Dec 25 2019 Dmitriy Kuminov <coding@dmik.org> 1:0.1.3-1
+- Release LIBC Next version 0.1.3
+  (https://github.com/bitwiseworks/libc/blob/0.1.3/CHANGELOG.md).
+- Rebuild with newer libiberty (binutils 2.33.1) to fix EMXOMF crash [#49].
+
 * Mon Jul 15 2019 Dmitriy Kuminov <coding@dmik.org> 1:0.1.2-1
 - Release LIBC Next version 0.1.2
   (https://github.com/bitwiseworks/libc/blob/0.1.2/CHANGELOG.md).
