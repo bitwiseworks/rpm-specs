@@ -6,7 +6,7 @@ License: GPLV2+ or LGPLv3+
 Url: http://www.gnu.org/software/libunistring/
 
 Vendor:  bww bitwise works GmbH
-%scm_source github http://github.com/bitwiseoworks/%{name}-os2 %{version}-os2
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
 
 BuildRequires: gcc
 #Provides: bundled(gnulib)
