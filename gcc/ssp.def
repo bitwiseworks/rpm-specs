@@ -1,0 +1,24 @@
+;
+; ssp.def (created by emximp)
+;
+LIBRARY ssp INITINSTANCE TERMINSTANCE
+DESCRIPTION 'GNU Stack Protector Forwarder'
+EXPORTS
+  "___chk_fail"
+  "___gets_chk"
+  "___memcpy_chk"
+  "___memmove_chk"
+  "___mempcpy_chk"
+  "___memset_chk"
+  "___snprintf_chk"
+  "___sprintf_chk"
+  "___stack_chk_fail"
+  "___stack_chk_fail_local"
+  "___stack_chk_guard"
+  "___stpcpy_chk"
+  "___strcat_chk"
+  "___strcpy_chk"
+  "___strncat_chk"
+  "___strncpy_chk"
+  "___vsnprintf_chk"
+  "___vsprintf_chk"
