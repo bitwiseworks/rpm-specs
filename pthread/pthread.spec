@@ -2,13 +2,13 @@
 
 Summary: A posix pthread emulation for OS/2 and OS/2 based systems
 Name: pthread
-Version: 0.1
+Version: 0.1.1
 Release: 1%{?dist}
 License: unknown
-Group: Development/Libraries
+Vendor:  bww bitwise works GmbH
 Epoch: 2
 
-%scm_source svn http://svn.netlabs.org/repos/ports/pthread/trunk 2346
+%scm_source github http://github.com/bitwiseworks/pthread %{version}
 
 BuildRequires: gcc make
 
@@ -19,7 +19,6 @@ A posix pthread emulation library.
 
 %package devel
 Summary: Header files developing apps which will use pthread
-Group: Development/Libraries
 Requires: %{name} = %{epoch}:%{version}-%{release}
 
 %description devel
@@ -71,6 +70,10 @@ rm -rf %{buildroot}
 %{_libdir}/pthread.dll
 
 %changelog
+* Mon Jan 06 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> 2:0.1.1-1
+- add a real pthread_sigmask, so returncode is correct
+- move source to github and clean it a bit
+
 * Fri Mar 29 2019 Dmitriy Kuminov <coding@dmik.org> 2:0.1-1
 - Bump epoch to 2 to replace bulky versioning scheme with normal one.
 - Implement key destructors [#182].

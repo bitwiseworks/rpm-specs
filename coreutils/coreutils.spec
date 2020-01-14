@@ -236,7 +236,7 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 
 %changelog
 * Mon Dec 09 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> - 8.31-1
-- update to versiion 8.31
+- update to version 8.31
 - fix ticket #1
 - merge spec with fedora one
 
