@@ -1,12 +1,12 @@
 Summary: A utility for retrieving files using the HTTP or FTP protocols
 Name: wget
 Version: 1.20.3
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Url: http://www.gnu.org/software/wget/
 
 Vendor:  bww bitwise works GmbH
-%scm_source  github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
+%scm_source  github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2-2
 
 Provides: webclient
 Requires: libcx >= 0.4
@@ -14,8 +14,8 @@ Requires: libcx >= 0.4
 #BuildRequires: perl-HTTP-Daemon, python2
 BuildRequires: openssl-devel, pkgconfig, texinfo
 BuildRequires: gettext >= 0.19, autoconf
-BuildRequires: libidn-devel, libpsl-devel, gcc, zlib-devel
-#BuildRequires: gnutls-devel, libidn2-devel, perl-podlators, libmetalink-devel, gpgme-devel
+BuildRequires: libidn2-devel, libpsl-devel, gcc, zlib-devel
+#BuildRequires: gnutls-devel, perl-podlators, libmetalink-devel, gpgme-devel
 
 %description
 GNU Wget is a file retrieval utility which can use either the HTTP or
@@ -73,6 +73,9 @@ rm -f $RPM_BUILD_ROOT/%{_infodir}/dir
 %{_infodir}/*
 
 %changelog
+* Mon Jan 13 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.20.3-2
+- enable libidn2
+
 * Fri Nov 08 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.20.3-1
 - update to version 1.20.3
 
