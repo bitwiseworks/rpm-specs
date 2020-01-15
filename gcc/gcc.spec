@@ -2,7 +2,7 @@
 %global gcc_version %{gcc_major}.2.0
 # Note, gcc_release must be integer, if you want to add suffixes to
 # %%{release}, append them after %%{gcc_release} on Release: line.
-%global gcc_release 1
+%global gcc_release 2
 
 %global build_ada 0
 %global build_objc 0
@@ -682,6 +682,10 @@ rm -f gcc/testsuite/go.test/test/chan/goroutines.go
 # Cook all generated stuff (our Git doesn't store it).
 autogen.sh
 
+# TODO hack around gcc1.dll BLDLEVEL string (temporary, should go away
+# once https://github.com/bitwiseworks/gcc-os2/issues/9 is done).
+sed -i -e 's/GNU GCC Runtime Version $(gcc_version)-$(RPM_PACKAGE_RELEASE)/$(LT_BUILDLEVEL)@@GNU GCC Runtime/' libgcc/config/i386/t-emx
+
 %build
 
 OPT_FLAGS=`echo %{optflags}|sed -e 's/\(-Wp,\)\?-D_FORTIFY_SOURCE=[12]//g'`
@@ -1144,36 +1148,36 @@ if [ $1 = 0 ]; then
 fi
 %endif
 
-%post wrc
+%post wrc -e
 if [ "$1" = 1 ] ; then
 #execute only on first install
-%cube {DELLINE "SET EMXOMFLD_RC="} c:\config.sys > NUL
-%cube {DELLINE "SET EMXOMFLD_RC_TYPE="} c:\config.sys > NUL
-%cube {ADDLINE "SET EMXOMFLD_RC=wrc.exe"} c:\config.sys > NUL
-%cube {ADDLINE "SET EMXOMFLD_RC_TYPE=WRC"} c:\config.sys > NUL
+%cube {DELLINE "SET EMXOMFLD_RC="} %%{os2_config_sys}  > NUL
+%cube {DELLINE "SET EMXOMFLD_RC_TYPE="} %%{os2_config_sys}> NUL
+%cube {ADDLINE "SET EMXOMFLD_RC=wrc.exe"} %%{os2_config_sys} > NUL
+%cube {ADDLINE "SET EMXOMFLD_RC_TYPE=WRC"} %%{os2_config_sys} > NUL
 fi
 
-%postun wrc
+%postun wrc -e
 if [ "$1" = 0 ] ; then
 # execute only on last uninstall
-%cube {DELLINE "SET EMXOMFLD_RC="} c:\config.sys > NUL
-%cube {DELLINE "SET EMXOMFLD_RC_TYPE="} c:\config.sys > NUL
+%cube {DELLINE "SET EMXOMFLD_RC="} %%{os2_config_sys} > NUL
+%cube {DELLINE "SET EMXOMFLD_RC_TYPE="} %%{os2_config_sys} > NUL
 fi
 
-%post wlink
+%post wlink -e
 if [ "$1" = 1 ] ; then
 # execute only on first install
-%cube {DELLINE "SET EMXOMFLD_LINKER="} c:\config.sys > NUL
-%cube {DELLINE "SET EMXOMFLD_TYPE="} c:\config.sys > NUL
-%cube {ADDLINE "SET EMXOMFLD_LINKER=wl.exe"} c:\config.sys > NUL
-%cube {ADDLINE "SET EMXOMFLD_TYPE=WLINK"} c:\config.sys > NUL
+%cube {DELLINE "SET EMXOMFLD_LINKER="} %%{os2_config_sys} > NUL
+%cube {DELLINE "SET EMXOMFLD_TYPE="} %%{os2_config_sys} > NUL
+%cube {ADDLINE "SET EMXOMFLD_LINKER=wl.exe"} %%{os2_config_sys} > NUL
+%cube {ADDLINE "SET EMXOMFLD_TYPE=WLINK"} %%{os2_config_sys} > NUL
 fi
 
-%postun wlink
+%postun wlink -e
 if [ "$1" = 0 ] ; then
 # execute only on last uninstall
-%cube {DELLINE "SET EMXOMFLD_LINKER="} c:\config.sys > NUL
-%cube {DELLINE "SET EMXOMFLD_TYPE="} c:\config.sys > NUL
+%cube {DELLINE "SET EMXOMFLD_LINKER="} %%{os2_config_sys} > NUL
+%cube {DELLINE "SET EMXOMFLD_TYPE="} %%{os2_config_sys} > NUL
 fi
 
 %files -f %{name}.lang
@@ -1795,6 +1799,10 @@ fi
 %doc gcc-wrc.txt
 
 %changelog
+* Wed Jan 15 2020 Dmitriy Kuminov <coding@dmik.org> - 9.2.0-2
+- Use os2_config_sys macro (with -e and %%) instead of hard-coded c:\config.sys.
+- Fix gcc1.dll BLDLEVEL string.
+
 * Tue Jan 14 2020 Dmitriy Kuminov <coding@dmik.org> - 9.2.0-1
 - Initial RPM release of GCC 9
   (https://github.com/bitwiseworks/gcc-os2/blob/gcc-9_2_0-release-os2-b1/ChangeLog.md).
