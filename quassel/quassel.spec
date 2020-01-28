@@ -42,7 +42,7 @@ BuildRequires: systemd
 
 #BuildRequires: libappstream-glib
 
-Requires: oxygen-icon-theme
+#Requires: oxygen-icon-theme
 
 Provides: %{name}-gui = %{version}-%{release}
 
@@ -215,6 +215,6 @@ fi
 
 
 %changelog
-* Wed Jan 22 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.14-1.pre
+* Mon Jan 27 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.14-1.pre
 - initial OS/2 rpm
 
