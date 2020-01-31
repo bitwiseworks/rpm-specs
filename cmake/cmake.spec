@@ -40,7 +40,7 @@
 %{!?_pkgdocdir:%global _pkgdocdir %{_docdir}/%{name}-%{version}}
 
 %global major_version 3
-%global minor_version 10
+%global minor_version 15
 # Set to RC version if building RC, else %%{nil}
 #global rcsuf rc3
 %{?rcsuf:%global relsuf .%{rcsuf}}
@@ -73,7 +73,7 @@ Source5:        %{name}.req
 
 BuildRequires:  coreutils
 BuildRequires:  findutils
-BuildRequires:  gcc
+BuildRequires:  gcc g++
 #BuildRequires:  gcc-gfortran
 BuildRequires:  sed
 BuildRequires:  git
@@ -426,6 +426,14 @@ cd ..
 
 
 %changelog
+* Fri Jan 31 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.15.3-1
+- update to vendor version 3.15.3
+- build with gcc9
+- add rc file handling
+- disable 1121 wlink messages
+- don't use emxexp for c++ by default anymore, it relies on declspec
+  if you want the old way use -DOS2_USE_CXX_EMXEXP=ON 
+
 * Mon Sep 16 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.10.3-1
 - update to vendor version 3.10.3
 
