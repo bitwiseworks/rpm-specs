@@ -1,3 +1,5 @@
+%global BuildDir Out
+
 # set this to 1 to enable
 %global with_docs 0
 %global with_latex 0
@@ -6,7 +8,7 @@
 
 Summary: A documentation system for C/C++
 Name:    doxygen
-Version: 1.8.15
+Version: 1.8.17
 Release: 1%{?dist}
 
 # No version is specified.
@@ -16,8 +18,7 @@ Vendor: bww bitwise works GmbH
 %scm_source  github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
 
 BuildRequires: %{_bindir}/python2
-
-BuildRequires: gcc perl
+BuildRequires: gcc-c++ gcc
 %if %{with_docs}
 BuildRequires: tex(dvips)
 BuildRequires: tex(latex)
@@ -28,8 +29,10 @@ BuildRequires: tex(xtab.sty)
 BuildRequires: tex(import.sty)
 BuildRequires: tex(tabu.sty)
 BuildRequires: tex(appendix.sty)
+BuildRequires: tex(adjustbox.sty)
 BuildRequires: /@unixroot/usr/bin/epstopdf
 BuildRequires: texlive-epstopdf
+BuildRequires: desktop-file-utils
 BuildRequires: graphviz
 %endif
 BuildRequires: ghostscript
@@ -81,18 +84,19 @@ Requires: texlive-epstopdf-bin
 
 %debug_package
 
-
 %prep
 %scm_setup
 
+#iconv --from=ISO-8859-1 --to=UTF-8 LANGUAGE.HOWTO > LANGUAGE.HOWTO.new
+#touch -r LANGUAGE.HOWTO LANGUAGE.HOWTO.new
+#mv LANGUAGE.HOWTO.new LANGUAGE.HOWTO
 
 %build
 export LDFLAGS="-Zhigh-mem -Zomf -lcx"
 export VENDOR="%{vendor}"
 
-mkdir -p %{_build}
-cd %{_build}
-#      -DBUILD_SHARED_LIBS=OFF \
+mkdir -p %{BuildDir}
+cd %{BuildDir}
 %cmake \
 %if %{with_docs}
       -Dbuild_doc=ON \
@@ -104,17 +108,14 @@ cd %{_build}
       -Dbuild_search=%{xapian_core_support} \
       -DMAN_INSTALL_DIR=%{_mandir}/man1 \
       -DCMAKE_INSTALL_PREFIX:PATH=%{_prefix} \
+      -DBUILD_SHARED_LIBS=OFF \
       ..
 cd ..
 
-%if %{with_docs}
-make docs -C %{_build}
-%endif
-make -C %{_build}
-
+make %{?_smp_mflags} -C %{BuildDir}
 
 %install
-make install DESTDIR=%{buildroot} -C %{_build}
+make install DESTDIR=%{buildroot} -C %{BuildDir}
 
 # install man pages
 mkdir -p %{buildroot}/%{_mandir}/man1
@@ -128,8 +129,8 @@ rm -f %{buildroot}/%{_mandir}/man1/doxyindexer.1* %{buildroot}/%{_mandir}/man1/d
 rm -rf %{buildroot}/%{_docdir}/packages
 
 %check
-#still disabled as we dont have bibtext tools. and one test needs it
-#make tests -C %{_build}
+#still disabled as we dont have bibtext and latex tools. and one test needs it
+#make tests -C %{BuildDir}
 
 %files
 %doc LANGUAGE.HOWTO README.md
@@ -159,6 +160,10 @@ rm -rf %{buildroot}/%{_docdir}/packages
 %endif
 
 %changelog
+* Sun Feb 02 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.8.17-1
+- fix a binary read
+- update to version 1.8.17
+
 * Wed Jun 12 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.8.15-1
 - move source to github
 - use scm_ macros
