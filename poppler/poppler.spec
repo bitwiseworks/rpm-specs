@@ -1,81 +1,123 @@
+%global test_sha 45f55f1e03b9bf3fbd334c31776b6f5e472889ec
+%global test_date 2018-12-18
+
+%global with_glib 0
+
 Summary:	PDF rendering library
-Name:		poppler
-Version:	0.61.1
+Name:	poppler
+Version:	0.84.0
 Release:	1%{?dist}
 License:	(GPLv2 or GPLv3) and GPLv2+ and LGPLv2+ and MIT
-Group:		Development/Libraries
 URL:		http://poppler.freedesktop.org/
 
 Vendor:		bww bitwise works GmbH
-%scm_source github http://github.com/bitwiseworks/poppler-os2 0.6x-os2
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
 
-Requires: poppler-data >= 0.4.0
-Requires: nss >= 3.23.0
-BuildRequires: gcc make subversion zip
+BuildRequires: cmake
+BuildRequires: gcc-c++
+BuildRequires: gettext-devel
+#BuildRequires: pkgconfig(cairo)
+#BuildRequires: pkgconfig(cairo-ft)
+#BuildRequires: pkgconfig(cairo-pdf)
+#BuildRequires: pkgconfig(cairo-ps)
+#BuildRequires: pkgconfig(cairo-svg)
+BuildRequires: cairo-devel
+BuildRequires: pkgconfig(fontconfig)
+BuildRequires: pkgconfig(freetype2)
 
-BuildRequires:  gettext-devel
-BuildRequires:  libjpeg-devel
-BuildRequires:  openjpeg2-devel
-BuildRequires:  cairo-devel
-BuildRequires:  lcms2-devel
-BuildRequires:	libqt4-devel
-BuildRequires:	qt5-qtbase-devel
-BuildRequires:  libtiff-devel
-BuildRequires:  libpng-devel
-BuildRequires:  nss-devel >= 3.23.0
-BuildRequires:  freetype-devel >= 2.5.3
-BuildRequires:  fontconfig-devel >= 2.11.94
+#BuildRequires: pkgconfig(gdk-pixbuf-2.0)
+#BuildRequires: pkgconfig(gio-2.0)
+#BuildRequires: pkgconfig(gobject-2.0)
+#BuildRequires: pkgconfig(gobject-introspection-1.0) 
+#BuildRequires: pkgconfig(gtk+-3.0)
+#BuildRequires: pkgconfig(gtk-doc)
+BuildRequires: pkgconfig(lcms2)
+BuildRequires: pkgconfig(libjpeg)
+BuildRequires: pkgconfig(libopenjp2)
+BuildRequires: pkgconfig(libpng)
+BuildRequires: pkgconfig(libtiff-4)
+BuildRequires: pkgconfig(nss)
+BuildRequires: pkgconfig(poppler-data)
+BuildRequires: pkgconfig(Qt5Core)
+BuildRequires: pkgconfig(Qt5Gui)
+BuildRequires: pkgconfig(Qt5Test)
+BuildRequires: pkgconfig(Qt5Widgets)
+BuildRequires: pkgconfig(Qt5Xml)
+#BuildRequires: pkgconfig(QtCore)
+#BuildRequires: pkgconfig(QtGui)
+#BuildRequires: pkgconfig(QtTest)
+#BuildRequires: pkgconfig(QtXml)
+BuildRequires:libqt4-devel
 
-BuildRequires:	cmake >= 3.10
-BuildRequires:  pkgconfig
-BuildRequires:	zlib-devel
+Requires: poppler-data
+
+%if %{with_glib}
+Obsoletes: poppler-glib-demos < 0.60.1-1
+%endif
 
 %description
 %{name} is a PDF rendering library.
 
 %package devel
 Summary:	Libraries and headers for poppler
-Group:		Development/Libraries
 Requires:	%{name} = %{version}-%{release}
 
 %description devel
 You should install the poppler-devel package if you would like to
 compile applications based on poppler.
 
+%if %{with_glib}
+%package glib
+Summary: Glib wrapper for poppler
+Requires: %{name}%{?_isa} = %{version}-%{release}
+
+%description glib
+%{summary}.
+
+%package glib-devel
+Summary: Development files for glib wrapper
+Requires: %{name}-glib%{?_isa} = %{version}-%{release}
+Requires: %{name}-devel%{?_isa} = %{version}-%{release}
+Suggests: %{name}-doc = %{version}-%{release}
+
+%description glib-devel
+%{summary}.
+
+%package glib-doc
+Summary: Documentation for glib wrapper
+BuildArch: noarch
+
+%description glib-doc
+%{summary}.
+%endif
+
 %package qt
 Summary:	Qt4 wrapper for poppler
-Group:		System Environment/Libraries
 Requires:	%{name} = %{version}-%{release}
 %{?_qt4:Requires: qt4 >= %{_qt4_version}}
 Obsoletes:	poppler-qt4 < 0.16.0-3
 Provides:	poppler-qt4 = %{version}-%{release}
-
 %description qt
 %{summary}.
 
 %package qt-devel
 Summary:	Development files for Qt4 wrapper
-Group:		Development/Libraries
 Requires:	%{name}-qt = %{version}-%{release}
 Requires:	%{name}-devel = %{version}-%{release}
 Obsoletes:	poppler-qt4-devel < 0.16.0-3
 Provides:	poppler-qt4-devel = %{version}-%{release}
 Requires:	qt4-devel-kit
-
 %description qt-devel
 %{summary}.
 
 %package qt5
 Summary: Qt5 wrapper for poppler
-Group:   System Environment/Libraries
 Requires: %{name} = %{version}-%{release}
-%{?_qt5:Requires: qt5-qtbase >= %{_qt5_version}}
 %description qt5
 %{summary}.
 
 %package qt5-devel
 Summary: Development files for Qt5 wrapper
-Group:   Development/Libraries
 Requires: %{name}-qt5 = %{version}-%{release}
 Requires: %{name}-devel = %{version}-%{release}
 Requires: qt5-qtbase-devel
@@ -84,7 +126,6 @@ Requires: qt5-qtbase-devel
 
 %package cpp
 Summary: Pure C++ wrapper for poppler
-Group: Development/Libraries
 Requires: %{name} = %{version}-%{release}
 
 %description cpp
@@ -92,7 +133,6 @@ Requires: %{name} = %{version}-%{release}
 
 %package cpp-devel
 Summary: Development files for C++ wrapper
-Group: Development/Libraries
 Requires: %{name}-cpp = %{version}-%{release}
 Requires: %{name}-devel = %{version}-%{release}
 
@@ -101,20 +141,10 @@ Requires: %{name}-devel = %{version}-%{release}
 
 %package utils
 Summary:	Command line utilities for converting PDF files
-Group:		Applications/Text
 Requires:	%{name} = %{version}-%{release}
-
 %description utils
 Command line tools for manipulating PDF files and converting them to
 other formats.
-
-%package demos
-Summary:	Demos for poppler
-Group:		Applications/Text
-Requires:	%{name}-glib = %{version}-%{release}
-
-%description demos
-%{summary}.
 
 %legacy_runtime_packages
 
@@ -131,59 +161,108 @@ export VENDOR="%{vendor}"
 
 mkdir build
 cd build
-
-cmake  -DCMAKE_INSTALL_PREFIX:PATH=/@unixroot/usr \
-    -DCMAKE_SKIP_RPATH:BOOL=YES \
-    -DCMAKE_SKIP_INSTALL_RPATH:BOOL=YES \
-    -DENABLE_XPDF_HEADERS:BOOL=YES \
-    ..
+%cmake \
+  -DENABLE_CMS=lcms2 \
+  -DENABLE_DCTDECODER=libjpeg \
+%if %{with_glib}
+  -DENABLE_GTK_DOC=ON \
+%endif
+  -DENABLE_LIBOPENJPEG=openjpeg2 \
+  -DENABLE_UNSTABLE_API_ABI_HEADERS=ON \
+  -DENABLE_ZLIB=OFF \
+  ..
 
 %{__make} %{?_smp_mflags}
 
 %install
-rm -rf $RPM_BUILD_ROOT
-%make_install -C build CMAKE_DOC_DIR=%{buildroot}%{_pkgdocdir}
+%make_install -C build
 
+%check
+#make_build test
+
+# verify pkg-config sanity/version
+export PKG_CONFIG_PATH="%{buildroot}%{_datadir}/pkgconfig;%{buildroot}%{_libdir}/pkgconfig"
+# !!!
+# we have to use main_version when available, as the legacy macro screws the version
+# !!!
+test "$(pkg-config --modversion poppler)" = "%{?main_version}%{!?main_version:%{version}}"
+test "$(pkg-config --modversion poppler-cairo)" = "%{?main_version}%{!?main_version:%{version}}"
+test "$(pkg-config --modversion poppler-cpp)" = "%{?main_version}%{!?main_version:%{version}}"
+%if %{with_glib}
+test "$(pkg-config --modversion poppler-glib)" = "%{?main_version}%{!?main_version:%{version}}"
+%endif
+test "$(pkg-config --modversion poppler-qt4)" = "%{?main_version}%{!?main_version:%{version}}"
+test "$(pkg-config --modversion poppler-qt5)" = "%{?main_version}%{!?main_version:%{version}}"
+test "$(pkg-config --modversion poppler-splash)" = "%{?main_version}%{!?main_version:%{version}}"
+
+#ldconfig_scriptlets
+
+#ldconfig_scriptlets glib
+
+#ldconfig_scriptlets qt
+
+#ldconfig_scriptlets qt5
+
+#ldconfig_scriptlets cpp
 
 %files
-%doc README
+%doc README.md
 %license COPYING
-%attr(755,root,root) %{_libdir}/popple72.dll
+%{_libdir}/popple94.dll
 
 %files devel
-%attr(755,root,root) %{_libdir}/poppler_dll.a
 %{_libdir}/pkgconfig/poppler.pc
 %{_libdir}/pkgconfig/poppler-splash.pc
-%{_libdir}/pkgconfig/poppler-cairo.pc
+%{_libdir}/poppler_dll.a
 %dir %{_includedir}/poppler/
 # xpdf headers
 %{_includedir}/poppler/*.h
 %{_includedir}/poppler/fofi/
 %{_includedir}/poppler/goo/
 %{_includedir}/poppler/splash/
+%if !%{with_glib}
+%{_libdir}/pkgconfig/poppler-cairo.pc
+%endif
+
+%if %{with_glib}
+%files glib
+%{_libdir}/popplg*.dll
+%{_libdir}/girepository-1.0/Poppler-0.18.typelib
+
+%files glib-devel
+%{_libdir}/pkgconfig/poppler-glib.pc
+%{_libdir}/pkgconfig/poppler-cairo.pc
+%{_libdir}/poppler-glib_dll.a
+%{_datadir}/gir-1.0/Poppler-0.18.gir
+%{_includedir}/poppler/glib/
+
+%files glib-doc
+%license COPYING
+%{_datadir}/gtk-doc/
+%endif
 
 %files qt
-%attr(755,root,root) %{_libdir}/poppq4*.dll
+%{_libdir}/poppq4*.dll
 
 %files qt-devel
-%attr(755,root,root) %{_libdir}/poppler-qt4_dll.a
+%{_libdir}/poppler-qt4_dll.a
 %{_libdir}/pkgconfig/poppler-qt4.pc
 %{_includedir}/poppler/qt4/
 
 %files qt5
-%attr(755,root,root) %{_libdir}/poppq5*.dll
+%{_libdir}/poppq5*.dll
 
 %files qt5-devel
-%attr(755,root,root) %{_libdir}/poppler-qt5_dll.a
+%{_libdir}/poppler-qt5_dll.a
 %{_libdir}/pkgconfig/poppler-qt5.pc
 %{_includedir}/poppler/qt5/
 
 %files cpp
-%attr(755,root,root) %{_libdir}/popplc*.dll
+%{_libdir}/popplc*.dll
 
 %files cpp-devel
 %{_libdir}/pkgconfig/poppler-cpp.pc
-%attr(755,root,root) %{_libdir}/poppler-cpp_dll.a
+%{_libdir}/poppler-cpp_dll.a
 %{_includedir}/poppler/cpp
 
 %files utils
@@ -193,6 +272,11 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Mon Feb 03 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.84.0-1
+- update to vendor version 0.84.0
+- adapt the spec to latest fedora spec
+- add qt4 backend again like fedora does
+
 * Mon Sep 23 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.61.1-1
 - update to vendor version 0.61.1
 - include qt5 backend
