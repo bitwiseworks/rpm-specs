@@ -3,19 +3,17 @@
 
 Summary: Library providing XML and HTML support
 Name: libxml2
-Version: 2.9.8
-Release: 2%{?dist}
+Version: 2.9.9
+Release: 1%{?dist}
 License: MIT
-Group: Development/Libraries
 URL: http://xmlsoft.org/
 Vendor: bww bitwise works GmbH
 
-%scm_source  github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2-1
+%scm_source  github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
 
 # DEF files to create forwarders for the legacy package
 Source10:       libxml2.def
 
-BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildRequires: python-devel
 %if 0%{?with_python3}
 BuildRequires: python3-devel
@@ -38,7 +36,6 @@ URI library.
 
 %package devel
 Summary: Libraries, includes, etc. to develop XML and HTML applications
-Group: Development/Libraries
 Requires: libxml2 = %{version}-%{release}
 Requires: zlib-devel
 #Requires: xz-devel
@@ -58,7 +55,6 @@ URI library.
 
 %package static
 Summary: Static library for libxml2
-Group: Development/Libraries
 Requires: libxml2 = %{version}-%{release}
 
 %description static
@@ -85,7 +81,6 @@ at parse time or later once the document has been modified.
 %if 0%{?with_python3}
 %package -n python3-%{name}
 Summary: Python 3 bindings for the libxml2 library
-Group: Development/Libraries
 Requires: libxml2 = %{version}-%{release}
 Obsoletes: %{name}-python3 < %{version}-%{release}
 Provides: %{name}-python3 = %{version}-%{release}
@@ -237,6 +232,9 @@ rm -fr %{buildroot}
 %endif # with_python3
 
 %changelog
+* Wed Feb 12 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.9.9-1
+- update to vendor version 2.9.9
+
 * Fri Jan 18 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.9.8-2
 - enable file:// with drive letters
 
