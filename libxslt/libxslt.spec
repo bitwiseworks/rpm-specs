@@ -1,9 +1,8 @@
 Summary: Library providing the Gnome XSLT engine
 Name: libxslt
-Version: 1.1.32
+Version: 1.1.34
 Release: 1%{?dist}%{?extra_release}
 License: MIT
-Group: Development/Libraries
 URL: http://xmlsoft.org/XSLT/
 Vendor: bww bitwise works GmbH
 
@@ -31,7 +30,6 @@ installed. The xsltproc command is a command line interface to the XSLT engine
 
 %package devel
 Summary: Libraries, includes, etc. to embed the Gnome XSLT engine
-Group: Development/Libraries
 Requires: libxslt = %{version}-%{release}
 Requires: libxml2-devel >= 2.6.27
 #Requires: libgcrypt-devel
@@ -43,7 +41,6 @@ developing applications that use %{name}.
 
 %package python
 Summary: Python bindings for the libxslt library
-Group: Development/Libraries
 Requires: libxslt = %{version}-%{release}
 Requires: libxml2 >= 2.6.27
 Requires: libxml2-python >= 2.6.27
@@ -147,6 +144,9 @@ rm -fr %{buildroot}
 %doc python/tests/*.xsl
 
 %changelog
+* Wed Feb 12 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.1.34-1
+- update to vendor version 1.1.34
+
 * Thu Jul 26 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.1.32-1
 - update to vendor version 1.1.32
 - moved source to github
