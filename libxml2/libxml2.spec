@@ -4,12 +4,12 @@
 Summary: Library providing XML and HTML support
 Name: libxml2
 Version: 2.9.9
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: MIT
 URL: http://xmlsoft.org/
 Vendor: bww bitwise works GmbH
 
-%scm_source  github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
+%scm_source  github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2-1
 
 # DEF files to create forwarders for the legacy package
 Source10:       libxml2.def
@@ -232,6 +232,9 @@ rm -fr %{buildroot}
 %endif # with_python3
 
 %changelog
+* Mon Feb 17 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.9.9-2
+- fixed libxstl ticket #1 (enable loading of symbols with _)
+
 * Wed Feb 12 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.9.9-1
 - update to vendor version 2.9.9
 
