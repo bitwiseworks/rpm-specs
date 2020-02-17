@@ -3,7 +3,7 @@
 Name:      hunspell
 Summary:   A spell checker and morphological analyzer library
 Version:   1.7.0
-Release:   1%{?dist}
+Release:   2%{?dist}
 URL:       https://github.com/hunspell/hunspell
 Group:     System Environment/Libraries
 License:   LGPLv2+ or GPLv2+ or MPLv1.1
@@ -123,6 +123,9 @@ mkdir $RPM_BUILD_ROOT/%{_datadir}/myspell
 %{_mandir}/man5/hunspell.5.gz
 
 %changelog
+* Mon Feb 17 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.7.0-2
+- rebuild with gcc9
+
 * Wed May 29 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.7.0-1
 - update to upstream version 1.7.0
 
