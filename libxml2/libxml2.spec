@@ -233,7 +233,7 @@ rm -fr %{buildroot}
 
 %changelog
 * Mon Feb 17 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.9.9-2
-- fixed libxstl ticket #1 (enable loading of symbols with _)
+- fixed libxslt ticket #1 (enable loading of symbols with _)
 
 * Wed Feb 12 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.9.9-1
 - update to vendor version 2.9.9
