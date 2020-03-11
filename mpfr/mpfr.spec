@@ -1,17 +1,15 @@
 Summary: A C library for multiple-precision floating-point computations
 Name: mpfr
-Version: 3.1.0
-Release: 2%{?dist}
+Version: 4.0.2
+Release: 1%{?dist}
 URL: http://www.mpfr.org/
 
-Source0: http://www.mpfr.org/mpfr-current/%{name}-%{version}.tar.gz
-Patch0: mpfr.diff
+License: LGPLv3+
+BuildRequires: gmp-devel gcc
 
-License: LGPLv2+ and GPLv2+ and GFDL
-Group: System Environment/Libraries
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-#BuildRequires: autoconf libtool gmp-devel
-Requires: gmp >= 4.2.1
+#Source0: http://www.mpfr.org/%{name}-%{version}/%{name}-%{version}.tar.xz
+Vendor:	bww bitwise works GmbH
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
 
 %description
 The MPFR library is a C library for multiple-precision floating-point
@@ -22,9 +20,8 @@ ANSI/IEEE-754 standard for double-precision floating-point arithmetic
 
 %package devel
 Summary: Development tools A C library for mpfr library
-Group: Development/Libraries
 Requires: %{name} = %{version}-%{release}
-#Requires: gmp-devel
+Requires: gmp-devel
 
 %description devel
 The static libraries, header files and documentation for using the MPFR 
@@ -34,49 +31,82 @@ If you want to develop applications which will use the MPFR library,
 you'll need to install the mpfr-devel package.  You'll also need to
 install the mpfr package.
 
+%package doc
+Summary: Documentation for the MPFR library
+License: GFDL
+BuildArch: noarch
+
+%description doc
+Documentation for the MPFR library.
+
+%legacy_runtime_packages
+
+%debug_package
+
 %prep
-%setup -q
-%patch0 -p1 -b .os2~
+%scm_setup
+autoreconf -fvi
 
 %build
-export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
-%configure \
-        --disable-shared --enable-static \
-        --disable-assert \
-        "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
+export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp -lcx"
+%configure --disable-assert --disable-static
+
+%if 0
+# Get rid of undesirable hardcoded rpaths; workaround libtool reordering
+# -Wl,--as-needed after all the libraries.
+sed -e 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' \
+    -e 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' \
+    -e 's|CC="\(g..\)"|CC="\1 -Wl,--as-needed"|' \
+    -i libtool
+%endif
+
+# Set BUILDLEVEL to be embedded to all DLLs built with Libtool.
+export LT_BUILDLEVEL="@#%{vendor}:%{version}-%{release}#@##1## `LANG=C date +'%%d %%b %%Y %%H:%%M:%%S'`     `uname -n`::::0::"
+
 make %{?_smp_mflags}
 
 %install
-rm -rf $RPM_BUILD_ROOT
-#iconv  -f iso-8859-1 -t utf-8 mpfr.info >mpfr.info.aux
-#mv mpfr.info.aux mpfr.info
-make install DESTDIR=$RPM_BUILD_ROOT
+%make_install
+cp -p PATCHES README %{buildroot}%{_docdir}/%{name}
+rm -f %{buildroot}%{_libdir}/*.la
+rm -f %{buildroot}%{_infodir}/dir
 
-cp -p src/mpfr.dll $RPM_BUILD_ROOT%{_libdir}
-cp -p src/.libs/mpfr_s.a $RPM_BUILD_ROOT%{_libdir}
+#these go into licenses, not doc
+rm -f %{buildroot}%{_docdir}/%{name}/COPYING
+rm -f %{buildroot}%{_docdir}/%{name}/COPYING.LESSER
 
-rm -f $RPM_BUILD_ROOT%{_libdir}/libmpfr.la
-rm -f $RPM_BUILD_ROOT%{_infodir}/dir
-rm -f $RPM_BUILD_ROOT%{_libdir}/libmpfr.a
-cd ..
-mkdir $RPM_BUILD_ROOT/%{_docdir}/%{name}-%{version}
-mv $RPM_BUILD_ROOT/%{_docdir}/%{name}/ $RPM_BUILD_ROOT/%{_docdir}/%{name}-%{version}/
-
-%clean
-rm -rf $RPM_BUILD_ROOT
+%check
+export BEGINLIBPATH=%{buildroot}%{_libdir}
+export LD_LIBRARY_PATH=%{buildroot}%{_libdir}
+make check
 
 %files
-%defattr(-,root,root,-)
-%doc COPYING NEWS README
-%{_libdir}/mpfr.dll
+%license COPYING COPYING.LESSER
+%{_docdir}/%{name}/BUGS
+%{_docdir}/%{name}/NEWS
+%{_docdir}/%{name}/PATCHES
+%{_docdir}/%{name}/README
+%{_libdir}/mpfr6.dll
 
 %files devel
-%defattr(-,root,root,-)
-%{_libdir}/mpfr*.a
-%{_includedir}/*.h
+%{_libdir}/mpfr*_dll.a
+%{_includedir}/mpfr.h
+%{_includedir}/mpf2mpfr.h
+%{_libdir}/pkgconfig/mpfr.pc
+
+%files doc
+%{_docdir}/%{name}/AUTHORS
+%{_docdir}/%{name}/examples
+%{_docdir}/%{name}/FAQ.html
+%{_docdir}/%{name}/TODO
 %{_infodir}/mpfr.info*
 
 %changelog
+* Wed Mar 11 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 4.0.2-1
+- update to version 4.0.2
+- add legacy dll
+- reworked the spec
+
 * Fri Dec 02 2011 yd
 - build as dll
 
