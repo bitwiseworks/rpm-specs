@@ -7,7 +7,7 @@ Url:        https://github.com/bitwiseworks/kbuild-os2
 Epoch:      1
 
 Version:    0.1.9998
-Release:    12%{?dist}
+Release:    13%{?dist}
 
 %scm_source github https://github.com/bitwiseworks/kbuild-os2 d197e375ed672dbe2c78f55313ffe0d826e7a484
 #scm_source git file://D:/Coding/kbuild/master d197e375ed672dbe2c78f55313ffe0d826e7a484
@@ -34,6 +34,7 @@ Group:      System Environment/Libraries
 %defattr(-,root,root,-)
 %docdir %{pkg_docdir}/
 %{_bindir}/*
+%exclude %{_bindir}/*.dbg
 %exclude %{_bindir}/make.exe
 %{_datadir}/*
 
@@ -55,6 +56,9 @@ compatible with the vanilla GNU Make function-wise.
 %files make
 %defattr(-,root,root,-)
 %{_bindir}/make.exe
+%exclude %{_bindir}/*.dbg
+
+%debug_package
 
 #------------------------------------------------------------------------------
 %prep
@@ -89,7 +93,7 @@ KBUILD_SVN_GIT := 1
         MY_INST_DOC=${MY_INST_DOC#/}/ \
         MY_INST_MODE=0644 \
         MY_INST_BIN_MODE=0755" \
-    BUILD_PLATFORM= \
+    BUILD_PLATFORM=os2 \
 
 %{kmk_env}
 
@@ -119,6 +123,9 @@ cmd /c "kBuild\envos2.cmd" kmk $KMK_FLAGS PATH_INS="%{buildroot}" install
 
 #------------------------------------------------------------------------------
 %changelog
+* Tue Mar 17 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.1.9998-13
+- add a debug package to the rpm
+
 * Sat Feb 2 2019 Dmitriy Kuminov <coding@dmik.org> 0.1.9998-12
 - Fix kmk crash when processing some makefiles (e.g. LIBCx ones).
 - Link kmk binaries against LIBCx to install EXCEPTQ handler.
