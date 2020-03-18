@@ -7,7 +7,7 @@ Url:        https://github.com/bitwiseworks/kbuild-os2
 Epoch:      1
 
 Version:    0.1.9998
-Release:    13%{?dist}
+Release:    14%{?dist}
 
 %scm_source github https://github.com/bitwiseworks/kbuild-os2 d197e375ed672dbe2c78f55313ffe0d826e7a484
 #scm_source git file://D:/Coding/kbuild/master d197e375ed672dbe2c78f55313ffe0d826e7a484
@@ -93,7 +93,7 @@ KBUILD_SVN_GIT := 1
         MY_INST_DOC=${MY_INST_DOC#/}/ \
         MY_INST_MODE=0644 \
         MY_INST_BIN_MODE=0755" \
-    BUILD_PLATFORM=os2 \
+    unset BUILD_PLATFORM \
 
 %{kmk_env}
 
@@ -123,6 +123,10 @@ cmd /c "kBuild\envos2.cmd" kmk $KMK_FLAGS PATH_INS="%{buildroot}" install
 
 #------------------------------------------------------------------------------
 %changelog
+* Wed Mar 18 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.1.9998-14
+- use unset BUILD_PLATFORM again as before commit
+  https://github.com/bitwiseworks/rpm-specs/commit/2c28b9a5e1f79e4e53b4d953566bfc9c573967ab
+
 * Tue Mar 17 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.1.9998-13
 - add a debug package to the rpm
 
