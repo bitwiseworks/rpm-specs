@@ -1,14 +1,16 @@
 %define release_name Prelude
-%define dist_version 01
+%define dist_version 00
 
 Summary:	OS/2 release files
 Name:		os2-release
 Version:	%{dist_version}
-Release:        1%{?dist}
+Release:        4%{?dist}
 License:	GPLv2
 Group:		System Environment/Base
 URL:		http://www.netlabs.org
 
+Obsoletes:	redhat-release
+Provides:	redhat-release
 Provides:	system-release = %{version}-%{release}
 BuildArch:	noarch
 
@@ -29,6 +31,7 @@ cat >> $RPM_BUILD_ROOT%{_sysconfdir}/rpm/macros.dist << EOF
 %%os2		%{dist_version}
 %%dist		.oc%{dist_version}
 %%oc%{dist_version}		1
+%%os2_version	5
 EOF
 
 %files
@@ -37,9 +40,8 @@ EOF
 %config %attr(0644,root,root) %{_sysconfdir}/rpm/macros.dist
 
 %changelog
-* Tue Mar 17 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> 01-1
-- set version to 1, so %%if %%{os2} works in spec files
-- don't provide redhat-release
+* Wed Mar 18 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> 00-4
+- add os2_version to macros.dist, so %%if %%{os2_version} works in spec files
 
 * Mon Aug 29 2011 yd <yd@os2power.com> 00-3
 - massive rebuild (not released spec)
