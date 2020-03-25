@@ -2,7 +2,7 @@
 
 Name:           libevent
 Version:        2.1.11
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Abstract asynchronous event notification library
 
 # arc4random.c, which is used in build, is ISC. The rest is BSD.
@@ -72,7 +72,7 @@ make DESTDIR=$RPM_BUILD_ROOT install
 rm -f $RPM_BUILD_ROOT%{_libdir}/*.la
 
 # not on OS/2, so disabled
-%if 1
+%if !0%{?os2_version}
 # Fix multilib install of devel (bug #477685)
 mv $RPM_BUILD_ROOT%{_includedir}/event2/event-config.h \
    $RPM_BUILD_ROOT%{_includedir}/event2/event-config-%{__isa_bits}.h
@@ -132,5 +132,8 @@ mkdir -p $RPM_BUILD_ROOT/%{develdocdir}/sample
 %doc %{develdocdir}/
 
 %changelog
+* Wed Mar 11 2020 Silvan Scherrer <silvan.scherrer@aroa.cg> - 2.1.11-2
+- fix a wrong if in the spec
+
 * Fri Feb 28 2020 Silvan Scherrer <silvan.scherrer@aroa.cg> - 2.1.11-1
 - first OS/2 rpm version
