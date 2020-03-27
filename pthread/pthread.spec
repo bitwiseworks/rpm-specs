@@ -2,13 +2,13 @@
 
 Summary: A posix pthread emulation for OS/2 and OS/2 based systems
 Name: pthread
-Version: 0.1.1
+Version: 0.2.0
 Release: 1%{?dist}
 License: unknown
 Vendor:  bww bitwise works GmbH
 Epoch: 2
 
-%scm_source github http://github.com/bitwiseworks/pthread %{version}
+%scm_source github http://github.com/bitwiseworks/pthread-os2 %{version}
 
 BuildRequires: gcc make
 
@@ -70,6 +70,11 @@ rm -rf %{buildroot}
 %{_libdir}/pthread.dll
 
 %changelog
+* Fri Mar 27 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> 2:0.2.0-1
+- fix compiler warnings
+- make pthread_key_creation thread safe
+- make pthread_key_t integer for compatibility with POSIX
+
 * Mon Jan 06 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> 2:0.1.1-1
 - add a real pthread_sigmask, so returncode is correct
 - move source to github and clean it a bit
