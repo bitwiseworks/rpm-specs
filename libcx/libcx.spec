@@ -1,6 +1,6 @@
 Name: libcx
 Summary: kLIBC Extension Library
-Version: 0.6.6
+Version: 0.6.7
 Release: 1%{?dist}
 License: LGPLv2.1+
 Group: System/Libraries
@@ -17,6 +17,8 @@ Provides: libpoll
 
 # Due to patch from kLIBC #366
 Requires: libc >= 0.6.6-35
+# Due to LIBCn #62 (socklen_t)
+BuildRequires: libc-devel >= 1:0.1.4
 
 %description
 The kLIBC Extension Library extends the functionality of the kLIBC library
@@ -88,6 +90,10 @@ rm -rf %{buildroot}
 %{_includedir}/libcx/spawn2.h
 
 %changelog
+* Fri Mar 27 2020 Dmitriy Kuminov <coding@dmik.org> 0.6.7-1
+- Release version 0.6.7
+  (https://github.com/bitwiseworks/libcx/blob/0.6.7/CHANGELOG.md).
+
 * Mon Jul 15 2019 Dmitriy Kuminov <coding@dmik.org> 0.6.6-1
 - Release version 0.6.6
   (https://github.com/bitwiseworks/libcx/blob/0.6.6/CHANGELOG.md).
