@@ -2,7 +2,7 @@
 %global gcc_version %{gcc_major}.2.0
 # Note, gcc_release must be integer, if you want to add suffixes to
 # %%{release}, append them after %%{gcc_release} on Release: line.
-%global gcc_release 2
+%global gcc_release 3
 
 %global build_ada 0
 %global build_objc 0
@@ -47,8 +47,8 @@ rpm.define(string.format("version_underscores %s",
            string.gsub(rpm.expand('%{version}'), '%.', '_')))
 }
 
-%scm_source github https://github.com/bitwiseworks/gcc-os2 gcc-%{version_underscores}-release-os2-b1
-#scm_source git file://D:/Coding/gcc/master ee72211
+%scm_source github https://github.com/bitwiseworks/gcc-os2 gcc-%{version_underscores}-release-os2-b2
+#scm_source git file://D:/Coding/gcc/master cf3ddd6
 
 Source1: gcc335.def
 Source2: gcc432.def
@@ -82,8 +82,9 @@ Source102: stdcpp.def
 URL: http://gcc.gnu.org
 Vendor:  bww bitwise works GmbH
 
-# For fixed EMXOMF with new libibetry from binutils 2.33.1
-BuildRequires: libc-devel >= 1:0.1.3
+# For fixed EMXOMF with new libibetry from binutils 2.33.1, wide char support.
+Requires: libc >= 1:0.1.4
+BuildRequires: libc-devel >= 1:0.1.4
 BuildRequires: binutils >= 2.33.1, make
 
 BuildRequires: zlib-devel, gettext, bison, flex
@@ -92,7 +93,7 @@ BuildRequires: zlib-devel, gettext, bison, flex
 BuildRequires: texinfo, perl
 # TODO texinfo tex is broken for now
 # texinfo-tex
-BuildRequires: gmp-devel >= 4.1.2-8, mpfr-devel >= 2.2.1, mpc-devel >= 0.8.1
+BuildRequires: gmp-devel >= 4.1.2-8, mpfr-devel >= 2.2.1, libmpc-devel >= 0.8.1
 BuildRequires: python-devel python
 BuildRequires: gcc gcc-c++
 BuildRequires: gcc-wlink
@@ -164,7 +165,8 @@ You'll need this package in order to compile C code.
 %package -n libgcc
 Summary: GCC version %{gcc_major} shared support library
 # Obsolete GCC 4.x package
-Obsoletes: libgcc1
+Obsoletes: libgcc1 < %{version}-%{release}
+Provides: libgcc1 = %{version}-%{release}
 
 %description -n libgcc
 This package contains GCC shared support library which is needed
@@ -225,8 +227,10 @@ including templates and exception handling.
 Summary: GNU Standard C++ Library
 Requires: libgcc = %{version}-%{release}
 # Obsolete GCC 4.x packages
-Obsoletes: libstdc++6
-Obsoletes: libsupc++6
+Obsoletes: libstdc++6 < %{version}-%{release}
+Obsoletes: libsupc++6 < %{version}-%{release}
+Provides: libstdc++6 = %{version}-%{release}
+Provides: libsupc++6 = %{version}-%{release}
 
 %description -n libstdc++
 The libstdc++ package contains a rewritten standard compliant GCC Standard
@@ -1799,6 +1803,13 @@ fi
 %doc gcc-wrc.txt
 
 %changelog
+* Fri Mar 27 2020 Dmitriy Kuminov <coding@dmik.org> - 9.2.0-3
+- Release version 9.2.0 OS/2 Beta 2.
+  (https://github.com/bitwiseworks/gcc-os2/blob/gcc-9_2_0-release-os2-b2/ChangeLog.md).
+- Provide libgcc1 and libstdc++6 as aliasses for libgcc and libstdc++6 as some
+  .spec may use Require them directly.
+- Change mpc-devel dependency to libmpc-devel (remaned according to Fedora).
+
 * Wed Jan 15 2020 Dmitriy Kuminov <coding@dmik.org> - 9.2.0-2
 - Use os2_config_sys macro (with -e and %%) instead of hard-coded c:\config.sys.
 - Fix gcc1.dll BLDLEVEL string.
