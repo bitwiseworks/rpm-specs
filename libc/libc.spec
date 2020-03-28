@@ -1,7 +1,7 @@
 # Defines the major version (used in the DLL name)
 %define ver_maj 0
 
-# Disable .dbg creation for forwaders and compression fo the main DLL
+# Disable .dbg creation for forwaders and compression for the main DLL
 # (will be done manually with special compression options)
 %define _strip_opts --debuginfo -x "libc*.dll" --compress -x "libcn%{ver_maj}.dll"
 
@@ -12,7 +12,7 @@ Name:           libc
 License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Standard Shared Libraries
 Group:          System/Libraries
-Version:        %{ver_maj}.1.3
+Version:        %{ver_maj}.1.4
 Release:        1%{?dist}
 Vendor:         bww bitwise works GmbH
 Url:            https://github.com/bitwiseworks/libc
@@ -158,6 +158,7 @@ lxlite /F+ /AP:4096 /MRN /MLN /MF1 %{buildroot}%{_libdir}/libcn%{ver_maj}.dll
 
 # remove .map files
 %{__rm} -f %{buildroot}%{_libdir}/*.map
+%{__rm} -f %{buildroot}%{_libdir}/log/*.map
 
 # remove ELH and PRF DLLs due to missing kdbglib.dll and kprofile.dll
 # (http://trac.netlabs.org/rpm/ticket/196)
@@ -204,6 +205,7 @@ rm -rf "%{buildroot}"
 %exclude %{_includedir}/ndbm.h
 %exclude %{_includedir}/libintl.h
 %{_libdir}
+%dir %{_libdir}/log
 %exclude %{_libdir}/libc*.dll
 %exclude %{_bindir}/pwd_mkdb.exe
 
@@ -218,6 +220,12 @@ rm -rf "%{buildroot}"
 
 
 %changelog
+* Fri Mar 27 2020 Dmitriy Kuminov <coding@dmik.org> 1:0.1.4-1
+- Release LIBC Next version 0.1.4
+  (https://github.com/bitwiseworks/libc/blob/0.1.4/CHANGELOG.md).
+- Build with GCC 9 and for pentium4 as well as for i686.
+- devel: Install logging version of DLL to /@unixroot/usr/lib/log/.
+
 * Wed Dec 25 2019 Dmitriy Kuminov <coding@dmik.org> 1:0.1.3-1
 - Release LIBC Next version 0.1.3
   (https://github.com/bitwiseworks/libc/blob/0.1.3/CHANGELOG.md).
