@@ -2,7 +2,7 @@
 
 Summary: A posix pthread emulation for OS/2 and OS/2 based systems
 Name: pthread
-Version: 0.2.0
+Version: 0.2.1
 Release: 1%{?dist}
 License: unknown
 Vendor:  bww bitwise works GmbH
@@ -70,10 +70,14 @@ rm -rf %{buildroot}
 %{_libdir}/pthread.dll
 
 %changelog
+* Tue Mar 31 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> 2:0.2.1-1
+- fix a regression of 0.2.0 (Dmitriy Kuminov)
+- fix wrong dates in spec file
+
 * Fri Mar 27 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> 2:0.2.0-1
-- fix compiler warnings
-- make pthread_key_creation thread safe
-- make pthread_key_t integer for compatibility with POSIX
+- fix compiler warnings (Dmitriy Kuminov)
+- make pthread_key_creation thread safe (Dmitriy Kuminov)
+- make pthread_key_t integer for compatibility with POSIX (Dmitriy Kuminov)
 
 * Mon Jan 06 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> 2:0.1.1-1
 - add a real pthread_sigmask, so returncode is correct
@@ -124,7 +128,7 @@ rm -rf %{buildroot}
 * Wed Feb 26 2014 komh
 - r704, pthread_mutex_destroy() crashs if a variable with PTHREAD_MUTEX_INITIALIZER is passed.
 
-* Sat Nov 17 2013 yd
+* Sun Nov 17 2013 yd
 - r684, fix initializer for mutex destroy, fixes AOO i123001.
 
 * Mon Sep 24 2012 yd
@@ -137,7 +141,7 @@ rm -rf %{buildroot}
 - added -Zdll to build system
 - improved build system
 
-* Thu Oct 11 2011 yd
+* Tue Oct 11 2011 yd
 - exception record must be on stack
 - always uninstall record from running thread
 - use new LibLoadExceptq to enable exceptq only if main app loads it. Code by Rich Walsh.
