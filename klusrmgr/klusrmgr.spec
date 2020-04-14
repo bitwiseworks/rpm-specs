@@ -6,7 +6,7 @@
 Summary:    (kLIBC) User Manager
 Name:       klusrmgr
 Version:    1.3.2
-Release:    1%{?dist}
+Release:    2%{?dist}
 License:    proprietary
 Group:      Applications/System
 URL:        http://www.netlabs.org/vxapps
@@ -86,6 +86,9 @@ fi
 
 
 %changelog
+* Tue Apr 14 2020 hb <herwig.bauernfeind@bitwiseworks.com> 1.3.2-2
+- Clean fix for uninitiazed groupname. stem variable
+
 * Sun Apr 12 2020 hb <herwig.bauernfeind@bitwiseworks.com> 1.3.2-1
 - Testfix for uninitislized groupname variable
 
