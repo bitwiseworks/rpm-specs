@@ -1,32 +1,28 @@
-# Note: this .spec is borrowed from icu-56.1-3.fc24.src.rpm
+#%%global debugtrace 1
+%global with_test 0
 
 Name:      icu
-Version:   56.1
-Release:   2%{?dist}
+Version:   65.1
+Release:   1%{?dist}
 Summary:   International Components for Unicode
-Group:     Development/Tools
+
 License:   MIT and UCD and Public Domain
-URL:       http://www.icu-project.org/
-#Source0:   http://download.icu-project.org/files/icu4c/56.1/icu4c-56_1-src.tgz
+URL:       http://site.icu-project.org/
+Vendor:    bww bitwise works GmbH
 
-# @todo (dmik) no doxygen RPM yet
-#BuildRequires: doxygen
-BuildRequires: autoconf
-Requires: lib%{name}%{?_isa} = %{version}-%{release}
+#scm_source github http://github.com(bitwiseworks/%{name}-os2 %{version}-os2
+%scm_source git e:/trees/icu/git %{version}-os2
 
-%scm_source svn http://svn.netlabs.org/repos/ports/icu/trunk 1388
-
-BuildRequires: gcc make
-
-Patch4: gennorm2-man.patch
-Patch5: icuinfo-man.patch
+BuildRequires: gcc
+BuildRequires: gcc-c++
+BuildRequires: doxygen, autoconf, python
+Requires: lib%{name} = %{version}-%{release}
 
 %description
 Tools and utilities for developing with icu.
 
 %package -n lib%{name}
 Summary: International Components for Unicode - libraries
-Group:   System Environment/Libraries
 
 %description -n lib%{name}
 The International Components for Unicode (ICU) libraries provide
@@ -42,44 +38,45 @@ customize the supplied services.
 
 %package  -n lib%{name}-devel
 Summary:  Development files for International Components for Unicode
-Group:    Development/Libraries
-Requires: lib%{name}%{?_isa} = %{version}-%{release}
+Requires: lib%{name} = %{version}-%{release}
 Requires: pkgconfig
 
 %description -n lib%{name}-devel
 Includes and definitions for developing with icu.
 
-# @todo (dmik) no doxygen RPM yet
-#%package -n lib%{name}-doc
-#Summary: Documentation for International Components for Unicode
-#Group:   Documentation
-#BuildArch: noarch
+%package -n lib%{name}-doc
+Summary: Documentation for International Components for Unicode
+BuildArch: noarch
 
-# @todo (dmik) no doxygen RPM yet
-#%description -n lib%{name}-doc
-#%{summary}.
+%description -n lib%{name}-doc
+%{summary}.
+
+%if !0%{os2_version}
+%{!?endian: %global endian %(%{__python} -c "import sys;print (0 if sys.byteorder=='big' else 1)")}
+# " this line just fixes syntax highlighting for vim that is confused by the above and continues literal
+%endif
+
+%debug_package
+
 
 %prep
-
 %scm_setup
 
-%patch4 -p1
-%patch5 -p1
 
 %build
 
 cd source
 autoreconf -fvi
-export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
-%configure --with-data-packaging=library --disable-samples \
-           --disable-renaming \
-           --enable-shared --disable-static
+export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp -lcx"
+export VENDOR="%{vendor}"
 
-# The configure --disable-renaming and possibly other options
-# result in icu/source/uconfig.h.prepend being created, include that content in
-# icu/source/common/unicode/uconfig.h to propagate to consumer packages.
-test -f uconfig.h.prepend && sed -e '/^#define __UCONFIG_H__/ r uconfig.h.prepend' -i common/unicode/uconfig.h
+#rhbz856594 do not use --disable-renaming or cope with the mess
+OPTIONS='--with-data-packaging=library --disable-samples'
+%if 0%{?debugtrace}
+OPTIONS=$OPTIONS' --enable-debug --enable-tracing'
+%endif
 
+# We deal with the mess it seems :)
 # We use --disable-renaming in configure options to build a non-versioned librariy for
 # system-wide installation on OS/2. This installation also requires hiding draft and
 # deprecated API to maintain backward ABI compatibility (see
@@ -89,34 +86,68 @@ test -f uconfig.h.prepend && sed -e '/^#define __UCONFIG_H__/ r uconfig.h.prepen
 # or U_HIDE_DEPRECATED_API (despite readme.html recommedation) for the same reason...
 # Note that we actually can't use U_HIDE_DRAFT_API... This part of ICU is really broken.
 # And the open source model is really evil. Really. Low code quality.
-#echo '
-##define U_HIDE_DRAFT_API 1
-#' > uconfig.h.prepend
-#sed -e '/^#define __UCONFIG_H__/ r uconfig.h.prepend' -i common/unicode/uconfig.h
+%if 0%{os2_version}
+OPTIONS=$OPTIONS' --disable-renaming --enable-shared --disable-static'
+%endif
+%configure $OPTIONS
 
-make %{?_smp_mflags}
-# @todo (dmik) no doxygen RPM yet
-#make %{?_smp_mflags} doc
+#rhbz#225896
+%if !0%{os2_version}
+sed -i 's|-nodefaultlibs -nostdlib||' config/mh-linux
+%endif
+#rhbz#813484
+sed -i 's| \$(docfilesdir)/installdox||' Makefile
+# There is no source/doc/html/search/ directory
+sed -i '/^\s\+\$(INSTALL_DATA) \$(docsrchfiles) \$(DESTDIR)\$(docdir)\/\$(docsubsrchdir)\s*$/d' Makefile
+# rhbz#856594 The configure --disable-renaming and possibly other options
+# result in icu/source/uconfig.h.prepend being created, include that content in
+# icu/source/common/unicode/uconfig.h to propagate to consumer packages.
+test -f uconfig.h.prepend && sed -e '/^#define __UCONFIG_H__/ r uconfig.h.prepend' -i common/unicode/uconfig.h
+
+# more verbosity for build.log
+sed -i -r 's|(PKGDATA_OPTS = )|\1-v |' data/Makefile
+
+make %{?_smp_mflags} VERBOSE=1
+make %{?_smp_mflags} doc
+
 
 %install
-
-# @todo (dmik) no doxygen RPM yet
-#rm -rf $RPM_BUILD_ROOT source/__docs
+rm -rf $RPM_BUILD_ROOT source/__docs
 make %{?_smp_mflags} -C source install DESTDIR=$RPM_BUILD_ROOT
-
-# @todo (dmik) no doxygen RPM yet
-#make %{?_smp_mflags} -C source install-doc docdir=__docs
+make %{?_smp_mflags} -C source install-doc docdir=__docs
+%if !0%{os2_version}
+chmod +x $RPM_BUILD_ROOT%{_libdir}/*.so.*
+(
+ cd $RPM_BUILD_ROOT%{_bindir}
+ mv icu-config icu-config-%{__isa_bits}
+)
+install -p -m755 -D %{SOURCE1} $RPM_BUILD_ROOT%{_bindir}/icu-config
+%endif
 
 %check
-
 # test to ensure that -j(X>1) didn't "break" man pages. b.f.u #2357
 if grep -q @VERSION@ source/tools/*/*.8 source/tools/*/*.1 source/config/*.1; then
     exit 1
 fi
-# make %{?_smp_mflags} -C source check
+%if 0%{?with_test}
+make %{?_smp_mflags} -C source check
+%endif
+
+# log available codes
+%if !0%{os2_version}
+pushd source
+LD_LIBRARY_PATH=lib:stubdata:tools/ctestfw:$LD_LIBRARY_PATH bin/uconv -l
+%endif
+
+
+%if !0%{os2_version}
+%ldconfig_scriptlets -n lib%{name}
+%endif
+
 
 %files
-%defattr(-,root,root,-)
+%license license.html
+%exclude %{_datadir}/%{name}/*/LICENSE
 %{_bindir}/derb.exe
 %{_bindir}/genbrk.exe
 %{_bindir}/gencfu.exe
@@ -139,17 +170,17 @@ fi
 %{_mandir}/man8/*.8*
 
 %files -n lib%{name}
-%defattr(-,root,root,-)
-%doc license.html readme.html
+%license LICENSE
+%doc readme.html
 %{_libdir}/*.dll
 
 %files -n lib%{name}-devel
-%defattr(-,root,root,-)
+%license LICENSE
+%doc source/samples/
 %{_bindir}/%{name}-config
 %{_bindir}/icuinfo.exe
 %{_mandir}/man1/%{name}-config.1*
 %{_mandir}/man1/icuinfo.1*
-%{_includedir}/layout
 %{_includedir}/unicode
 %{_libdir}/*_dll.a
 %{_libdir}/pkgconfig/*.pc
@@ -159,15 +190,20 @@ fi
 %{_datadir}/%{name}/%{version}/install-sh
 %{_datadir}/%{name}/%{version}/mkinstalldirs
 %{_datadir}/%{name}/%{version}/config
-%doc %{_datadir}/%{name}/%{version}/license.html
 
-# @todo (dmik) no doxygen RPM yet
-#%files -n lib%{name}-doc
-#%defattr(-,root,root,-)
-#%doc license.html readme.html
-#%doc source/__docs/%{name}/html/*
+%files -n lib%{name}-doc
+%license LICENSE
+%doc readme.html
+%doc source/__docs/%{name}/html/*
+
 
 %changelog
+* Wed Apr 15 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> 65.1-1
+- moved source to github
+- enable doxygen
+- add bldlevel to the dll
+- update to latest source
+
 * Wed Dec 27 2017 Dmitriy Kuminov <coding@dmik.org> 56.1-2
 - Build with high memory support.
 - Use scm_source macro and friends.
