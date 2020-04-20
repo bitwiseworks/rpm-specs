@@ -10,8 +10,7 @@ License:   MIT and UCD and Public Domain
 URL:       http://site.icu-project.org/
 Vendor:    bww bitwise works GmbH
 
-#scm_source github http://github.com(bitwiseworks/%{name}-os2 %{version}-os2
-%scm_source git e:/trees/icu/git %{version}-os2
+%scm_source github http://github.com(bitwiseworks/%{name}-os2 %{version}-os2
 
 BuildRequires: gcc
 BuildRequires: gcc-c++
@@ -157,7 +156,7 @@ LD_LIBRARY_PATH=lib:stubdata:tools/ctestfw:$LD_LIBRARY_PATH bin/uconv -l
 %{_bindir}/makeconv.exe
 %{_bindir}/pkgdata.exe
 %{_bindir}/uconv.exe
-%{_sbindir}/*
+%{_sbindir}/*.exe
 %{_mandir}/man1/derb.1*
 %{_mandir}/man1/gencfu.1*
 %{_mandir}/man1/gencnval.1*
@@ -194,7 +193,11 @@ LD_LIBRARY_PATH=lib:stubdata:tools/ctestfw:$LD_LIBRARY_PATH bin/uconv -l
 %files -n lib%{name}-doc
 %license LICENSE
 %doc readme.html
-%doc source/__docs/%{name}/html/*
+# we have to split the docs in smaller parts, as the length otherwise
+# exceeds 32k
+%doc source/__docs/icu/html/[a-f]*
+%doc source/__docs/icu/html/[g-z]*
+%doc source/__docs/icu/html/[A-Z]*
 
 
 %changelog
