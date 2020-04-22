@@ -1,15 +1,15 @@
-# remove the comment below, when we have python3 support
-#global with_python3 1
+# enable python3 when we have it
+%global with_python3 0
 
 Summary: Library providing XML and HTML support
 Name: libxml2
-Version: 2.9.9
-Release: 2%{?dist}
+Version: 2.9.10
+Release: 1%{?dist}
 License: MIT
 URL: http://xmlsoft.org/
 Vendor: bww bitwise works GmbH
 
-%scm_source  github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2-1
+%scm_source  github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
 
 # DEF files to create forwarders for the legacy package
 Source10:       libxml2.def
@@ -20,7 +20,7 @@ BuildRequires: python3-devel
 %endif # with_python3
 BuildRequires: zlib-devel
 BuildRequires: pkgconfig
-#BuildRequires: xz-devel
+Buildrequires: libicu-devel
 Requires: libcx >= 0.4
 
 %description
@@ -38,7 +38,6 @@ URI library.
 Summary: Libraries, includes, etc. to develop XML and HTML applications
 Requires: libxml2 = %{version}-%{release}
 Requires: zlib-devel
-#Requires: xz-devel
 Requires: pkgconfig
 
 %description devel
@@ -119,7 +118,7 @@ autogen.sh
 export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 export LIBS="-lcx"
 export VENDOR="%{vendor}"
-%configure
+%configure --with-icu --enable-ipv6=no
 
 make %{?smp_mflags}
 
@@ -153,7 +152,8 @@ gcc -Zomf -Zdll -nostdlib libxml2.def -l$RPM_BUILD_ROOT/%{_libdir}/xml22.dll -le
 ln -s %{_libdir}/python2.7/site-packages/xml2mod.dll $RPM_BUILD_ROOT%{_libdir}/python2.7/site-packages/libxml2mod.pyd
 
 %check
-#make runtests
+export BEGINLIBPATH=%{_builddir}/%{buildsubdir}/.libs
+make runtests
 
 %clean
 rm -fr %{buildroot}
@@ -232,6 +232,10 @@ rm -fr %{buildroot}
 %endif # with_python3
 
 %changelog
+* Wed Apr 22 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.9.10-1
+- update to vendor version 2.9.10
+- enable icu support
+
 * Mon Feb 17 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.9.9-2
 - fixed libxslt ticket #1 (enable loading of symbols with _)
 
