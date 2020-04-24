@@ -1,26 +1,19 @@
-# Build without documentation per default if built as part of a module.
-%if 0%{?_module_build}
-%bcond_with documentation
-%else
 %bcond_without documentation
-%endif
 
 Summary: A portable x86 assembler which uses Intel-like syntax
 Name: nasm
-Version: 2.13.03
+Version: 2.14.02
 Release: 1%{?dist}
 License: BSD
-Group: Development/Languages
 URL: http://www.nasm.us
 Vendor: bww bitwise works GmbH
 %scm_source github https://github.com/bitwiseworks/%{name}-os2 %{version}-os2
-
 Source1: http://www.nasm.us/pub/nasm/releasebuilds/%{version}/%{name}-%{version}-xdoc.tar.bz2
 
 BuildRequires: perl
 BuildRequires: autoconf
-#BuildRequires: asciidoc
-#BuildRequires: xmlto
+BuildRequires: asciidoc
+BuildRequires: xmlto
 BuildRequires: gcc
 BuildRequires: make
 
@@ -40,7 +33,6 @@ Obsoletes: %{name}-doc < %{version}-%{release}
 
 %package rdoff
 Summary: Tools for the RDOFF binary format, sometimes used with NASM
-Group: Development/Tools
 
 %description
 NASM is the Netwide Assembler, a free portable assembler for the Intel
@@ -62,6 +54,7 @@ include linker, library manager, loader, and information dump.
 
 %prep
 %scm_setup
+
 tar xjf %{SOURCE1} --strip-components 1
 
 %build
@@ -78,11 +71,7 @@ make all %{?_smp_mflags}
 %endif
 
 %install
-make INSTALLROOT=$RPM_BUILD_ROOT install install_rdf
-
-%clean
-rm -rf ${RPM_BUILD_ROOT}
-
+%make_install install_rdf
 
 %files
 %doc AUTHORS CHANGES README TODO
@@ -109,8 +98,11 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_mandir}/man1/rd*
 %{_mandir}/man1/ld*
 
-
 %changelog
+* Thu Apr 23 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.14.02-1
+- updated to vendor version 2.14.02
+- synchronized with fedora spec
+
 * Wed Feb 21 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.13.03-1
 - updated to vendor version 2.13.03
 
