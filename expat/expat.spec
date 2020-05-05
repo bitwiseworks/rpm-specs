@@ -1,24 +1,18 @@
-# Note: this .spec is borrowed from expat-2.1.0-10.fc22.src.rpm
+%global unversion 2_2_9
 
 Summary: An XML parser library
 Name: expat
-Version: 2.1.0
-Release: 13%{?dist}
-Group: System Environment/Libraries
-#Source: http://downloads.sourceforge.net/expat/expat-%{version}.tar.gz
-URL: http://www.libexpat.org/
+Version: %(echo %{unversion} | sed 's/_/./g')
+Release: 1%{?dist}
+URL: https://libexpat.github.io/
 License: MIT
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildRequires: autoconf, automake, libtool
-#BuildRequires: check-devel
+BuildRequires: autoconf, libtool, xmlto, gcc-c++
 
 Vendor: bww bitwise works GmbH
-%scm_source svn  http://svn.netlabs.org/repos/ports/expat/trunk 770
+%scm_source github  http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
 
 # DEF files to create forwarders to the old name
 Source10:       expat7.def
-
-BuildRequires: gcc make subversion zip
 
 %description
 This is expat, the C library for parsing XML, written by James Clark. Expat
@@ -30,7 +24,6 @@ register handlers.
 
 %package devel
 Summary: Libraries and header files to develop applications using expat
-Group: Development/Libraries
 Requires: expat = %{version}-%{release}
 
 %description devel
@@ -39,8 +32,7 @@ to develop XML applications with expat.
 
 %package static
 Summary: expat XML parser static library
-Group: Development/Libraries
-Requires: expat-devel%{?_isa} = %{version}-%{release}
+Requires: expat-devel = %{version}-%{release}
 
 %description static
 The expat-static package contains the static version of the expat library.
@@ -51,8 +43,8 @@ Install it if you need to link statically with expat.
 %prep
 %scm_setup
 
-# make sure configure is updated to properly support OS/2
-buildconf.sh
+sed -i 's/install-data-hook/do-nothing-please/' lib/Makefile.am
+autoreconf -fvi
 
 # Prepare forwarder DLLs.
 for m in %{SOURCE10}; do
@@ -60,55 +52,57 @@ for m in %{SOURCE10}; do
 done
 
 %build
-#rm -rf autom4te*.cache
-#libtoolize --copy --force --automake && aclocal && autoheader && autoconf
 export CFLAGS="$RPM_OPT_FLAGS"
-export LDFLAGS="-Zomf -Zhigh-mem -Zargs-wild -Zargs-resp -Zbin-files"
+export LDFLAGS="-Zomf -Zhigh-mem -Zargs-wild -Zargs-resp -lcx"
+export DOCBOOK_TO_MAN="xmlto man --skip-validation"
 %configure
+
+# Set BUILDLEVEL to be embedded to all DLLs built with Libtool.
+export LT_BUILDLEVEL="@#%{vendor}:%{version}-%{release}#@##1## `LANG=C date +'%%d %%b %%Y %%H:%%M:%%S'`     `uname -n`::::0::"
 make %{?_smp_mflags}
 
 %install
-rm -rf ${RPM_BUILD_ROOT}
-
-rm -f examples/*.dsp examples/.cvsignore
-chmod 644 README COPYING Changes doc/* examples/*
-
 make install DESTDIR=$RPM_BUILD_ROOT
 
 rm -f $RPM_BUILD_ROOT%{_libdir}/*.la
+rm -rf $RPM_BUILD_ROOT%{_datadir}/doc/expat
 
 # Generate & install forwarder DLLs.
 gcc -Zomf -Zdll -nostdlib expat7.def -l$RPM_BUILD_ROOT/%{_libdir}/expat1.dll -lend -o $RPM_BUILD_ROOT/%{_libdir}/expat7.dll
 
-#%check
-#make check
+%check
+export LIBPATHSTRICT=t
+export BEGINLIBPATH=%{_builddir}/%{buildsubdir}/lib/.libs
+make check
 
-%clean
-rm -rf ${RPM_BUILD_ROOT}
+%if !0%{?os2_version}
+%ldconfig_scriptlets
+%endif
 
 %files
-%defattr(-,root,root)
-%doc README
 %{!?_licensedir:%global license %%doc}
+%doc AUTHORS Changes
 %license COPYING
-%{_bindir}/*
+%{_bindir}/*.exe
 %{_libdir}/*.dll
 %{_mandir}/*/*
 
 %files devel
-%defattr(-,root,root)
-%doc Changes doc examples
+%doc doc/reference.html doc/*.png doc/*.css examples/*.c
 %{_libdir}/*_dll.a
 %{_libdir}/pkgconfig/*.pc
 %{_includedir}/*.h
 
 %files static
-%defattr(-,root,root)
-%exclude %{_libdir}/*_dll.a
 %{_libdir}/*.a
-
+%exclude %{_libdir}/*_dll.a
 
 %changelog
+* Thu Aug 10 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.2.9-1
+- update to version 2.2.9
+- built with latest tools
+- remove -Zbin-files
+
 * Thu Aug 10 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.1.0-13
 - use scm_ macros
 - add a forwarder, as the toolchain changes the name
