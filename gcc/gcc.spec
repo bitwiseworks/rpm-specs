@@ -2,7 +2,7 @@
 %global gcc_version %{gcc_major}.2.0
 # Note, gcc_release must be integer, if you want to add suffixes to
 # %%{release}, append them after %%{gcc_release} on Release: line.
-%global gcc_release 3
+%global gcc_release 4
 
 %global build_ada 0
 %global build_objc 0
@@ -88,6 +88,7 @@ BuildRequires: libc-devel >= 1:0.1.4
 BuildRequires: binutils >= 2.33.1, make
 
 BuildRequires: zlib-devel, gettext, bison, flex
+BuildRequires: gettext-devel
 # TODO don't have these
 # dejagnu, sharutils
 BuildRequires: texinfo, perl
@@ -1803,6 +1804,10 @@ fi
 %doc gcc-wrc.txt
 
 %changelog
+* Sat May 9 2020 Dmitriy Kuminov <coding@dmik.org> - 9.2.0-4
+- Require gettext-devel when building to avoid GCC own intl usage [gcc-os2#24].
+- Fix forwarders for GCC runtime 4.4.0-4.4.2, 4.4.4 and 4.4.5 [gcc-os2#25].
+
 * Fri Mar 27 2020 Dmitriy Kuminov <coding@dmik.org> - 9.2.0-3
 - Release version 9.2.0 OS/2 Beta 2.
   (https://github.com/bitwiseworks/gcc-os2/blob/gcc-9_2_0-release-os2-b2/ChangeLog.md).
