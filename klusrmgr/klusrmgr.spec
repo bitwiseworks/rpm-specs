@@ -5,8 +5,8 @@
 
 Summary:    (kLIBC) User Manager
 Name:       klusrmgr
-Version:    1.3.2
-Release:    3%{?dist}
+Version:    1.4.0
+Release:    1%{?dist}
 License:    proprietary
 Group:      Applications/System
 URL:        http://www.netlabs.org/vxapps
@@ -69,7 +69,7 @@ fi
 %bww_app_shadow -d WP_CONFIG
 %{_rpmconfigdir_os2}/wpi4rpm add %{vendor}/%{name}/binaries %{version}-%{release}
 cmd /c klusrmgr.exe -init
-
+cmd /c groupmod.exe -x "wheel"
 
 %postun
 if [ "$1" -eq 0 ]; then # (upon removal)
@@ -86,6 +86,12 @@ fi
 
 
 %changelog
+* Sun May 10 2020 hb <herwig.bauernfeind@bitwiseworks.com> 1.4.0-1
+- Fix vxapps tickets #12 and #13
+- Remove "wheel" group upon installation
+- Add a refresh timer to the GUI in order to detect externally changed 
+  users
+  
 * Tue Apr 21 2020 hb <herwig.bauernfeind@bitwiseworks.com> 1.3.2-3
 - Repackage with proper zip file
 
