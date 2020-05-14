@@ -1,19 +1,14 @@
 Summary: A library for editing typed command lines
 Name: readline
-Version: 6.1
-Release: 4%{?dist}
+Version: 8.0
+Release: 1%{?dist}
 License: GPLv3+
-Group: System Environment/Libraries
-URL: http://cnswww.cns.cwru.edu/php/chet/readline/rltop.html
-Source: ftp://ftp.gnu.org/gnu/readline/readline-%{version}.tar.gz
+URL: https://tiswww.case.edu/php/chet/readline/rltop.html
+Vendor: bww bitwise works GmbH
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
 
-# sent upstream
-Patch0: readline-6.1-os2.diff
-
-#Requires(post): /sbin/install-info
-#Requires(preun): /sbin/install-info
+BuildRequires: gcc
 BuildRequires: ncurses-devel
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %description
 The Readline library provides a set of functions that allow users to
@@ -25,11 +20,7 @@ commands.
 
 %package devel
 Summary: Files needed to develop programs which use the readline library
-Group: Development/Libraries
 Requires: %{name} = %{version}-%{release}
-Requires: ncurses-devel
-#Requires(post): /sbin/install-info
-#Requires(preun): /sbin/install-info
 
 %description devel
 The Readline library provides a set of functions that allow users to
@@ -39,107 +30,65 @@ installed. You also need to have the readline package installed.
 
 %package static
 Summary: Static libraries for the readline library
-Group: Development/Libraries
 Requires: %{name}-devel = %{version}-%{release}
 
 %description static
 The readline-static package contains the static version of the readline
 library.
 
-%prep
-%setup -q
-%patch0 -p1 -b .os2~
+%legacy_runtime_packages
 
-#pushd examples
-#rm -f rlfe/configure
-#iconv -f iso8859-1 -t utf8 -o rl-fgets.c{_,}
-#touch -r rl-fgets.c{,_}
-#mv -f rl-fgets.c{_,}
-#popd
+%debug_package
+
+%prep
+%scm_setup
+autoreconf -fvi
 
 %build
-#export CPPFLAGS="-I%{_includedir}/ncurses"
-export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
-LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp" ; export LDFLAGS ; \
-%configure \
-    --disable-shared \
-    "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
-
+export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp -lcx"
+export VENDOR="%{vendor}"
+%configure --with-curses --disable-install-examples
 make %{?_smp_mflags}
 
 %install
-rm -rf $RPM_BUILD_ROOT
+%make_install
 
-make DESTDIR=$RPM_BUILD_ROOT install
+rm -vrf %{buildroot}%{_docdir}/readline
+rm -vf %{buildroot}%{_infodir}/dir*
 
-#mkdir $RPM_BUILD_ROOT/%{_lib}
-#mv $RPM_BUILD_ROOT%{_libdir}/libreadline.so.* $RPM_BUILD_ROOT/%{_lib}
-#for l in $RPM_BUILD_ROOT%{_libdir}/libreadline.so; do
-#    ln -sf $(echo %{_libdir} | \
-#        sed 's,\(^/\|\)[^/][^/]*,..,g')/%{_lib}/$(readlink $l) $l
-#done
-
-rm -rf $RPM_BUILD_ROOT%{_datadir}/readline
-rm -f $RPM_BUILD_ROOT%{_infodir}/dir*
-
-cp readln6.dll $RPM_BUILD_ROOT%{_libdir}
-cp libreadline_s.a $RPM_BUILD_ROOT%{_libdir}
-cp libreadline.lib $RPM_BUILD_ROOT%{_libdir}
-cp histor6.dll $RPM_BUILD_ROOT%{_libdir}
-cp libhistory_s.a $RPM_BUILD_ROOT%{_libdir}
-cp libhistory.lib $RPM_BUILD_ROOT%{_libdir}
-
-
-%clean
-rm -rf $RPM_BUILD_ROOT
-
-#%post
-#/sbin/ldconfig
-#/sbin/install-info %{_infodir}/history.info.gz %{_infodir}/dir &> /dev/null
-#/sbin/install-info %{_infodir}/rluserman.info.gz %{_infodir}/dir &> /dev/null
-#:
-
-#%postun -p /sbin/ldconfig
-
-#%preun
-#if [ $1 = 0 ]; then
-#   /sbin/install-info --delete %{_infodir}/history.info.gz %{_infodir}/dir &> /dev/null
-#   /sbin/install-info --delete %{_infodir}/rluserman.info.gz %{_infodir}/dir &> /dev/null
-#fi
-#:
-
-#%post devel
-#/sbin/install-info %{_infodir}/readline.info.gz %{_infodir}/dir &> /dev/null
-#:
-
-#%preun devel
-#if [ $1 = 0 ]; then
-#   /sbin/install-info --delete %{_infodir}/readline.info.gz %{_infodir}/dir &> /dev/null
-#fi
-#:
+%if !0%{?os2_version}
+%ldconfig_scriptlets
+%endif
 
 %files
-%defattr(-,root,root,-)
-%doc CHANGES COPYING NEWS README USAGE
-%{_libdir}/*.dll
+%license COPYING USAGE
+%{_libdir}/readln8.dll
+%{_libdir}/histor8.dll
 %{_infodir}/history.info*
 %{_infodir}/rluserman.info*
 
 %files devel
-%defattr(-,root,root,-)
+%doc CHANGES NEWS README
 %doc examples/*.c examples/*.h examples/rlfe
-%{_includedir}/readline
-%{_libdir}/*.dll
-%{_libdir}/libreadline.a
-%{_libdir}/libhistory.a
-%{_libdir}/*.lib
-%{_mandir}/man3/*
+%{_includedir}/readline/
+%{_libdir}/libreadline_dll.a
+%{_libdir}/libhistory_dll.a
+%{_libdir}/pkgconfig/%{name}.pc
+%{_mandir}/man3/readline.3*
+%{_mandir}/man3/history.3*
 %{_infodir}/readline.info*
 
 %files static
-%defattr(-,root,root,-)
-%{_libdir}/*_s.a
+%{_libdir}/libreadline.a
+%{_libdir}/libhistory.a
 
 %changelog
-* Mon Jan 16 2012 yd
+* Thu May 14 2020 Silvan Scherrer <silvan.scherrer@ara.ch> 8.0-1
+- update to version 8.0
+- sync with latest fedora spec
+- use scm_macros
+- add legacy package to the old version 6.1-4
+
+* Mon Jan 16 2012 yd <yuri.dario@os2power.com> 6.1-4
 - rebuild with libc 0.6.4 runtime.
+
