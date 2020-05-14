@@ -50,6 +50,9 @@ export VENDOR="%{vendor}"
 %configure --with-curses --disable-install-examples
 make %{?_smp_mflags}
 
+# for now fix the .pc file to not incude tinfo. remove it after new ncurses build
+sed -i -e 's/tinfo//' readline.pc
+
 %install
 %make_install
 
