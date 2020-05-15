@@ -1,11 +1,11 @@
 Summary: A library for editing typed command lines
 Name: readline
 Version: 8.0
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 URL: https://tiswww.case.edu/php/chet/readline/rltop.html
 Vendor: bww bitwise works GmbH
-%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2-2
 
 BuildRequires: gcc
 BuildRequires: ncurses-devel
@@ -86,6 +86,9 @@ rm -vf %{buildroot}%{_infodir}/dir*
 %{_libdir}/libhistory.a
 
 %changelog
+* Thu May 14 2020 Silvan Scherrer <silvan.scherrer@ara.ch> 8.0-2
+- fix library name in dll
+
 * Thu May 14 2020 Silvan Scherrer <silvan.scherrer@ara.ch> 8.0-1
 - update to version 8.0
 - sync with latest fedora spec
