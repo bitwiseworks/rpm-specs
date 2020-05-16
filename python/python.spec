@@ -54,7 +54,7 @@
 Summary: An interpreted, interactive, object-oriented programming language
 Name: %{python}
 Version: 2.7.6
-Release: 24%{?dist}
+Release: 25%{?dist}
 License: Python
 Group: Development/Languages
 Vendor: bww bitwise works GmbH
@@ -63,7 +63,9 @@ Requires: %{name}-libs = %{version}-%{release}
 Provides: python-abi = %{pybasever}
 Provides: python(abi) = %{pybasever}
 
-%scm_source svn http://svn.netlabs.org/repos/rpm/python/trunk 1565
+%scm_source github http://github.com/bitwiseworks/python-os2 c45aae4f53cd6958085591c545c0c3e1c5c8158d
+
+BuildRequires: git make
 
 %if %{main_python}
 Obsoletes: Distutils
@@ -96,11 +98,12 @@ Conflicts: yum-metadata-parser < 1.1.4-6
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: readline-devel, openssl-devel, gmp-devel
-#BuildRequires: gdbm-devel, zlib-devel, expat-devel
+#BuildRequires: gdbm-devel
 BuildRequires: ncurses-devel, zlib-devel, expat-devel
-#BuildRequires: libGL-devel tk tix gcc-c++ libX11-devel glibc-devel
-#BuildRequires: tar findutils pkgconfig tcl-devel tk-devel
-BuildRequires: bzip2 pkgconfig tcl-devel
+#BuildRequires: libGL-devel tk tix libX11-devel glibc-devel
+BuildRequires: gcc-c++
+#BuildRequires: tk-devel
+BuildRequires: bzip2 tar findutils pkgconfig tcl-devel
 #BuildRequires: tix-devel
 BuildRequires: bzip2-devel sqlite-devel
 BuildRequires: autoconf
@@ -522,6 +525,14 @@ fi
 # payload file would be unpackaged)
 
 %changelog
+* Sat May 16 2020 Dmitriy Kuminov <coding@dmik.org> 2.7.6-25
+- Move OS/2 port from Trac to GitHub.
+- Build with GCC 9 and latest toolchain.
+- Provide built-in dbm and bsddb modules.
+- Make python distutils recognize FOO_dll.a libraries in EMX mode.
+- Make sys.getfilesystemencoding() never return None [#1].
+- Properly restore BEGINLIBPATH and friends after execve/spawnve.
+
 * Wed Jan 23 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.7.6-24
 - fix ticket #328
 
