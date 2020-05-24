@@ -371,11 +371,11 @@ rm -fr %{buildroot}
 #%postun libs -p /sbin/ldconfig
 
 
-%post
+%post -e
 if [ "$1" = 1 ] ; then
 #execute only on first install
-%cube {DELLINE "SET PYTHONPATH="} %{os2_config_sys} > NUL
-%cube {DELLINE "SET PYTHONHOME="} %{os2_config_sys} > NUL
+%cube {DELLINE "SET PYTHONPATH="} %%{os2_config_sys} > NUL
+%cube {DELLINE "SET PYTHONHOME="} %%{os2_config_sys} > NUL
 fi
 
 
