@@ -1,6 +1,6 @@
 Summary: Pattern matching utilities
 Name: grep
-Version: 3.3
+Version: 3.4
 Release: 1%{?dist}
 License: GPLv3+
 URL: http://www.gnu.org/software/grep/
@@ -45,7 +45,7 @@ export LIBS="-lcx"
 %endif
 
 %configure --without-included-regex --disable-silent-rules \
-  CPPFLAGS="-I%{_includedir}/pcre" CFLAGS="%{BUILD_FLAGS}"
+  CFLAGS="%{BUILD_FLAGS}"
 make %{?_smp_mflags}
 
 %install
@@ -70,6 +70,10 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 %{_mandir}/*/*
 
 %changelog
+* Sun May 25 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.4-1
+- fix a issue where closing a pipe didn't work and spit an error
+- update to version 3.4
+
 * Mon May 13 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.3-1
 - case insensitive search in --include/--exclude options (ticket #208)
 - update to version 3.3
