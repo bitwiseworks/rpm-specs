@@ -1,17 +1,18 @@
 Summary: A utility for unpacking zip files
 Name: unzip
 Version: 6.0
-Release: 7%{?dist}
+Release: 8%{?dist}
 License: BSD
-Group: Applications/Archiving
 Vendor: bww bitwise works GmbH
 
-%scm_source svn http://svn.netlabs.org/repos/ports/unzip/trunk 2285
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
 
 URL: http://www.info-zip.org/UnZip.html
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:  bzip2-devel
 Requires:  bzip2
+Requires:  zip >= 3.0
+
+BuildRequires: rexx_exe
 
 %description
 The unzip utility is used to list, test, or extract files from a zip
@@ -38,17 +39,23 @@ make -f os2/Makefile.os2 CFLAGS="$RPM_OPT_FLAGS" klibc %{?_smp_mflags}
 rm -rf $RPM_BUILD_ROOT
 make -f os2/Makefile.os2 prefix=$RPM_BUILD_ROOT%{_prefix} MANDIR=$RPM_BUILD_ROOT/%{_mandir}/man1 INSTALL="cp -p" install
 
-%clean
-rm -rf $RPM_BUILD_ROOT
+# create a exe out of the cmd files
+for f in $RPM_BUILD_ROOT%{_prefix}/bin/*.cmd ; do
+  rexx2vio "$f" "${f%.cmd}.exe"
+  rm -f "$f"
+done
 
 %files
 %defattr(-,root,root)
 %doc README BUGS LICENSE 
 %{_bindir}/*.exe
-%{_bindir}/*.cmd
 %{_mandir}/*/*
 
 %changelog
+* Wed Jun 03 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> 6.0-8
+- fix zip ticket #1 done by Herwig Bauernfeind
+- deliver *.cmd as *.exe
+
 * Tue Jun 12 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 6.0-7
 - fix ticket #184
 
