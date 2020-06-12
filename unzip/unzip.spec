@@ -1,11 +1,11 @@
 Summary: A utility for unpacking zip files
 Name: unzip
 Version: 6.0
-Release: 8%{?dist}
+Release: 9%{?dist}
 License: BSD
 Vendor: bww bitwise works GmbH
 
-%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2-2
 
 URL: http://www.info-zip.org/UnZip.html
 BuildRequires:  bzip2-devel
@@ -52,6 +52,10 @@ done
 %{_mandir}/*/*
 
 %changelog
+* Fri Jun 12 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> 6.0-9
+- better version to find zip.exe in zip2exe (Herwig Bauernfeind)
+- use a nicer -v sting (ticket #1)
+
 * Wed Jun 03 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> 6.0-8
 - fix zip ticket #1 done by Herwig Bauernfeind
 - deliver *.cmd as *.exe
