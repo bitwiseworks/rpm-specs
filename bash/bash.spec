@@ -12,11 +12,11 @@
 Version: %{baseversion}%{patchleveltag}
 Name: bash
 Summary: The GNU Bourne Again shell
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Url: https://www.gnu.org/software/bash
 Vendor: bww bitwise works GmbH
-%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2-2
 
 # For now there isn't any doc
 #Source2: ftp://ftp.gnu.org/gnu/bash/bash-doc-%%{version}.tar.gz
@@ -26,6 +26,9 @@ BuildRequires:  gcc
 BuildRequires: texinfo bison
 BuildRequires: ncurses-devel
 BuildRequires: autoconf, gettext
+%if 0%{?os2_version}
+BuildRequires: readline-devel >= 8.0
+%endif
 %if !0%{?os2_version}
 # Required for bash tests
 BuildRequires: glibc-all-langpacks
@@ -72,7 +75,8 @@ rm y.tab.*
 autoreconf -fvi
 
 export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp -lcx"
-%configure --with-bash-malloc=no
+%configure --with-bash-malloc=no \
+  --with-installed-readline=yes
 
 # Recycles pids is neccessary. When bash's last fork's pid was X
 # and new fork's pid is also X, bash has to wait for this same pid.
@@ -280,6 +284,10 @@ end
 %{_libdir}/pkgconfig/%{name}.pc
 
 %changelog
+* Wed Jun 22 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 5.0.11-2
+- enable system readline
+- added BEGINLIBPATH and friends
+
 * Wed May 20 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 5.0.11-1
 - updated to version 5.0.11
 - use scm_macros and friends
