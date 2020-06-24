@@ -12,11 +12,11 @@
 Version: %{baseversion}%{patchleveltag}
 Name: bash
 Summary: The GNU Bourne Again shell
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv3+
 Url: https://www.gnu.org/software/bash
 Vendor: bww bitwise works GmbH
-%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2-2
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2-3
 
 # For now there isn't any doc
 #Source2: ftp://ftp.gnu.org/gnu/bash/bash-doc-%%{version}.tar.gz
@@ -284,7 +284,10 @@ end
 %{_libdir}/pkgconfig/%{name}.pc
 
 %changelog
-* Wed Jun 22 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 5.0.11-2
+* Wed Jun 24 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 5.0.11-3
+- fixed a double fault, which leads to a kernel trap :( sorry about that
+
+* Mon Jun 22 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 5.0.11-2
 - enable system readline
 - added BEGINLIBPATH and friends
 
