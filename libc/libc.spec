@@ -12,7 +12,7 @@ Name:           libc
 License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Standard Shared Libraries
 Group:          System/Libraries
-Version:        %{ver_maj}.1.4
+Version:        %{ver_maj}.1.5
 Release:        1%{?dist}
 Vendor:         bww bitwise works GmbH
 Url:            https://github.com/bitwiseworks/libc
@@ -23,8 +23,8 @@ Url:            https://github.com/bitwiseworks/libc
 BuildRequires:  rexx_exe kbuild
 BuildRequires:  gcc unzip sed gawk
 
-# we need ourselves for the build (db1-devel is for pwd_mkdb)
-BuildRequires:  libc-devel libc-db1-devel
+# we need ourselves for the build
+BuildRequires:  libc-devel
 
 # for libiberty (#49)
 BuildRequires:  binutils-devel >= 2.33.1
@@ -220,6 +220,11 @@ rm -rf "%{buildroot}"
 
 
 %changelog
+* Wed Jul 22 2020 Dmitriy Kuminov <coding@dmik.org> 1:0.1.5-1
+- Release LIBC Next version 0.1.5
+  (https://github.com/bitwiseworks/libc/blob/0.1.5/CHANGELOG.md).
+- Remove libc-db1-devel from BuildRequires (not needed any more).
+
 * Fri Mar 27 2020 Dmitriy Kuminov <coding@dmik.org> 1:0.1.4-1
 - Release LIBC Next version 0.1.4
   (https://github.com/bitwiseworks/libc/blob/0.1.4/CHANGELOG.md).
