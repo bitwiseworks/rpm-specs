@@ -2,7 +2,7 @@
 %global gcc_version %{gcc_major}.2.0
 # Note, gcc_release must be integer, if you want to add suffixes to
 # %%{release}, append them after %%{gcc_release} on Release: line.
-%global gcc_release 4
+%global gcc_release 5
 
 %global build_ada 0
 %global build_objc 0
@@ -47,8 +47,8 @@ rpm.define(string.format("version_underscores %s",
            string.gsub(rpm.expand('%{version}'), '%.', '_')))
 }
 
-%scm_source github https://github.com/bitwiseworks/gcc-os2 gcc-%{version_underscores}-release-os2-b2
-#scm_source git file://D:/Coding/gcc/master cf3ddd6
+%scm_source github https://github.com/bitwiseworks/gcc-os2 gcc-%{version_underscores}-release-os2-b3
+#scm_source git file://D:/Coding/gcc/master e9edfe3
 
 Source1: gcc335.def
 Source2: gcc432.def
@@ -1357,7 +1357,7 @@ fi
 %{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/liblsan.so
 %{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/liblsan_preinit.o
 %endif
-%doc gcc/README* rpm.doc/changelogs/gcc/ChangeLog* 
+%doc gcc/README* rpm.doc/changelogs/gcc/ChangeLog*
 %doc README.md ChangeLog.md
 %{!?_licensedir:%global license %%doc}
 %license gcc/COPYING* COPYING.RUNTIME
@@ -1804,6 +1804,10 @@ fi
 %doc gcc-wrc.txt
 
 %changelog
+* Thu Jul 23 2020 Dmitriy Kuminov <coding@dmik.org> - 9.2.0-5
+- Release version 9.2.0 OS/2 Beta 3.
+  (https://github.com/bitwiseworks/gcc-os2/blob/gcc-9_2_0-release-os2-b3/ChangeLog.md).
+
 * Sat May 9 2020 Dmitriy Kuminov <coding@dmik.org> - 9.2.0-4
 - Require gettext-devel when building to avoid GCC own intl usage [gcc-os2#24].
 - Fix forwarders for GCC runtime 4.4.0-4.4.2, 4.4.4 and 4.4.5 [gcc-os2#25].
