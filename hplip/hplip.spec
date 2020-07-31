@@ -4,19 +4,19 @@
 %filter_setup
 }
 
-%define without_sane 1
 %define without_dbus 1
 %define without_fax 1
 
 Summary: HP Linux Imaging and Printing Project
 Name: hplip
 Version: 3.19.8
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv2+ and MIT and BSD and IJG and Public Domain and GPLv2+ with exceptions and ISC
 
 Url: https://developers.hp.com/hp-linux-imaging-and-printing
 Vendor: bww bitwise works GmbH
-%scm_source github  https://github.com/bitwiseworks/%{name}-os2 3.19.8-os2
+%scm_source github  https://github.com/bitwiseworks/%{name}-os2 %{version}-os2-2
+
 
 # @todo: decide if we need that to
 # if we do it as well, also remove the comment in the post section
@@ -35,9 +35,7 @@ Requires: python3-dbus
 # /usr/lib/udev/rules.d
 #Requires: systemd
 # 1733449 - Scanner on an HP AIO printer is not detected unless libsane-hpaio is installed
-%if 0%{!?without_sane:1}
 Requires: libsane-hpaio
-%endif
 # require coreutils, because timeout binary is needed in post scriptlet,
 # because hpcups-update-ppds script can freeze in certain situation and
 # stop the update
@@ -60,9 +58,7 @@ BuildRequires: libjpeg-devel
 #BuildRequires: desktop-file-utils
 BuildRequires: libusb1-devel
 BuildRequires: openssl-devel
-%if 0%{!?without_sane:1}
 BuildRequires: sane-backends-devel
-%endif
 %if 0%{!?without_dbus:1}
 BuildRequires: pkgconfig(dbus-1)
 %endif
@@ -103,14 +99,11 @@ Requires: python2-PyQt4
 # hpssd.py
 #Requires: python3-gobject
 Requires: %{name} = %{version}-%{release}
-%if 0%{!?without_sane:1}
 Requires: libsane-hpaio = %{version}-%{release}
-%endif
 
 %description gui
 HPLIP graphical tools.
 
-%if 0%{!?without_sane:1}
 %package -n libsane-hpaio
 Summary: SANE driver for scanners in HP's multi-function devices
 License: GPLv2+
@@ -119,7 +112,6 @@ Requires: %{name}-libs = %{version}-%{release}
 
 %description -n libsane-hpaio
 SANE driver for scanners in HP's multi-function devices (from HPOJ).
-%endif
 
 %debug_package
 
@@ -152,11 +144,7 @@ export LIBS="-lcx"
 export VENDOR="%{vendor}"
 
 %configure \
-%if 0%{!?without_sane:1}
         --enable-scan-build \
-%else
-        --disable-scan-build \
-%endif
         --enable-gui-build \
 %if 0%{!?without_fax:1}
         --enable-fax-build \
@@ -218,6 +206,9 @@ rm -f   %{buildroot}%{_bindir}/foomatic-rip \
 # Regenerate hpcups PPDs on upgrade if necessary (bug #579355).
 #install -p -m755 %{SOURCE1} %{buildroot}%{_bindir}/hpcups-update-ppds
 
+%{__mkdir_p} %{buildroot}%{_sysconfdir}/sane.d/dll.d
+echo hpaio > %{buildroot}%{_sysconfdir}/sane.d/dll.d/hpaio
+
 # Images in docdir should not be executable (bug #440552).
 find doc/images -type f -exec chmod 644 {} \;
 
@@ -248,6 +239,7 @@ rm -rf %{buildroot}%{_sysconfdir}/xdg/autostart/hplip-systray.desktop
 
 # as there is no devel package we don't ship the *.a files either
 rm -f  %{buildroot}%{_libdir}/*.a \
+       %{buildroot}%{_libdir}/sane/*.a \
        %{buildroot}%{python_sitearch}/*.a
 
 # hp-setup needs to have cups service enabled and running for setups of queues
@@ -259,7 +251,7 @@ rm -f  %{buildroot}%{_libdir}/*.a \
 # timeout is to prevent possible freeze during update
 #%{_bindir}/timeout 10m -k 15m %{_bindir}/hpcups-update-ppds &>/dev/null ||:
 
-%ldconfig_scriptlets libs
+#ldconfig_scriptlets libs
 
 
 %files
@@ -343,9 +335,7 @@ rm -f  %{buildroot}%{_libdir}/*.a \
 %{_datadir}/hplip/installer
 %{_datadir}/hplip/pcard
 %{_datadir}/hplip/prnt
-%if 0%{!?without_sane:1}
 %{_datadir}/hplip/scan
-%endif
 %{_datadir}/ppd
 %{_localstatedir}/lib/hp
 %dir %attr(0775,root,lp) %{_localstatedir}/run/hplip
@@ -396,13 +386,14 @@ rm -f  %{buildroot}%{_libdir}/*.a \
 %{_datadir}/hplip/data/images
 %{_datadir}/hplip/ui4
 
-%if 0%{!?without_sane:1}
 %files -n libsane-hpaio
-%{_libdir}/sane/sane-*.dll
+%{_libdir}/sane/hpaio*.dll
 %config(noreplace) %{_sysconfdir}/sane.d/dll.d/hpaio
-%endif
 
 %changelog
+* Wed Jan 15 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.19.8-2
+- enable sane-backends
+
 * Wed Oct 02 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.19.8-1
 - update to version 3.19.8
 
