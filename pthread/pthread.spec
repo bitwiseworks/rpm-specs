@@ -2,7 +2,7 @@
 
 Summary: A posix pthread emulation for OS/2 and OS/2 based systems
 Name: pthread
-Version: 0.2.1
+Version: 0.2.2
 Release: 1%{?dist}
 License: unknown
 Vendor:  bww bitwise works GmbH
@@ -70,6 +70,9 @@ rm -rf %{buildroot}
 %{_libdir}/pthread.dll
 
 %changelog
+* Wed Aug 12 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> 2:0.2.2-1
+- fix ticket #8
+
 * Tue Mar 31 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> 2:0.2.1-1
 - fix a regression of 0.2.0 (Dmitriy Kuminov)
 - fix wrong dates in spec file
