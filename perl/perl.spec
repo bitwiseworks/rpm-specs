@@ -27,7 +27,7 @@
 Name:           perl
 Version:        %{perl_version}
 # release number must be even higher, because dual-lived modules will be broken otherwise
-Release:        5%{?dist}
+Release:        6%{?dist}
 Epoch:          %{perl_epoch}
 Summary:        Practical Extraction and Report Language
 Group:          Development/Languages
@@ -41,7 +41,7 @@ License:        (GPL+ or Artistic) and (GPLv2+ or Artistic) and Copyright Only a
 Url:            http://www.perl.org/
 Vendor:         bww bitwise works GmbH
 
-%scm_source     svn http://svn.netlabs.org/repos/ports/perl/trunk 2305
+%scm_source     svn http://svn.netlabs.org/repos/ports/perl/trunk 2369
 Source3:        macros.perl
 
 # Update some of the bundled modules
@@ -1331,7 +1331,7 @@ perl regen.pl -v
         -Dversion=%{perl_version} \
         -Dmyhostname=localhost \
         -Dperladmin=root@localhost \
-        -Dcc='%{__cc}' \
+        -Dcc='%{_bindir}/gcc.exe' \
         -Dsh='%{_bindir}/sh.exe' \
         -Dcf_by='bww bitwise works GmbH' \
         -Dprefix=%{_prefix} \
@@ -2521,6 +2521,9 @@ rm -rf $RPM_BUILD_ROOT
 # Nothing. Nada. Zilch. Zarro. Uh uh. Nope. Sorry.
 
 %changelog
+* Wed Oct 24 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 5.16.1-6
+- preserve boot_DynaLoader export
+
 * Wed Oct 24 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 5.16.1-5
 - readd zip functionality, which was lost in 5.16.1-4
 - remove duplicate files
