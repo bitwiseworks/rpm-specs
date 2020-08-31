@@ -2,8 +2,8 @@
 
 Summary:	The Vorbis General Audio Compression Codec
 Name:		libvorbis
-Version:	1.3.6
-Release:	4%{?dist}
+Version:	1.3.7
+Release:	2%{?dist}
 Epoch:		1
 License:	BSD
 URL:		https://www.xiph.org/
@@ -101,6 +101,12 @@ make check
 %endif
 
 %changelog
+* Mon Aug 31 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.3.7-2
+- updated vorbis right, which includes buildlevel again and such
+
+* Wed Jul 29 2020 Elbert Pol <elbert.pol@gmail.com> - 1.3.7-1
+- updated to latest source
+
 * Fri May 01 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.3.6-4
 - moved the source to github.com/bitwiseworks
 - added a debug package
