@@ -2,12 +2,12 @@
 
 Name:           xvidcore
 Version:        1.3.7
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        MPEG-4 Simple and Advanced Simple Profile codec
 License:        GPLv2+
 URL:            https://www.xvid.com/
 Vendor:         bww bitwise works GmbH
-%scm_source     github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
+%scm_source     github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2-1
 
 
 BuildRequires:  gcc
@@ -90,5 +90,8 @@ find %{buildroot} -name "xvidcore.a" -delete
 
 
 %changelog
+* Fri Sep 04 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.3.7-2
+- fix a name typo in _dll.a
+
 * Sat May 09 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.3.7-1
 - Initial OS/2 RPM release.
