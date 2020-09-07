@@ -6,7 +6,7 @@
 Summary: A GNU arbitrary precision library
 Name: gmp
 Version: 6.2.0
-Release: 1%{?dist}
+Release: 2%{?dist}
 Epoch: 1
 URL: http://gmplib.org/
 
@@ -186,25 +186,28 @@ make %{?_smp_mflags} check
 %doc NEWS README
 %{_libdir}/gmp10.dll
 %{_libdir}/gmp.dll
-%{_libdir}/pkgconfig/gmp.pc
 %if %{with fips}
 %{_libdir}/.libgmp.so.*.hmac
 %endif
 
 %files c++
 %{_libdir}/gmpxx4.dll
-%{_libdir}/pkgconfig/gmpxx.pc
 
 %files devel
 %{_libdir}/gmp*_dll.a
 %{_includedir}/*.h
 %{_infodir}/gmp.info*
+%{_libdir}/pkgconfig/gmp.pc
+%{_libdir}/pkgconfig/gmpxx.pc
 
 %files static
 %{_libdir}/gmp.a
 %{_libdir}/gmpxx.a
 
 %changelog
+* Mon Sep 07 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1:6.2.0-2
+- move pc files to devel (fedora resync)
+
 * Mon Mar 09 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1:6.2.0-1
 - update to version 6.2.0
 - move source to github
