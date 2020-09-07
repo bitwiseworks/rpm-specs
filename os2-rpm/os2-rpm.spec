@@ -1,7 +1,7 @@
 Summary: OS/2 specific RPM macros and scripts
 Name: os2-rpm
 Version: 1
-Release: 10%{?dist}
+Release: 9%{?dist}
 License: GPLv2+
 Group: Development/System
 Vendor: bww bitwise works GmbH
@@ -101,9 +101,6 @@ done
 %config(noreplace) %{_sysconfdir}/rpm/macros.scm_pwd
 
 %changelog
-* Mon Sep 07 2020 Herwig Bauernfeind <herwig.bauernfeind@bitwiseworks.com> 1-10
-- streamline DATBAS_?.INI detection code in wpi4rpm
-
 * Thu Nov 07 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 1-9
 - fix a CRLF vs LF issue in getbootdrive.cmd
 
