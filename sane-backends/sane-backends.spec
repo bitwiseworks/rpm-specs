@@ -38,14 +38,13 @@
 Summary: Scanner access software
 Name: sane-backends
 Version: 1.0.28
-Release: 1%{?dist}
+Release: 2%{?dist}
 # lib/ is LGPLv2+, backends are GPLv2+ with exceptions
 # Tools are GPLv2+, docs are public domain
 # see LICENSE for details
 License: GPLv2+ and GPLv2+ with exceptions and Public Domain and IJG and LGPLv2+ and MIT
 # Alioth Download URLs are amazing.
-#scm_source github http://github.com/bitwiseworks/sane-backend-os2 %{version}-os2
-%scm_source git e:/trees/libsane/git master-os2
+%scm_source github http://github.com/bitwiseworks/sane-backend-os2 %{version}-os2
 Vendor: bww bitwise works GmbH
 
 URL: http://www.sane-project.org
@@ -53,9 +52,12 @@ URL: http://www.sane-project.org
 # gcc is no longer in buildroot by default
 BuildRequires: gcc
 # genesys backend is not written in C++, so it is needed as buildrequire
-#BuildRequires: gcc-c++
+BuildRequires: gcc-c++
+BuildRequires: net-snmp-devel
 
-#BuildRequires: %{_bindir}/latex
+%if !0%{?os2_version}
+BuildRequires: %{_bindir}/latex
+%endif
 %if %libusb1
 BuildRequires: libusb1-devel
 %else
@@ -198,7 +200,7 @@ sed -i "s/git describe --dirty/echo %{version}/" configure.ac
 sh autogen.sh
 
 %build
-export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp -fstack-protector"
 export LIBS="-lcx -lpthread"
 export VENDOR="%{vendor}"
 
@@ -288,7 +290,9 @@ udevadm hwdb --update >/dev/null 2>&1 || :
 udevadm hwdb --update >/dev/null 2>&1 || :
 %endif
 
-#ldconfig_scriptlets libs
+%if !0%{?os2_version}
+%ldconfig_scriptlets libs
+%endif
 
 %pre daemon
 #getent group saned >/dev/null || groupadd -r saned
@@ -364,7 +368,9 @@ exit 0
 %{_libdir}/sane/*.dll
 %exclude %{_libdir}/sane*.dll
 
+%if %{with_gphoto2}
 %exclude %{_libdir}/sane/gphoto2*.dll
+%endif
 
 %if %{with_gphoto2}
 %files drivers-cameras
@@ -381,5 +387,8 @@ exit 0
 %endif
 
 %changelog
-* Thu Oct 31 2019 Zdenek Dohnal <zdohnal@redhat.com> - 1.0.28-1
-- 1761530 - apply upstream patch
+* Mon Dec 23 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.0.28-2
+- rebuild with net-snmp enabled
+
+* Mon Dec 23 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.0.28-1
+- initial OS/2 rpm
