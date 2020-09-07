@@ -108,18 +108,18 @@ DatBas     = ''
 WarpINPath = strip(SysIni("USER","WarpIN","Path"),,'00'x)
 
 ok = SysFileTree(WarpINPath"\DATBAS*",WarpINbas.,"FO")
+
 select 
     when WarpINbas.0 = 0 then do
         if verbose then say 'INFO:  wpi4rpm: WarpINPath = "'WarpINPath'"'
         say "ERROR: wpi4rpm: No WarpIN database found."
         exit -2
     end
-    when WarpINbas.0 > 1 then do
+    otherwise do
         if verbose then say 'INFO:  wpi4rpm: WarpINPath = "'WarpINPath'"'
-        say "ERROR: wpi4rpm: Warning: "WarpINbas.0" WarpIN databases found. Using "WarpINbas.1
-        DatBas = WarpINbas.1
+        DatBas = WarpINPath"\DATBAS_"||left(SysBootDrive(),1)||".INI"
+        if verbose then say "INFO:  wpi4rpm: DATBAS_?.INI = "DatBas
     end
-    otherwise DatBas = WarpINbas.1
 end
 
 ok = SysIni(DatBas,"ALL:",WarpINApps.)
