@@ -98,7 +98,7 @@ make check
 %exclude %{_libdir}/*_dll.a
 
 %changelog
-* Thu Aug 10 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.2.9-1
+* Tue May 05 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.2.9-1
 - update to version 2.2.9
 - built with latest tools
 - remove -Zbin-files
