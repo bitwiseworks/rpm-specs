@@ -10,17 +10,19 @@
 Summary: HP Linux Imaging and Printing Project
 Name: hplip
 Version: 3.19.8
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv2+ and MIT and BSD and IJG and Public Domain and GPLv2+ with exceptions and ISC
 
 Url: https://developers.hp.com/hp-linux-imaging-and-printing
 Vendor: bww bitwise works GmbH
-%scm_source github  https://github.com/bitwiseworks/%{name}-os2 %{version}-os2-2
-
+#scm_source github  https://github.com/bitwiseworks/%{name}-os2 %{version}-os2-2
+%scm_source git e:/trees/hplip/git master
 
 # @todo: decide if we need that to
 # if we do it as well, also remove the comment in the post section
-#Source1: hpcups-update-ppds.sh
+%if !0%{?os2_version}
+Source1: hpcups-update-ppds.sh
+%endif
 
 Requires: %{name}-libs = %{version}-%{release}
 #Requires: python3-pillow
@@ -31,9 +33,11 @@ Requires: python3-dbus
 %endif
 # set require directly to /usr/bin/gpg, because gnupg2 and gnupg ships it,
 # but gnupg will be deprecated in the future
-#Requires: %{_bindir}/gpg
+%if !0%{?os2_version}
+Requires: %{_bindir}/gpg
 # /usr/lib/udev/rules.d
-#Requires: systemd
+Requires: systemd
+%endif
 # 1733449 - Scanner on an HP AIO printer is not detected unless libsane-hpaio is installed
 Requires: libsane-hpaio
 # require coreutils, because timeout binary is needed in post scriptlet,
@@ -48,14 +52,16 @@ Requires(post): coreutils
 # library), multipoint transport driver hpmud
 BuildRequires: gcc
 # gcc-c++ is needed for hpijs, hpcups drivers
-#BuildRequires: gcc-c++
+BuildRequires: gcc-c++
 
 BuildRequires: autoconf automake libtool
-#BuildRequires: net-snmp-devel
+BuildRequires: net-snmp-devel
 BuildRequires: cups-devel
 BuildRequires: python-devel
 BuildRequires: libjpeg-devel
-#BuildRequires: desktop-file-utils
+%if !0%{?os2_version}
+BuildRequires: desktop-file-utils
+%endif
 BuildRequires: libusb1-devel
 BuildRequires: openssl-devel
 BuildRequires: sane-backends-devel
@@ -65,10 +71,14 @@ BuildRequires: pkgconfig(dbus-1)
 
 # Make sure we get postscriptdriver tags - need cups and python3-cups.
 BuildRequires: cups
-#BuildRequires: python3-cups
+%if !0%{?os2_version}
+BuildRequires: python3-cups
+%endif
 
 # macros: %%{_tmpfilesdir}, %%{_udevrulesdir}
-#BuildRequires: systemd
+%if !0%{?os2_version}
+BuildRequires: systemd
+%endif
 
 %description
 The Hewlett-Packard Linux Imaging and Printing Project provides
@@ -93,11 +103,15 @@ Libraries needed by HPLIP.
 %package gui
 Summary: HPLIP graphical tools
 License: BSD
-#BuildRequires: libappstream-glib
+%if !0%{?os2_version}
+BuildRequires: libappstream-glib
+%endif
 Requires: python2-PyQt4
-#Requires: python3-reportlab
+%if !0%{?os2_version}
+Requires: python3-reportlab
 # hpssd.py
-#Requires: python3-gobject
+Requires: python3-gobject
+%endif
 Requires: %{name} = %{version}-%{release}
 Requires: libsane-hpaio = %{version}-%{release}
 
@@ -160,7 +174,7 @@ export VENDOR="%{vendor}"
         --enable-dbus-build=no \
 %endif
         --disable-policykit --with-mimedir=%{_datadir}/cups/mime \
-        --disable-network-build --enable-shared --disable-static \
+        --enable-shared --disable-static \
         --with-cupsbackenddir=%{_cups_serverbin}/backend \
         --with-cupsfilterdir=%{_cups_serverbin}/filter \
         --with-icondir=%{_datadir}/applications \
@@ -204,7 +218,9 @@ rm -f   %{buildroot}%{_bindir}/foomatic-rip \
 
 
 # Regenerate hpcups PPDs on upgrade if necessary (bug #579355).
-#install -p -m755 %{SOURCE1} %{buildroot}%{_bindir}/hpcups-update-ppds
+%if !0%{?os2_version}
+install -p -m755 %{SOURCE1} %{buildroot}%{_bindir}/hpcups-update-ppds
+%endif
 
 %{__mkdir_p} %{buildroot}%{_sysconfdir}/sane.d/dll.d
 echo hpaio > %{buildroot}%{_sysconfdir}/sane.d/dll.d/hpaio
@@ -244,22 +260,29 @@ rm -f  %{buildroot}%{_libdir}/*.a \
 
 # hp-setup needs to have cups service enabled and running for setups of queues
 %pre
-#%{_bindir}/systemctl start cups &>/dev/null ||:
-#%{_bindir}/systemctl enable cups &>/dev/null ||:
+%if !0%{?os2_version}
+%{_bindir}/systemctl start cups &>/dev/null ||:
+%{_bindir}/systemctl enable cups &>/dev/null ||:
+%endif
 
 %post
 # timeout is to prevent possible freeze during update
-#%{_bindir}/timeout 10m -k 15m %{_bindir}/hpcups-update-ppds &>/dev/null ||:
+%if !0%{?os2_version}
+%{_bindir}/timeout 10m -k 15m %{_bindir}/hpcups-update-ppds &>/dev/null ||:
+%endif
 
-#ldconfig_scriptlets libs
-
+%if !0%{?os2_version}
+ldconfig_scriptlets libs
+%endif
 
 %files
 %doc COPYING doc/*
 # ex-hpijs
 %{_bindir}/hpijs.exe
 # ex-hpijs
-#%{_bindir}/hpcups-update-ppds
+%if !0%{?os2_version}
+%{_bindir}/hpcups-update-ppds
+%endif
 %{_bindir}/hp-align
 %{_bindir}/hp-clean
 %{_bindir}/hp-colorcal
@@ -339,7 +362,9 @@ rm -f  %{buildroot}%{_libdir}/*.a \
 %{_datadir}/ppd
 %{_localstatedir}/lib/hp
 %dir %attr(0775,root,lp) %{_localstatedir}/run/hplip
-#%{_tmpfilesdir}/hplip.conf
+%if !0%{?os2_version}
+%{_tmpfilesdir}/hplip.conf
+%endif
 %{_sysconfdir}/udev/rules.d/56-hpmud.rules
 
 %files common
@@ -352,7 +377,7 @@ rm -f  %{buildroot}%{_libdir}/*.a \
 
 %files libs
 %{_libdir}/hpip*.dll
-#%{_libdir}/hpdis*.dll
+%{_libdir}/hpdis*.dll
 %{_libdir}/hpmud*.dll
 # Python extension
 %{python_sitearch}/*.dll
@@ -369,7 +394,9 @@ rm -f  %{buildroot}%{_libdir}/*.a \
 %{_bindir}/hp-toolbox
 %{_bindir}/hp-uiscan
 %{_bindir}/hp-wificonfig
-#%{_datadir}/applications/*.desktop
+%if !0%{?os2_version}
+%{_datadir}/applications/*.desktop
+%endif
 # Files
 %{_datadir}/hplip/check.py*
 %{_datadir}/hplip/devicesettings.py*
@@ -391,6 +418,9 @@ rm -f  %{buildroot}%{_libdir}/*.a \
 %config(noreplace) %{_sysconfdir}/sane.d/dll.d/hpaio
 
 %changelog
+* Wed Sep 02 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.19.8-3
+- enable net-snmp
+
 * Wed Jan 15 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.19.8-2
 - enable sane-backends
 
