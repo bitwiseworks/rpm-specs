@@ -2,7 +2,7 @@
 
 Name:     opus
 Version:  1.3.1
-Release:  1%{?candidate:.%{candidate}}%{?dist}
+Release:  2%{?candidate:.%{candidate}}%{?dist}
 Summary:  An audio codec for use in low-delay speech and audio communication
 License:  BSD
 URL:      https://www.opus-codec.org/
@@ -37,6 +37,7 @@ Files for development with opus.
 %scm_setup
 cp %{SOURCE1} .
 cp %{SOURCE2} .
+echo PACKAGE_VERSION="%{version}" > package_version
 autoreconf -fvi
 
 %build
@@ -76,6 +77,9 @@ make check %{?_smp_mflags} V=1
 %{_datadir}/man/man3/opus_*.3.gz
 
 %changelog
+* Mon Sep 07 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.3.1-2
+- make sure we get the right version in the .pc file and in config.h
+
 * Wed Apr 15 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.3.1-1
 - cloned source to out github repo
 - updated to latest version
