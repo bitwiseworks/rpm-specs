@@ -24,7 +24,7 @@ Epoch:      1
 License:    BSD
 URL:        http://net-snmp.sourceforge.net/
 Vendor:     bww bitwise works GmbH
-%scm_source git e:/trees/net-snmp/git master-os2
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
 
 Requires:        %{name}-libs = %{epoch}:%{version}-%{release}
 Requires:        %{name}-agent-libs = %{epoch}:%{version}-%{release}
@@ -568,5 +568,5 @@ BEGINLIBPATH=%{buildroot}/%{_libdir} make test
 %{_libdir}/netstr*.dll
 
 %changelog
-* Wed Aug 26 2020 Silvan Scherrer <silvan.scherrer@aroa.cg> - 1:5.8-1
+* Wed Aug 26 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1:5.8-1
 - first OS/2 rpm version

@@ -132,8 +132,8 @@ mkdir -p $RPM_BUILD_ROOT/%{develdocdir}/sample
 %doc %{develdocdir}/
 
 %changelog
-* Wed Mar 11 2020 Silvan Scherrer <silvan.scherrer@aroa.cg> - 2.1.11-2
+* Wed Mar 11 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.1.11-2
 - fix a wrong if in the spec
 
-* Fri Feb 28 2020 Silvan Scherrer <silvan.scherrer@aroa.cg> - 2.1.11-1
+* Fri Feb 28 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.1.11-1
 - first OS/2 rpm version

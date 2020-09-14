@@ -325,5 +325,5 @@ make check %{?_smp_mflags} GNUTLS_SYSTEM_PRIORITY_FILE=/dev/null
 %endif
 
 %changelog
-* Sat Apr 04 2020 Silvan Scherrer <silvan.scherrer@aroa.cg> - 3.6.12-1
+* Sat Apr 04 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.6.12-1
 - first OS/2 rpm version

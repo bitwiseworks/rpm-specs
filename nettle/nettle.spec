@@ -175,5 +175,5 @@ make check
 
 
 %changelog
-* Tue Mar 24 2020 Silvan Scherrer <silvan.scherrer@aroa.cg> - 3.5.1-1
+* Tue Mar 24 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.5.1-1
 - first OS/2 rpm version
