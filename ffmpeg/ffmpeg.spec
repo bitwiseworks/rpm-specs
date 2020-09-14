@@ -525,7 +525,9 @@ install -pm755 tools/qt-faststart.exe %{buildroot}%{_bindir}
 
 %changelog
 * Fri Sep 04 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.2.2-1
-- Enable high memory support.
+- update to version 4.2.2
+- enable all features we have available as rpm
+- rework the spec file heavily
 
 * Mon Apr 18 2016 Dmitriy Kuminov <coding@dmik.org> 2.8.6-2
 - Enable high memory support.
