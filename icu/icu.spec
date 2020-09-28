@@ -3,14 +3,14 @@
 
 Name:      icu
 Version:   65.1
-Release:   1%{?dist}
+Release:   2%{?dist}
 Summary:   International Components for Unicode
 
 License:   MIT and UCD and Public Domain
 URL:       http://site.icu-project.org/
 Vendor:    bww bitwise works GmbH
 
-%scm_source github http://github.com(bitwiseworks/%{name}-os2 %{version}-os2
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2-1
 
 BuildRequires: gcc
 BuildRequires: gcc-c++
@@ -201,6 +201,9 @@ LD_LIBRARY_PATH=lib:stubdata:tools/ctestfw:$LD_LIBRARY_PATH bin/uconv -l
 
 
 %changelog
+* Mon Sep 28 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> 65.1-2
+- fixed ticket #3 & #4 (patch sent by Koh Myung-Hun)
+
 * Wed Apr 15 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> 65.1-1
 - moved source to github
 - enable doxygen
