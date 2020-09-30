@@ -1,22 +1,17 @@
-# Note: this .spec is borrowed from https://src.fedoraproject.org/git/rpms/libgpg-error.git
-
-Summary: Library for error values used by GnuPG components
 Name: libgpg-error
-Version: 1.28
-Release: 2%{?dist}
+Version: 1.39
+Release: 1%{?dist}
+Summary: Library for error values used by GnuPG components
 URL: https://www.gnupg.org/related_software/libgpg-error/
-Group: System Environment/Libraries
 License: LGPLv2+
 
 Vendor:		bww bitwise works GmbH
-%scm_source     github https://github.com/bitwiseworks/libgpg-error master-os2
-#scm_source git file://f:/rd/ports/keepassx/libgpg-error master-os2
+%scm_source     github https://github.com/bitwiseworks/%{name}-os2 %{name}-%{version}-os2
 
+BuildRequires: gcc
 BuildRequires: gawk, gettext, autoconf, automake, gettext-devel, libtool
-#BuildRequires: texinfo
-%if 0%{?fedora} > 13
+BuildRequires: texinfo
 BuildRequires: gettext-autopoint
-%endif
 
 %description
 This is a library that defines common error values for all GnuPG
@@ -25,8 +20,8 @@ pinentry, SmartCard Daemon and possibly more in the future.
 
 %package devel
 Summary: Development files for the %{name} package
-Group: Development/Libraries
-Requires: %{name}%{?_isa} = %{version}-%{release}
+Requires: %{name} = %{version}-%{release}
+Requires: pkgconfig
 
 %description devel
 This is a library that defines common error values for all GnuPG
@@ -38,49 +33,77 @@ contains files necessary to develop applications using libgpg-error.
 
 %prep
 %scm_setup
-libtoolize
-autogen.sh --force
+
+autoreconf -fvi
+
+# The config script already suppresses the -L if it's /usr/lib, so cheat and
+# set it to a value which we know will be suppressed.
+sed -i -e 's|^libdir=@libdir@$|libdir=@exec_prefix@/lib|g;s|@GPG_ERROR_CONFIG_HOST@|none|g' src/gpg-error-config.in
+sed -i -e '/--variable=host/d' src/gpg-error-config-test.sh.in
+
+# Modify configure to drop rpath for /usr/lib64
+sed -i -e 's|sys_lib_dlsearch_path_spec="/lib /usr/lib|sys_lib_dlsearch_path_spec="/lib /usr/lib %{_libdir}|g' configure
 
 %build
-%configure \
-	--disable-static --disable-rpath --disable-languages \
-	--disable-doc --disable-tests
+%if 0%{?os2_version}
+export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp -lcx"
+# Set BUILDLEVEL to be embedded to all DLLs built with Libtool.
+export LT_BUILDLEVEL="@#%{vendor}:%{version}-%{release}#@##1## `LANG=C date +'%%d %%b %%Y %%H:%%M:%%S'`     `uname -n`::::0::"
+%endif
+
+%configure --disable-static --disable-rpath --disable-languages
 make %{?_smp_mflags}
 
 %install
-rm -fr $RPM_BUILD_ROOT
-make install DESTDIR=$RPM_BUILD_ROOT
+%make_install
 rm -f $RPM_BUILD_ROOT/%{_libdir}/*.la
 rm -f $RPM_BUILD_ROOT/%{_infodir}/dir
 
 %find_lang %{name}
 
 %check
+export BEGINLIBPATH=%{_builddir}/%{buildsubdir}/src/.libs
 make check
 
-%clean
-rm -fr $RPM_BUILD_ROOT
+%if !0%{?os2_version}
+%ldconfig_scriptlets
+%endif
 
 %files -f %{name}.lang
-%defattr(-,root,root)
-%{!?_licensedir:%global license %%doc}
 %license COPYING COPYING.LIB
-%doc AUTHORS README NEWS ChangeLog
+%doc AUTHORS README NEWS
+%if !0%{?os2_version}
+%{_bindir}/gpg-error
+%{_libdir}/libgpg-error.so.0*
+%else
 %{_bindir}/gpg-error.exe
 %{_libdir}/gpg-err0.dll
-#%{_datadir}/libgpg-error
+%endif
+%{_datadir}/libgpg-error
 
 %files devel
-%defattr(-,root,root)
 %{_bindir}/gpg-error-config
-%{_libdir}/gpg-error*.a
+%{_bindir}/gpgrt-config
+%if !0%{?os2_version}
+%{_bindir}/yat2m
+%{_libdir}/libgpg-error.so
+%else
+%{_bindir}/yat2m.exe
+%{_libdir}/gpg-error*_dll.a
+%endif
+%{_libdir}/pkgconfig/gpg-error.pc
 %{_includedir}/gpg-error.h
 %{_includedir}/gpgrt.h
 %{_datadir}/aclocal/gpg-error.m4
-#%{_infodir}/gpgrt.info*
-#%{_mandir}/man1/gpg-error-config.*
+%{_datadir}/aclocal/gpgrt.m4
+%{_infodir}/gpgrt.info*
+%{_mandir}/man1/gpgrt-config.*
 
 %changelog
+* Wed Sep 30 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.39-1
+- update to version 1.39
+- resync spec with fedora
+
 * Wed Nov 23 2017 yd <yd@os2power.com> 1.28-2
 - disable weak symbols for pthread, fixes pthread locking.
 
