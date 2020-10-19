@@ -128,7 +128,7 @@ ExclusiveArch: armv7hnl
 Summary:        Digital VCR and streaming server
 Name:           ffmpeg%{?flavor}
 Version:        4.2.2
-Release:        1%{?date}%{?date:git}%{?rel}%{?dist}
+Release:        2%{?date}%{?date:git}%{?rel}%{?dist}
 License:        %{ffmpeg_license}
 URL:            http://ffmpeg.org/
 %if !0%{?os2_version}
@@ -139,8 +139,7 @@ Source0:        http://ffmpeg.org/releases/ffmpeg-%{version}.tar.xz
 %endif
 %else
 Vendor:         bww bitwise works GmbH
-#scm_source     github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
-%scm_source     git e:/trees/ffmpeg/git master-os2
+%scm_source     github http://github.com/bitwiseworks/%{name}-os2 n%{version}-os2
 %endif
 Requires:       %{name}-libs = %{version}-%{release}
 %{?_with_cuda:BuildRequires: cuda-minimal-build-%{_cuda_version_rpm} cuda-drivers-devel}
@@ -294,6 +293,8 @@ broadcasting solution for Linux/Unix. It also includes a digital
 VCR. It can encode in real time in many formats including MPEG1 audio
 and video, MPEG4, h263, ac3, asf, avi, real, mjpeg, and flash.
 This package contains development files for %{name}
+
+%legacy_runtime_packages
 
 %debug_package
 
@@ -503,14 +504,20 @@ install -pm755 tools/qt-faststart.exe %{buildroot}%{_bindir}
 %files libs
 %doc  CREDITS README.md
 %license COPYING.*
-%{_libdir}/*.dll
-%exclude %{_libdir}/avdevi*.dll
+%{_libdir}/avcode58.dll
+%{_libdir}/avfilt7.dll
+%{_libdir}/avform58.dll
+%{_libdir}/avresa4.dll
+%{_libdir}/avutil56.dll
+%{_libdir}/postpr55.dll
+%{_libdir}/swresa3.dll
+%{_libdir}/swscal5.dll
 %{!?flavor:%{_mandir}/man3/lib*.3.*
 %exclude %{_mandir}/man3/libavdevice.3*
 }
 
 %files -n libavdevice%{?flavor}
-%{_libdir}/avdevi*.dll
+%{_libdir}/avdevi58.dll
 %{!?flavor:%{_mandir}/man3/libavdevice.3*}
 
 %files devel
@@ -519,11 +526,15 @@ install -pm755 tools/qt-faststart.exe %{buildroot}%{_bindir}
 %doc %{_docdir}/%{name}/*.html
 %{_includedir}/%{name}
 %{_libdir}/pkgconfig/lib*.pc
-%{_libdir}/*.a
+%{_libdir}/*_dll.a
 %{_libdir}/*.lib
 
 
 %changelog
+* Mon Oct 19 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.2.2-2
+- add a legacy package to version 2.8.6 to please ffox
+- adjusted spec a bit to have legacy working
+
 * Fri Sep 04 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.2.2-1
 - update to version 4.2.2
 - enable all features we have available as rpm
