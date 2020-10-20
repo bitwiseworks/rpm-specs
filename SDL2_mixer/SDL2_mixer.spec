@@ -1,6 +1,6 @@
 Name:           SDL2_mixer
 Version:        2.0.4
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Simple DirectMedia Layer - Sample Mixer Library
 
 License:        zlib
@@ -101,6 +101,9 @@ find %{buildroot} -name '*.la' -print -delete
 %{_includedir}/SDL2/SDL_mixer.h
 
 %changelog
+* Tue Oct 20 2020 Elbert Pol <elbert.pol@gmail.com> - 2.0.4-2
+- Update cause i had a wrong macros.dist
+
 * Tue Sep 08 2020 Elbert Pol <elbert.pol@gmail.com> - 2.0.4-1
 - First rpm for OS2
 
