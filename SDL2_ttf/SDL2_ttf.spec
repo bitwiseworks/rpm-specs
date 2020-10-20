@@ -1,6 +1,6 @@
 Name:		SDL2_ttf
 Version:	2.0.15
-Release:	1%{?dist}
+Release:	2%{?dist}
 Summary:	TrueType font rendering library for SDL2
 License:	zlib
 URL:		https://www.libsdl.org/projects/SDL_ttf/
@@ -70,5 +70,8 @@ find %{buildroot} -type f -name '*.la' -delete -print
 %{_libdir}/pkgconfig/%{name}.pc
 
 %changelog
+* Tue Oct 20 2020 Elbert Pol <elbert.pol@gmail.com> - 2.0.15-2
+- Update cause i had a wrong macros.dist
+
 * Tue Sep 08 2020 Elbert Pol <elbert.pol@gmail.com> - 2.0.15-1
 - First rpm for OS2
