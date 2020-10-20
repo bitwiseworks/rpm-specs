@@ -1,7 +1,7 @@
 Summary: SDL2 graphics drawing primitives and other support functions
 Name: SDL2_gfx
 Version: 1.0.4
-Release: 3%{?dist}
+Release: 1%{?dist}
 License: zlib
 URL: http://www.ferzkopp.net/Software/SDL2_gfx-2.0/
 %if !0%{?os2_version}
@@ -135,6 +135,9 @@ cd test
 %{_pkgdocdir}/html
 
 %changelog
+* Tue Oct 20 2020 Elbert Pol <elbert.pol@gmail.com> - 1.0.4-1
+- Update cause i had a wrong macros.dist
+
 * Tue Sep 08 2020 Elbert Pol <elbert.pol@gmail.com> - 1.0.4-1
 - First rpm for OS2
 
