@@ -1,6 +1,6 @@
 Name:          opusfile
 Version:       0.12
-Release:       1%{?dist}
+Release:       2%{?dist}
 Summary:       A high-level API for decoding and seeking within .opus files
 License:       BSD
 URL:           https://www.opus-codec.org/
@@ -83,6 +83,9 @@ find %{buildroot} -type f -name "*.la" -delete
 %endif
 
 %changelog
+* Tue Okt 20 2020 Elbert Pol <elbert.pol@gmail.com> - 0.12-2
+- Update cause i had a wrong macros.dist
+
 * Tue Sep 08 2020 Elbert Pol <elbert.pol@gmail.com> - 0.12-1
 - First rpm for OS2
 
