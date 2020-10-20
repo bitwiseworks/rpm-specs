@@ -1,6 +1,6 @@
 Name:		SDL2_net
 Version:	2.0.1
-Release:	1%{?dist}
+Release:	2%{?dist}
 Summary:	SDL portable network library
 License:	zlib
 URL:		http://www.libsdl.org/projects/SDL_net/
@@ -64,6 +64,9 @@ find %{buildroot} -name '*.la' -exec rm -f {} ';'
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
+* Tue Oct 20 2020 Elbert Pol <elbert.pol@gmail.com> - 2.0.1-2
+- Update cause i had a wrong macros.dist
+
 * Tue Sep 08 2020 Elbert Pol <elbert.pol@gmail.com> - 2.0.1-1
 - First rpm for OS2
 
