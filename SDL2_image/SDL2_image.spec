@@ -97,5 +97,5 @@ rm -f %{buildroot}%{_libdir}/*.la
 %{_libdir}/pkgconfig/SDL2_image.pc
 
 %changelog
-* Thu Sep 03 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.0.5-1
+* Thu Sep 03 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.0.5-5
 - first OS/2 rpm
