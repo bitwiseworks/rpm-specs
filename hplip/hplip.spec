@@ -15,8 +15,7 @@ License: GPLv2+ and MIT and BSD and IJG and Public Domain and GPLv2+ with except
 
 Url: https://developers.hp.com/hp-linux-imaging-and-printing
 Vendor: bww bitwise works GmbH
-#scm_source github  https://github.com/bitwiseworks/%{name}-os2 %{version}-os2-2
-%scm_source git e:/trees/hplip/git master
+%scm_source github  https://github.com/bitwiseworks/%{name}-os2 %{version}-os2-3
 
 # @todo: decide if we need that to
 # if we do it as well, also remove the comment in the post section

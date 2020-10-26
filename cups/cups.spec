@@ -31,8 +31,7 @@ License: GPLv2+ and LGPLv2+ with exceptions and AML
 Url: http://www.cups.org
 
 Vendor: bww bitwise works GmbH
-#scm_source  github https://github.com/bitwiseworks/%{name}-os2 %{version}-os2
-%scm_source  git e:/Trees/cups/git master
+%scm_source  github https://github.com/bitwiseworks/%{name}-os2 %{version}-os2
 Source8:  macros.%{name}
 
 Requires: %{name}-filesystem = %{epoch}:%{version}-%{release}
