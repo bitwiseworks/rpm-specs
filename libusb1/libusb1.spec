@@ -104,7 +104,6 @@ rm -rf $RPM_BUILD_ROOT
 - handle the case when we opened the device already, this is to mimik the nix
   behaviour better (libsane testcases failed because of that)
 
-
 * Mon Dec 12 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.0.21-1
 - update to version 1.0.21
 - add the documention
