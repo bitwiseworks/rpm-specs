@@ -124,7 +124,7 @@ cmd /c "kBuild\envos2.cmd" kmk $KMK_FLAGS PATH_INS="%{buildroot}" install
 #------------------------------------------------------------------------------
 %changelog
 * Fri Mar 27 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.1.9998-15
-- EMX: Make memchr assembly override wotk with GCC 9 optimizer
+- EMX: Make memchr assembly override work with GCC 9 optimizer
 
 * Wed Mar 18 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.1.9998-14
 - use unset BUILD_PLATFORM again as before commit
