@@ -20,8 +20,9 @@ BuildRequires:  SDL-devel libpng-devel
 Obsoletes: %{name}-devel-docs < %{epoch}:%{version}-%{release}
 %else
 BuildRequires:  doxygen
+BuildRequires:  transfig
 %if !0%{?os2_version}
-BuildRequires:  tetex-latex transfig
+BuildRequires:  tetex-latex
 %endif
 %endif
 
