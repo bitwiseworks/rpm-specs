@@ -2,14 +2,6 @@
 
 %global use_alternatives 0
 %global lspp 0
-%global dbus 0
-%global dnsds 0
-%global gnutls 0
-%global systemd 0
-%global openldap 0
-%global krb5 0
-%global php 0
-%global used_on_os2 0
 
 # {_exec_prefix}/lib/cups is correct, even on x86_64.
 # It is not used for shared objects but for executables.
@@ -24,7 +16,7 @@
 Summary: CUPS printing system
 Name: cups
 Epoch: 1
-Version: 2.2.12
+Version: 2.2.13
 Release: 1%{?dist}
 
 License: GPLv2+ and LGPLv2+ with exceptions and AML
@@ -41,31 +33,28 @@ Requires: %{name}-ipptool = %{epoch}:%{version}-%{release}
 
 Provides: cupsddk, cupsddk-drivers
 
-%if %{used_on_os2}
+%if !0%{?os2_version}
 BuildRequires: pam-devel
 %endif
 #BuildRequires: pkgconf-pkg-config
 BuildRequires: pkgconfig
-%if %{gnutls}
 BuildRequires: pkgconfig(gnutls)
-%endif
-%if %{openldap}
+%if !0%{?os2_version}
 BuildRequires: libacl-devel
 BuildRequires: openldap-devel
 %endif
-#BuildRequires: pkgconfig(libusb-1.0)
-BuildRequires: libusb1 >= 1.0.16
-%if %{krb5}
+BuildRequires: pkgconfig(libusb-1.0)
+%if !0%{?os2_version}
 BuildRequires: krb5-devel
 %endif
-%if %{dnsds}
+%if !0%{?os2_version}
 BuildRequires: pkgconfig(avahi-client)
 %endif
-%if %{systemd}
+%if !0%{?os2_version}
 BuildRequires: systemd
 BuildRequires: pkgconfig(libsystemd)
 %endif
-%if %{dbus}
+%if !0%{?os2_version}
 BuildRequires: pkgconfig(dbus-1)
 %endif
 BuildRequires: automake
@@ -86,23 +75,23 @@ BuildRequires: libselinux-devel
 BuildRequires: audit-libs-devel
 %endif
 
-%if %{dbus}
+%if !0%{?os2_version}
 Requires: dbus
 %endif
 
 # Requires working PrivateTmp (bug #807672)
-%if %{systemd}
+%if !0%{?os2_version}
 Requires(pre): systemd
 Requires(post): systemd
 %endif
 Requires(post): grep, sed
-%if %{systemd}
+%if !0%{?os2_version}
 Requires(preun): systemd
 Requires(postun): systemd
 %endif
 
 # We ship udev rules which use setfacl.
-%if %{systemd}
+%if !0%{?os2_version}
 Requires: systemd
 Requires: acl
 %endif
@@ -124,10 +113,8 @@ Provides: lpr
 Summary: CUPS printing system - development environment
 License: LGPLv2
 Requires: %{name}-libs = %{epoch}:%{version}-%{release}
-%if %{gnutls}
 Requires: gnutls-devel
-%endif
-%if %{krb5}
+%if !0%{?os2_version}
 Requires: krb5-devel
 %endif
 Requires: zlib-devel
@@ -196,7 +183,7 @@ Sends IPP requests to the specified URI and tests and/or displays the result.
 %prep
 %scm_setup
 
-%if %{used_on_os2}
+%if !0%{?os2_version}
 # if cupsd is set to log into /var/log/cups, then 'MaxLogSize 0' needs to be
 # in cupsd.conf to disable cupsd logrotate functionality and use logrotated
 sed -i -e '1iMaxLogSize 0' conf/cupsd.conf.in
@@ -242,19 +229,17 @@ export LDFLAGS="$LDFLAGS $RPM_OPT_FLAGS"
 	--with-cupsd-file-perm=0755 \
 	--with-log-file-perm=0600 \
 	--enable-relro \
-%if %{dbus}
+%if !0%{?os2_version}
 	--with-dbusdir=%{_sysconfdir}/dbus-1 \
 %endif
-%if %{php}
+%if !0%{?os2_version}
 	--with-php=/@unixroot/usr/bin/php-cgi \
 %endif
-%if %{dnsds}
+%if !0%{?os2_version}
 	--enable-avahi \
 %endif
 	--enable-threads \
-%if %{gnutls}
 	--enable-gnutls \
-%endif
 	--enable-webif \
 	--with-xinetd=no \
 	--with-access-log-level=actions \
@@ -273,11 +258,11 @@ make BUILDROOT=%{buildroot} install
 rm -rf	%{buildroot}%{_initddir} \
 	%{buildroot}%{_sysconfdir}/init.d \
 	%{buildroot}%{_sysconfdir}/rc.d
-%if %{systemd}
+%if !0%{?os2_version}
 mkdir -p %{buildroot}%{_unitdir}
 %endif
 
-%if %{used_on_os2}
+%if !0%{?os2_version}
 find %{buildroot}%{_datadir}/cups/model -name "*.ppd" |xargs gzip -n9f
 %endif
 
@@ -299,7 +284,7 @@ mv lpc.8 lpc-cups.8
 popd
 %endif
 
-%if %{systemd}
+%if !0%{?os2_version}
 mv %{buildroot}%{_unitdir}/org.cups.cupsd.path %{buildroot}%{_unitdir}/cups.path
 mv %{buildroot}%{_unitdir}/org.cups.cupsd.service %{buildroot}%{_unitdir}/cups.service
 mv %{buildroot}%{_unitdir}/org.cups.cupsd.socket %{buildroot}%{_unitdir}/cups.socket
@@ -331,7 +316,7 @@ rm -rf %{buildroot}%{_datadir}/icons
 rm -rf %{buildroot}%{_datadir}/cups/banners
 rm -f %{buildroot}%{_datadir}/cups/data/testprint
 
-%if %{used_on_os2}
+%if !0%{?os2_version}
 # install /usr/lib/tmpfiles.d/cups.conf (bug #656566, bug #893834)
 mkdir -p ${RPM_BUILD_ROOT}%{_tmpfilesdir}
 cat > ${RPM_BUILD_ROOT}%{_tmpfilesdir}/cups.conf <<EOF
@@ -364,7 +349,7 @@ s:.*\('%{_datadir}'/\)\([^/_]\+\)\(.*\.po$\):%lang(\2) \1\2\3:
 ' > %{name}.lang
 
 %post
-%if %{systemd}
+%if !0%{?os2_version}
 %systemd_post %{name}.path %{name}.socket %{name}.service
 %endif
 
@@ -403,7 +388,7 @@ exit 0
 exit 0
 
 %post lpd
-%if %{systemd}
+%if !0%{?os2_version}
 %systemd_post cups-lpd.socket
 %endif
 exit 0
@@ -411,7 +396,7 @@ exit 0
 #ldconfig_scriptlets libs
 
 %preun
-%if %{systemd}
+%if !0%{?os2_version}
 %systemd_preun %{name}.path %{name}.socket %{name}.service
 %endif
 exit 0
@@ -425,19 +410,19 @@ fi
 exit 0
 
 %preun lpd
-%if %{systemd}
+%if !0%{?os2_version}
 %systemd_preun cups-lpd.socket
 %endif
 exit 0
 
 %postun
-%if %{systemd}
+%if !0%{?os2_version}
 %systemd_postun_with_restart %{name}.path %{name}.socket %{name}.service
 %endif
 exit 0
 
 %postun lpd
-%if %{systemd}
+%if !0%{?os2_version}
 %systemd_postun_with_restart cups-lpd.socket
 %endif
 exit 0
@@ -448,7 +433,7 @@ exit 0
 %dir %attr(0755,root,lp) %{_sysconfdir}/cups
 %dir %attr(0755,root,lp) %{_localstatedir}/run/cups
 %dir %attr(0511,lp,sys) %{_localstatedir}/run/cups/certs
-%if %{used_on_os2}
+%if !0%{?os2_version}
 %{_tmpfilesdir}/cups.conf
 %{_tmpfilesdir}/cups-lp.conf
 %endif
@@ -466,7 +451,7 @@ exit 0
 %verify(not md5 size mtime) %config(noreplace) %attr(0644,root,lp) %{_sysconfdir}/cups/lpoptions
 %dir %attr(0755,root,lp) %{_sysconfdir}/cups/ppd
 %dir %attr(0700,root,lp) %{_sysconfdir}/cups/ssl
-%if %{used_on_os2}
+%if !0%{?os2_version}
 %config(noreplace) %{_sysconfdir}/pam.d/cups
 %config(noreplace) %{_sysconfdir}/logrotate.d/cups
 %endif
@@ -491,7 +476,7 @@ exit 0
 %{_datadir}/%{name}/www/apple-touch-icon.png
 %dir %{_datadir}/%{name}/usb
 %{_datadir}/%{name}/usb/org.cups.usb-quirks
-%if %{systemd}
+%if !0%{?os2_version}
 %{_unitdir}/%{name}.service
 %{_unitdir}/%{name}.socket
 %{_unitdir}/%{name}.path
@@ -553,7 +538,7 @@ exit 0
 %dir %attr(1770,root,lp) %{_localstatedir}/spool/cups/tmp
 %dir %attr(0710,root,lp) %{_localstatedir}/spool/cups
 %dir %attr(0755,lp,sys) %{_localstatedir}/log/cups
-%if %{dbus}
+%if !0%{?os2_version}
 %config(noreplace) %{_sysconfdir}/dbus-1/system.d/cups.conf
 %endif
 %{_datadir}/cups/drv/sample.drv
@@ -602,7 +587,7 @@ exit 0
 %{_rpmconfigdir}/macros.d/macros.cups
 
 %files lpd
-%if %{systemd}
+%if !0%{?os2_version}
 %{_unitdir}/cups-lpd.socket
 %{_unitdir}/cups-lpd@.service
 %endif
@@ -610,7 +595,7 @@ exit 0
 %{_datadir}/man/man8/cups-lpd.8.gz
 
 %files ipptool
-%if %{dnsds}
+%if !0%{?os2_version}
 %{_bindir}/ippfind.exe
 %endif
 %{_bindir}/ipptool.exe
@@ -620,6 +605,12 @@ exit 0
 %{_mandir}/man5/ipptoolfile.5.gz
 
 %changelog
+* Tue Nov 03 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.2.13-1
+- enable gnutls
+- fix some build breaks due to latest tools
+- updated to 2.2.13
+- use %%os2_version macro for stuff we don't enable
+
 * Fri Oct 25 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.2.12-1
 - update to version 2.2.12
 - reworked spec file heavily
