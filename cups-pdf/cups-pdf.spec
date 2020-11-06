@@ -1,7 +1,7 @@
 Summary:        Extension for creating pdf-Files with CUPS
 Name:           cups-pdf
 Version:        3.0.1
-Release:        1%{?dist}
+Release:        3%{?dist}
 Group:          Applications/Publishing
 URL:            http://www.cups-pdf.de/
 License:        GPLv2+
@@ -14,8 +14,9 @@ BuildRequires:  gcc
 BuildRequires:  cups-devel
 
 Requires:       ghostscript, cups
-#Requires(post): %{_bindir}/pgrep
-
+%if !0%{?os2_version}
+Requires(post): %{_bindir}/pgrep
+%endif
 
 # These are the defaults paths defined in config.h
 # CUPS-PDF spool directory
@@ -69,14 +70,11 @@ install -m700 src/cups-pdf.exe %{buildroot}%{CPBACKEND}/
 
 
 %post
-# not right now, as we lack pgrep
-%if 0
 # First install : create the printer if cupsd is running
-if [ "$1" -eq "1" ] && %{_bindir}/pgrep -u root -f %{_sbindir}/cupsd >/dev/null
+if [ "$1" -eq "1" ] && plist y | grep CUPSD >/dev/null
 then
     /@unixroot/usr/sbin/lpadmin -p Cups-PDF -v cups-pdf:/ -m CUPS-PDF_noopt.ppd -E || :
 fi
-%endif
 
 %postun
 if [ "$1" -eq "0" ]; then
@@ -96,5 +94,13 @@ fi
 
 
 %changelog
+* Fri Nov 06 2020 Silvan Scherrer <silvan.scherrer@aroa> 3.0.1-3
+- rebuild with latest toolchain
+
+* Wed Dec 18 2018 Silvan Scherrer <silvan.scherrer@aroa> 3.0.1-2
+- fix ticket #3
+- handle title better in documents
+- install the printer when cupsd runs
+
 * Mon Dec 10 2018 Silvan Scherrer <silvan.scherrer@aroa> 3.0.1-1
 - first rpm version
