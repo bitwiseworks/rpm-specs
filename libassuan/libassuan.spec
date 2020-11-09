@@ -1,7 +1,7 @@
 Name:    libassuan
 Summary: GnuPG IPC library
 Version: 2.5.3
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 # The library is LGPLv2+, the documentation GPLv3+
 License: LGPLv2+ and GPLv3+
@@ -16,7 +16,7 @@ Patch1:  libassuan-2.5.2-multilib.patch
 Patch2:  libassuan-2.5.3-includedir.patch
 %else
 Vendor:  bww bitwise works GmbH
-%scm_source    github https://github.com/bitwiseworks/%{name}-os2 %{name}-%{version}-os2
+%scm_source    github https://github.com/bitwiseworks/%{name}-os2 %{name}-%{version}-os2-2
 %endif
 
 BuildRequires: gcc
@@ -115,5 +115,8 @@ make check
 
 
 %changelog
+* Mon Nov 09 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.5.3-2
+- fix some socket problems with AF_LOCAL
+
 * Mon Oct 26 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.5.3-1
 - first OS/2 rpm
