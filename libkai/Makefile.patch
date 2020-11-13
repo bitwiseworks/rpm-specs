@@ -1,0 +1,24 @@
+--- Makefile	2020-11-13 14:26:04.000000000 +0100
++++ Makefile_new	2020-11-13 14:24:46.000000000 +0100
+@@ -26,7 +26,7 @@
+ BLDLEVEL_VERSION_MACRO := KAI_VERSION
+ BLDLEVEL_VERSION_FILE := kai.h
+ BLDLEVEL_VERSION := $(shell sed -n -e "s/^[ \t]*\#[ \t]*define[ \t]\+$(BLDLEVEL_VERSION_MACRO)[ \t]\+\"\(.*\)\"/\1/p" $(BLDLEVEL_VERSION_FILE))
+-BLDLEVEL_DATE := $(shell LANG=C date +"\" %F %T %^Z  \"")
++BLDLEVEL_DATE := $(shell LANG=C date +"\" %d %b %Y %H:%M:%S\ \ \ \ \ \"")
+ BLDLEVEL_HOST = $(shell echo $(HOSTNAME) | cut -b -11)
+ BLDLEVEL := @\#$(BLDLEVEL_VENDOR):$(BLDLEVEL_VERSION)\#@\#\#1\#\#$(BLDLEVEL_DATE)$(BLDLEVEL_HOST)::::::@@
+ 
+@@ -49,11 +49,11 @@
+ 
+ $(KAIDLL): kai.o kai_dart.o kai_uniaud.o speex/resample.o $(KAIDLLDEF)
+ 	$(CC) -Zdll $(LDFLAGS) -o $@ $^
+-	echo $(BLDLEVEL)K Audio Interface >> $@
+ 
+ $(KAIDLLDEF):
+ 	echo LIBRARY $(KAIDLLNAME) INITINSTANCE TERMINSTANCE > $@
+ 	echo DATA MULTIPLE NONSHARED >> $@
++	echo DESCRIPTION "\"$(BLDLEVEL)K Audio Interface\"" >> $@
+ 
+ kai.o: kai.c kai.h kai_internal.h kai_dart.h kai_uniaud.h \
+        speex/speex_resampler.h

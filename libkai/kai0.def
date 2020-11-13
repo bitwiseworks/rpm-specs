@@ -1,0 +1,20 @@
+;
+; kai0.def (created by emximp)
+;
+LIBRARY kai0 INITINSTANCE TERMINSTANCE
+EXPORTS
+  "kaiInit"
+  "kaiDone"
+  "kaiCaps"
+  "kaiOpen"
+  "kaiClose"
+  "kaiPlay"
+  "kaiStop"
+  "kaiPause"
+  "kaiResume"
+  "kaiSetSoundState"
+  "kaiSetVolume"
+  "kaiGetVolume"
+  "kaiClearBuffer"
+  "kaiStatus"
+  "kaiEnableSoftVolume"
