@@ -1,11 +1,11 @@
 Name: libdaemon
 Version: 0.14
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: Library for writing UNIX daemons
 License: LGPLv2+
 URL: http://0pointer.de/lennart/projects/libdaemon/
 Vendor: bww bitwise works GmbH
-%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2 
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2-2
 
 # Requires lynx to build the docs
 BuildRequires:  gcc
@@ -69,5 +69,8 @@ rm -f $RPM_BUILD_ROOT/%{_datadir}/doc/libdaemon/style.css
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
+* Mon Nov 16 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.14-2
+- add the possibility to unlink files, as we need to close them first 
+
 * Mon Jan 06 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.14-1
 - first rpm version
