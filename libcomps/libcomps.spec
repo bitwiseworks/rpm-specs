@@ -117,6 +117,11 @@ mkdir build-py3
 mkdir build-doc
 
 %build
+%if 0%{?os2_version}
+export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp -lcx"
+export VENDOR="%{vendor}"
+%endif
+
 %if %{with python2}
 %if !0%{?os2_version}
 pushd build-py2
