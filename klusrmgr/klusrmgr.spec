@@ -5,7 +5,7 @@
 
 Summary:    (kLIBC) User Manager
 Name:       klusrmgr
-Version:    1.4.0
+Version:    1.4.1
 Release:    1%{?dist}
 License:    proprietary
 Group:      Applications/System
@@ -86,12 +86,15 @@ fi
 
 
 %changelog
+* Tue Dec 1 2020 hb <herwig.bauernfeind@bitwiseworks.com> 1.4.1-1
+- transparently handle /@unixroot/ (both for reading and writing)
+
 * Sun May 10 2020 hb <herwig.bauernfeind@bitwiseworks.com> 1.4.0-1
 - Fix vxapps tickets #12 and #13
 - Remove "wheel" group upon installation
 - Add a refresh timer to the GUI in order to detect externally changed 
   users
-  
+
 * Tue Apr 21 2020 hb <herwig.bauernfeind@bitwiseworks.com> 1.3.2-3
 - Repackage with proper zip file
 
