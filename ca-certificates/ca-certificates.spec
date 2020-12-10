@@ -35,8 +35,10 @@ Name: ca-certificates
 # to have increasing version numbers. However, the new scheme will work, 
 # because all future versions will start with 2013 or larger.)
 
-Version: 2019.2.32
-Release: 2%{?dist}
+Version: 2020.2.41
+# for Rawhide, please always use release >= 2
+# for Fedora release branches, please use release < 2 (1.0, 1.1, ...)
+Release: 1%{?dist}
 License: Public Domain
 
 URL: https://fedoraproject.org/wiki/CA-Certificates
@@ -63,20 +65,33 @@ Source18: README.src
 
 BuildArch: noarch
 
+%if !0%{?os2_version}
+Requires(post): bash
+%else
 Requires(post): sh
+%endif
 Requires(post): grep
 Requires(post): sed
 Requires(post): coreutils
+%if !0%{?os2_version}
+Requires: bash
+%else
 Requires: sh
+%endif
 Requires: grep
 Requires: sed
-Requires(post): p11-kit >= 0.23.10
-Requires(post): p11-kit-trust >= 0.23.10
-Requires: p11-kit >= 0.23.10
-Requires: p11-kit-trust >= 0.23.10
+Requires(post): p11-kit >= 0.23.19
+Requires(post): p11-kit-trust >= 0.23.19
+Requires: p11-kit >= 0.23.19
+Requires: p11-kit-trust >= 0.23.19
 
-#BuildRequires: perl-interpreter
+%if !0%{?os2_version}
+BuildRequires: perl-interpreter
+BuildRequires: python3
+%else
+BuildRequires: perl
 BuildRequires: python
+%endif
 BuildRequires: openssl
 BuildRequires: asciidoc
 BuildRequires: libxslt
@@ -94,15 +109,21 @@ mkdir %{name}/certs/legacy-disable
 mkdir %{name}/java
 
 %build
-#pushd %{name}/certs
-cd %{name}
-cd certs
+%if !0%{?os2_version}
+pushd %{name}/certs
+%else
+cd %{name}/certs
+%endif
  pwd
  cp %{SOURCE0} .
+%if !0%{?os2_version}
+ python3 %{SOURCE4} >c2p.log 2>c2p.err
+popd
+pushd %{name}
+%else
  python %{SOURCE4} >c2p.log 2>c2p.err
-#popd
 cd ..
-#pushd %{name}
+%endif
  (
    cat <<EOF
 # This is a bundle of X.509 certificates of public Certificate
@@ -167,17 +188,28 @@ EOF
  fi
  # Append our trust fixes
  cat %{SOURCE3} >> %{p11_format_bundle}
-#popd
+%if !0%{?os2_version}
+popd
+%else
 cd ..
+%endif
 
 #manpage
 cp %{SOURCE10} %{name}/update-ca-trust.8.txt
 asciidoc.py -v -d manpage -b docbook %{name}/update-ca-trust.8.txt
+%if !0%{?os2_version}
+xsltproc --nonet -o %{name}/update-ca-trust.8 /usr/share/asciidoc/docbook-xsl/manpage.xsl %{name}/update-ca-trust.8.xml
+%else
 xsltproc --nonet -o %{name}/update-ca-trust.8 /@unixroot/usr/share/asciidoc/docbook-xsl/manpage.xsl %{name}/update-ca-trust.8.xml
+%endif
 
 cp %{SOURCE9} %{name}/ca-legacy.8.txt
 asciidoc.py -v -d manpage -b docbook %{name}/ca-legacy.8.txt
+%if !0%{?os2_version}
+xsltproc --nonet -o %{name}/ca-legacy.8 /usr/share/asciidoc/docbook-xsl/manpage.xsl %{name}/ca-legacy.8.xml
+%else
 xsltproc --nonet -o %{name}/ca-legacy.8 /@unixroot/usr/share/asciidoc/docbook-xsl/manpage.xsl %{name}/ca-legacy.8.xml
+%endif
 
 
 %install
@@ -244,9 +276,27 @@ chmod 444 $RPM_BUILD_ROOT%{catrustdir}/extracted/%{java_bundle}
 touch $RPM_BUILD_ROOT%{catrustdir}/extracted/edk2/cacerts.bin
 chmod 444 $RPM_BUILD_ROOT%{catrustdir}/extracted/edk2/cacerts.bin
 
-# /etc/ssl/certs symlink for 3rd-party tools
-ln -s ../pki/tls/certs \
+# /etc/ssl symlinks for 3rd-party tools and cross-distro compatibility
+%if !0%{?os2_version}
+ln -s /etc/pki/tls/certs \
     $RPM_BUILD_ROOT%{_sysconfdir}/ssl/certs
+%else
+ln -s /@unixroot/etc/pki/tls/certs \
+    $RPM_BUILD_ROOT%{_sysconfdir}/ssl/certs
+%endif
+ln -s %{catrustdir}/extracted/pem/tls-ca-bundle.pem \
+    $RPM_BUILD_ROOT%{_sysconfdir}/ssl/cert.pem
+%if !0%{?os2_version}
+ln -s /etc/pki/tls/openssl.cnf \
+    $RPM_BUILD_ROOT%{_sysconfdir}/ssl/openssl.cnf
+ln -s /etc/pki/tls/ct_log_list.cnf \
+    $RPM_BUILD_ROOT%{_sysconfdir}/ssl/ct_log_list.cnf
+%else
+ln -s /@unixroot/etc/pki/tls/openssl.cnf \
+    $RPM_BUILD_ROOT%{_sysconfdir}/ssl/openssl.cnf
+ln -s /@unixroot/etc/pki/tls/ct_log_list.cnf \
+    $RPM_BUILD_ROOT%{_sysconfdir}/ssl/ct_log_list.cnf
+%endif
 # legacy filenames
 ln -s %{catrustdir}/extracted/pem/tls-ca-bundle.pem \
     $RPM_BUILD_ROOT%{pkidir}/tls/cert.pem
@@ -274,7 +324,7 @@ if [ $1 -gt 1 ] ; then
     # no backup yet
     if test -e %{pkidir}/%{java_bundle}; then
       # a file exists
-      if ! test -L %{pkidir}/%{java_bundle}; then
+        if ! test -L %{pkidir}/%{java_bundle}; then
         # it's an old regular file, not a link
         mv -f %{pkidir}/%{java_bundle} %{pkidir}/%{java_bundle}.rpmsave
       fi
@@ -309,9 +359,26 @@ fi
 #if [ $1 -gt 1 ] ; then
 #  # when upgrading or downgrading
 #fi
+# if ln is available, go ahead and run the ca-legacy and update
+# scripts. If not, wait until %posttrans.
+if [ -x %{_bindir}/ln ]; then
 %{_bindir}/ca-legacy install
 %{_bindir}/update-ca-trust
+fi
 
+%posttrans
+# When coreutils is installing with ca-certificates
+# we need to wait until coreutils install to
+# run our update since update requires ln to complete.
+# There is a circular dependency here where
+# ca-certificates depends on coreutils
+# coreutils depends on openssl
+# openssl depends on ca-certificates
+# so we run the scripts here too, in case we couldn't run them in
+# post. If we *could* run them in post this is an unnecessary
+# duplication, but it shouldn't hurt anything
+%{_bindir}/ca-legacy install
+%{_bindir}/update-ca-trust
 
 %files
 %dir %{_sysconfdir}/ssl
@@ -350,8 +417,11 @@ fi
 %{pkidir}/tls/certs/%{classic_tls_bundle}
 %{pkidir}/tls/certs/%{openssl_format_trust_bundle}
 %{pkidir}/%{java_bundle}
-# symlink directory
+# symlinks to cross-distro compatibility files and directory
 %{_sysconfdir}/ssl/certs
+%{_sysconfdir}/ssl/cert.pem
+%{_sysconfdir}/ssl/openssl.cnf
+%{_sysconfdir}/ssl/ct_log_list.cnf
 
 # master bundle file with trust
 %{_datadir}/pki/ca-trust-source/%{p11_format_bundle}
@@ -372,6 +442,10 @@ fi
 
 
 %changelog
+* Thu Dec 10 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> 2020.2.41-1
+- update to latest fedora spec
+- update ca-cert to latest Mozilla cert
+
 * Mon Nov 11 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 2019.2.32-2
 - fix a bashism in ca-legcacy
 
