@@ -27,7 +27,7 @@
 Name:           perl
 Version:        %{perl_version}
 # release number must be even higher, because dual-lived modules will be broken otherwise
-Release:        6%{?dist}
+Release:        8%{?dist}
 Epoch:          %{perl_epoch}
 Summary:        Practical Extraction and Report Language
 Group:          Development/Languages
@@ -41,7 +41,7 @@ License:        (GPL+ or Artistic) and (GPLv2+ or Artistic) and Copyright Only a
 Url:            http://www.perl.org/
 Vendor:         bww bitwise works GmbH
 
-%scm_source     svn http://svn.netlabs.org/repos/ports/perl/trunk 2369
+%scm_source     github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2-1
 Source3:        macros.perl
 
 # Update some of the bundled modules
@@ -1370,7 +1370,7 @@ perl regen.pl -v
         -Dinstallusrbinperl=n \
         -Ubincompat5005 \
         -Uversiononly \
-        -Dpager='%{_bindir}less -isr' \
+        -Dpager='%{_bindir}/less -isr' \
         -Dd_gethostent_r_proto -Ud_endhostent_r_proto -Ud_sethostent_r_proto \
         -Ud_endprotoent_r_proto -Ud_setprotoent_r_proto \
         -Ud_endservent_r_proto -Ud_setservent_r_proto \
@@ -2521,7 +2521,13 @@ rm -rf $RPM_BUILD_ROOT
 # Nothing. Nada. Zilch. Zarro. Uh uh. Nope. Sorry.
 
 %changelog
-* Wed Oct 24 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 5.16.1-6
+* Fri Dec 11 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> 5.16.1-8
+- fix a gcc 9 compiler regression while creating Errno.pm
+
+* Wed Oct 14 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> 5.16.1-7
+- enable libcx
+
+* Thu Aug 27 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> 5.16.1-6
 - preserve boot_DynaLoader export
 
 * Wed Oct 24 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 5.16.1-5
