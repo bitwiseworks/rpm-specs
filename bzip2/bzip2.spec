@@ -10,7 +10,7 @@ URL: http://www.bzip.org/
 #Source0: http://www.bzip.org/%{version}/%{name}-%{version}.tar.gz
 Source0: https://sourceware.org/pub/bzip2/%{name}-%{version}.tar.gz
 %else
-%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 v%{version}-os2
 Vendor: bww bitwise works GmbH
 %endif
 Source1: bzip2.pc
