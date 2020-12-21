@@ -1,0 +1,11 @@
+prefix=/@unixroot/usr
+exec_prefix=/@unixroot/usr
+bindir=/@unixroot/usr/bin
+libdir=
+includedir=/@unixroot/usr/include
+
+Name: bzip2
+Description: A file compression library
+Version:
+Libs: -L${libdir} -lbz2
+Cflags: -I${includedir}
