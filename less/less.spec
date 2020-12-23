@@ -1,7 +1,3 @@
-#define svn_url     e:/trees/less/trunk
-%define svn_url     http://svn.netlabs.org/repos/ports/less/trunk
-%define svn_rev     1763
-
 Summary: A text file browser similar to more, but better
 Name: less
 Version: 530
