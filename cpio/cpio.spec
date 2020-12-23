@@ -1,24 +1,70 @@
-#define svn_url     e:/trees/cpio/trunk
-%define svn_url     http://svn.netlabs.org/repos/ports/cpio/trunk
-%define svn_rev     1967
-
 Summary: A GNU archiving program
 Name: cpio
-Version: 2.12
+Version: 2.13
 Release: 1%{?dist}
 License: GPLv3+
-Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
+%if !0%{?os2_version}
+Source: ftp://ftp.gnu.org/gnu/cpio/cpio-%{version}.tar.bz2
+
+# help2man generated manual page distributed only in RHEL/Fedora
+Source1: cpio.1
+
+# We use SVR4 portable format as default.
+Patch1: cpio-2.9-rh.patch
+
+# fix warn_if_file_changed() and set exit code to 1 when cpio fails to store
+# file > 4GB (#183224)
+# http://lists.gnu.org/archive/html/bug-cpio/2006-11/msg00000.html
+Patch2: cpio-2.13-exitCode.patch
+
+# Support major/minor device numbers over 127 (bz#450109)
+# http://lists.gnu.org/archive/html/bug-cpio/2008-07/msg00000.html
+Patch3: cpio-2.13-dev_number.patch
+
+# Define default remote shell as /usr/bin/ssh (#452904)
+Patch4: cpio-2.9.90-defaultremoteshell.patch
+
+# Fix segfault with nonexisting file with patternnames (#567022)
+# http://savannah.gnu.org/bugs/index.php?28954
+# We have slightly different solution than upstream.
+Patch5: cpio-2.10-patternnamesigsegv.patch
+
+# Fix bad file name splitting while creating ustar archive (#866467)
+# (fix backported from tar's source)
+Patch7: cpio-2.10-longnames-split.patch
+
+# Cpio does Sum32 checksum, not CRC (downstream)
+Patch8: cpio-2.11-crc-fips-nit.patch
+
+# Fix multiple definition of `program_name'
+Patch9: cpio-2.13-mutiple-definition.patch
+
+# Revert fix for CVE-2015-1197 (#1797163)
+# reverts upstream commit 45b0ee2b4
+Patch10: cpio-2.13-revert-CVE-2015-1197-fix.patch
+
+# Extract: retain times for symlinks
+# downstream patch (#1486364)
+# https://www.mail-archive.com/bug-cpio@gnu.org/msg00605.html
+Patch11: cpio-2.11-retain-symlink-times.patch
+%else
 Vendor:  bww bitwise works GmbH
-Source:  %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 v%{version}-os2
+%endif
 
-Requires(post): %{_sbindir}/install-info.exe
-Requires(preun): %{_sbindir}/install-info.exe
-BuildRequires: texinfo, autoconf, gettext
-#BuildRequires: rmt
-Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-
-Requires: gettext-libs
+%if !0%{?os2_version}
+Provides: bundled(gnulib)
+Provides: bundled(paxutils)
+Provides: /bin/cpio
+%endif
+BuildRequires: gcc
+%if !0%{?os2_version}
+BuildRequires: texinfo, autoconf, automake, gettext, gettext-devel, rmt
+%else
+BuildRequires: texinfo, autoconf, automake, gettext, gettext-devel
+%endif
+BuildRequires: make
 
 %description
 GNU cpio copies files into or out of a cpio or tar archive.  Archives
@@ -34,67 +80,71 @@ and can read archives created on machines with a different byte-order.
 
 Install cpio if you need a program to manage file archives.
 
+%if 0%{?os2_version}
 %debug_package
-
-
-%prep
-%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
-%setup -q
-%else
-%setup -n "%{name}-%{version}" -Tc
-svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
 %endif
 
-autoreconf -fvi
+%prep
+%if !0%{?os2_version}
+%autosetup -p1
+%else
+%scm_setup
+%endif
+
 
 %build
-export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
-export LIBS="-lcx"
+autoreconf -fi
+export CFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -pedantic -fno-strict-aliasing -Wall $CFLAGS"
+%if 0%{?os2_version}
+export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp -lcx"
+%endif
 %configure --with-rmt="%{_sysconfdir}/rmt"
-
+%if !0%{?os2_version}
+%make_build
+%else
 make %{?_smp_mflags}
+%endif
+(cd po && make update-gmo)
+
 
 %install
-rm -rf ${RPM_BUILD_ROOT}
-
-make DESTDIR=$RPM_BUILD_ROOT INSTALL="install -p" install
+%make_install
 
 rm -f $RPM_BUILD_ROOT%{_libexecdir}/rmt
 rm -f $RPM_BUILD_ROOT%{_infodir}/dir
+%if !0%{?os2_version}
+rm -f $RPM_BUILD_ROOT%{_mandir}/man1/*.1*
+install -c -p -m 0644 %{SOURCE1} ${RPM_BUILD_ROOT}%{_mandir}/man1
+%endif
 
 %find_lang %{name}
 
-%clean
-rm -rf ${RPM_BUILD_ROOT}
+%check
+rm -f ${RPM_BUILD_ROOT}/test/testsuite
+make check || {
+    echo "### TESTSUITE.LOG ###"
+    cat tests/testsuite.log
+    exit 1
+}
 
-#%check
-#rm -f ${RPM_BUILD_ROOT}/test/testsuite
-#make check
-
-
-%post
-if [ -f %{_infodir}/cpio.info.gz ]; then
-  %{_sbindir}/install-info.exe %{_infodir}/cpio.info.gz %{_infodir}/dir || :
-fi
-
-%preun
-if [ $1 = 0 ]; then
-  if [ -f %{_infodir}/cpio.info.gz ]; then
-    %{_sbindir}/install-info.exe --delete %{_infodir}/cpio.info.gz %{_infodir}/dir || :
-  fi
-fi
 
 %files -f %{name}.lang
-%defattr(-,root,root,0755)
-%doc AUTHORS ChangeLog NEWS README THANKS TODO COPYING
-%{_bindir}/*.exe
+%doc AUTHORS ChangeLog NEWS README THANKS TODO
+%{!?_licensedir:%global license %%doc}
+%license COPYING
+%{_bindir}/*
+%if 0%{?os2_version}
+%exclude %{_bindir}/*.dbg
+%endif
 %{_mandir}/man*/*
 %{_infodir}/*.info*
-%{_usr}/share/locale/*
 
 %changelog
+* Mon Dec 21 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.13-1
+- update to vendor version 2.13
+- use scm_* macros
+- resynced with fedora spec
+
 * Fri Feb 03 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.12-1
 - update to vendor version 2.12
 - update some gnulib tool to latest gnulib
