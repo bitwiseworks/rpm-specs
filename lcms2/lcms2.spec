@@ -1,12 +1,15 @@
 Name:           lcms2
-Version:        2.9
+Version:        2.11
 Release:        1%{?dist}
 Summary:        Color Management Engine
 License:        MIT
 URL:            http://www.littlecms.com/
-
+%if !0%{?os2_version}
+Source0:        http://www.littlecms.com/lcms2-%{version}.tar.gz
+%else
 Vendor:         bww bitwise works GmbH
-%scm_source svn http://svn.netlabs.org/repos/ports/lcms2/trunk 2316
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 v%{version}-os2
+%endif
 
 BuildRequires:  gcc
 BuildRequires:  libjpeg-devel
@@ -33,63 +36,105 @@ Provides:       littlecms-devel = %{version}-%{release}
 %description    devel
 Development files for LittleCMS.
 
+%if 0%{?os2_version}
 %debug_package
-
+%endif
 
 %prep
+%if !0%{?os2_version}
+%autosetup -p1
+%else
 %scm_setup
-
-# hammer to nuke rpaths, recheck on new releases
 export NOCONFIGURE=1
 libtoolize -fc
 autogen.sh
+%endif
 
 
 %build
+%if 0%{?os2_version}
 export LDFLAGS=" -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp -lcx"
 export VENDOR="%{vendor}"
+%endif
 
-%configure --disable-static --enable-shared
+%configure \
+  --disable-static \
+  --program-suffix=2
 
+# remove rpath from libtool
+sed -i.rpath 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
+sed -i.rpath 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
+
+%if !0%{?os2_version}
+%make_build
+%else
 make %{?_smp_mflags}
+%endif
 
 
 %install
-make install DESTDIR=${RPM_BUILD_ROOT} INSTALL="install -p"
+%make_install
 
 rm -fv %{buildroot}%{_libdir}/lib*.la
 
 # rename docs (for use with %%doc below)
-cp -af doc/LittleCMS2.?\ API.pdf api.pdf
-cp -af doc/LittleCMS2.?\ Plugin\ API.pdf plugin-api.pdf
-cp -af doc/LittleCMS2.?\ tutorial.pdf tutorial.pdf
+%if !0%{?os2_version}
+cp -alf doc/LittleCMS2.??\ API.odt api.odt
+cp -alf doc/LittleCMS2.??\ Plugin\ API.odt plugin-api.odt
+cp -alf doc/LittleCMS2.??\ tutorial.odt tutorial.odt
+%else
+cp -af doc/LittleCMS2.??\ API.odt api.odt
+cp -af doc/LittleCMS2.??\ Plugin\ API.odt plugin-api.odt
+cp -af doc/LittleCMS2.??\ tutorial.odt tutorial.odt
+%endif
 
 
 %check
+%if !0%{?os2_version}
+%make_build check -k ||:
+%else
 export BEGINLIBPATH=%{_builddir}/%{buildsubdir}/src/.libs
 make check -k ||:
+%endif
 
 
-#%ldconfig_scriplets
-
+%if !0%{?os2_version}
+%ldconfig_scriptlets
+%endif
 
 %files
 %doc AUTHORS
 %license COPYING
+%if !0%{?os2_version}
+%{_libdir}/liblcms2.so.2*
+%else
 %{_libdir}/*.dll
+%endif
 
 %files utils
+%if !0%{?os2_version}
+%{_bindir}/*
+%else
 %{_bindir}/*.exe
+%endif
 %{_mandir}/man1/*
 
 %files devel
-%doc api.pdf plugin-api.pdf tutorial.pdf
+%doc api.odt plugin-api.odt tutorial.odt
 %{_includedir}/lcms2*.h
-%{_libdir}/*.a
+%if !0%{?os2_version}
+%{_libdir}/liblcms2.so
+%else
+%{_libdir}/*_dll.a
+%endif
 %{_libdir}/pkgconfig/lcms2.pc
 
 
 %changelog
+* Tue Dec 29 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.11-1
+- update to vendor version 2.11
+- resynced with fedora spec
+
 * Sat Dec 29 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.9-1
 - update to vendor version 2.9
 
