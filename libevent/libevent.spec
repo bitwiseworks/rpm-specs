@@ -2,14 +2,14 @@
 
 Name:           libevent
 Version:        2.1.11
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Abstract asynchronous event notification library
 
 # arc4random.c, which is used in build, is ISC. The rest is BSD.
 License:        BSD and ISC
 URL:            http://libevent.org/
 Vendor:         bww bitwise works GmbH
-%scm_source     github https://github.com/bitwiseworks/%{name}-os2 %{version}-os2
+%scm_source     github https://github.com/bitwiseworks/%{name}-os2 %{version}-3-os2
 
 BuildRequires:  gcc
 %if ! 0%{?_module_build}
@@ -132,6 +132,9 @@ mkdir -p $RPM_BUILD_ROOT/%{develdocdir}/sample
 %doc %{develdocdir}/
 
 %changelog
+* Thu Dec 31 2020 Dmitriy Kuminov <coding@dmik.org> - 2.1.11-3
+- Remove OS/2 specific EBADF hack from select_dispatch [#2].
+
 * Wed Mar 11 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.1.11-2
 - fix a wrong if in the spec
 
