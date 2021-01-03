@@ -23,6 +23,12 @@
 %global _without_opengl   1
 %endif
 
+# Native Opus decoder is currently broken on OS/2, see
+# https://github.com/bitwiseworks/ffmpeg-os2/issues/4
+%if 0%{?os2_version}
+%global _without_native_opus    1
+%endif
+
 # TODO: add make test to %%check section
 
 #global branch  oldabi-
@@ -128,7 +134,7 @@ ExclusiveArch: armv7hnl
 Summary:        Digital VCR and streaming server
 Name:           ffmpeg%{?flavor}
 Version:        4.2.2
-Release:        2%{?date}%{?date:git}%{?rel}%{?dist}
+Release:        3%{?date}%{?date:git}%{?rel}%{?dist}
 License:        %{ffmpeg_license}
 URL:            http://ffmpeg.org/
 %if !0%{?os2_version}
@@ -360,6 +366,8 @@ This package contains development files for %{name}
     --enable-libopenjpeg \\\
     %{?!os2_version:--enable-libopenmpt} \\\
     %{!?_without_opus:--enable-libopus} \\\
+    %{?_without_native_opus:--disable-decoder=opus} \\\
+    %{?_without_native_opus:--disable-encoder=opus} \\\
     %{!?_without_pulse:--enable-libpulse} \\\
     %{?!os2_version:--enable-librsvg} \\\
     %{?_with_rav1e:--enable-librav1e} \\\
@@ -531,6 +539,9 @@ install -pm755 tools/qt-faststart.exe %{buildroot}%{_bindir}
 
 
 %changelog
+* Mon Jan 4 2021 Dmitriy Kuminov <coding@dmik.org> 4.2.2-3
+- Disable broken native Opus decoder/encoder [ffmpeg-os2#4].
+
 * Mon Oct 19 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.2.2-2
 - add a legacy package to version 2.8.6 to please ffox
 - adjusted spec a bit to have legacy working
