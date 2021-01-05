@@ -1,7 +1,7 @@
 Name: libcx
 Summary: kLIBC Extension Library
 Version: 0.6.9
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: LGPLv2.1+
 Group: System/Libraries
 Vendor: bww bitwise works GmbH
@@ -61,6 +61,7 @@ echo "#include <sys/poll.h>" > nosys_poll.h
 %{__install} -m 644 src/net/libcx/net.h %{buildroot}%{_includedir}/libcx
 %{__install} -m 644 src/net/ifaddrs.h %{buildroot}%{_includedir}
 %{__install} -m 644 src/spawn/libcx/spawn2.h %{buildroot}%{_includedir}/libcx
+%{__install} -m 644 src/shmem/libcx/shmem.h %{buildroot}%{_includedir}/libcx
 # Dir for LIBCx assertion logs
 %{__mkdir_p} %{buildroot}%{_var}/log/libcx
 
@@ -88,8 +89,12 @@ rm -rf %{buildroot}
 %{_includedir}/libcx/exeinfo.h
 %{_includedir}/libcx/net.h
 %{_includedir}/libcx/spawn2.h
+%{_includedir}/libcx/shmem.h
 
 %changelog
+* Tue Jan 5 2021 Dmitriy Kuminov <coding@dmik.org> 0.6.9-2
+- Install forgotten <libcx/shmem.h>.
+
 * Thu Dec 31 2020 Dmitriy Kuminov <coding@dmik.org> 0.6.9-1
 - Release version 0.6.9
   (https://github.com/bitwiseworks/libcx/blob/0.6.9/CHANGELOG.md).
