@@ -5,7 +5,7 @@
 
 Summary:    (kLIBC) User Manager
 Name:       klusrmgr
-Version:    1.4.1
+Version:    1.4.2
 Release:    1%{?dist}
 License:    proprietary
 Group:      Applications/System
@@ -69,7 +69,7 @@ fi
 %bww_app_shadow -d WP_CONFIG
 %{_rpmconfigdir_os2}/wpi4rpm add %{vendor}/%{name}/binaries %{version}-%{release}
 cmd /c klusrmgr.exe -init
-cmd /c groupmod.exe -x "wheel"
+cmd /c groupmod.exe -xx "wheel"
 
 %postun
 if [ "$1" -eq 0 ]; then # (upon removal)
@@ -86,6 +86,12 @@ fi
 
 
 %changelog
+* Tue Jan 5 2021 hb <herwig.bauernfeind@bitwiseworks.com> 1.4.2-1
+- add context menu for users and groups pages
+- fix error when manipulating groups with numbers below 10
+- fix ticket #11 by adding -xx switch for silent removal in usermod
+  and groupmod
+
 * Tue Dec 1 2020 hb <herwig.bauernfeind@bitwiseworks.com> 1.4.1-1
 - transparently handle /@unixroot/ (both for reading and writing)
 
