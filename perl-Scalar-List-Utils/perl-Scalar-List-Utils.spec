@@ -1,7 +1,7 @@
 Name:           perl-Scalar-List-Utils
 Epoch:          3
 Version:        1.49
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        A selection of general-utility scalar and list subroutines
 License:        GPL+ or Artistic
 Group:          Development/Libraries
@@ -79,5 +79,8 @@ find $RPM_BUILD_ROOT -type f -name .packlist -exec rm -f {} ';'
 %{_mandir}/man3/*
 
 %changelog
+* Wed Jan 13 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.49-2
+- rebuilt with latest tools, fixes a crash
+
 * Thu Feb 22 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.49-1
 - initial version
