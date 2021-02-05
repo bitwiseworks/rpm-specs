@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.8.6
-Release: 1%{?dist}
+Release: 2%{?dist}
 URL: http://www.gnupg.org/
 
 %global gcrylibdir %{_libdir}
@@ -14,7 +14,7 @@ License: LGPLv2+
 Summary: A general-purpose cryptography library
 
 Vendor:  bww bitwise works GmbH
-%scm_source    github https://github.com/bitwiseworks/%{name}-os2 %{name}-%{version}-os2
+%scm_source    github https://github.com/bitwiseworks/%{name}-os2 %{name}-%{version}-os2-2
 
 BuildRequires: gcc
 BuildRequires: gawk, libgpg-error-devel >= 1.11, pkgconfig
@@ -63,6 +63,9 @@ export LT_BUILDLEVEL="@#%{vendor}:%{version}-%{release}#@##1## `LANG=C date +'%%
 %endif
 
 %configure --disable-static \
+%if 0%{?os2_version}
+     --disable-mmap \
+%endif
 %ifarch sparc64
      --disable-asm \
 %endif
@@ -184,6 +187,9 @@ install -m644 %{SOURCE7} $RPM_BUILD_ROOT/etc/gcrypt/random.conf
 %license COPYING
 
 %changelog
+* Mon Jan 18 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.8.6-2
+- disable mmap usage, as we lack some features still
+
 * Wed Sep 30 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.8.6-1
 - update to version 1.8.6
 - resync spec with fedora
