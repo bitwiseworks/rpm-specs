@@ -27,7 +27,7 @@
 Name:           perl
 Version:        %{perl_version}
 # release number must be even higher, because dual-lived modules will be broken otherwise
-Release:        8%{?dist}
+Release:        9%{?dist}
 Epoch:          %{perl_epoch}
 Summary:        Practical Extraction and Report Language
 Group:          Development/Languages
@@ -41,13 +41,14 @@ License:        (GPL+ or Artistic) and (GPLv2+ or Artistic) and Copyright Only a
 Url:            http://www.perl.org/
 Vendor:         bww bitwise works GmbH
 
-%scm_source     github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2-1
+%scm_source     github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2-9
 Source3:        macros.perl
 
 # Update some of the bundled modules
 # see http://fedoraproject.org/wiki/Perl/perl.spec for instructions
 
 BuildRequires:  db4-devel, zlib-devel, bzip2-devel
+BuildRequires:  groff
 #BuildRequires:  groff, tcsh
 %if %{with gdbm}
 BuildRequires: gdbm-devel
@@ -983,8 +984,7 @@ License:        GPL+ or Artistic
 Epoch:          0
 Version:        3.17.00
 # Pod::Perldoc::ToMan executes roff
-# TODO no groff on OS/2 yet.
-#Requires:       groff-base
+Requires:       groff-base
 Requires:       perl = %{perl_epoch}:%{perl_version}-%{release}
 BuildArch:      noarch
 
@@ -2521,6 +2521,9 @@ rm -rf $RPM_BUILD_ROOT
 # Nothing. Nada. Zilch. Zarro. Uh uh. Nope. Sorry.
 
 %changelog
+* Wed Jan 13 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 5.16.1-9
+- add libcx to the exe as well, so we get a nice trp on failures
+
 * Fri Dec 11 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> 5.16.1-8
 - fix a gcc 9 compiler regression while creating Errno.pm
 
