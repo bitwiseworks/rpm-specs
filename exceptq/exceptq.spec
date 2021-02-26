@@ -3,15 +3,11 @@
 
 Summary: Exceptq creates a debugging report.
 Name: exceptq
-Version: 7.11.3
+Version: 7.11.5
 Release: 1%{?dist}
 License: custom
 Group: Development/Libraries
-Source: exceptq-7.11.3-shl-2016-07-27.zip
-#Source1: exceptq.h
-#Source2: exceptq71-dev.zip
-
-Patch1: exceptq_h.diff
+Source: exceptq-7.11.5-shl-beta8-2020-06-01.zip
 
 %description
 Exceptq creates a debugging report whenever a program that uses it
@@ -46,9 +42,6 @@ Exceptq developer package
 %prep
 %setup -q -c
 
-#%patch1 -p0 -b .bak
-[ $? = 0 ] || exit 1
-
 %build
 
 %install
@@ -57,11 +50,11 @@ mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_libdir}
 mkdir -p %{buildroot}%{_includedir}
 
-cp -p dll/*.dll %{buildroot}%{_libdir}
-cp -p dll/*.xqs %{buildroot}%{_libdir}
+cp -p lib/*.dll %{buildroot}%{_libdir}
+cp -p lib/*.xqs %{buildroot}%{_libdir}
+cp -p lib/*.lib %{buildroot}%{_libdir}
 
 cp -p bin/mapxqs.* %{buildroot}%{_bindir}
-#cp -p exceptq71-dev/demangl.dll %{buildroot}%{_libdir}
 cp -p include/exceptq.h %{buildroot}%{_includedir}
 
 %clean
@@ -70,9 +63,7 @@ rm -rf %{buildroot}
 %files
 %defattr(-,root,root)
 %{_libdir}/*.dll
-#%exclude %{_libdir}/demangl.dll
 %{_libdir}/*.xqs
-#%doc distorm-shl.txt
 %doc exceptq.txt
 %doc exceptq-shl.txt
 %doc HISTORY
@@ -81,15 +72,14 @@ rm -rf %{buildroot}
 %files devel
 %defattr(-,root,root)
 %{_bindir}/*
+%{_libdir}/*.lib
 %{_includedir}/*.h
-#%{_libdir}/demangl.dll
-#%doc distorm-shl.txt
-%doc exceptq.txt
-%doc exceptq-shl.txt
-%doc HISTORY
-%doc readme.exceptq
 
 %changelog
+* Fri Feb 26 2021 Dmitriy Kuminov <coding@dmik.org> 7.11.5-1
+- Update to 7.11.5-shl-beta8-2020-06-01 binaries.
+- Clean up spec file.
+
 * Mon Aug 01 2016 yd <yd@os2power.com> 7.11.3-1
 - update to SHL 2016-07-27 binaries.
 - revert header fix.
