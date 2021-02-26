@@ -2,13 +2,17 @@
 
 Summary: A posix pthread emulation for OS/2 and OS/2 based systems
 Name: pthread
-Version: 0.2.2
+Version: 0.2.3
 Release: 1%{?dist}
 License: unknown
 Vendor:  bww bitwise works GmbH
 Epoch: 2
 
 %scm_source github http://github.com/bitwiseworks/pthread-os2 %{version}
+#scm_source git file://D:/Coding/pthread/master %{version}
+
+# Due to fixed _fmutex_request loop break.
+Requires: libc >= 1:0.1.7
 
 BuildRequires: gcc make
 
@@ -70,6 +74,13 @@ rm -rf %{buildroot}
 %{_libdir}/pthread.dll
 
 %changelog
+* Fri Feb 26 2021 Dmitriy Kuminov <coding@dmik.org> 2:0.2.3-1
+- Return proper POSIX errors in 'key' APIs (try 2).
+- Retry waiting after DOS wait APIs fail with ERROR_INTERRUPT.
+- pthread_mutex_trylock: Return EBUSY when mutex is locked instead of ETIMEDOUT.
+- pthread_join: Don't call DosWaitThread twice.
+- Use _fmutex for pthread_mutex [#9].
+
 * Wed Aug 12 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> 2:0.2.2-1
 - fix ticket #8
 
