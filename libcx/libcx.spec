@@ -1,7 +1,7 @@
 Name: libcx
 Summary: kLIBC Extension Library
-Version: 0.6.9
-Release: 2%{?dist}
+Version: 0.7.0
+Release: 1%{?dist}
 License: LGPLv2.1+
 Group: System/Libraries
 Vendor: bww bitwise works GmbH
@@ -15,8 +15,8 @@ BuildRequires: sed
 Obsoletes: libpoll
 Provides: libpoll
 
-# Due to patch from kLIBC #366
-Requires: libc >= 0.6.6-35
+# Due to added EXCEPTQ support.
+Requires: libc >= 1:0.1.7
 # Due to LIBCn #62 (socklen_t)
 BuildRequires: libc-devel >= 1:0.1.4
 
@@ -62,6 +62,7 @@ echo "#include <sys/poll.h>" > nosys_poll.h
 %{__install} -m 644 src/net/ifaddrs.h %{buildroot}%{_includedir}
 %{__install} -m 644 src/spawn/libcx/spawn2.h %{buildroot}%{_includedir}/libcx
 %{__install} -m 644 src/shmem/libcx/shmem.h %{buildroot}%{_includedir}/libcx
+%{__install} -m 644 src/libcx/libcx/handles.h %{buildroot}%{_includedir}/libcx
 # Dir for LIBCx assertion logs
 %{__mkdir_p} %{buildroot}%{_var}/log/libcx
 
@@ -90,8 +91,13 @@ rm -rf %{buildroot}
 %{_includedir}/libcx/net.h
 %{_includedir}/libcx/spawn2.h
 %{_includedir}/libcx/shmem.h
+%{_includedir}/libcx/handles.h
 
 %changelog
+* Fri Feb 26 2021 Dmitriy Kuminov <coding@dmik.org> 0.7.0-1
+- Release version 0.7.0
+  (https://github.com/bitwiseworks/libcx/blob/0.7.0/CHANGELOG.md).
+
 * Tue Jan 5 2021 Dmitriy Kuminov <coding@dmik.org> 0.6.9-2
 - Install forgotten <libcx/shmem.h>.
 
