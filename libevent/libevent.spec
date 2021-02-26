@@ -2,13 +2,14 @@
 
 Name:           libevent
 Version:        2.1.11
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Abstract asynchronous event notification library
 
 # arc4random.c, which is used in build, is ISC. The rest is BSD.
 License:        BSD and ISC
 URL:            http://libevent.org/
 Vendor:         bww bitwise works GmbH
+
 %scm_source     github https://github.com/bitwiseworks/%{name}-os2 %{version}-3-os2
 
 BuildRequires:  gcc
@@ -18,6 +19,8 @@ BuildRequires:  doxygen
 BuildRequires:  openssl-devel
 BuildRequires:  python-devel
 
+# Due to fixed socketpair (note: the fix is in static lib)
+BuildRequires: libc-devel >= 1:0.1.7
 
 %description
 The libevent API provides a mechanism to execute a callback function
@@ -132,6 +135,9 @@ mkdir -p $RPM_BUILD_ROOT/%{develdocdir}/sample
 %doc %{develdocdir}/
 
 %changelog
+* Fri Feb 26 2021 Dmitriy Kuminov <coding@dmik.org> - 2.1.11-4
+- Rebuild against libc 0.1.7 to fix faulty socketpair errors.
+
 * Thu Dec 31 2020 Dmitriy Kuminov <coding@dmik.org> - 2.1.11-3
 - Remove OS/2 specific EBADF hack from select_dispatch [#2].
 
