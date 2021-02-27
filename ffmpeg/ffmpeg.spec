@@ -29,6 +29,14 @@
 %global _without_native_opus    1
 %endif
 
+# AVX2 and above will not work on OS/2 due to alignment problems in GCC. Also
+# we need to dsiable merging uninitialized vars to get proper alignment for AVX,
+# see https://github.com/bitwiseworks/ffmpeg-os2/issues/5
+%if 0%{?os2_version}
+%global _without_avx2           1
+%global _no_var_merge           1
+%endif
+
 # TODO: add make test to %%check section
 
 #global branch  oldabi-
@@ -134,7 +142,7 @@ ExclusiveArch: armv7hnl
 Summary:        Digital VCR and streaming server
 Name:           ffmpeg%{?flavor}
 Version:        4.2.2
-Release:        3%{?date}%{?date:git}%{?rel}%{?dist}
+Release:        4%{?date}%{?date:git}%{?rel}%{?dist}
 License:        %{ffmpeg_license}
 URL:            http://ffmpeg.org/
 %if !0%{?os2_version}
@@ -316,7 +324,8 @@ This package contains development files for %{name}
     --arch=%{_target_cpu} \\\
     --optflags="%{optflags}" \\\
     --extra-ldflags="-Zhigh-mem %{?__global_ldflags} %{?cuda_ldflags} %{?libnpp_ldlags}" \\\
-    --extra-cflags="%{?cuda_cflags} %{?libnpp_cflags}" \\\
+    --extra-cflags="%{?cuda_cflags} %{?libnpp_cflags} %{?_no_var_merge:-fno-common}" \\\
+    %{?_without_avx2:--disable-avx2 --disable-avx512} \\\
     %{?flavor:--disable-manpages} \\\
     %{?progs_suffix:--progs-suffix=%{progs_suffix}} \\\
     %{?build_suffix:--build-suffix=%{build_suffix}} \\\
@@ -539,6 +548,9 @@ install -pm755 tools/qt-faststart.exe %{buildroot}%{_bindir}
 
 
 %changelog
+* Sat Feb 27 2021 Dmitriy Kuminov <coding@dmik.org> 4.2.2-4
+- Fix crashes on AVX hardware [bitwiseworks/ffmpeg-os2#4].
+
 * Mon Jan 4 2021 Dmitriy Kuminov <coding@dmik.org> 4.2.2-3
 - Disable broken native Opus decoder/encoder [ffmpeg-os2#4].
 
