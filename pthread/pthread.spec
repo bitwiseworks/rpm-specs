@@ -2,7 +2,7 @@
 
 Summary: A posix pthread emulation for OS/2 and OS/2 based systems
 Name: pthread
-Version: 0.2.3
+Version: 0.2.4
 Release: 1%{?dist}
 License: unknown
 Vendor:  bww bitwise works GmbH
@@ -74,6 +74,11 @@ rm -rf %{buildroot}
 %{_libdir}/pthread.dll
 
 %changelog
+* Tue Mar 9 2021 Dmitriy Kuminov <coding@dmik.org> 2:0.2.4-1
+- Make PTHREAD_RECURSIVE_MUTEX_INITIALIZER actually work [#11].
+- Add support for kLIBC fork [#12].
+- pthread_join: Fix possible race [#7].
+
 * Fri Feb 26 2021 Dmitriy Kuminov <coding@dmik.org> 2:0.2.3-1
 - Return proper POSIX errors in 'key' APIs (try 2).
 - Retry waiting after DOS wait APIs fail with ERROR_INTERRUPT.
