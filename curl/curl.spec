@@ -1,7 +1,7 @@
 Summary: A utility for getting files from remote servers (FTP, HTTP, and others)
 Name: curl
 Version: 7.75.0
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: MIT
 %if !0%{?os2_version}
 Source: https://curl.se/download/%{name}-%{version}.tar.xz
@@ -213,7 +213,11 @@ comes with a limited set of features compared to the 'libcurl' package.  On the
 other hand, the package is smaller and requires fewer run-time dependencies to
 be installed.
 
+%if 0%{?os2_version}
+%legacy_runtime_packages
+
 %debug_package
+%endif
 
 %prep
 %if !0%{?os2_version}
@@ -464,6 +468,9 @@ rm -f ${RPM_BUILD_ROOT}%{_libdir}/libcurl.la
 %endif
 
 %changelog
+* Mon Mar 15 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 7.75.0-2
+- add a legacy package
+
 * Fri Mar 12 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 7.75.0-1
 - update version to 7.75.0
 - use scm_ macros
