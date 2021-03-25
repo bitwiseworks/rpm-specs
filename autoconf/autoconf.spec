@@ -1,14 +1,14 @@
 Summary:    A GNU tool for automatically configuring source code
 Name:       autoconf
 Version:    2.69
-Release:    5%{?dist}
+Release:    6%{?dist}
 License:    GPLv2+ and GFDL
 Group:      Development/Tools
 URL:        http://www.gnu.org/software/autoconf/
 BuildArch:  noarch
 Vendor:     bww bitwise works GmbH
 
-%scm_source svn http://svn.netlabs.org/repos/ports/autoconf/trunk 2192
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2-1
 
 # m4 >= 1.4.6 is required, >= 1.4.13 is recommended:
 BuildRequires:      m4 >= 1.4.13
@@ -90,6 +90,9 @@ rm -rf ${RPM_BUILD_ROOT}
 %doc AUTHORS COPYING ChangeLog NEWS README THANKS TODO
 
 %changelog
+* Wed Mar 24 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.69-6
+- fix an annoying crash in print.com
+
 * Fri May 12 2017 Dmitriy Kuminov <coding@dmik.org> 2.69-5
 - Use scm_source and friends.
 - Fix fatal failure in postun script (missing percent in macro).
