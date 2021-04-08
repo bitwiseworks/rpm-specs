@@ -2,7 +2,7 @@
 #%%global rcversion RC1
 Name:       pcre
 Version:    8.44
-Release:    %{?rcversion:0.}1%{?rcversion:.%rcversion}%{?dist}.1
+Release:    %{?rcversion:0.}2%{?rcversion:.%rcversion}%{?dist}.1
 %global myversion %{version}%{?rcversion:-%rcversion}
 Summary:    Perl-compatible regular expression library
 ## Source package only:
@@ -83,7 +83,9 @@ encodings. Detailed change log is provided by %{name}-doc package.
 
 %package utf16
 Summary:    UTF-16 variant of PCRE
+%if !0%{?os2_version}
 Conflicts:  %{name} < 8.38-12
+%endif
 
 %description utf16
 This is Perl-compatible regular expression library working on UTF-16 strings.
@@ -91,7 +93,9 @@ Detailed change log is provided by %{name}-doc package.
 
 %package utf32
 Summary:    UTF-32 variant of PCRE
+%if !0%{?os2_version}
 Conflicts:  %{name} < 8.38-12
+%endif
 
 %description utf32
 This is Perl-compatible regular expression library working on UTF-32 strings.
@@ -293,6 +297,9 @@ make %{?_smp_mflags} check VERBOSE=yes
 %{_mandir}/man1/pcretest.*
 
 %changelog
+* Thu Apr 08 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> - 8.44-2.1
+- disable a conflict, as this clashes with the old legacy package
+
 * Fri Apr 02 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> - 8.44-1.1
 - update to version 8.44
 - resync with fedora spec
