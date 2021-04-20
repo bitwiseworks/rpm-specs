@@ -33,7 +33,7 @@
 
 Name:           lib%{libname}
 Version:        0.7.16
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Package dependency solver
 
 License:        BSD
@@ -118,7 +118,11 @@ Requires:       %{name}%{?_isa} = %{version}-%{release}
 Requires:       %{name} = %{version}-%{release}
 %endif
 # solv dependencies. Used as execlp() and system()
+%if !0%{?os2_version}
 Requires:       %{_bindir}/curl
+%else
+Requires:       %{_bindir}/curl.exe
+%endif
 %if !0%{?os2_version}
 Requires:       %{_bindir}/gpg2
 %endif
@@ -367,6 +371,8 @@ make test
 %endif
 
 %changelog
+* Tue Apr 20 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.7.16-2
+- fix a wrong requires
+
 * Tue Apr 20 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.7.16-1
 - first rpm version
-
