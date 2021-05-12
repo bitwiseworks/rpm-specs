@@ -2,20 +2,37 @@
 %global rpmmacrodir %(d=%{_rpmconfigdir}/macros.d; [ -d $d ] || d=%{_sysconfdir}/rpm; echo $d)
 
 Name:           python-rpm-macros
-Version:        1
-Release:        3%{?dist}
-Summary:        The unversioned Python RPM macros
+Summary:        The common Python RPM macros
 
-License:        MIT
-Source0:        macros.python
-Source1:        macros.python-srpm
-Source2:        macros.python2
-Source3:        macros.python3
+# Macros:
+Source101:      macros.python
+Source102:      macros.python-srpm
+Source104:      macros.python3
+Source105:      macros.pybytecompile
+
+# Lua files
+Source201:      python.lua
+
+# Python code
+%global compileall2_version 0.7.1
+Source301:      https://github.com/fedora-python/compileall2/raw/v%{compileall2_version}/compileall2.py
+
+# macros and lua: MIT, compileall2.py: PSFv2
+License:        MIT and Python
+
+# The package version MUST be always the same as %%{__default_python3_version}.
+# To have only one source of truth, we load the macro and use it.
+# The macro is defined in python-srpm-macros.
+                %{?load:%{SOURCE102}}
+Version:        %{__default_python3_version}
+Release:        1%{?dist}
 
 BuildArch:      noarch
-# For %%python3_pkgversion used in %%python_provide
-Requires:       python-srpm-macros
-Provides:       python-macros = %{version}-%{release}
+
+# For %%__default_python3_pkgversion used in %%python_provide
+# For python.lua
+# For compileall2.py
+Requires:       python-srpm-macros = %{version}-%{release}
 
 %description
 This package contains the unversioned Python RPM macros, that most
@@ -24,49 +41,83 @@ implementations should rely on.
 You should not need to install this package manually as the various
 python?-devel packages require it. So install a python-devel package instead.
 
+
 %package -n python-srpm-macros
 Summary:        RPM macros for building Python source packages
+
+# For directory structure and flags macros
+%if !0%{?os2_version}
+Requires:       redhat-rpm-config
+%endif
+
+# We bundle our own software here :/
+Provides:       bundled(python3dist(compileall2)) = %{compileall2_version}
 
 %description -n python-srpm-macros
 RPM macros for building Python source packages.
 
-%package -n python2-rpm-macros
-Summary:        RPM macros for building Python 2 packages
-
-%description -n python2-rpm-macros
-RPM macros for building Python 2 packages.
 
 %package -n python3-rpm-macros
 Summary:        RPM macros for building Python 3 packages
+
+# For %%__python3 and %%python3
+Requires:       python-srpm-macros = %{version}-%{release}
+
+# For %%py_setup
+Requires:       python-rpm-macros = %{version}-%{release}
 
 %description -n python3-rpm-macros
 RPM macros for building Python 3 packages.
 
 
 %prep
+%autosetup -c -T
+cp -a %{sources} .
 
-%build
 
 %install
-mkdir -p %{buildroot}/%{rpmmacrodir}
-install -m 644 %{SOURCE0} %{SOURCE1} %{SOURCE2} %{SOURCE3} \
-  %{buildroot}/%{rpmmacrodir}/
+mkdir -p %{buildroot}%{rpmmacrodir}
+install -m 644 macros.* %{buildroot}%{rpmmacrodir}/
+
+%if !0%{?os2_version}
+mkdir -p %{buildroot}%{_rpmluadir}/fedora/srpm
+install -p -m 644 -t %{buildroot}%{_rpmluadir}/fedora/srpm python.lua
+%else
+mkdir -p %{buildroot}%{_rpmconfigdir}/lua
+install -p -m 644 -t %{buildroot}%{_rpmconfigdir}/lua python.lua
+%endif
+
+%if !0%{?os2_version}
+mkdir -p %{buildroot}%{_rpmconfigdir}/redhat
+install -m 644 compileall2.py %{buildroot}%{_rpmconfigdir}/redhat/
+%else
+mkdir -p %{buildroot}%{_rpmconfigdir_os2}
+install -m 644 compileall2.py %{buildroot}%{_rpmconfigdir_os2}/
+%endif
 
 
 %files
 %{rpmmacrodir}/macros.python
+%{rpmmacrodir}/macros.pybytecompile
 
 %files -n python-srpm-macros
 %{rpmmacrodir}/macros.python-srpm
-
-%files -n python2-rpm-macros
-%{rpmmacrodir}/macros.python2
+%if !0%{?os2_version}
+%{_rpmconfigdir}/redhat/compileall2.py
+%{_rpmluadir}/fedora/srpm/python.lua
+%else
+%{_rpmconfigdir_os2}/compileall2.py
+%{_rpmconfigdir}/lua/python.lua
+%endif
 
 %files -n python3-rpm-macros
 %{rpmmacrodir}/macros.python3
 
 
 %changelog
+* Fri Apr 09 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.9-1
+- heavily reworked and adapted tp latest fedora version
+
 * Mon May 08 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 1-3
 - remove .exe from python2 and python3 path, as this is insane
 

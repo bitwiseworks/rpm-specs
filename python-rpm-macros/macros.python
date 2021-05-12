@@ -1,73 +1,110 @@
+# unversioned macros: used with user defined __python, no longer part of rpm >= 4.15
+# __python is defined to error by default in the srpm macros
+%python_sitelib %(%{__python} -Esc "import sysconfig; print(sysconfig.get_path('purelib'))")
+%python_sitearch %(%{__python} -Esc "import sysconfig; print(sysconfig.get_path('platlib'))")
+%python_version %(%{__python} -Esc "import sys; sys.stdout.write('{0.major}.{0.minor}'.format(sys.version_info))")
+%python_version_nodots %(%{__python} -Esc "import sys; sys.stdout.write('{0.major}{0.minor}'.format(sys.version_info))")
+%python_platform %(%{__python} -Esc "import sysconfig; print(sysconfig.get_platform())")
+%python_platform_triplet %(%{__python} -Esc "import sysconfig; print(sysconfig.get_config_var('MULTIARCH'))")
+%python_ext_suffix %(%{__python} -Esc "import sysconfig; print(sysconfig.get_config_var('EXT_SUFFIX'))")
+
 %py_setup setup.py
 %py_shbang_opts -s
+%py_shbang_opts_nodash %(opts=%{py_shbang_opts}; echo ${opts#-})
+%py_shebang_flags %(opts=%{py_shbang_opts}; echo ${opts#-})
+%py_shebang_fix %{expand:\\\
+  if [ -f /@unixroot/usr/bin/pathfix%{python_version}.py ]; then
+    pathfix=/@unixroot/usr/bin/pathfix%{python_version}.py
+  else
+    # older versions of Python don't have it and must BR /usr/bin/pathfix.py from python3-devel explicitly
+    pathfix=/@unixroot/usr/bin/pathfix.py
+  fi
+  if [ -z "%{?py_shebang_flags}" ]; then
+    shebang_flags="-k"
+  else
+    shebang_flags="-ka%{py_shebang_flags}"
+  fi
+  $pathfix -pni %{__python} $shebang_flags}
 
 # Use the slashes after expand so that the command starts on the same line as
 # the macro
 %py_build() %{expand:\\\
-  CFLAGS="%{optflags}" %{__python} %{py_setup} %{?py_setup_args} build --executable="%{__python2} %{py_shbang_opts}" %{?*}
-  sleep 1
+  CFLAGS="${CFLAGS:-${RPM_OPT_FLAGS}}" LDFLAGS="${LDFLAGS:-${RPM_LD_FLAGS}}"\\\
+  %{__python} %{py_setup} %{?py_setup_args} build --executable="%{__python} %{py_shbang_opts}" %{?*}
 }
 
 %py_build_egg() %{expand:\\\
-  CFLAGS="%{optflags}" %{__python} %{py_setup} %{?py_setup_args} bdist_egg %{?*}
-  sleep 1
+  CFLAGS="${CFLAGS:-${RPM_OPT_FLAGS}}" LDFLAGS="${LDFLAGS:-${RPM_LD_FLAGS}}"\\\
+  %{__python} %{py_setup} %{?py_setup_args} bdist_egg %{?*}
 }
 
 %py_build_wheel() %{expand:\\\
-  CFLAGS="%{optflags}" %{__python} %{py_setup} %{?py_setup_args} bdist_wheel %{?*}
-  sleep 1
+  CFLAGS="${CFLAGS:-${RPM_OPT_FLAGS}}" LDFLAGS="${LDFLAGS:-${RPM_LD_FLAGS}}"\\\
+  %{__python} %{py_setup} %{?py_setup_args} bdist_wheel %{?*}
 }
 
 %py_install() %{expand:\\\
-  CFLAGS="%{optflags}" %{__python} %{py_setup} %{?py_setup_args} install -O1 --skip-build --root %{buildroot} %{?*}
+  CFLAGS="${CFLAGS:-${RPM_OPT_FLAGS}}" LDFLAGS="${LDFLAGS:-${RPM_LD_FLAGS}}"\\\
+  %{__python} %{py_setup} %{?py_setup_args} install -O1 --skip-build --root %{buildroot} %{?*}
+  rm -rfv %{buildroot}%{_bindir}/__pycache__
 }
 
 %py_install_egg() %{expand:\\\
   mkdir -p %{buildroot}%{python_sitelib}
-  easy_install -m --prefix %{buildroot}%{_prefix} -Z dist/*-py%{python_version}.egg %{?*}
+  %{__python} -m easy_install -m --prefix %{buildroot}%{_prefix} -Z dist/*-py%{python_version}.egg %{?*}
+  rm -rfv %{buildroot}%{_bindir}/__pycache__
 }
 
 %py_install_wheel() %{expand:\\\
-  pip install -I dist/%{1} --root %{buildroot} --strip-file-prefix %{buildroot} --no-deps
+  %{__python} -m pip install -I dist/%{1} --root %{buildroot} --no-deps --no-index --no-warn-script-location
+  rm -rfv %{buildroot}%{_bindir}/__pycache__
+  for distinfo in %{buildroot}%{python_sitelib}/*.dist-info %{buildroot}%{python_sitearch}/*.dist-info; do
+    if [ -f ${distinfo}/direct_url.json ]; then
+      rm -fv ${distinfo}/direct_url.json
+      sed -i '/direct_url.json/d' ${distinfo}/RECORD
+    fi
+  done
 }
 
 %python_provide() %{lua:
+  local python = require "fedora.srpm.python"
   function string.starts(String,Start)
     return string.sub(String,1,string.len(Start))==Start
   end
-  package = rpm.expand("%{?1}")
-  vr = rpm.expand("%{?epoch:%{epoch}:}%{version}-%{release}")
-  if (string.starts(package, "python2-")) then
-    if (rpm.expand("%{?buildarch}") ~= "noarch") then
-      str = "Provides: python-" .. string.sub(package,9,string.len(package)) .. "%{?_isa} = " .. vr
-      print(rpm.expand(str))
+  local package = rpm.expand("%{?1}")
+  local vr = rpm.expand("%{?epoch:%{epoch}:}%{version}-%{release}")
+  local provides = python.python_altprovides(package, vr)
+  if (string.starts(package, "python3-")) then
+    for i, provide in ipairs(provides) do
+      print("\\nProvides: " .. provide)
     end
-    print("\\nProvides: python-")
-    print(string.sub(package,9,string.len(package)))
-    print(" = ")
-    print(vr)
-    --Obsoleting the previous default python package
-    print("\\nObsoletes: python-")
-    print(string.sub(package,9,string.len(package)))
-    print(" < ")
-    print(vr)
-  elseif (string.starts(package, "python" .. rpm.expand("%{python3_pkgversion}") .. "-")) then
-    --No unversioned provides as python3 is not default
-  elseif (rpm.expand("%{?python3_other_pkgversion}") ~= "" and string.starts(package, "python" .. rpm.expand("%{python3_other_pkgversion}") .. "-")) then
-    --No unversioned provides as python3_other is not default
-  elseif (string.starts(package, "pypy-")) then
-    --No unversioned provides as pypy is not default
-  elseif (string.starts(package, "pypy3-")) then
-    --No unversioned provides as pypy is not default
-  elseif (string.starts(package, "python-")) then
-    --Providing the current default python
-    print("Provides: python2-")
-    print(string.sub(package,8,string.len(package)))
-    print(" = ")
-    print(vr)
+    --Obsoleting the previous default python package (if it doesn't have isa)
+    if (string.sub(package, "-1") ~= ")") then
+      print("\\nObsoletes: python-")
+      print(string.sub(package,9,string.len(package)))
+      print(" < " .. vr)
+    end
+  elseif (string.starts(package, "python" .. rpm.expand("%{__default_python3_pkgversion}") .. "-")) then
+    for i, provide in ipairs(provides) do
+      print("\\nProvides: " .. provide)
+    end
+    --Obsoleting the previous default python package (if it doesn't have isa)
+    if (string.sub(package, "-1") ~= ")") then
+      print("\\nObsoletes: python-")
+      print(string.sub(package,11,string.len(package)))
+      print(" < " .. vr)
+    end
+  elseif (string.starts(package, "python")) then
+    --No unversioned provides as other python3 cases are not the default
+  elseif (string.starts(package, "pypy")) then
+    --No unversioned provides as pypy is not default either
   else
     print("%python_provide: ERROR: ")
     print(package)
     print(" not recognized.")
   end
 }
+
+%python_disable_dependency_generator() \
+%undefine __pythondist_requires \
+%{nil}
