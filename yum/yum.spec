@@ -3,7 +3,7 @@
 Summary: RPM installer/updater
 Name: yum
 Version: 3.4.3
-Release: 11%{?dist}
+Release: 12%{?dist}
 License: GPLv2+
 Group: System Environment/Base
 Vendor: bww bitwise works GmbH
@@ -22,7 +22,6 @@ Conflicts: pirut < 1.1.4
 
 Requires: python >= 2.4, rpm-python, rpm >= 0:4.4.2
 #Requires: python-iniparse
-Requires: python-sqlite
 Requires: urlgrabber >= 3.1.0-0
 Requires: yum-metadata-parser >= 1.1.0
 #Requires: pygpgme
@@ -129,6 +128,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Tue May 25 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.4.3-12
+- Remove python-sqlite requires
+
 * Mon Jun 5 2017 Dmitriy Kuminov <coding@dmik.org> 3.4.3-11
 - Be nice and close transaction files before removing.
 - Remove outdated sub-package leftovers from .spec.
