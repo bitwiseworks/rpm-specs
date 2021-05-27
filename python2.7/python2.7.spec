@@ -87,7 +87,7 @@ Vendor: bww bitwise works GmbH
 #global prerel ...
 %global upstream_version %{general_version}%{?prerel}
 Version: %{general_version}%{?prerel:~%{prerel}}
-Release: 1%{?dist}
+Release: 2%{?dist}
 %if %{with rpmwheels}
 License: Python
 %else
@@ -837,7 +837,7 @@ Patch4000: 04000-disable-tk.patch
 
 Patch5000: 05000-autotool-intermediates.patch
 %else
-%scm_source github http://github.com/bitwiseworks/python-os2 v%{version}-os2
+%scm_source github http://github.com/bitwiseworks/python-os2 v%{version}-os2-1
 %endif
 
 # ======================================================
@@ -855,6 +855,22 @@ Note that Python 2 is not supported upstream after 2020-01-01, please use the
 python3 package instead if you can.
 
 This package also provides the "python2" executable.
+
+# remove this part when we are sure everything works with python3
+%if 0%{?os2_version}
+%package -n python%{pybasever}-unversioned-command
+Summary: The "python" command that runs Python 2
+
+# In theory this could require any python2 version
+Requires: python2 == %{version}-%{release}
+# But since we want to provide versioned python, we require exact version
+Provides: python = %{version}-%{release}
+# This also save us an explicit conflict for older python2 builds
+
+%description -n python%{pybasever}-unversioned-command
+This package contains python.exe - the "python" command that runs Python 2.
+
+%endif # os2_version
 
 %if 0%{?os2_version}
 %debug_package
@@ -1343,6 +1359,16 @@ ln -s ./msgfmt%{pybasever}.py %{buildroot}%{_bindir}/msgfmt2.py
 mv %{buildroot}%{_bindir}/smtpd.py %{buildroot}%{_bindir}/smtpd%{pybasever}.py
 ln -s ./smtpd%{pybasever}.py %{buildroot}%{_bindir}/smtpd2.py
 
+%if 0%{?os2_version}
+ln -s ./python%{pybasever}.exe %{buildroot}%{_bindir}/python%{pybasever}
+%endif
+
+# Link the unversioned stuff
+%if 0%{?os2_version}
+ln -s ./python%{pybasever}.exe %{buildroot}%{_bindir}/python
+cp -p %{buildroot}%{_bindir}/python%{pybasever}.exe %{buildroot}%{_bindir}/python.exe
+%endif
+
 # Fix for bug #136654
 rm -f %{buildroot}%{pylibdir}/email/test/data/audiotest.au %{buildroot}%{pylibdir}/test/audiotest.au
 
@@ -1487,7 +1513,6 @@ rm %{buildroot}%{_bindir}/*.pyo
 %if !0%{?os2_version}
 rm %{buildroot}%{_bindir}/python
 %else
-rm %{buildroot}%{_bindir}/python.exe
 rm -f %{buildroot}%{_bindir}/python%{pyshortver}.dll
 %endif
 rm %{buildroot}%{_bindir}/python-config
@@ -1574,15 +1599,19 @@ if [ "$1" = 1 ] ; then
 fi
 %endif
 
+%if 0%{?os2_version}
+%files -n python%{pybasever}-unversioned-command
+%{_bindir}/python
+%{_bindir}/python.exe
+%endif
 
 %files
 %doc README
 %license %{pylibdir}/LICENSE.txt
 %{_bindir}/pydoc2*
 %{_bindir}/python2
-%if !0%{?os2_version}
 %{_bindir}/python%{pybasever}
-%else
+%if 0%{?os2_version}
 %{_bindir}/python%{pybasever}.exe
 %endif
 %{_mandir}/*/python2*
@@ -1803,6 +1832,11 @@ fi
 # ======================================================
 
 %changelog
+* Wed May 26 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.7.18-2
+- Add a symlink for python2.7
+- Add python2.7-unversioned-command files
+- Fix issue #5
+
 * Mon May 10 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.7.18-1
 - Add python2-rpm-macros content here
 - Rename package to python2.7
