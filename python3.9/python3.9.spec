@@ -17,7 +17,7 @@ URL: https://www.python.org/
 #global prerel ...
 %global upstream_version %{general_version}%{?prerel}
 Version: %{general_version}%{?prerel:~%{prerel}}
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: Python
 
 
@@ -430,7 +430,7 @@ Patch353: 00353-architecture-names-upstream-downstream.patch
 #     https://github.com/fedora-python/cpython
 %else
 Vendor: bww bitwise works GmbH
-%scm_source github http://github.com/bitwiseworks/python-os2 v%{version}-os2
+%scm_source github http://github.com/bitwiseworks/python-os2 v%{version}-os2-1
 %endif
 
 
@@ -550,7 +550,9 @@ the "%{pkgname}-" prefix.
 # https://fedoraproject.org/wiki/Changes/Python_means_Python3
 %package -n python-unversioned-command
 Summary: The "python" command that runs Python 3
+%if !0%{?os2_version}
 BuildArch: noarch
+%endif
 
 # In theory this could require any python3 version
 Requires: python3 == %{version}-%{release}
@@ -1279,6 +1281,13 @@ ln -s ./pathfix%{pybasever}.py %{buildroot}%{_bindir}/pathfix.py
 %if %{with debug_build}
 ln -s ./python3-debug %{buildroot}%{_bindir}/python-debug
 %endif
+%if 0%{?os2_version}
+cp -p %{buildroot}%{_bindir}/python%{pybasever}.exe %{buildroot}%{_bindir}/python.exe
+%endif
+%endif
+
+%if 0%{?os2_version}
+ln -s ./python%{pybasever}.exe %{buildroot}%{_bindir}/python%{pybasever}
 %endif
 
 %if %{with rhel8_compat_shims}
@@ -1415,8 +1424,8 @@ CheckPython optimized
 %{_bindir}/pydoc%{pybasever}
 %endif
 
-%if !0%{?os2_version}
 %{_bindir}/python%{pybasever}
+%if !0%{?os2_version}
 %{_bindir}/python%{LDVERSION_optimized}
 %else
 %{_bindir}/python%{pybasever}.exe
@@ -1434,6 +1443,9 @@ CheckPython optimized
 %files -n python-unversioned-command
 %endif
 %{_bindir}/python
+%if 0%{?os2_version}
+%{_bindir}/python.exe
+%endif
 %{_mandir}/*/python.1*
 %endif
 
@@ -2053,6 +2065,11 @@ CheckPython optimized
 # ======================================================
 
 %changelog
+* Wed May 26 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.9.5-2
+- Add a symlink for python3.9
+- Add python.exe to unversioned-command
+- Fix issue #5
+
 * Wed May 12 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.9.5-1
 - fix several bugs from first 3.9.2
 - update to version 3.9.5
