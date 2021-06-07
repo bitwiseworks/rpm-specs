@@ -3,12 +3,12 @@
 Summary: RPM installer/updater
 Name: yum
 Version: 3.4.3
-Release: 12%{?dist}
+Release: 13%{?dist}
 License: GPLv2+
 Group: System Environment/Base
 Vendor: bww bitwise works GmbH
 
-%scm_source svn http://svn.netlabs.org/repos/rpm/yum/trunk 1154
+%scm_source svn http://svn.netlabs.org/repos/rpm/yum/trunk 1779
 
 Source1: exec-py.c
 
@@ -128,6 +128,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Mon Jun 07 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.4.3-13
+- use github as rpm issue location instead of netlabs
+
 * Tue May 25 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.4.3-12
 - Remove python-sqlite requires
 
