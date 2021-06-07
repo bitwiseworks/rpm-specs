@@ -17,7 +17,7 @@ URL: https://www.python.org/
 #global prerel ...
 %global upstream_version %{general_version}%{?prerel}
 Version: %{general_version}%{?prerel:~%{prerel}}
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: Python
 
 
@@ -430,7 +430,7 @@ Patch353: 00353-architecture-names-upstream-downstream.patch
 #     https://github.com/fedora-python/cpython
 %else
 Vendor: bww bitwise works GmbH
-%scm_source github http://github.com/bitwiseworks/python-os2 v%{version}-os2-1
+%scm_source github http://github.com/bitwiseworks/python-os2 v%{version}-os2-2
 %endif
 
 
@@ -476,9 +476,7 @@ Recommends: %{_bindir}/python
 
 %if %{with rhel8_compat_shims}
 Provides:  platform-python = %{version}-%{release}
-%if !0%{?os2_version}
 Provides:  platform-python%{?_isa} = %{version}-%{release}
-%endif
 Obsoletes: platform-python < %{pybasever}
 %endif
 
@@ -552,6 +550,9 @@ the "%{pkgname}-" prefix.
 Summary: The "python" command that runs Python 3
 %if !0%{?os2_version}
 BuildArch: noarch
+%else
+Provides:  python = %{version}-%{release}
+Obsoletes: python < %{pybasever}
 %endif
 
 # In theory this could require any python3 version
@@ -597,6 +598,11 @@ Recommends: (%{pkgname}-tkinter%{?_isa} = %{version}-%{release} if tk%{?_isa})
 # The zoneinfo module needs tzdata
 %if %{with tz_data}
 Requires: tzdata
+%endif
+
+%if 0%{?os2_version} && %{with main_python}
+Provides:  python-libs = %{version}-%{release}
+Obsoletes: python-libs < %{pybasever}
 %endif
 
 # https://fedoraproject.org/wiki/Changes/Move_usr_bin_python_into_separate_package
@@ -660,10 +666,13 @@ Conflicts: python-devel < 3
 
 %if %{with rhel8_compat_shims}
 Provides:  platform-python-devel = %{version}-%{release}
-%if !0%{?os2_version}
 Provides:  platform-python-devel%{?_isa} = %{version}-%{release}
-%endif
 Obsoletes: platform-python-devel < %{pybasever}
+%endif
+
+%if 0%{?os2_version} && %{with main_python}
+Provides:  python-devel = %{version}-%{release}
+Obsoletes: python-devel < %{pybasever}
 %endif
 
 %description -n %{pkgname}-devel
@@ -723,6 +732,11 @@ Requires: %{pkgname}-libs%{?_isa} = %{version}-%{release}
 Requires: %{pkgname}-libs = %{version}-%{release}
 %endif
 
+%if 0%{?os2_version} && %{with main_python}
+Provides:  python-test = %{version}-%{release}
+Obsoletes: python-test < %{pybasever}
+%endif
+
 %description -n %{pkgname}-test
 The self-test suite for the Python interpreter.
 
@@ -752,6 +766,11 @@ Conflicts: python-debug < 3
 Provides:  platform-python-debug = %{version}-%{release}
 Provides:  platform-python-debug%{?_isa} = %{version}-%{release}
 Obsoletes: platform-python-debug < %{pybasever}
+%endif
+
+%if 0%{?os2_version} && %{with main_python}
+Provides:  python-debug = %{version}-%{release}
+Obsoletes: python-debug < %{pybasever}
 %endif
 
 %description -n %{pkgname}-debug
@@ -1582,90 +1601,90 @@ CheckPython optimized
 %{dynload_dir}/zlib.%{SOABI_optimized}.so
 %{dynload_dir}/_zoneinfo.%{SOABI_optimized}.so
 %else
-%{dynload_dir}/_blake2.dll
-%{dynload_dir}/_md5.dll
-%{dynload_dir}/_sha1.dll
-%{dynload_dir}/_sha256.dll
-%{dynload_dir}/_sha3.dll
-%{dynload_dir}/_sha512.dll
+%{dynload_dir}/_blake2.pyd
+%{dynload_dir}/_md5.pyd
+%{dynload_dir}/_sha1.pyd
+%{dynload_dir}/_sha256.pyd
+%{dynload_dir}/_sha3.pyd
+%{dynload_dir}/_sha512.pyd
 
-%{dynload_dir}/_asyncio.dll
-%{dynload_dir}/_bisect.dll
-%{dynload_dir}/_bz2.dll
-%{dynload_dir}/_codecs_cn.dll
-%{dynload_dir}/_co3282.dll
-%{dynload_dir}/_codecs_hk.dll
-%{dynload_dir}/_co3284.dll
-%{dynload_dir}/_codecs_iso2022.dll
-%{dynload_dir}/_co3602.dll
-%{dynload_dir}/_codecs_jp.dll
-%{dynload_dir}/_co3291.dll
-%{dynload_dir}/_codecs_kr.dll
-%{dynload_dir}/_co3294.dll
-%{dynload_dir}/_codecs_tw.dll
-%{dynload_dir}/_co3308.dll
-%{dynload_dir}/_contextvars.dll
-%{dynload_dir}/_co3570.dll
-%{dynload_dir}/_crypt.dll
-%{dynload_dir}/_csv.dll
-%{dynload_dir}/_ctypes.dll
-%{dynload_dir}/_curses.dll
-%{dynload_dir}/_curses_panel.dll
-%{dynload_dir}/_cu3637.dll
-%{dynload_dir}/_dbm.dll
-%{dynload_dir}/_decimal.dll
-%{dynload_dir}/_elementtree.dll
-%{dynload_dir}/_el3531.dll
+%{dynload_dir}/_asyncio.pyd
+%{dynload_dir}/_bisect.pyd
+%{dynload_dir}/_bz2.pyd
+%{dynload_dir}/_codecs_cn.pyd
+%{dynload_dir}/_co3299.pyd
+%{dynload_dir}/_codecs_hk.pyd
+%{dynload_dir}/_co3301.pyd
+%{dynload_dir}/_codecs_iso2022.pyd
+%{dynload_dir}/_co3619.pyd
+%{dynload_dir}/_codecs_jp.pyd
+%{dynload_dir}/_co3308.pyd
+%{dynload_dir}/_codecs_kr.pyd
+%{dynload_dir}/_co3311.pyd
+%{dynload_dir}/_codecs_tw.pyd
+%{dynload_dir}/_co3325.pyd
+%{dynload_dir}/_contextvars.pyd
+%{dynload_dir}/_co3587.pyd
+%{dynload_dir}/_crypt.pyd
+%{dynload_dir}/_csv.pyd
+%{dynload_dir}/_ctypes.pyd
+%{dynload_dir}/_curses.pyd
+%{dynload_dir}/_curses_panel.pyd
+%{dynload_dir}/_cu3654.pyd
+%{dynload_dir}/_dbm.pyd
+%{dynload_dir}/_decimal.pyd
+%{dynload_dir}/_elementtree.pyd
+%{dynload_dir}/_el3548.pyd
 %if %{with gdbm}
-%{dynload_dir}/_gdbm.dll
+%{dynload_dir}/_gdbm.pyd
 %endif
-%{dynload_dir}/_hashlib.dll
-%{dynload_dir}/_heapq.dll
-%{dynload_dir}/_json.dll
-%{dynload_dir}/_lsprof.dll
-%{dynload_dir}/_lzma.dll
-%{dynload_dir}/_multibytecodec.dll
-%{dynload_dir}/_mu3854.dll
-#{dynload_dir}/_multiprocessing.dll
-#{dynload_dir}/_mu3993.dll
-%{dynload_dir}/_opcode.dll
-%{dynload_dir}/_pickle.dll
-%{dynload_dir}/_posixsubprocess.dll
-%{dynload_dir}/_po4013.dll
-%{dynload_dir}/_queue.dll
-%{dynload_dir}/_random.dll
-%{dynload_dir}/_socket.dll
-%{dynload_dir}/_sqlite3.dll
-%{dynload_dir}/_ssl.dll
-%{dynload_dir}/_statistics.dll
-%{dynload_dir}/_st3452.dll
-%{dynload_dir}/_struct.dll
-%{dynload_dir}/array.dll
-%{dynload_dir}/audioop.dll
-%{dynload_dir}/binascii.dll
-%{dynload_dir}/cmath.dll
-%{dynload_dir}/_datetime.dll
-%{dynload_dir}/_da3198.dll
-%{dynload_dir}/fcntl.dll
-%{dynload_dir}/grp.dll
-%{dynload_dir}/math.dll
-%{dynload_dir}/mmap.dll
-%{dynload_dir}/parser.dll
-%{dynload_dir}/pyexpat.dll
-%{dynload_dir}/readline.dll
-%{dynload_dir}/resource.dll
-%{dynload_dir}/select.dll
-%{dynload_dir}/syslog.dll
-%{dynload_dir}/termios.dll
-%{dynload_dir}/unicodedata.dll
-%{dynload_dir}/uni3411.dll
-%{dynload_dir}/xxlimited.dll
-%{dynload_dir}/xxl3242.dll
-%{dynload_dir}/_xxsubinterpreters.dll
-%{dynload_dir}/_xx4242.dll
-%{dynload_dir}/zlib.dll
-%{dynload_dir}/_zoneinfo.dll
-%{dynload_dir}/_zo3225.dll
+%{dynload_dir}/_hashlib.pyd
+%{dynload_dir}/_heapq.pyd
+%{dynload_dir}/_json.pyd
+%{dynload_dir}/_lsprof.pyd
+%{dynload_dir}/_lzma.pyd
+%{dynload_dir}/_multibytecodec.pyd
+%{dynload_dir}/_mu3871.pyd
+#{dynload_dir}/_multiprocessing.pyd
+#{dynload_dir}/_mu3993.pyd
+%{dynload_dir}/_opcode.pyd
+%{dynload_dir}/_pickle.pyd
+%{dynload_dir}/_posixsubprocess.pyd
+%{dynload_dir}/_po4030.pyd
+%{dynload_dir}/_queue.pyd
+%{dynload_dir}/_random.pyd
+%{dynload_dir}/_socket.pyd
+%{dynload_dir}/_sqlite3.pyd
+%{dynload_dir}/_ssl.pyd
+%{dynload_dir}/_statistics.pyd
+%{dynload_dir}/_st3469.pyd
+%{dynload_dir}/_struct.pyd
+%{dynload_dir}/array.pyd
+%{dynload_dir}/audioop.pyd
+%{dynload_dir}/binascii.pyd
+%{dynload_dir}/cmath.pyd
+%{dynload_dir}/_datetime.pyd
+%{dynload_dir}/_da3215.pyd
+%{dynload_dir}/fcntl.pyd
+%{dynload_dir}/grp.pyd
+%{dynload_dir}/math.pyd
+%{dynload_dir}/mmap.pyd
+%{dynload_dir}/parser.pyd
+%{dynload_dir}/pyexpat.pyd
+%{dynload_dir}/readline.pyd
+%{dynload_dir}/resource.pyd
+%{dynload_dir}/select.pyd
+%{dynload_dir}/syslog.pyd
+%{dynload_dir}/termios.pyd
+%{dynload_dir}/unicodedata.pyd
+%{dynload_dir}/uni3428.pyd
+%{dynload_dir}/xxlimited.pyd
+%{dynload_dir}/xxl3259.pyd
+%{dynload_dir}/_xxsubinterpreters.pyd
+%{dynload_dir}/_xx4259.pyd
+%{dynload_dir}/zlib.pyd
+%{dynload_dir}/_zoneinfo.pyd
+%{dynload_dir}/_zo3242.pyd
 %endif
 
 %dir %{pylibdir}/site-packages/
@@ -1891,20 +1910,20 @@ CheckPython optimized
 %{dynload_dir}/_testmultiphase.%{SOABI_optimized}.so
 %{dynload_dir}/_xxtestfuzz.%{SOABI_optimized}.so
 %else
-%{dynload_dir}/_ctypes_test.dll
-%{dynload_dir}/_ct3560.dll
-%{dynload_dir}/_testbuffer.dll
-%{dynload_dir}/_te3435.dll
-%{dynload_dir}/_testcapi.dll
-%{dynload_dir}/_te3214.dll
-%{dynload_dir}/_testimportmultiple.dll
-%{dynload_dir}/_te4344.dll
-%{dynload_dir}/_testinternalcapi.dll
-%{dynload_dir}/_te4075.dll
-%{dynload_dir}/_testmultiphase.dll
-%{dynload_dir}/_te3885.dll
-%{dynload_dir}/_xxtestfuzz.dll
-%{dynload_dir}/_xx3504.dll
+%{dynload_dir}/_ctypes_test.pyd
+%{dynload_dir}/_ct3577.pyd
+%{dynload_dir}/_testbuffer.pyd
+%{dynload_dir}/_te3452.pyd
+%{dynload_dir}/_testcapi.pyd
+%{dynload_dir}/_te3231.pyd
+%{dynload_dir}/_testimportmultiple.pyd
+%{dynload_dir}/_te4361.pyd
+%{dynload_dir}/_testinternalcapi.pyd
+%{dynload_dir}/_te4092.pyd
+%{dynload_dir}/_testmultiphase.pyd
+%{dynload_dir}/_te3902.pyd
+%{dynload_dir}/_xxtestfuzz.pyd
+%{dynload_dir}/_xx3521.pyd
 %endif
 %{pylibdir}/lib2to3/tests
 %{pylibdir}/tkinter/test
@@ -2065,6 +2084,10 @@ CheckPython optimized
 # ======================================================
 
 %changelog
+* Mon Jun 07 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.9.5-3
+- obsolete/privide python, python-libs, python-devel, python-test
+- use pyd again instead of dll for modules. fixes some name clashes in anpm
+
 * Wed May 26 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.9.5-2
 - Add a symlink for python3.9
 - Add python.exe to unversioned-command
