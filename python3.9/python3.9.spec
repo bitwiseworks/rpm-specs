@@ -17,7 +17,7 @@ URL: https://www.python.org/
 #global prerel ...
 %global upstream_version %{general_version}%{?prerel}
 Version: %{general_version}%{?prerel:~%{prerel}}
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: Python
 
 
@@ -701,6 +701,11 @@ Obsoletes: %{pkgname}-tools < %{version}-%{release}
 # In Fedora 31, /usr/bin/idle was moved here from Python 2.
 Conflicts: python-tools < 3
 
+%if 0%{?os2_version} && %{with main_python}
+Provides:  python-tools = %{version}-%{release}
+Obsoletes: python-tools < %{pybasever}
+%endif
+
 %description -n %{pkgname}-idle
 IDLE is Python’s Integrated Development and Learning Environment.
 
@@ -717,6 +722,11 @@ configuration, browsers, and other dialogs.
 %package -n %{pkgname}-tkinter
 Summary: A GUI toolkit for Python
 Requires: %{pkgname} = %{version}-%{release}
+
+%if 0%{?os2_version} && %{with main_python}
+Provides:  python-tkinter = %{version}-%{release}
+Obsoletes: python-tkinter < %{pybasever}
+%endif
 
 %description -n %{pkgname}-tkinter
 The Tkinter (Tk interface) library is a graphical user interface toolkit for
@@ -2084,8 +2094,11 @@ CheckPython optimized
 # ======================================================
 
 %changelog
+* Fri Jun 18 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.9.5-4
+- obsolete/provide python-tools, python-tkinter
+
 * Mon Jun 07 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.9.5-3
-- obsolete/privide python, python-libs, python-devel, python-test
+- obsolete/provide python, python-libs, python-devel, python-test
 - use pyd again instead of dll for modules. fixes some name clashes in anpm
 
 * Wed May 26 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.9.5-2
