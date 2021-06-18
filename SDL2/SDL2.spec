@@ -1,12 +1,12 @@
 Name:           SDL2
 Version:        2.0.12
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Cross-platform multimedia library
 
 License:        zlib and MIT
 URL:            http://www.libsdl.org/
 Vendor:         bww bitwise works GmbH
-%scm_source     github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
+%scm_source     github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2-1
 
 
 BuildRequires:  gcc
@@ -156,6 +156,10 @@ rm -vf %{buildroot}%{_libdir}/*.la
 %exclude %{_libdir}/*_dll.a
 
 %changelog
+* Fri Jun 18 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.0.12-3
+- added pull request #1 from josch1710
+- added pull request #2 from josch1710
+
 * Mon Sep 28 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.0.12-2
 - fix a sigsegv in some situations
 - don't enable a capture device for now
