@@ -17,7 +17,7 @@ URL: https://www.python.org/
 #global prerel ...
 %global upstream_version %{general_version}%{?prerel}
 Version: %{general_version}%{?prerel:~%{prerel}}
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: Python
 
 
@@ -724,8 +724,8 @@ Summary: A GUI toolkit for Python
 Requires: %{pkgname} = %{version}-%{release}
 
 %if 0%{?os2_version} && %{with main_python}
-Provides:  python-tkinter = %{version}-%{release}
-Obsoletes: python-tkinter < %{pybasever}
+Provides:  tkinter = %{version}-%{release}
+Obsoletes: tkinter < %{pybasever}
 %endif
 
 %description -n %{pkgname}-tkinter
@@ -2094,6 +2094,9 @@ CheckPython optimized
 # ======================================================
 
 %changelog
+* Mon Jun 28 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.9.5-5
+- python-tkinter was tkinter, so name it right
+
 * Fri Jun 18 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.9.5-4
 - obsolete/provide python-tools, python-tkinter
 
