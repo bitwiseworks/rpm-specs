@@ -1,7 +1,7 @@
 # The default OS/2 Toolkit path, use --define to override on the command line
 Summary: K Audio Interface library for OS/2 multimedia subsystem
 Name: libkai
-Version: 2.0.0
+Version: 2.1.0
 Release: 1%{?dist}
 License:  LGPLv2+
 Vendor: bww bitwise works GmbH
@@ -86,6 +86,9 @@ gcc -Zomf -Zdll -nostdlib %{SOURCE10} -l$RPM_BUILD_ROOT/%{_libdir}/kai1.dll -len
 
 
 %changelog
+* Mon Jul 19 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.1.0-1
+- Update to version 2.1.0 from vendor
+
 * Fri Nov 13 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.0.0-1
 - Update to version 2.0.0 from vendor
 - add a forwarder to the older kai0.dll
