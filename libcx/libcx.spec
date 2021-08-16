@@ -1,6 +1,6 @@
 Name: libcx
 Summary: kLIBC Extension Library
-Version: 0.7.0
+Version: 0.7.1
 Release: 1%{?dist}
 License: LGPLv2.1+
 Group: System/Libraries
@@ -15,10 +15,9 @@ BuildRequires: sed
 Obsoletes: libpoll
 Provides: libpoll
 
-# Due to added EXCEPTQ support.
-Requires: libc >= 1:0.1.7
-# Due to LIBCn #62 (socklen_t)
-BuildRequires: libc-devel >= 1:0.1.4
+# Due to __libc_LogInitEx and friends.
+Requires: libc >= 1:0.1.8
+BuildRequires: libc-devel >= 1:0.1.8
 
 %description
 The kLIBC Extension Library extends the functionality of the kLIBC library
@@ -63,8 +62,6 @@ echo "#include <sys/poll.h>" > nosys_poll.h
 %{__install} -m 644 src/spawn/libcx/spawn2.h %{buildroot}%{_includedir}/libcx
 %{__install} -m 644 src/shmem/libcx/shmem.h %{buildroot}%{_includedir}/libcx
 %{__install} -m 644 src/libcx/libcx/handles.h %{buildroot}%{_includedir}/libcx
-# Dir for LIBCx assertion logs
-%{__mkdir_p} %{buildroot}%{_var}/log/libcx
 
 %check
 kmk  %{kmk_flags} test
@@ -77,7 +74,6 @@ rm -rf %{buildroot}
 %doc LICENSE README.md CHANGELOG.md
 %{_libdir}/libcx*.dll
 %{_libdir}/libcx-spawn2.wrp
-%dir %{_var}/log/libcx
 
 %files devel
 %defattr(-,root,root)
@@ -94,6 +90,11 @@ rm -rf %{buildroot}
 %{_includedir}/libcx/handles.h
 
 %changelog
+* Mon Aug 16 2021 Dmitriy Kuminov <coding@dmik.org> 0.7.1-1
+- Release version 0.7.1
+  (https://github.com/bitwiseworks/libcx/blob/0.7.1/CHANGELOG.md).
+- Remove /var/log/libcx (superseded by /var/log/app not belonging here).
+
 * Fri Feb 26 2021 Dmitriy Kuminov <coding@dmik.org> 0.7.0-1
 - Release version 0.7.0
   (https://github.com/bitwiseworks/libcx/blob/0.7.0/CHANGELOG.md).
