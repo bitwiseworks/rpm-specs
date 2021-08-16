@@ -17,8 +17,8 @@ Release:        1%{?dist}
 Vendor:         bww bitwise works GmbH
 Url:            https://github.com/bitwiseworks/libc
 
-#scm_source github https://github.com/bitwiseworks/libc %{version}
-%scm_source git file://D:/Coding/libc/master %{version}
+%scm_source github https://github.com/bitwiseworks/libc %{version}
+#scm_source git file://D:/Coding/libc/master %{version}
 
 BuildRequires:  rexx_exe kbuild
 BuildRequires:  gcc unzip sed gawk
