@@ -12,7 +12,7 @@ Name:           libc
 License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Standard Shared Libraries
 Group:          System/Libraries
-Version:        %{ver_maj}.1.8
+Version:        %{ver_maj}.1.9
 Release:        1%{?dist}
 Vendor:         bww bitwise works GmbH
 Url:            https://github.com/bitwiseworks/libc
@@ -93,13 +93,7 @@ test "`grep -P -o '(?<=(VH|VM|VL) = )([0-9]+)' < src/emx/version.smak | tr -d \\
 
 %build
 
-# TODO: For now, we still build only a i686 RPM of LIBC even though we could
-# do multiplatform builds by overriding OPTIMIZE_FLAGS. The reason is that
-# LIBC isn't stable with -march=pentium4. See https://github.com/bitwiseworks/libc/issues/30
-# for details. Once we fix that, we should set OPTIMIZE_FLAGS as follows
-# (note -O2 override with -O3 as LIBC wants this):
-#
-#OPTIMIZE_FLAGS="%{lua: print((string.gsub(rpm.expand('%{optflags}'), '-O2', '-O3')))}"
+# NOTE: OPTIMIZE_FLAGS below overrides -O2 with -O3 as LIBC wants this.
 
 %define kmk_flags \\\
   NO_STRIP=1 \\\
@@ -108,6 +102,7 @@ test "`grep -P -o '(?<=(VH|VM|VL) = )([0-9]+)' < src/emx/version.smak | tr -d \\
   ASM="%{_builddir}/%{?buildsubdir}/bin/ml.exe -c" \\\
   SHELL=/@unixroot/usr/bin/sh.exe \\\
   BUILD_ID="%{lua: print(string.sub(rpm.expand('%{__source_rev}'), 1, 7))}-git" \\\
+  OPTIMIZE_FLAGS="%{lua: print((string.gsub(rpm.expand('%{optflags}'), '-O2', '-O3')))}" \\\
   OFFICIAL_VERSION=1
 
 # boostrap everything using the system LIBC build
@@ -219,6 +214,12 @@ rm -rf "%{buildroot}"
 
 
 %changelog
+* Thu Aug 26 2021 Dmitriy Kuminov <coding@dmik.org> 1:0.1.9-1
+- Release LIBC Next version 0.1.9
+  (https://github.com/bitwiseworks/libc/blob/0.1.9/CHANGELOG.md).
+- Use optflags which works well now (this will also enable removing RPMBUILD
+  prefix from source files to make debuginfo references relocatable).
+
 * Mon Aug 16 2021 Dmitriy Kuminov <coding@dmik.org> 1:0.1.8-1
 - Release LIBC Next version 0.1.8
   (https://github.com/bitwiseworks/libc/blob/0.1.8/CHANGELOG.md).
