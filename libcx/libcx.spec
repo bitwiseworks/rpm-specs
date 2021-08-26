@@ -1,6 +1,6 @@
 Name: libcx
 Summary: kLIBC Extension Library
-Version: 0.7.1
+Version: 0.7.2
 Release: 1%{?dist}
 License: LGPLv2.1+
 Group: System/Libraries
@@ -16,8 +16,8 @@ Obsoletes: libpoll
 Provides: libpoll
 
 # Due to __libc_LogInitEx and friends.
-Requires: libc >= 1:0.1.8
-BuildRequires: libc-devel >= 1:0.1.8
+Requires: libc >= 1:0.1.9
+BuildRequires: libc-devel >= 1:0.1.9
 
 %description
 The kLIBC Extension Library extends the functionality of the kLIBC library
@@ -90,6 +90,12 @@ rm -rf %{buildroot}
 %{_includedir}/libcx/handles.h
 
 %changelog
+* Thu Aug 26 2021 Dmitriy Kuminov <coding@dmik.org> 0.7.2-1
+- Release version 0.7.2
+  (https://github.com/bitwiseworks/libcx/blob/0.7.2/CHANGELOG.md).
+- Rebuild with new optflags which enable removing RPMBUILD prefix from source
+  files to make debuginfo references relocatable.
+
 * Mon Aug 16 2021 Dmitriy Kuminov <coding@dmik.org> 0.7.1-1
 - Release version 0.7.1
   (https://github.com/bitwiseworks/libcx/blob/0.7.1/CHANGELOG.md).
