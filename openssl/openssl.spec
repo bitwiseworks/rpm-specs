@@ -24,12 +24,13 @@
 
 Summary: Utilities from the general purpose cryptography library with TLS implementation
 Name: openssl
-Version: 1.1.1k
+Version: 1.1.1l
 Release: 1%{?dist}
 Epoch: 1
 
 License: OpenSSL and ASL 2.0
 URL: http://www.openssl.org/
+BuildRequires: make
 BuildRequires: gcc
 %if !0%{?os2_version}
 BuildRequires: coreutils, perl-interpreter, sed, zlib-devel, /usr/bin/cmp
@@ -415,6 +416,7 @@ export LD_LIBRARY_PATH
 %endif
 %exclude %{_mandir}/man1*/*.pl*
 %exclude %{_mandir}/man1*/c_rehash*
+%exclude %{_mandir}/man1*/openssl-c_rehash*
 %exclude %{_mandir}/man1*/tsget*
 %exclude %{_mandir}/man1*/openssl-tsget*
 
@@ -468,6 +470,7 @@ export LD_LIBRARY_PATH
 %{_bindir}/tsget
 %{_mandir}/man1*/*.pl*
 %{_mandir}/man1*/c_rehash*
+%{_mandir}/man1*/openssl-c_rehash*
 %{_mandir}/man1*/tsget*
 %{_mandir}/man1*/openssl-tsget*
 %dir %{_sysconfdir}/pki/CA
@@ -481,6 +484,10 @@ export LD_LIBRARY_PATH
 %endif
 
 %changelog
+* Tue Aug 31 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 1:1.1.1l-1
+- Update to version 1.1.1l.
+- resync with fedora spec
+
 * Tue Apr 13 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 1:1.1.1k-1
 - Update to version 1.1.1k.
 
