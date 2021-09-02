@@ -1,8 +1,8 @@
 # Is this a stable/testing release:
 #%%global rcversion RC1
 Name:       pcre
-Version:    8.44
-Release:    %{?rcversion:0.}2%{?rcversion:.%rcversion}%{?dist}.1
+Version:    8.45
+Release:    %{?rcversion:0.}1%{?rcversion:.%rcversion}%{?dist}.1
 %global myversion %{version}%{?rcversion:-%rcversion}
 Summary:    Perl-compatible regular expression library
 ## Source package only:
@@ -297,6 +297,9 @@ make %{?_smp_mflags} check VERBOSE=yes
 %{_mandir}/man1/pcretest.*
 
 %changelog
+* Fri Aug 03 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> - 8.45-1.1
+- update to version 8.45
+
 * Thu Apr 08 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> - 8.44-2.1
 - disable a conflict, as this clashes with the old legacy package
 
