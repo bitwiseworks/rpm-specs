@@ -8,7 +8,7 @@
 # This is stable release:
 #%%global rcversion RC1
 Name:       pcre2
-Version:    10.36
+Version:    10.37
 Release:    %{?rcversion:0.}1%{?rcversion:.%rcversion}%{?dist}
 %global     myversion %{version}%{?rcversion:-%rcversion}
 Summary:    Perl-compatible regular expression library
@@ -326,6 +326,8 @@ make %{?_smp_mflags} check VERBOSE=yes
 %{_mandir}/man1/pcre2test.*
 
 %changelog
+* Fri Aug 03 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> - 10.37-1
+- update to version 10.37
+
 * Fri Apr 02 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> - 10.36-1
 - First OS/2 rpm
-
