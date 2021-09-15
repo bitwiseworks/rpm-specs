@@ -1,0 +1,4 @@
+%_qt5_qtwebengine @@NAME@@
+%_qt5_qtwebengine_epoch @@EPOCH@@
+%_qt5_qtwebengine_version @@VERSION@@
+%_qt5_qtwebengine_evr @@EVR@@
