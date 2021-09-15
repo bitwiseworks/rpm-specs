@@ -1,4 +1,5 @@
 # Note: http://pkgs.fedoraproject.org/cgit/rpms/rpm.git/tree/rpm.spec?id=cef3bf822054a87f8f8ae53a31f4af9b3d88359b
+%define __python %__python2
 
 # build against xz?
 %bcond_without xz
@@ -32,12 +33,11 @@
 Summary: The RPM package management system
 Name: rpm
 Version: %{rpmver}
-Release: %{?snapver:0.%{snapver}.}19%{?dist}
-Group: System Environment/Base
+Release: %{?snapver:0.%{snapver}.}20%{?dist}
 Url: http://www.rpm.org/
 Vendor: bww bitwise works GmbH
 
-%scm_source svn http://svn.netlabs.org/repos/rpm/rpm/trunk 1657
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 v%{version}-os2-1
 
 %if %{with int_bdb}
 Source1: db-%{bdbver}.tar.gz
@@ -530,6 +530,10 @@ make check
 %doc doc/librpm/html/*
 
 %changelog
+* Wed Sep 15 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.13.0-20
+- force proper sse2 alignment in optflags on x86 platforms
+- cherry pick some lua changes from upstream, fixes lua path handling
+
 * Fri Jun 21 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.13.0-19
 - fix ticket #246 (symlinks)
 - fix ticket #289 (no cron)
