@@ -1,23 +1,26 @@
-#define svn_url     F:/rd/ports/popt/trunk
-%define svn_url     http://svn.netlabs.org/repos/ports/popt/trunk
-%define svn_rev     1209
+%define ver 1.18
+#define snap rc1
+%define srcver %{ver}%{?snap:-%{snap}}
 
-%define name popt
-%define version 1.15
-
-Summary:	C library for parsing command line parameters
-Name:		%{name}
-Version:	%{version}
-Release:        5%{?dist}
-Epoch:		1
-License:	MIT
-Group:		System/Libraries
-Url:		http://rpm5.org/files/popt/
-BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
-Source: %{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip
-
-Requires: popt-libs = %{epoch}:%{version}-%{release}
-Requires: popt-data = %{epoch}:%{version}-%{release}
+Summary:        C library for parsing command line parameters
+Name:           popt
+Version:        %{ver}%{?snap:~%{snap}}
+Release:        1%{?dist}
+License:        MIT
+URL:            https://github.com/rpm-software-management/popt/
+%if !0%{?os2_version}
+Source0:        http://ftp.rpm.org/popt/releases/popt-1.x/%{name}-%{srcver}.tar.gz
+Patch0:		popt-1.18-ltname.patch
+%else
+Vendor:         bww bitwise works GmbH
+%scm_source     github http://github.com/bitwiseworks/%{name}-os2 %{name}-%{version}-release-os2
+# DEF files to create forwarders for the legacy package
+Source10:       popt.def
+Source11:       iconv.m4
+%endif
+BuildRequires:  gcc
+BuildRequires:  gettext
+BuildRequires:  make
 
 %description
 Popt is a C library for parsing command line parameters. Popt was
@@ -29,86 +32,121 @@ arguments to be aliased via configuration files and includes utility
 functions for parsing arbitrary strings into argv[] arrays using
 shell-like rules.
 
-%package libs
-Summary:	Main %{name} library
-Group:		System/Libraries
-Requires:	popt-data = %{epoch}:%{version}
-
-%description libs
-This package contains the library needed to run programs dynamically
-linked with the %{name} library.
-
 %package devel
-Summary:	Development headers and libraries for %{name}
-Group:		Development/C
-Requires:	popt-libs >= %{epoch}:%{version}
+Summary:        Development files for the popt library
+Requires:       %{name} = %{version}-%{release}, pkgconfig
 
 %description devel
-This package contains the header files and libraries needed for
-developing programs using the %{name} library.
+The popt-devel package includes header files and libraries necessary
+for developing programs which use the popt C library. It contains the
+API documentation of the popt library, too.
 
-%package data
-Summary:	Data files for %{name}
-Group:		System/Libraries
+%if 0%{!?_without_static:1}
+%package static
+Summary:        Static library for parsing command line parameters
+Requires:       %{name}-devel%{?_isa} = %{version}-%{release}
 
-%description data
-This package contains popt data files like locales.
+%description static
+The popt-static package includes static libraries of the popt library.
+Install it if you need to link statically with libpopt.
+%endif
 
-%package debug
-Summary: HLL debug data for exception handling support.
-
-%description debug
-HLL debug data for exception handling support.
+%if 0%{?os2_version}
+%debug_package
+%endif
 
 %prep
-%if %{?svn_rev:%(sh -c 'if test -f "%{_sourcedir}/%{name}-%{version}-r%{svn_rev}.zip" ; then echo 1 ; else echo 0 ; fi')}%{!?svn_rev):0}
-%setup -q
+%if !0%{?os2_version}
+%autosetup -n %{name}-%{srcver} -p1
 %else
-%setup -n "%{name}-%{version}" -Tc
-svn export %{?svn_rev:-r %{svn_rev}} %{svn_url} . --force
-rm -f "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip"
-(cd .. && zip -SrX9 "%{_sourcedir}/%{name}-%{version}%{?svn_rev:-r%{svn_rev}}.zip" "%{name}-%{version}")
+%scm_setup
+
+# Prepare forwarder DLLs.
+cp %{SOURCE10} .
+
+mkdir -p m4
+cp %{SOURCE11} m4
+
+autoreconf -vi
 %endif
 
 %build
-export CONFIG_SITE="/@unixroot/usr/share/config.legacy";
-export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp";
-%configure --disable-rpath \
-    --disable-shared --enable-static
-
+%if 0%{?os2_version}
+export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp -lcx"
+export LIBS='-lcx -lpthread'
+# Set BUILDLEVEL to be embedded to all DLLs built with Libtool.
+export LT_BUILDLEVEL="@#%{vendor}:%{version}-%{release}#@##1## `LANG=C date +'%%d %%b %%Y %%H:%%M:%%S'`     `uname -n`::::0::"
+%endif
+%configure %{?_without_static:--disable-static}
+%if !0%{?os2_version}
+%make_build
+%else
 make %{?_smp_mflags}
+%endif
 
 %install
-rm -rf %{buildroot}
-make DESTDIR=${RPM_BUILD_ROOT} install
-cp popt.dll $RPM_BUILD_ROOT/%{_libdir}
-%find_lang %name
+%make_install
 
-%clean
-rm -rf %{buildroot}
+# Don't install any libtool .la files
+rm -f $RPM_BUILD_ROOT%{_libdir}/libpopt.la
 
-%files
-%defattr(-,root,root)
-%doc README
+# Multiple popt configurations are possible
+mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/popt.d/
 
-%files libs
-%defattr(-,root,root)
-%doc README
-%{_libdir}/*.dll
+%if 0%{?os2_version}
+# Generate & install forwarder DLLs.
+gcc -Zomf -Zdll -nostdlib %{SOURCE10} -l$RPM_BUILD_ROOT/%{_libdir}/popt0.dll -lend -o $RPM_BUILD_ROOT/%{_libdir}/popt.dll
+%endif
+
+%find_lang %{name}
+
+%check
+%if 0%{?os2_version}
+# this export is needed, as else the dll for the tests are not found
+export BEGINLIBPATH=%{_builddir}/%{buildsubdir}/src/.libs
+%endif
+make check || (cat tests/*.log; exit 1)
+
+%if !0%{?os2_version}
+%ldconfig_scriptlets
+%endif
+
+%files -f %{name}.lang
+%license COPYING
+%doc CHANGES
+%{_sysconfdir}/popt.d/
+%if !0%{?os2_version}
+%{_libdir}/libpopt.so.*
+%else
+%{_libdir}/popt*.dll
+%endif
 
 %files devel
-%defattr(-,root,root)
-%{_includedir}/%{name}.h
-%{_libdir}/%{name}*a
-%{_libdir}/lib%{name}*a
-%{_mandir}/man3/popt.*
-%files data -f %{name}.lang
+%doc README
+%if !0%{?os2_version}
+%{_libdir}/libpopt.so
+%else
+%{_libdir}/popt*_dll.a
+%endif
+%{_libdir}/pkgconfig/%{name}.pc
+%{_includedir}/popt.h
+%{_mandir}/man3/popt.3*
 
-%files debug
-%defattr(-,root,root)
-%{_libdir}/*.dbg
+%if 0%{!?_without_static:1}
+%files static
+%if !0%{?os2_version}
+%{_libdir}/libpopt.a
+%else
+%{_libdir}/popt.a
+%endif
+%endif
 
 %changelog
+* Fri Sep 17 2021 Silvan Scherrer <silvan.scerrer@aroa.ch> 1.18-1
+- update to version 1.18
+- add a forwarder to the old popt.dll
+- resync with fedora spec
+
 * Tue Dec 08 2015 yd <yd@os2power.com> 1.15-5
 - r1209, strip path and extension from programname.
 - added debug package with symbolic info for exceptq.
