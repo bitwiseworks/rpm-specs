@@ -5,18 +5,22 @@
 Summary:        C library for parsing command line parameters
 Name:           popt
 Version:        %{ver}%{?snap:~%{snap}}
-Release:        1%{?dist}
+Release:        2%{?dist}
 License:        MIT
 URL:            https://github.com/rpm-software-management/popt/
 %if !0%{?os2_version}
 Source0:        http://ftp.rpm.org/popt/releases/popt-1.x/%{name}-%{srcver}.tar.gz
 Patch0:		popt-1.18-ltname.patch
 %else
+Epoch:          1
 Vendor:         bww bitwise works GmbH
 %scm_source     github http://github.com/bitwiseworks/%{name}-os2 %{name}-%{version}-release-os2
 # DEF files to create forwarders for the legacy package
 Source10:       popt.def
 Source11:       iconv.m4
+Obsoletes:      popt-libs < %{epoch}:1.18-1
+Provides:       popt-libs = %{epoch}:%{version}-%{release}
+Obsoletes:      popt-data < %{epoch}:1.18-1
 %endif
 BuildRequires:  gcc
 BuildRequires:  gettext
@@ -34,7 +38,11 @@ shell-like rules.
 
 %package devel
 Summary:        Development files for the popt library
+%if !0%{?os2_version}
 Requires:       %{name} = %{version}-%{release}, pkgconfig
+%else
+Requires:       %{name} = %{epoch}:%{version}-%{release}, pkgconfig
+%endif
 
 %description devel
 The popt-devel package includes header files and libraries necessary
@@ -44,7 +52,11 @@ API documentation of the popt library, too.
 %if 0%{!?_without_static:1}
 %package static
 Summary:        Static library for parsing command line parameters
+%if !0%{?os2_version}
 Requires:       %{name}-devel%{?_isa} = %{version}-%{release}
+%else
+Requires:       %{name}-devel = %{epoch}:%{version}-%{release}
+%endif
 
 %description static
 The popt-static package includes static libraries of the popt library.
@@ -142,6 +154,10 @@ make check || (cat tests/*.log; exit 1)
 %endif
 
 %changelog
+* Mon Sep 20 2021 Silvan Scherrer <silvan.scerrer@aroa.ch> 1.18-2
+- obsolete and provide -libs and -data
+- use epoch 1, as old spec had it
+
 * Fri Sep 17 2021 Silvan Scherrer <silvan.scerrer@aroa.ch> 1.18-1
 - update to version 1.18
 - add a forwarder to the old popt.dll
