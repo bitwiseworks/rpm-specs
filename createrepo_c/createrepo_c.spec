@@ -25,7 +25,7 @@
 Summary:        Creates a common metadata repository
 Name:           createrepo_c
 Version:        0.17.3
-Release:        1%{?dist}
+Release:        2%{?dist}
 License:        GPLv2+
 %if !0%{?os2_version}
 URL:            https://github.com/rpm-software-management/createrepo_c
@@ -124,7 +124,8 @@ mkdir build-py3
 pushd build-py3
 %else
 cd build-py3
-export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp -lcx"
+# !!!!! remove -Zbin-files again when new rpm 4.17.0 is out !!!!
+export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp -Zbin-files -lcx"
 export VENDOR="%{vendor}"
 %endif
   %cmake .. \
@@ -248,6 +249,8 @@ ln -sr %{buildroot}%{_bindir}/modifyrepo_c.exe %{buildroot}%{_bindir}/modifyrepo
 %endif
 
 %changelog
+* Tue Sep 23 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.17.3-2
+- add -Zbin-files, as the rpm dll need it. which is a rpm dll flaw!!!
+
 * Wed Jul 14 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.17.3-1
 - first OS/2 rpm
-
