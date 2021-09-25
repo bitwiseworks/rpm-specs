@@ -19,7 +19,7 @@
 
 Summary: Qt5 - QtTool components
 Name:    qt5-qttools
-Version: 5.13.1
+Version: 5.15.2
 Release: 1%{?dist}
 
 License: LGPLv3 or LGPLv2
@@ -34,6 +34,10 @@ Vendor:  bww bitwise works GmbH
 %scm_source github https://github.com/bitwiseworks/qttools-os2 v%{version}-os2-b1
 #scm_source git file://D:/Coding/qt5/qt5/qttools xxxxxxx
 
+# filter plugin/qml/examples provides
+%global __provides_exclude_from ^(%{_qt5_qmldir}|%{_qt5_plugindir}|%{_qt5_examplesdir})/.*\\.dll$
+
+BuildRequires: make
 # %%check needs cmake (and don't want to mess with cmake28)
 BuildRequires: cmake
 BuildRequires: qt5-rpm-macros >= %{version}
@@ -57,6 +61,8 @@ BuildRequires: clang-devel llvm-devel
 
 # To support github tags starting with `v` (nasty github bug!)
 BuildRequires: os2-rpm-build >= 1-8
+# To pick up SSE2 alignment and no AVX optflags.
+BuildRequires: rpm >= 4.13.0-20
 
 # To create WPS objects (with shared folder/object support)
 BuildRequires: bww-resources-rpm-build >= 1.1.4
@@ -228,7 +234,7 @@ PWD_SAVE=$PWD
 cd %{buildroot}%{_qt5_bindir}
 for i in * ; do
   case "${i}" in
-   assistant.exe|designer.exe|lconvert.exe|linguist.exe|lrelease.exe|lupdate.exe|pixeltool.exe|qcollectiongenerator.exe|qdbus.exe|qdbusviewer.exe|qhelpconverter.exe|qhelpgenerator.exe|qtplugininfo.exe|qtattributionsscanner.exe)
+   assistant.exe|designer.exe|lconvert.exe|linguist.exe|lrelease.exe|lupdate.exe|lprodump.exe|pixeltool.exe|qcollectiongenerator.exe|qdbus.exe|qdbusviewer.exe|qhelpconverter.exe|qhelpgenerator.exe|qtplugininfo.exe|qtattributionsscanner.exe)
       ext=${i##*.}
       targ=%{_bindir}/${i%%.${ext}}-qt5.${ext}
       mv     ${i} %{buildroot}${targ}
@@ -294,6 +300,7 @@ cd $PWD_SAVE
 %files -n qt5-designer -f %{debug_package_exclude_files}
 %{_bindir}/designer*
 %{_qt5_bindir}/designer*
+%{_qt5_libdir}/cmake/Qt5DesignerComponents/Qt5DesignerComponentsConfig*.cmake
 
 %if 0%{?webkit}
 %files -n qt5-designer-plugin-webkit -f %{debug_package_exclude_files}
@@ -360,6 +367,11 @@ cd $PWD_SAVE
 %{_qt5_archdatadir}/mkspecs/modules/qt_lib_help.pri
 %{_qt5_archdatadir}/mkspecs/modules/qt_lib_help_private.pri
 %{_qt5_archdatadir}/mkspecs/modules/qt_lib_uiplugin.pri
+# putting these here for now, new stuff in 5.14, review for accuracy -- rdieter
+%{_qt5_libdir}/cmake/Qt5AttributionsScannerTools/
+%if 0%{?qdoc}
+%{_qt5_libdir}/cmake/Qt5DocTools/
+%endif
 
 %files static -f %{debug_package_exclude_files}
 %{_qt5_headerdir}/QtUiTools/
@@ -433,5 +445,9 @@ fi
 %endif
 
 %changelog
+* Wed Sep 22 2021 Dmitriy Kuminov <coding@dmik.org> 5.15.2-1
+- Release version 5.15.2 for OS/2.
+- Filter out qml/plugin/examples DLLs from Provides.
+
 * Thu Oct 17 2019 Dmitriy Kuminov <coding@dmik.org> 5.13.1-1
 - Initial release.
