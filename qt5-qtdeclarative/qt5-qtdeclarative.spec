@@ -11,7 +11,7 @@
 
 Summary: Qt5 - QtDeclarative component
 Name:    qt5-%{qt_module}
-Version: 5.13.1
+Version: 5.15.2
 Release: 1%{?dist}
 
 # See LICENSE.GPL LICENSE.LGPL LGPL_EXCEPTION.txt, for details
@@ -27,14 +27,14 @@ Vendor:  bww bitwise works GmbH
 %scm_source github https://github.com/bitwiseworks/qtdeclarative-os2 v%{version}-os2-b1
 #scm_source git file://D:/Coding/qt5/qt5/qtdeclarative xxxxxxx
 
-# filter qml provides
-%global __provides_exclude_from ^%{_qt5_archdatadir}/qml/.*\\.dll$
+# filter plugin/qml/examples provides
+%global __provides_exclude_from ^(%{_qt5_qmldir}|%{_qt5_plugindir}|%{_qt5_examplesdir})/.*\\.dll$
 
 Obsoletes: qt5-qtjsbackend < 5.2.0
 Obsoletes: qt5-qtdeclarative-render2d < 5.7.1-10
 
-# TODO: we don't have specific gcc sub-packages so far.
-#BuildRequires: gcc-c++
+BuildRequires: make
+BuildRequires: gcc-c++
 BuildRequires: qt5-rpm-macros >= %{version}
 BuildRequires: qt5-qtbase-devel >= %{version}
 BuildRequires: qt5-qtbase-private-devel
@@ -52,6 +52,8 @@ Obsoletes: %{name}-examples < %{version}-%{release}
 
 # To support github tags starting with `v` (nasty github bug!)
 BuildRequires: os2-rpm-build >= 1-8
+# To pick up SSE2 alignment and no AVX optflags.
+BuildRequires: rpm >= 4.13.0-20
 
 %if ! 0%{?no_examples:1}
 %_qt5_examples_package_builddeps
@@ -89,7 +91,7 @@ Requires: %{name}%{?_isa} = %{version}-%{release}
 
 
 %prep
-#setup -q -n %{qt_module}-everywhere-src-%{version}
+#autosetup -n %{qt_module}-everywhere-src-%{version} -p1
 %scm_setup
 
 
@@ -169,6 +171,8 @@ make check -k -C tests ||:
 %doc README.md CHANGELOG.md
 %license LICENSE.LGPL*
 %{_qt5_libdir}/Qt5Qml.dll
+%{_qt5_libdir}/Qt5QmlM.dll
+%{_qt5_libdir}/Qt5QmlW.dll
 %{_qt5_libdir}/Qt5Q.dll
 %{_qt5_libdir}/Qt5QWgt.dll
 # TODO: later (requires opengl)
@@ -182,15 +186,23 @@ make check -k -C tests ||:
 %{_bindir}/qml*
 %{_qt5_bindir}/qml*
 %{_qt5_headerdir}/Qt*/
-%{_qt5_libdir}/Qt5Q*.lib
-%{_qt5_libdir}/Qt5Q*.prl
+%{_qt5_libdir}/Qt5Qml.lib
+%{_qt5_libdir}/Qt5Qml.prl
+%{_qt5_libdir}/Qt5QmlModels.lib
+%{_qt5_libdir}/Qt5QmlModels.prl
+%{_qt5_libdir}/Qt5QmlWorkerScript.lib
+%{_qt5_libdir}/Qt5QmlWorkerScript.prl
+%{_qt5_libdir}/Qt5Quick*.lib
+%{_qt5_libdir}/Qt5Quick*.prl
 %dir %{_qt5_libdir}/cmake/Qt5Quick*/
 %{_qt5_libdir}/cmake/Qt5*/Qt5*Config*.cmake
+%{_qt5_libdir}/metatypes/qt5*_metatypes.json
 %{_qt5_libdir}/pkgconfig/Qt5*.pc
 %{_qt5_archdatadir}/mkspecs/modules/*.pri
 %{_qt5_archdatadir}/mkspecs/features/*.prf
 %dir %{_qt5_libdir}/cmake/Qt5Qml/
 %{_qt5_libdir}/cmake/Qt5Qml/Qt5Qml_*Factory.cmake
+%{_qt5_libdir}/cmake/Qt5QmlImportScanner/
 
 %files static -f %{debug_package_exclude_files}
 %{_qt5_libdir}/Qt5QmlDevTools.lib
@@ -210,5 +222,9 @@ make check -k -C tests ||:
 
 
 %changelog
+* Fri Sep 10 2021 Dmitriy Kuminov <coding@dmik.org> 5.15.2-1
+- Release version 5.15.2 for OS/2.
+- Filter out qml/plugin/examples DLLs from Provides.
+
 * Thu Oct 17 2019 Dmitriy Kuminov <coding@dmik.org> 5.13.1-1
 - Initial release.
