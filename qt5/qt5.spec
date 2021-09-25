@@ -1,6 +1,11 @@
+# include qt5,qt5-devel metapackages or not
+# dropped for f32+
+%if 0
+%global metapackage 1
+%endif
 
 Name: qt5
-Version: 5.13.1
+Version: 5.15.2
 Release: 1%{?dist}
 Summary: Qt5 meta package
 License: GPLv3
@@ -17,17 +22,15 @@ BuildArch: noarch
 Requires: qt5-qtbase
 Requires: qt5-qtbase-gui
 # TODO: No SQL drivers besides sqlite for now (which is part of main pkg)
-%if 0
 #Requires: qt5-qtbase-mysql
 #Requires: qt5-qtbase-postgresql
-%endif
 #Requires: qt5-qtconnectivity
 Requires: qt5-qtdeclarative
 #Requires: qt5-qtdoc
 #Requires: qt5-qtgraphicaleffects
 #Requires: qt5-qtimageformats
 #Requires: qt5-qtlocation
-#Requires: qt5-qtmultimedia
+Requires: qt5-qtmultimedia
 #Requires: qt5-qtquickcontrols
 #Requires: qt5-qtquickcontrols2
 #Requires: qt5-qtscript
@@ -36,12 +39,11 @@ Requires: qt5-qtdeclarative
 Requires: qt5-qtsvg
 Requires: qt5-qttools
 #Requires: qt5-qtwayland
-#Requires: qt5-qtwebchannel
-### qtwebengine is not available on all archs, omit for now
-### else, need to make qt5 arch'd and deps conditional (on arch)
-##Requires: qt5-qtwebengine
-#Requires: qt5-qtwebkit
-#Requires: qt5-qtwebsockets
+Requires: qt5-qtwebchannel
+## qtwebengine is not available on all archs, omit for now
+## else, need to make qt5 arch'd and deps conditional (on arch)
+#Requires: qt5-qtwebengine
+Requires: qt5-qtwebsockets
 #Requires: qt5-qtx11extras
 #Requires: qt5-qtxmlpatterns
 
@@ -63,19 +65,18 @@ Requires: qt5-linguist
 Requires: qt5-qtbase-devel
 #Requires: qt5-qtconnectivity-devel
 Requires: qt5-qtdeclarative-devel
-#Requires: qt5-qtenginio-devel
 #Requires: qt5-qtlocation-devel
-#Requires: qt5-qtmultimedia-devel
+Requires: qt5-qtmultimedia-devel
 #Requires: qt5-qtscript-devel
 #Requires: qt5-qtsensors-devel
 #Requires: qt5-qtserialport-devel
 Requires: qt5-qtsvg-devel
 Requires: qt5-qttools-devel
 #Requires: qt5-qtwayland-devel
-#Requires: qt5-qtwebchannel-devel
-##Requires: qt5-qtwebengine-devel
-#Requires: qt5-qtwebkit-devel
-#Requires: qt5-qtwebsockets-devel
+Requires: qt5-qtwebchannel-devel
+#Requires: qt5-qtwebengine-devel
+Requires: qt5-qtwebsockets-devel
+#Requires: qt5-qtx11extras-devel
 #Requires: qt5-qtxmlpatterns-devel
 
 %description devel
@@ -85,8 +86,7 @@ Requires: qt5-qttools-devel
 Summary: RPM macros for building Qt5 and KDE Frameworks 5 packages
 Conflicts: qt5-qtbase-devel < 5.6.0-0.23
 Requires: cmake >= 3
-# TODO: we don't have specific gcc sub-packages so far.
-#Requires: gcc-c++
+Requires: gcc-c++
 %description rpm-macros
 %{summary}.
 
@@ -117,6 +117,7 @@ sed -i \
   -e "s|@@QMAKE_QT5_WRAPPER@@|%{_bindir}/qmake-qt5.sh|g" \
   %{buildroot}%{_rpmconfigdir}/macros.d/macros.qt5
 
+%if 0%{?metapackage}
 mkdir -p %{buildroot}%{_docdir}/qt5
 mkdir -p %{buildroot}%{_docdir}/qt5-devel
 echo "- Qt5 meta package" > %{buildroot}%{_docdir}/qt5/README
@@ -127,6 +128,7 @@ echo "- Qt5 devel meta package" > %{buildroot}%{_docdir}/qt5-devel/README
 
 %files devel
 %{_docdir}/qt5-devel/README
+%endif
 
 %files rpm-macros
 %{_rpmconfigdir}/macros.d/macros.qt5
@@ -138,6 +140,10 @@ echo "- Qt5 devel meta package" > %{buildroot}%{_docdir}/qt5-devel/README
 
 
 %changelog
+* Wed Sep 22 2021 Dmitriy Kuminov <coding@dmik.org> 5.15.2-1
+- Release version 5.15.2 for OS/2.
+- Add qtmultimedia, qtwebchannel, qtwebsockets to dependencies.
+
 * Thu Oct 17 2019 Dmitriy Kuminov <coding@dmik.org> 5.13.1-1
 - Release version 5.13.1 for OS/2.
 - Add qtsvg, qtdeclarative and qttools to dependencies.
