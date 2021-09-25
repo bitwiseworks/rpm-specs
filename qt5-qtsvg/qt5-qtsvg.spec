@@ -9,7 +9,7 @@
 
 Summary: Qt5 - Support for rendering and displaying SVG
 Name:    qt5-%{qt_module}
-Version: 5.13.1
+Version: 5.15.2
 Release: 1%{?dist}
 
 # See LGPL_EXCEPTIONS.txt, LICENSE.GPL3, respectively, for exception details
@@ -25,6 +25,11 @@ Vendor:  bww bitwise works GmbH
 %scm_source github https://github.com/bitwiseworks/qtsvg-os2 v%{version}-os2-b1
 #scm_source git file://D:/Coding/qt5/qt5/qtsvg xxxxxxx
 
+# filter plugin/qml/examples provides
+%global __provides_exclude_from ^(%{_qt5_qmldir}|%{_qt5_plugindir}|%{_qt5_examplesdir})/.*\\.dll$
+
+BuildRequires: make
+BuildRequires: qt5-rpm-macros >= %{version}
 BuildRequires: qt5-qtbase-devel >= %{version}
 BuildRequires: pkgconfig(zlib)
 
@@ -33,6 +38,8 @@ BuildRequires: qt5-qtbase-private-devel
 
 # To support github tags starting with `v` (nasty github bug!)
 BuildRequires: os2-rpm-build >= 1-8
+# To pick up SSE2 alignment and no AVX optflags.
+BuildRequires: rpm >= 4.13.0-20
 
 %_qt5_examples_package_builddeps
 
@@ -77,7 +84,7 @@ test -d .git || mkdir .git
 %install
 make install INSTALL_ROOT=%{buildroot}
 
-## .prl/.la file love
+## .prl file love
 # nuke .prl reference(s) to %%buildroot
 PWD_SAVE=$PWD
 cd %{buildroot}%{_qt5_libdir}
@@ -93,13 +100,13 @@ cd $PWD_SAVE
 %{_qt5_libdir}/Qt5Svg.dll
 %{_qt5_plugindir}/iconengines/qsvgico.dll
 %{_qt5_plugindir}/imageformats/qsvg.dll
-%dir %{_qt5_libdir}/cmake/Qt5Svg/
-%{_qt5_libdir}/cmake/Qt5Svg/Qt5Svg_*Plugin.cmake
+%{_qt5_libdir}/cmake/Qt5Gui/Qt5Gui_QSvg*Plugin.cmake
 
 %files devel -f %{debug_package_exclude_files}
 %{_qt5_headerdir}/QtSvg/
 %{_qt5_libdir}/Qt5Svg.lib
 %{_qt5_libdir}/Qt5Svg.prl
+%dir %{_qt5_libdir}/cmake/Qt5Svg/
 %{_qt5_libdir}/cmake/Qt5Svg/Qt5SvgConfig*.cmake
 %{_qt5_libdir}/pkgconfig/Qt5Svg.pc
 %{_qt5_archdatadir}/mkspecs/modules/qt_lib_svg*.pri
@@ -113,5 +120,9 @@ cd $PWD_SAVE
 
 
 %changelog
+* Wed Sep 22 2021 Dmitriy Kuminov <coding@dmik.org> 5.15.2-1
+- Release version 5.15.2 for OS/2.
+- Filter out qml/plugin/examples DLLs from Provides.
+
 * Thu Oct 17 2019 Dmitriy Kuminov <coding@dmik.org> 5.13.1-1
 - Initial release.
