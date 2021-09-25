@@ -1,5 +1,3 @@
-# TODO: support openssl-1.1 (not yet ported to OS/2)
-#global openssl11 1
 %global openssl -openssl-linked
 
 %global platform os2-g++
@@ -7,6 +5,8 @@
 %global qt_module qtbase
 
 %global rpm_macros_dir %(d=%{_rpmconfigdir}/macros.d; [ -d $d ] || d=%{_sysconfdir}/rpm; echo $d)
+
+BuildRequires: make
 
 %global examples 1
 ## skip for now, until we're better at it --rex
@@ -21,7 +21,7 @@
 
 Name:    qt5-qtbase
 Summary: Qt5 - QtBase components
-Version: 5.13.1
+Version: 5.15.2
 Release: 1%{?dist}
 
 # See LGPL_EXCEPTIONS.txt, for exception details
@@ -43,42 +43,59 @@ Source1: qtlogging.ini
 # macros
 Source10: macros.qt5-qtbase
 
+# filter plugin/qml/examples provides
+%global __provides_exclude_from ^(%{_qt5_qmldir}|%{_qt5_plugindir}|%{_qt5_examplesdir})/.*\\.dll$
+
 BuildRequires: cups-devel
 BuildRequires: findutils
 BuildRequires: libjpeg-devel
 # TODO: it seems Qt doesn't support mng/tiff by default, remove?
 #BuildRequires: libmng-devel
 #BuildRequires: libtiff-devel
-# TODO: we don't have specific gcc sub-packages so far.
-#BuildRequires: gcc-c++
+BuildRequires: gcc-c++
 BuildRequires: pkgconfig(fontconfig)
 BuildRequires: pkgconfig(libpng)
-BuildRequires: openssl-devel%{?openssl11: >= 1.1}
+BuildRequires: openssl-devel
 %global sqlite -system-sqlite
 BuildRequires: pkgconfig(sqlite3) >= 3.7
 # TODO no system harfbuzz yet
 #global harfbuzz -system-harfbuzz
 #BuildRequires: pkgconfig(harfbuzz) >= 0.9.42
 BuildRequires: pkgconfig(icu-i18n)
-# TODO our system pcre is too old, needs updating
-#BuildRequires: pkgconfig(libpcre2-posix) >= 10.20
-#BuildRequires: pkgconfig(libpcre) >= 8.0
-#%global pcre -system-pcre
-# TODO need?
-#BuildRequires: libicu-devel
+%if 1
+BuildRequires: pkgconfig(libpcre2-posix) >= 10.20
+BuildRequires: pkgconfig(libpcre) >= 8.0
+%global pcre -system-pcre
+%else
+BuildRequires: libicu-devel
 %global pcre -qt-pcre
+%endif
 BuildRequires: pkgconfig(zlib)
 BuildRequires: perl-generators
-BuildRequires: qt5-rpm-macros
+BuildRequires: qt5-rpm-macros >= %{version}
 
 # To support github tags starting with `v` (nasty github bug!)
 BuildRequires: os2-rpm-build >= 1-8
+# To pick up SSE2 alignment and no AVX optflags.
+BuildRequires: rpm >= 4.13.0-20
+
+# Lots of new needed stuff in LIBC.
+Requires: libc >= 1:0.1.9
+BuildRequires: libc-devel >= 1:0.1.9
 
 %if 0%{?examples}
 %_qt5_examples_package_builddeps
 %endif
 
 Requires: %{name}-common = %{version}-%{release}
+
+## Sql drivers
+%if 0
+%global ibase -no-sql-ibase
+%global tds -no-sql-tds
+%endif
+
+%global accessibility 0
 
 %description
 Qt is a software toolkit for developing applications.
@@ -163,6 +180,15 @@ BuildRequires: libpq-devel
 Requires: %{name}%{?_isa} = %{version}-%{release}
 %description postgresql
 %{summary}.
+
+%if "%{?tds}" != "-no-sql-tds"
+%package tds
+Summary: TDS driver for Qt5's SQL classes
+BuildRequires: freetds-devel
+Requires: %{name}%{?_isa} = %{version}-%{release}
+%description tds
+%{summary}.
+%endif
 %endif
 
 # debating whether to do 1 subpkg per library or not -- rex
@@ -200,14 +226,13 @@ sed -i -e "s|^#!/usr/bin/env perl$|#!%{__perl}|" \
 %build
 
 ## adjust $RPM_OPT_FLAGS
-# TODO: Later (needs -no-sse in rpm macros for pentium4 builds etc.)
-#RPM_OPT_FLAGS=`echo $RPM_OPT_FLAGS | sed 's|-fexceptions||g'`
-#RPM_OPT_FLAGS="$RPM_OPT_FLAGS %{?qt5_arm_flag} %{?qt5_deprecated_flag} %{?qt5_null_flag}"
+# remove -fexceptions
+RPM_OPT_FLAGS=`echo $RPM_OPT_FLAGS | sed 's|-fexceptions||g'`
+RPM_OPT_FLAGS="$RPM_OPT_FLAGS %{?qt5_arm_flag} %{?qt5_deprecated_flag} %{?qt5_null_flag}"
 
-# TODO: Later (needs -no-sse in rpm macros for pentium4 builds etc.)
-#export CFLAGS="$CFLAGS $RPM_OPT_FLAGS"
-#export CXXFLAGS="$CXXFLAGS $RPM_OPT_FLAGS"
-#export LDFLAGS="$LDFLAGS $RPM_LD_FLAGS"
+export CFLAGS="$CFLAGS $RPM_OPT_FLAGS"
+export CXXFLAGS="$CXXFLAGS $RPM_OPT_FLAGS"
+export LDFLAGS="$LDFLAGS $RPM_LD_FLAGS"
 export MAKEFLAGS="%{?_smp_mflags}"
 
 # configure expects either a git clone w/o include dir or a source tarball with
@@ -232,37 +257,36 @@ test -d .git || mkdir .git
   -sysconfdir %{_qt5_sysconfdir} \
   -translationdir %{_qt5_translationdir} \
   -platform %{platform} \
+  -no-debug-and-release \
   -release \
   -shared \
+  %{?accessibility:-accessibility} \
   -fontconfig \
+  %{?ibase} \
   -icu \
-  -optimized-qmake \
   %{?openssl} \
   %{!?examples:-nomake examples} \
   %{!?tests:-nomake tests} \
-  -force-debug-info \
+  -no-strip \
   -system-libjpeg \
   -system-libpng \
   %{?harfbuzz} \
   %{?pcre} \
   %{?sqlite} \
   -system-zlib \
+  -no-feature-relocatable \
   -no-opengl \
-
-# TODO: Later (needs -no-sse in rpm macros for pentium4 builds etc.)
-#  QMAKE_CFLAGS_RELEASE="${CFLAGS:-$RPM_OPT_FLAGS}" \
-#  QMAKE_CXXFLAGS_RELEASE="${CXXFLAGS:-$RPM_OPT_FLAGS}" \
-#  QMAKE_LFLAGS_RELEASE="${LDFLAGS:-$RPM_LD_FLAGS}"
+  QMAKE_CFLAGS_RELEASE="${CFLAGS:-$RPM_OPT_FLAGS}" \
+  QMAKE_CXXFLAGS_RELEASE="${CXXFLAGS:-$RPM_OPT_FLAGS}" \
+  QMAKE_LFLAGS_RELEASE="${LDFLAGS:-$RPM_LD_FLAGS}"
 
 # ensure qmake build using optflags (which can happen if not munging qmake.conf defaults)
 make clean -C qmake
 %make_build -C qmake all binary \
-
-# TODO: Later (needs -no-sse in rpm macros for pentium4 builds etc.)
-#  QMAKE_CFLAGS_RELEASE="${CFLAGS:-$RPM_OPT_FLAGS}" \
-#  QMAKE_CXXFLAGS_RELEASE="${CXXFLAGS:-$RPM_OPT_FLAGS}" \
-#  QMAKE_LFLAGS_RELEASE="${LDFLAGS:-$RPM_LD_FLAGS}" \
-#  QMAKE_STRIP=
+  QMAKE_CFLAGS_RELEASE="${CFLAGS:-$RPM_OPT_FLAGS}" \
+  QMAKE_CXXFLAGS_RELEASE="${CXXFLAGS:-$RPM_OPT_FLAGS}" \
+  QMAKE_LFLAGS_RELEASE="${LDFLAGS:-$RPM_LD_FLAGS}" \
+  QMAKE_STRIP=
 
 %make_build
 
@@ -448,6 +472,7 @@ make check -k ||:
 %{_bindir}/qlalr*
 %{_bindir}/fixqt4headers.pl
 %{_bindir}/qvkgen*
+%{_bindir}/tracegen*
 %{_qt5_bindir}/moc*
 %{_qt5_bindir}/qdbuscpp2xml*
 %{_qt5_bindir}/qdbusxml2cpp*
@@ -522,14 +547,6 @@ make check -k ||:
 %if 0%{?egl}
 %{_qt5_libdir}/cmake/Qt5OpenGL/Qt5OpenGLConfig*.cmake
 %endif
-%{_qt5_libdir}/cmake/Qt5AccessibilitySupport/Qt5AccessibilitySupportConfig*.cmake
-%{_qt5_libdir}/cmake/Qt5Bootstrap/Qt5BootstrapConfig*.cmake
-%{_qt5_libdir}/cmake/Qt5DeviceDiscoverySupport/Qt5DeviceDiscoverySupportConfig*.cmake
-%{_qt5_libdir}/cmake/Qt5EdidSupport/Qt5EdidSupportConfig*.cmake
-%{_qt5_libdir}/cmake/Qt5EventDispatcherSupport/Qt5EventDispatcherSupportConfig*.cmake
-%{_qt5_libdir}/cmake/Qt5FbSupport/Qt5FbSupportConfig*.cmake
-%{_qt5_libdir}/cmake/Qt5FontDatabaseSupport/Qt5FontDatabaseSupportConfig*.cmake
-%{_qt5_libdir}/cmake/Qt5ThemeSupport/Qt5ThemeSupportConfig*.cmake
 %{_qt5_libdir}/cmake/Qt5PrintSupport/Qt5PrintSupportConfig*.cmake
 %{_qt5_libdir}/cmake/Qt5Sql/Qt5SqlConfig*.cmake
 %{_qt5_libdir}/cmake/Qt5Test/Qt5TestConfig*.cmake
@@ -537,6 +554,26 @@ make check -k ||:
 %{_qt5_libdir}/cmake/Qt5Widgets/Qt5WidgetsMacros.cmake
 %{_qt5_libdir}/cmake/Qt5Xml/Qt5XmlConfig*.cmake
 %{_qt5_libdir}/cmake/Qt5/Qt5ModuleLocation.cmake
+%{_qt5_libdir}/cmake/Qt5AccessibilitySupport/
+%{_qt5_libdir}/cmake/Qt5DeviceDiscoverySupport/
+%{_qt5_libdir}/cmake/Qt5EdidSupport/
+%if 0%{?egl}
+%{_qt5_libdir}/cmake/Qt5EglFSDeviceIntegration/
+%{_qt5_libdir}/cmake/Qt5EglFsKmsSupport/
+%{_qt5_libdir}/cmake/Qt5EglSupport/
+%endif
+%{_qt5_libdir}/cmake/Qt5EventDispatcherSupport/
+%{_qt5_libdir}/cmake/Qt5FbSupport/
+%{_qt5_libdir}/cmake/Qt5FontDatabaseSupport/
+%if 0%{?egl}
+%{_qt5_libdir}/cmake/Qt5GlxSupport/
+%endif
+# TODO later?
+#{_qt5_libdir}/cmake/Qt5InputSupport/
+%{_qt5_libdir}/cmake/Qt5ThemeSupport/
+%{_qt5_libdir}/metatypes/qt5core_metatypes.json
+%{_qt5_libdir}/metatypes/qt5gui_metatypes.json
+%{_qt5_libdir}/metatypes/qt5widgets_metatypes.json
 %{_qt5_libdir}/pkgconfig/Qt5.pc
 %{_qt5_libdir}/pkgconfig/Qt5Concurrent.pc
 %{_qt5_libdir}/pkgconfig/Qt5Core.pc
@@ -555,13 +592,14 @@ make check -k ||:
 %{_qt5_libdir}/Qt5EglFsKmsSupport.prl
 %{_qt5_libdir}/Qt5EglFsKmsSupport.lib
 %endif
+%{_qt5_libdir}/qt5/bin/tracegen*
 ## private-devel globs
 # keep mkspecs/modules stuff  in -devel for now, https://bugzilla.redhat.com/show_bug.cgi?id=1705280
 #exclude %{_qt5_archdatadir}/mkspecs/modules/qt_lib_*_private.pri
-%exclude %{_qt5_headerdir}/*/%{version}/*/private/
+%exclude %{_qt5_headerdir}/*/%{version}/
 
 %files private-devel -f %{debug_package_exclude_files}
-%{_qt5_headerdir}/*/%{version}/*/private/
+%{_qt5_headerdir}/*/%{version}/
 #{_qt5_archdatadir}/mkspecs/modules/qt_lib_*_private.pri
 
 %files static -f %{debug_package_exclude_files}
@@ -703,6 +741,11 @@ fi
 %endif
 
 %changelog
+* Wed Sep 22 2021 Dmitriy Kuminov <coding@dmik.org> 5.15.2-1
+- Release version 5.15.2 for OS/2.
+- Add -no-debug-and-release to disable dual build useless with debug libs not built.
+- Filter out qml/plugin/examples DLLs from Provides.
+
 * Thu Oct 17 2019 Dmitriy Kuminov <coding@dmik.org> 5.13.1-1
 - Release version 5.13.1 Beta 1 for OS/2.
   (https://github.com/bitwiseworks/qtbase-os2/blob/v5.13.1-os2-b1/CHANGELOG.md).
