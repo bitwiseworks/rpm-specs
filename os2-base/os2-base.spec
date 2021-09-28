@@ -2,7 +2,7 @@
 Summary: OS/2 - eComStation 2.0 - ArcaOS 5.0 base
 Name: os2-base
 Version: 0.0.1
-Release: 2%{?dist}
+Release: 3%{?dist}
 
 License: free
 
@@ -263,7 +263,7 @@ tools from findutils and coreutils to be used instead of default OS/2 tools.
 %install
 %{__rm} -rf $RPM_BUILD_ROOT
 %{__mkdir_p} -m 755 $RPM_BUILD_ROOT%{_sysconfdir}/rpm
-echo i686-OS/2-OS/2 > $RPM_BUILD_ROOT%{_sysconfdir}/rpm/platform
+echo pentium4-OS/2-OS/2 > $RPM_BUILD_ROOT%{_sysconfdir}/rpm/platform
 
 %{__mkdir_p} %{buildroot}%{os2_bookdir}
 %{__mkdir_p} %{buildroot}%{os2_helpdir}
@@ -330,6 +330,9 @@ fi
 
 
 %changelog
+* Tue Sep 28 2021 Dmitriy Kuminov <coding@dmik.org> 0.0.1-3
+- Set pentium4 as defalut platform.
+
 * Mon Nov 18 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.0.1-2
 - fix usage os os2_config_sys macro
 - use -e for all post/pre state
