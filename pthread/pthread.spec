@@ -2,7 +2,7 @@
 
 Summary: A posix pthread emulation for OS/2 and OS/2 based systems
 Name: pthread
-Version: 0.2.5
+Version: 0.2.6
 Release: 1%{?dist}
 License: unknown
 Vendor:  bww bitwise works GmbH
@@ -73,6 +73,10 @@ rm -rf %{buildroot}
 %{_libdir}/pthread.dll
 
 %changelog
+* Mon Oct 04 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 2:0.2.6-1
+- Fix ticket 16 with pull request 17
+- Fix wrong return codes in pthread_rwlock_try*lock()
+
 * Mon Sep 27 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 2:0.2.5-1
 - Add pthread_condattr_setclock() and needed functions for that
 
