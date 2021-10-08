@@ -1,8 +1,8 @@
 # =============================================================================
 
 Name:             poppler-data
-Summary:          Encoding files for use with poppler 
-Version:          0.4.9
+Summary:          Encoding files for use with poppler
+Version:          0.4.11
 Release:          1%{?dist}
 
 # NOTE: The licensing details are explained in COPYING file in source archive.
@@ -12,6 +12,7 @@ URL:              https://poppler.freedesktop.org/
 Source:           https://poppler.freedesktop.org/poppler-data-%{version}.tar.gz
 
 BuildArch:        noarch
+BuildRequires: make
 BuildRequires:    git
 
 # =============================================================================
@@ -38,7 +39,6 @@ BuildRequires:    git
 %endif
 
 
-
 # Patches to be removed -- deprecated functionality which shall be removed at
 # ---------------------    some point in the future:
 
@@ -54,6 +54,7 @@ and Cyrrilic characters properly.
 
 %package          devel
 Summary:          Devel files for %{name}
+
 Requires:         %{name} = %{version}-%{release}
 BuildRequires:    pkgconfig
 
@@ -64,8 +65,11 @@ pkgconfig utility allowing your software to be build with poppler-data.
 # === BUILD INSTRUCTIONS ======================================================
 
 %prep
-#autosetup -S git
+%if !0%{?os2_version}
+%autosetup -S git
+%else
 %setup -q
+%endif
 
 # NOTE: Nothing to do here - we are packaging the content only.
 %build
@@ -85,6 +89,10 @@ pkgconfig utility allowing your software to be build with poppler-data.
 # =============================================================================
 
 %changelog
+* Fri Oct 08 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.4.11-1
+- updated to version 0.4.11
+- adjusted the spec according to fedora
+
 * Fri Aug 17 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.4.9-1
 - updated to version 0.4.9
 - adjusted the spec according to fedora
