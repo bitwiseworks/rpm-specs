@@ -42,7 +42,7 @@ Release: 1%{?dist}
 License: Public Domain
 
 URL: https://fedoraproject.org/wiki/CA-Certificates
-%if !0%{?os2_version}
+%if 0%{?os2_version}
 Vendor: bww bitwise works GmbH
 %endif
 
