@@ -35,14 +35,16 @@ Name: ca-certificates
 # to have increasing version numbers. However, the new scheme will work, 
 # because all future versions will start with 2013 or larger.)
 
-Version: 2020.2.41
+Version: 2021.2.50
 # for Rawhide, please always use release >= 2
 # for Fedora release branches, please use release < 2 (1.0, 1.1, ...)
 Release: 1%{?dist}
 License: Public Domain
 
 URL: https://fedoraproject.org/wiki/CA-Certificates
+%if !0%{?os2_version}
 Vendor: bww bitwise works GmbH
+%endif
 
 #Please always update both certdata.txt and nssckbi.h
 Source0: certdata.txt
@@ -219,6 +221,7 @@ mkdir -p -m 755 $RPM_BUILD_ROOT%{pkidir}/java
 mkdir -p -m 755 $RPM_BUILD_ROOT%{_sysconfdir}/ssl
 mkdir -p -m 755 $RPM_BUILD_ROOT%{catrustdir}/source
 mkdir -p -m 755 $RPM_BUILD_ROOT%{catrustdir}/source/anchors
+mkdir -p -m 755 $RPM_BUILD_ROOT%{catrustdir}/source/blocklist
 mkdir -p -m 755 $RPM_BUILD_ROOT%{catrustdir}/source/blacklist
 mkdir -p -m 755 $RPM_BUILD_ROOT%{catrustdir}/extracted
 mkdir -p -m 755 $RPM_BUILD_ROOT%{catrustdir}/extracted/pem
@@ -227,6 +230,7 @@ mkdir -p -m 755 $RPM_BUILD_ROOT%{catrustdir}/extracted/java
 mkdir -p -m 755 $RPM_BUILD_ROOT%{catrustdir}/extracted/edk2
 mkdir -p -m 755 $RPM_BUILD_ROOT%{_datadir}/pki/ca-trust-source
 mkdir -p -m 755 $RPM_BUILD_ROOT%{_datadir}/pki/ca-trust-source/anchors
+mkdir -p -m 755 $RPM_BUILD_ROOT%{_datadir}/pki/ca-trust-source/blocklist
 mkdir -p -m 755 $RPM_BUILD_ROOT%{_datadir}/pki/ca-trust-source/blacklist
 mkdir -p -m 755 $RPM_BUILD_ROOT%{_datadir}/pki/ca-trust-legacy
 mkdir -p -m 755 $RPM_BUILD_ROOT%{_bindir}
@@ -388,6 +392,7 @@ fi
 %dir %{catrustdir}
 %dir %{catrustdir}/source
 %dir %{catrustdir}/source/anchors
+%dir %{catrustdir}/source/blocklist
 %dir %{catrustdir}/source/blacklist
 %dir %{catrustdir}/extracted
 %dir %{catrustdir}/extracted/pem
@@ -396,6 +401,7 @@ fi
 %dir %{_datadir}/pki
 %dir %{_datadir}/pki/ca-trust-source
 %dir %{_datadir}/pki/ca-trust-source/anchors
+%dir %{_datadir}/pki/ca-trust-source/blocklist
 %dir %{_datadir}/pki/ca-trust-source/blacklist
 %dir %{_datadir}/pki/ca-trust-legacy
 
@@ -423,7 +429,7 @@ fi
 %{_sysconfdir}/ssl/openssl.cnf
 %{_sysconfdir}/ssl/ct_log_list.cnf
 
-# master bundle file with trust
+# primary bundle file with trust
 %{_datadir}/pki/ca-trust-source/%{p11_format_bundle}
 
 %{_datadir}/pki/ca-trust-legacy/%{legacy_default_bundle}
@@ -442,6 +448,10 @@ fi
 
 
 %changelog
+* Wed Oct 13 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 2021.2.50-1
+- update to latest fedora spec
+- update ca-cert to latest Mozilla cert
+
 * Thu Dec 10 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> 2020.2.41-1
 - update to latest fedora spec
 - update ca-cert to latest Mozilla cert
