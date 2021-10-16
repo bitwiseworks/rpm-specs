@@ -6,7 +6,7 @@ License:    proprietary
 URL:        http://www.bitwiseworks.com
 Vendor:     bww bitwise works GmbH
 
-%scm_source github https://github.com/bitwiseworks/highmem b02a84f5a21e27b2479def365546b57c041d1d41
+%scm_source github https://github.com/bitwiseworks/highmem 3134c3ff44e9e94c8b2a3ce0785963f4c9025bf4
 
 BuildRequires: gcc kbuild git zip
 BuildRequires: os2tk45-headers
