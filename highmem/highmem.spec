@@ -1,6 +1,6 @@
 Summary:    HighMem, a LX format 32bit DLL module 'loading above 512MB' marking utility,
 Name:       highmem
-Version:    1.0.2
+Version:    1.0.3
 Release:    1%{?dist}
 License:    proprietary
 URL:        http://www.bitwiseworks.com
@@ -53,6 +53,9 @@ rm -rf "$RPM_BUILD_ROOT"
 %{_rpmconfigdir}/macros.d/macros.%{name}
 
 %changelog
+* Fri Oct 15 2021 Yuri Dario <yd@os2power.com> 1.0.3-1
+- Always skip marking of libc runtime dlls.
+
 * Thu Nov 12 2020 Dmitriy Kuminov <coding@dmik.org> 1.0.2-1
 - Use scm_source and friends.
 - Fix system hangs when processing huge DLLs (hundreds of megabytes).
