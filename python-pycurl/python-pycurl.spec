@@ -1,35 +1,64 @@
-%{!?python_sitearch: %global python_sitearch %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)")}
+# python3 is not available on RHEL <= 7
+%if 0%{?fedora} || 0%{?rhel} > 7
+%bcond_without python3
+%else
+%bcond_with python3
+%endif
 
-Name:           python-pycurl
-Version:        7.19.5.1
-Release:        2%{?dist}
+# python2 is not available on Fedora and el8+
+%if 0%{?fedora} || 0%{?rhel} > 7
+%bcond_with python2
+%else
+%bcond_without python2
+%endif
+
+# test dependencies are not available on el9+
+%if 0%{?fedora}
+%bcond_without tests
+%else
+%bcond_with tests
+%endif
+
+%global modname pycurl
+
+Name:           python-%{modname}
+Version:        7.44.1
+Release:        1%{?dist}
 Summary:        A Python interface to libcurl
 
-Group:          Development/Languages
 License:        LGPLv2+ or MIT
-URL:            http://pycurl.sourceforge.net/
-Source0:        http://pycurl.sourceforge.net/download/pycurl-%{version}.tar.gz
-Patch0:		pycurl-os2.patch
+URL:            http://pycurl.io/
+%if !0%{?os2_version}
+Source0:        https://files.pythonhosted.org/packages/47/f9/c41d6830f7bd4e70d5726d26f8564538d08ca3a7ac3db98b325f94cdcb7f/pycurl-%{version}.tar.gz
 
-#Requires:       keyutils-libs
-BuildRequires:  python-devel
-#BuildRequires:  python3-devel
-BuildRequires:  curl-devel >= 7.19.0
+# drop link-time vs. run-time TLS backend check (#1446850)
+Patch2:         0002-python-pycurl-7.43.0-tls-backend.patch
+%else
+Vendor:         bww bitwise works GmbH
+#scm_source github http://github.com/bitwiseworks/pycurl-os2 %{version}-os2
+%scm_source git e:/trees/pycurl/git master-os2
+%endif
+
+BuildRequires:  gcc
+BuildRequires:  libcurl-devel
+BuildRequires:  make
 BuildRequires:  openssl-devel
-#BuildRequires:  python-bottle
-#BuildRequires:  python-cherrypy
-#BuildRequires:  python-nose
-#BuildRequires:  python3-bottle
-#BuildRequires:  python3-cherrypy
-#BuildRequires:  python3-nose
-#BuildRequires:  vsftpd
+%if !0%{?os2_version}
+BuildRequires:  vsftpd
+%endif
 
-Requires:       libcurl >= 7.37
-
-# YD because of ucs4
-Requires:       python >= 2.7.6-13
-
-Provides:       pycurl = %{version}-%{release}
+# During its initialization, PycURL checks that the actual libcurl version
+# is not lower than the one used when PycURL was built.
+# Yes, that should be handled by library versioning (which would then get
+# automatically reflected by rpm).
+# For now, we have to reflect that dependency.
+%global libcurl_sed '/^#define LIBCURL_VERSION "/!d;s/"[^"]*$//;s/.*"//;q'
+%if !0%{?os2_version}
+%global curlver_h /usr/include/curl/curlver.h
+%else
+%global curlver_h /@unixroot/usr/include/curl/curlver.h
+%endif
+%global libcurl_ver %(sed %{libcurl_sed} %{curlver_h} 2>/dev/null || echo 0)
 
 %description
 PycURL is a Python interface to libcurl. PycURL can be used to fetch
@@ -37,65 +66,147 @@ objects identified by a URL from a Python program, similar to the
 urllib Python module. PycURL is mature, very fast, and supports a lot
 of features.
 
-%package -n python3-pycurl
-Summary:        A Python interface to libcurl for Python 3
+%if %{with python2}
+%package -n python2-%{modname}
+Summary:        Python interface to libcurl for Python 2
+%{?python_provide:%python_provide python2-%{modname}}
+BuildRequires:  python2-devel
+Requires:       libcurl >= %{libcurl_ver}
 
-%description -n python3-pycurl
+Provides:       %{modname} = %{version}-%{release}
+
+%description -n python2-%{modname}
 PycURL is a Python interface to libcurl. PycURL can be used to fetch
 objects identified by a URL from a Python program, similar to the
 urllib Python module. PycURL is mature, very fast, and supports a lot
 of features.
 
+Python 2 version.
+%endif
+
+%if %{with python3}
+%package -n python3-%{modname}
+Summary:        Python interface to libcurl for Python 3
+%{?python_provide:%python_provide python3-%{modname}}
+BuildRequires:  python3-devel
+%if %{with tests}
+BuildRequires:  python3-bottle
+BuildRequires:  python3-pytest
+%global pytest pytest
+%else
+%global pytest true
+%endif
+BuildRequires:  python3-setuptools
+Requires:       libcurl >= %{libcurl_ver}
+
+%description -n python3-%{modname}
+PycURL is a Python interface to libcurl. PycURL can be used to fetch
+objects identified by a URL from a Python program, similar to the
+urllib Python module. PycURL is mature, very fast, and supports a lot
+of features.
+
+Python 3 version.
+%endif
+
 %prep
+%if !0%{?os2_version}
+%autosetup -n %{modname}-%{version} -p1
 %setup0 -q -n pycurl-%{version}
-%patch0 -p0 -b .os2~
+%else
+%scm_setup
+%endif
 
-# temporarily exclude failing test-cases
-rm -f tests/{pycurl_object_test,share_test}.py
+# remove windows-specific build script
+rm -fv winbuild.py
+sed -e 's| winbuild.py||' -i Makefile
 
-# fails with python3 on i686
-rm -f tests/post_test.py
+# remove a test-case that relies on sftp://web.sourceforge.net being available
+rm -fv tests/ssh_key_cb_test.py
 
-# copy the whole directory for the python3 build
-#cp -a . %{py3dir}
+# remove a test-case that fails in Koji
+rm -fv tests/seek_cb_test.py
+
+# remove test-cases that depend on external network
+%if !0%{?os2_version}
+rm -fv examples/tests/test_{build_config,xmlrpc}.py
+%else
+rm -fv examples/tests/test_build_config.py
+rm -fv examples/tests/test_xmlrpc.py
+%endif
+
+# remove a test-case that depends on pygtk
+rm -fv examples/tests/test_gtk.py
+
+# remove tests depending on the 'flaky' python module
+grep '^import flaky' -r tests | cut -d: -f1 | xargs rm -fv
+
+# use %%{python3} instead of python to invoke tests, to make them work on f34
+sed -e 's|python |%{python3} |' -i tests/ext/test-suite.sh
+sed -e 's|^#! */usr/bin/env python$|#! /usr/bin/env %{python3}|' \
+    -i tests/*.py setup.py
 
 %build
-export CFLAGS="$RPM_OPT_FLAGS"
-%{__python} setup.py build
-# --with-nss // YD openssl required as in curl
-#pushd %{py3dir}
-#%{__python3} setup.py build --with-nss
-#popd
-
-%check
-#export PYTHONPATH=$RPM_BUILD_ROOT%{python_sitearch}
-#make test PYTHON=%{__python}
-#pushd %{py3dir}
-#export PYTHONPATH=$RPM_BUILD_ROOT%{python3_sitearch}
-#make test PYTHON=%{__python3} NOSETESTS="nosetests-%{python3_version} -v"
-#popd
+%if %{with python2}
+%py2_build -- --with-openssl
+%endif
+%if %{with python3}
+%py3_build -- --with-openssl
+%endif
 
 %install
-%{__python} setup.py install -O1 --skip-build --root %{buildroot}
-#pushd %{py3dir}
-#%{__python3} setup.py install -O1 --skip-build --root %{buildroot}
-#popd
+export PYCURL_SSL_LIBRARY=openssl
+%if %{with python2}
+%py2_install
+%endif
+%if %{with python3}
+%py3_install
+%endif
 rm -rf %{buildroot}%{_datadir}/doc/pycurl
 
-%files
-%{!?_licensedir:%global license %%doc}
+%if %{with python3}
+%check
+# relax crypto policy for the test-suite to make it pass again (#1863711)
+export OPENSSL_SYSTEM_CIPHERS_OVERRIDE=XXX
+export OPENSSL_CONF=
+
+export PYTHONPATH=%{buildroot}%{python3_sitearch}
+export PYCURL_SSL_LIBRARY=openssl
+export PYCURL_VSFTPD_PATH=vsftpd
+make test PYTHON=%{__python3} PYTEST=%{pytest} PYFLAKES=true
+rm -fv tests/fake-curl/libcurl/*.so
+%endif
+
+%if %{with python2}
+%files -n python2-%{modname}
 %license COPYING-LGPL COPYING-MIT
 %doc ChangeLog README.rst examples doc tests
-%{python_sitearch}/*
+%{python2_sitearch}/curl/
+%if !0%{?os2_version}
+%{python2_sitearch}/%{modname}.so
+%else
+%{python2_sitearch}/%{modname}.pyd
+%endif
+%{python2_sitearch}/%{modname}-%{version}-*.egg-info
+%endif
 
-#%files -n python3-pycurl
-# TODO: find the lost COPYING file
-#%{!?_licensedir:%global license %%doc}
-#%license COPYING-LGPL COPYING-MIT
-#%doc ChangeLog README.rst examples doc tests
-#%{python3_sitearch}/*
+%if %{with python3}
+%files -n python3-%{modname}
+%license COPYING-LGPL COPYING-MIT
+%doc ChangeLog README.rst examples doc tests
+%{python3_sitearch}/curl/
+%if !0%{?os2_version}
+%{python3_sitearch}/%{modname}.*.so
+%else
+%{python3_sitearch}/%{modname}.*.pyd
+%endif
+%{python3_sitearch}/%{modname}-%{version}-*.egg-info
+%endif
 
 %changelog
+* Thu Jun 09 2016 yd <yd@os2power.com> 7.44.1-1
+- update to 7.44.1
+- reync spec with fedora version
+
 * Thu Jun 09 2016 yd <yd@os2power.com> 7.19.5.1-2
 - rebuild for ucs4, ticket#182.
 
