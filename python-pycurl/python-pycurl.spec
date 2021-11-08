@@ -23,7 +23,7 @@
 
 Name:           python-%{modname}
 Version:        7.44.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        A Python interface to libcurl
 
 License:        LGPLv2+ or MIT
@@ -74,6 +74,10 @@ BuildRequires:  python2-devel
 Requires:       libcurl >= %{libcurl_ver}
 
 Provides:       %{modname} = %{version}-%{release}
+%if 0%{?os2_version}
+Provides:       python-%{modname} = %{version}-%{release}
+Obsoletes:      python-%{modname} < %{version}-%{release}
+%endif
 
 %description -n python2-%{modname}
 PycURL is a Python interface to libcurl. PycURL can be used to fetch
@@ -203,7 +207,10 @@ rm -fv tests/fake-curl/libcurl/*.so
 %endif
 
 %changelog
-* Thu Jun 09 2016 yd <yd@os2power.com> 7.44.1-1
+* Mon Nov 08 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 7.44.1-2
+- provide a python-pycurl and obsolete the old version
+
+* Wed Nov 03 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 7.44.1-1
 - update to 7.44.1
 - reync spec with fedora version
 
