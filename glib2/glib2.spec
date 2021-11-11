@@ -3,7 +3,7 @@
 Summary: A library of handy utility functions
 Name: glib2
 Version: 2.46.2
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: LGPLv2+
 URL: http://www.gtk.org
 #VCS: git:git://git.gnome.org/glib
@@ -51,6 +51,8 @@ Provides:  libgthread-2_0-0 = %{version}-%{release}
 Obsoletes: libgthread-2_0-0 < %{version}-%{release}
 Provides:  libgobject-2_0-0 = %{version}-%{release}
 Obsoletes: libgobject-2_0-0 < %{version}-%{release}
+Provides:  libgio-2_0-0 = %{version}-%{release}
+Obsoletes: libgio-2_0-0 < %{version}-%{release}
 %endif
 
 %description
@@ -334,6 +336,9 @@ glib-compile-schemas %{_datadir}/glib-2.0/schemas
 %{_datadir}/installed-tests
 
 %changelog
+* Thu Nov 11 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.46.2-2
+- provide libgio to force update as well
+
 * Wed Nov 10 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.46.2-1
 - update to version 2.46.2
 - resync with fedora spec
