@@ -1,302 +1,343 @@
+%global _changelog_trimtime %(date +%s -d "1 year ago")
 
-Name:           glib2
-%define _name glib
-Version:        2.33.12
-Release:        3%{?dist}
-License:        LGPLv2.1+
-Summary:        A Library with Convenient Functions Written in C
-Url:            http://www.gtk.org/
-Group:          Development/Libraries/C and C++
-Vendor:         bww bitwise works GmbH
+Summary: A library of handy utility functions
+Name: glib2
+Version: 2.46.2
+Release: 1%{?dist}
+License: LGPLv2+
+URL: http://www.gtk.org
+#VCS: git:git://git.gnome.org/glib
+%if !0%{?os2_version}
+Source: http://download.gnome.org/sources/glib/2.46/glib-%{version}.tar.xz
+%else
+Vendor: bww bitwise works GmbH
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
+%endif
 
-%scm_source  svn http://svn.netlabs.org/repos/ports/glib/trunk 1643
-#Source1: glib2-legacy.zip
+BuildRequires: pkgconfig
+BuildRequires: gettext
+%if !0%{?os2_version}
+BuildRequires: libattr-devel
+BuildRequires: libselinux-devel
+# for sys/inotify.h
+BuildRequires: glibc-devel
+%endif
+BuildRequires: zlib-devel
+%if !0%{?os2_version}
+# for sys/sdt.h
+BuildRequires: systemtap-sdt-devel
+%endif
+# Bootstrap build requirements
+BuildRequires: automake autoconf libtool
+%if !0%{?os2_version}
+BuildRequires: gtk-doc
+%endif
+BuildRequires: python-devel
+BuildRequires: libffi-devel
+%if !0%{?os2_version}
+BuildRequires: elfutils-libelf-devel
+BuildRequires: chrpath
 
-BuildRequires: gcc make subversion zip
+# required for GIO content-type support
+Requires: shared-mime-info
+%endif
 
-BuildRequires: autoconf automake
-BuildRequires: libtool > 2.4.5
-
-#BuildRequires:  fam-devel
-#BuildRequires:  fdupes
-#BuildRequires:  gcc-c++
-#BuildRequires:  pcre-devel
-BuildRequires:  pkgconfig
-#BuildRequires:  translation-update-upstream
-BuildRequires:  zlib-devel
-BuildRequires:  libffi-devel gettext-devel bind-devel
-# For temporary %%posttrans script only.
-#PreReq:         coreutils
-#PreReq:         /bin/sed
-#Requires:       %{name}-branding
-#Requires:       %{name}-lang = %{version}
-#
-Provides:       glib2-doc = 2.19.6
-Obsoletes:      glib2-doc < 2.19.6
-
-# YD this must be added to force dll install
-Requires:       libglib-2_0-0 = %{version}
-Requires:       libgmodule-2_0-0 = %{version}
-Requires:       libgthread-2_0-0 = %{version}
-Requires:       libgobject-2_0-0 = %{version}
+%if 0%{?os2_version}
+Provides:  libglib-2_0-0 = %{version}-%{release}
+Obsoletes: libglib-2_0-0 < %{version}-%{release}
+Provides:  libgmodule-2_0-0 = %{version}-%{release}
+Obsoletes: libgmodule-2_0-0 < %{version}-%{release}
+Provides:  libgthread-2_0-0 = %{version}-%{release}
+Obsoletes: libgthread-2_0-0 < %{version}-%{release}
+Provides:  libgobject-2_0-0 = %{version}-%{release}
+Obsoletes: libgobject-2_0-0 < %{version}-%{release}
+%endif
 
 %description
-This library provides convenient functions, such as lists and hashes,
-to a C programmer and is used by Gtk+ and GNOME.
+GLib is the low-level core library that forms the basis for projects
+such as GTK+ and GNOME. It provides data structure handling for C,
+portability wrappers, and interfaces for such runtime functionality
+as an event loop, threads, dynamic loading, and an object system.
 
-#%package branding-upstream
-#License:        LGPLv2.1+
-#Summary:        Definition of GNOME Default Applications
-#Group:          Development/Libraries/C and C++
-#Provides:       %{name}-branding = %{version}
-#Conflicts:      otherproviders(%{name}-branding)
-#Supplements:    packageand(%{name}:branding-upstream)
-#BRAND: The /etc/gnome_defaults.conf allows to define arbitrary
-#BRAND: applications as preferred defaults.
-# NOTE: gnome_defaults is not an upstream feature, but a SuSE
-# enhancement, but to conform branding conventions, the package is named
-# as glib2-branding-upstream.
-
-#%description branding-upstream
-#This branding-style package sets default applications in GNOME in
-#openSUSE.
-
-#This is a dumb package, which provides only upstream GNOME packages as
-#preferred defaults. You most probably don't want this package. You
-#probably want to install distribution default glib2-branding and prefer
-#distribution wise GNOME defaults.
 
 %package devel
-#'
-License:        GPLv2+
-Requires:       %{name} = %{version} pkgconfig
-# glibc-devel
-# Now require the subpackages too
-Requires:       libglib-2_0-0 = %{version}
-Requires:       libgmodule-2_0-0 = %{version}
-#Requires:       libgio-2_0-0 = %{version}
-Requires:       libgthread-2_0-0 = %{version}
-Requires:       libgobject-2_0-0 = %{version}
-Summary:        Include files and libraries mandatory for development
-Group:          Development/Libraries/C and C++
+Summary: A library of handy utility functions
+Requires: %{name} = %{version}-%{release}
 
 %description devel
-This package contains all necessary include files, libraries,
-configuration files and development tools (with manual pages) needed to
-compile and link applications using the glib library.
+The glib2-devel package includes the header files for the GLib library.
 
-The glib library provides convenient functions, such as lists and
-hashes, to a C programmer and is used by Gtk+ and GNOME.
+%package doc
+Summary: A library of handy utility functions
+Requires: %{name} = %{version}-%{release}
+BuildArch: noarch
 
-%package -n libglib-2_0-0
-License:        LGPLv2.1+
-Summary:        A Library with Convenient Functions Written in C
-Group:          Development/Libraries/C and C++
-#Recommends:     %{name}-lang = %{version}
+%description doc
+The glib2-doc package includes documentation for the GLib library.
 
-%description -n libglib-2_0-0
-This library provides convenient functions, such as lists and hashes,
-to a C programmer and is used by Gtk+ and GNOME.
+%if !0%{?os2_version}
+%package fam
+Summary: FAM monitoring module for GIO
+Requires: %{name} = %{version}-%{release}
+BuildRequires: gamin-devel
 
-%package -n libgmodule-2_0-0
-License:        LGPLv2.1+
-Summary:        A Library with Convenient Functions Written in C
-Group:          Development/Libraries/C and C++
+%description fam
+The glib2-fam package contains the FAM (File Alteration Monitor) module for GIO.
+%endif
 
-%description -n libgmodule-2_0-0
-This library provides convenient functions, such as lists and hashes,
-to a C programmer and is used by Gtk+ and GNOME.
+%package static
+Summary: glib static
+Requires: %{name}-devel = %{version}-%{release}
 
-%package -n libgio-2_0-0
-License:        LGPLv2.1+
-Summary:        A Library with Convenient Functions Written in C
-Group:          Development/Libraries/C and C++
-# Temporarily disable this, pending further discussion
-# Recommends:     gvfs
+%description static
+The %{name}-static subpackage contains static libraries for %{name}.
 
-%description -n libgio-2_0-0
-This library provides convenient functions, such as lists and hashes,
-to a C programmer and is used by Gtk+ and GNOME.
+%package tests
+Summary: Tests for the glib2 package
+Requires: %{name} = %{version}-%{release}
 
-#%package -n libgio-fam
-#License:        LGPLv2.1+
-#Summary:        A Library with Convenient Functions Written in C
-#Group:          Development/Libraries/C and C++
-# we need gio-querymodules in %post/%postun
-#Requires(post): %{name}
-#Requires(postun): %{name}
-#Supplements:    packageand(libgio-2_0-0:fam)
-
-#%description -n libgio-fam
-#This library provides convenient functions, such as lists and hashes,
-#to a C programmer and is used by Gtk+ and GNOME.
-
-%package -n libgthread-2_0-0
-License:        LGPLv2.1+
-Summary:        A Library with Convenient Functions Written in C
-Group:          Development/Libraries/C and C++
-Requires:       %{name} = %{version}
-
-%description -n libgthread-2_0-0
-This library provides convenient functions, such as lists and hashes,
-to a C programmer and is used by Gtk+ and GNOME.
-
-%package -n libgobject-2_0-0
-License:        LGPLv2.1+
-Summary:        A Library with Convenient Functions Written in C
-Group:          Development/Libraries/C and C++
-
-%description -n libgobject-2_0-0
-This library provides convenient functions, such as lists and hashes,
-to a C programmer and is used by Gtk+ and GNOME.
+%description tests
+The glib2-tests package contains tests that can be used to verify
+the functionality of the installed glib2 package.
 
 %debug_package
 
-# @todo (dmik) We don't support this macro, put language files into the main package
-#%lang_package
-
 %prep
+%if !0%{?os2_version}
+%setup -q -n glib-%{version}
+%else
 %scm_setup
-
-cat > gtk-doc.make <<EOF
-EXTRA_DIST =
-CLEANFILES =
-EOF
-touch README INSTALL
-
-autoreconf -fi
+%endif
 
 %build
-export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
-export LIBS="-lcx -lpthread -llwres"
-export CFLAGS="%optflags -I/@unixroot/usr/include/bind9"
+%if !0%{?os2_version}
+# Support builds of both git snapshots and tarballs packed with autogoo
+(if ! test -x configure; then NOCONFIGURE=1 ./autogen.sh; CONFIGFLAGS=--enable-gtk-doc; fi;
+ %configure $CONFIGFLAGS \
+           --enable-systemtap \
+           --enable-static \
+           --enable-installed-tests
+)
+%else
+export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+export LIBS="-lpthread -lcx"
+export VENDOR="%{vendor}"
+export NOCONFIGURE=1
+autogen.sh
+export BEGINLIBPATH="%{_builddir}/%{buildsubdir}/glib/.libs;%{_builddir}/%{buildsubdir}/gobject/.libs;%{_builddir}/%{buildsubdir}/gio/.libs;%{_builddir}/%{buildsubdir}/gthread/.libs;%{_builddir}/%{buildsubdir}/gmodule/.libs"
 %configure \
-        --disable-modular-tests \
-        --enable-shared --disable-static
+           --enable-shared --enable-static \
+           --with-pcre=system \
+           --enable-installed-tests
+%endif
 
-make OPT="$CFLAGS" %{?_smp_mflags}
-
-%check
-# make check does not work on x86_64. See http://bugzilla.gnome.org/show_bug.cgi?id=554969
-# %{__make} %{?jobs:-j%jobs} check
+make %{?_smp_mflags}
 
 %install
-%makeinstall
-#%if 0%{?suse_version} <= 1120
-#%{__rm} %{buildroot}%{_datadir}/locale/en@shaw/LC_MESSAGES/*
-#%endif
+# Use -p to preserve timestamps on .py files to ensure
+# they're not recompiled with different timestamps
+# to help multilib: https://bugzilla.redhat.com/show_bug.cgi?id=718404
+make install DESTDIR=$RPM_BUILD_ROOT INSTALL="install -p -c"
+# Also since this is a generated .py file, set it to a known timestamp,
+# otherwise it will vary by build time, and thus break multilib -devel
+# installs.
+touch -r gio/gdbus-2.0/codegen/config.py.in $RPM_BUILD_ROOT/%{_datadir}/glib-2.0/codegen/config.py
+%if !0%{?os2_version}
+chrpath --delete $RPM_BUILD_ROOT%{_libdir}/*.so
+%endif
 
-rm $RPM_BUILD_ROOT%{_libdir}/charset.alias
+rm -f $RPM_BUILD_ROOT%{_libdir}/*.la
+%if !0%{?os2_version}
+rm -f $RPM_BUILD_ROOT%{_libdir}/gio/modules/*.{a,la}
+rm -f $RPM_BUILD_ROOT%{_datadir}/glib-2.0/gdb/*.{pyc,pyo}
+rm -f $RPM_BUILD_ROOT%{_datadir}/glib-2.0/codegen/*.{pyc,pyo}
+%else
+rm -f $RPM_BUILD_ROOT%{_libdir}/gio/modules/*.a
+rm -f $RPM_BUILD_ROOT%{_libdir}/gio/modules/*.la
+rm -f $RPM_BUILD_ROOT%{_datadir}/glib-2.0/gdb/*.pyc
+rm -f $RPM_BUILD_ROOT%{_datadir}/glib-2.0/gdb/*.pyo
+rm -f $RPM_BUILD_ROOT%{_datadir}/glib-2.0/codegen/*.pyc
+rm -f $RPM_BUILD_ROOT%{_datadir}/glib-2.0/codegen/*.pyo
+rm -f $RPM_BUILD_ROOT%{_datadir}/gdb/auto-load%{_libdir}/libglib-2.0.so.*-gdb.py*
+rm -f $RPM_BUILD_ROOT%{_datadir}/gdb/auto-load%{_libdir}/libgobject-2.0.so.*-gdb.py*
+rm -f $RPM_BUILD_ROOT%{_libdir}/charset.alias
+%endif
 
-#install -D -m0644 glib2.sh $RPM_BUILD_ROOT/etc/profile.d/zzz-glib2.sh
-#install -D -m0644 glib2.csh $RPM_BUILD_ROOT/etc/profile.d/zzz-glib2.csh
-#install -D -m0755 SuSEconfig.glib2 $RPM_BUILD_ROOT/sbin/conf.d/SuSEconfig.glib2
-#install -D -m0644 gnome_defaults.conf $RPM_BUILD_ROOT%{_sysconfdir}/gnome_defaults.conf
-# default apps magic
-#mkdir -p $RPM_BUILD_ROOT%{_localstatedir}/cache/gio-2.0 $RPM_BUILD_ROOT%{_datadir}/applications
-#touch $RPM_BUILD_ROOT%{_localstatedir}/cache/gio-2.0/defaults.list
-#ln -s %{_localstatedir}/cache/gio-2.0/defaults.list $RPM_BUILD_ROOT%{_datadir}/applications/defaults.list
-# fix some permission issue, but only if needed
-#test ! -x $RPM_BUILD_ROOT/%{_bindir}/gtester-report
-#chmod +x $RPM_BUILD_ROOT/%{_bindir}/gtester-report
-# gio-querymodules magic
-#%if "%{_lib}" == "lib64"
-#mv $RPM_BUILD_ROOT%{_bindir}/gio-querymodules $RPM_BUILD_ROOT%{_bindir}/gio-querymodules-64
-#%endif
-#touch $RPM_BUILD_ROOT%{_libdir}/gio/modules/giomodule.cache
-# remove files we don't care about
-#rm $RPM_BUILD_ROOT%{_libdir}/gio/modules/libgiofam.*a
-# We do not need the la files for 11.1 and newer
-#%if %suse_version > 1100
-rm $RPM_BUILD_ROOT%{_libdir}/*.la
-#%endif
+%if !0%{?os2_version}
+# Multilib fixes for systemtap tapsets; see
+# https://bugzilla.redhat.com/718404
+for f in $RPM_BUILD_ROOT%{_datadir}/systemtap/tapset/*.stp; do
+    (dn=$(dirname ${f}); bn=$(basename ${f});
+     mv ${f} ${dn}/%{__isa_bits}-${bn})
+done
+
+mv  $RPM_BUILD_ROOT%{_bindir}/gio-querymodules $RPM_BUILD_ROOT%{_bindir}/gio-querymodules-%{__isa_bits}
+%endif
+
+touch $RPM_BUILD_ROOT%{_libdir}/gio/modules/giomodule.cache
+
+# bash-completion scripts need not be executable
+chmod 644 $RPM_BUILD_ROOT%{_datadir}/bash-completion/completions/*
+
+%find_lang glib20
 
 
-%find_lang %{_name}20
-#%fdupes $RPM_BUILD_ROOT
+%if !0%{?os2_version}
+%post -p /sbin/ldconfig
 
+%postun -p /sbin/ldconfig
 
-%clean
-rm -rf $RPM_BUILD_ROOT
+%transfiletriggerin -- %{_libdir}/gio/modules
+gio-querymodules-%{__isa_bits} %{_libdir}/gio/modules
 
+%transfiletriggerpostun -- %{_libdir}/gio/modules
+gio-querymodules-%{__isa_bits} %{_libdir}/gio/modules
 
-%files -f %{_name}20.lang
-%defattr(-,root,root)
-%doc AUTHORS COPYING README NEWS ChangeLog
-#/etc/profile.d/zzz-glib2.*
-#/sbin/conf.d/SuSEconfig.glib2
+%transfiletriggerin -- %{_datadir}/glib-2.0/schemas
+glib-compile-schemas %{_datadir}/glib-2.0/schemas
+
+%transfiletriggerpostun -- %{_datadir}/glib-2.0/schemas
+glib-compile-schemas %{_datadir}/glib-2.0/schemas
+%endif
+
+%files -f glib20.lang
+%{!?_licensedir:%global license %%doc}
+%license COPYING
+%doc AUTHORS NEWS README
+%if !0%{?os2_version}
+%{_libdir}/libglib-2.0.so.*
+%{_libdir}/libgthread-2.0.so.*
+%{_libdir}/libgmodule-2.0.so.*
+%{_libdir}/libgobject-2.0.so.*
+%{_libdir}/libgio-2.0.so.*
+%else
+%{_libdir}/glib2*.dll
+%{_libdir}/gthr2*.dll
+%{_libdir}/gmod2*.dll
+%{_libdir}/gobj2*.dll
+%{_libdir}/gio2*.dll
+%endif
+%dir %{_datadir}/bash-completion
+%dir %{_datadir}/bash-completion/completions
+%{_datadir}/bash-completion/completions/gdbus
+%{_datadir}/bash-completion/completions/gsettings
+%{_datadir}/bash-completion/completions/gapplication
+%dir %{_datadir}/glib-2.0
+%dir %{_datadir}/glib-2.0/schemas
+%dir %{_libdir}/gio
+%dir %{_libdir}/gio/modules
+%ghost %{_libdir}/gio/modules/giomodule.cache
+%if !0%{?os2_version}
 %{_bindir}/gio-querymodules*
-%{_datadir}/bash-completion/completions/*
-
-#%files branding-upstream
-#%defattr(-,root,root)
-#%config (noreplace) %{_sysconfdir}/gnome_defaults.conf
-
-%files -n libglib-2_0-0
-%defattr(-, root, root)
-%{_libdir}/glib*.dll
-
-%files -n libgmodule-2_0-0
-%defattr(-, root, root)
-%{_libdir}/gmod*.dll
-
-%files -n libgobject-2_0-0
-%defattr(-, root, root)
-%{_libdir}/gobj*.dll
-
-%files -n libgthread-2_0-0
-%defattr(-, root, root)
-%{_libdir}/gthr*.dll
-
-%files -n libgio-2_0-0
-%defattr(-, root, root)
-%{_libdir}/gio*.dll
-#%dir %{_libdir}/gio
-#%dir %{_libdir}/gio/modules
-#%ghost %{_libdir}/gio/modules/giomodule.cache
-##%{_datadir}/applications/defaults.list
-#%dir %{_localstatedir}/cache/gio-2.0
-#%ghost %{_localstatedir}/cache/gio-2.0/defaults.list
-
-#%files -n libgio-fam
-#%defattr(-,root,root)
-#%{_libdir}/gio/modules/libgiofam.so
+%{_bindir}/glib-compile-schemas
+%{_bindir}/gsettings
+%{_bindir}/gdbus
+%{_bindir}/gapplication
+%else
+%{_bindir}/gio-querymodules.exe
+%{_bindir}/glib-compile-schemas.exe
+%{_bindir}/gsettings.exe
+%{_bindir}/gdbus.exe
+%{_bindir}/gapplication.exe
+%endif
+%{_mandir}/man1/gio-querymodules.1*
+%{_mandir}/man1/glib-compile-schemas.1*
+%{_mandir}/man1/gsettings.1*
+%{_mandir}/man1/gdbus.1*
+%{_mandir}/man1/gapplication.1*
 
 %files devel
-%defattr(-,root,root)
-%{_bindir}/glib-*
-%{_bindir}/gobject-*
-%{_bindir}/gtester*
-%{_bindir}/gresource*
-%{_bindir}/gsettings*
-%{_bindir}/gdbus*
-#%doc %{_mandir}/man?/glib-*.*
-#%doc %{_mandir}/man?/gobject-*.*
-#%doc %{_mandir}/man?/gtester*.*
-%{_datadir}/aclocal/*.m4
-%{_datadir}/glib-2.0
-%{_includedir}/glib-2.0
-%{_includedir}/gio-unix-2.0
-%{_libdir}/*.a
+%if !0%{?os2_version}
+%{_libdir}/lib*.so
+%else
+%{_libdir}/*_dll.a
+%endif
 %{_libdir}/glib-2.0
-%{_libdir}/pkgconfig/*.pc
-%{_libdir}/gdbus-2.0/*
-#%{_datadir}/gtk-doc/html/gio
-#%{_datadir}/gtk-doc/html/glib
-#%{_datadir}/gtk-doc/html/gobject
-#%{_datadir}/gdb/auto-load/%{_libdir}/*-gdb.py
-%{_datadir}/gdb/auto-load/*
-# Own these directories to not depend on gtk-doc while building:
-#%dir %{_datadir}/gtk-doc
-#%dir %{_datadir}/gtk-doc/html
-# Own these directories to not depend on gdb
-%dir %{_datadir}/gdb
-%dir %{_datadir}/gdb/auto-load
-#%dir %{_datadir}/gdb/auto-load/%{_prefix}
-#%dir %{_datadir}/gdb/auto-load/%{_prefix}/%{_lib}
+%{_includedir}/*
+%{_datadir}/aclocal/*
+%{_libdir}/pkgconfig/*
+%{_datadir}/glib-2.0/gdb
+%{_datadir}/glib-2.0/gettext
+%{_datadir}/glib-2.0/schemas/gschema.dtd
+%{_datadir}/bash-completion/completions/gresource
+%if !0%{?os2_version}
+%{_bindir}/glib-genmarshal
+%else
+%{_bindir}/glib-genmarshal.exe
+%endif
+%{_bindir}/glib-gettextize
+%{_bindir}/glib-mkenums
+%if !0%{?os2_version}
+%{_bindir}/gobject-query
+%{_bindir}/gtester
+%else
+%{_bindir}/gobject-query.exe
+%{_bindir}/gtester.exe
+%endif
+%{_bindir}/gdbus-codegen
+%if !0%{?os2_version}
+%{_bindir}/glib-compile-resources
+%{_bindir}/gresource
+%else
+%{_bindir}/glib-compile-resources.exe
+%{_bindir}/gresource.exe
+%endif
+%{_datadir}/glib-2.0/codegen
+%attr (0755, root, root) %{_bindir}/gtester-report
+%{_mandir}/man1/glib-genmarshal.1*
+%{_mandir}/man1/glib-gettextize.1*
+%{_mandir}/man1/glib-mkenums.1*
+%{_mandir}/man1/gobject-query.1*
+%{_mandir}/man1/gtester-report.1*
+%{_mandir}/man1/gtester.1*
+%{_mandir}/man1/gdbus-codegen.1*
+%{_mandir}/man1/glib-compile-resources.1*
+%{_mandir}/man1/gresource.1*
+%if !0%{?os2_version}
+%{_datadir}/gdb/auto-load%{_libdir}/libglib-2.0.so.*-gdb.py*
+%{_datadir}/gdb/auto-load%{_libdir}/libgobject-2.0.so.*-gdb.py*
+%{_datadir}/systemtap/tapset/*.stp
+%endif
 
+%files doc
+%if !0%{?os2_version}
+%doc %{_datadir}/gtk-doc/html/*
+%endif
+
+%if !0%{?os2_version}
+%files fam
+%{_libdir}/gio/modules/libgiofam.so
+%endif
+
+%files static
+%if !0%{?os2_version}
+%{_libdir}/libgio-2.0.a
+%{_libdir}/libglib-2.0.a
+%{_libdir}/libgmodule-2.0.a
+%{_libdir}/libgobject-2.0.a
+%{_libdir}/libgthread-2.0.a
+%else
+%{_libdir}/gio-2.0.a
+%{_libdir}/glib-2.0.a
+%{_libdir}/gmodule-2.0.a
+%{_libdir}/gobject-2.0.a
+%{_libdir}/gthread-2.0.a
+%endif
+
+%files tests
+%{_libexecdir}/installed-tests
+%if 0%{?os2_version}
+%exclude %{_libexecdir}/installed-tests/glib/*.dbg
+%exclude %{_libexecdir}/installed-tests/glib/modules/*.dbg
+%exclude %{_libexecdir}/installed-tests/glib/x-content/*/*.dbg
+%endif
+%{_datadir}/installed-tests
 
 %changelog
+* Wed Nov 10 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.46.2-1
+- update to version 2.46.2
+- resync with fedora spec
+
 * Tue Aug 21 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.33.12-3
 - rebuild with latest tool chain
 - use new scm_ macros
