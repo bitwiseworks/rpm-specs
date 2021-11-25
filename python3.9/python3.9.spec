@@ -17,7 +17,7 @@ URL: https://www.python.org/
 #global prerel ...
 %global upstream_version %{general_version}%{?prerel}
 Version: %{general_version}%{?prerel:~%{prerel}}
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: Python
 
 
@@ -430,7 +430,7 @@ Patch353: 00353-architecture-names-upstream-downstream.patch
 #     https://github.com/fedora-python/cpython
 %else
 Vendor: bww bitwise works GmbH
-%scm_source github http://github.com/bitwiseworks/python-os2 v%{version}-os2-2
+%scm_source github http://github.com/bitwiseworks/python-os2 v%{version}-os2-3
 %endif
 
 
@@ -2094,6 +2094,12 @@ CheckPython optimized
 # ======================================================
 
 %changelog
+* Thu Nov 25 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.9.5-6
+- fix reading pyc files
+- fix isabs for in bootstrap
+- fix spawn
+- add HOME as ~ replacement
+
 * Mon Jun 28 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.9.5-5
 - python-tkinter was tkinter, so name it right
 
