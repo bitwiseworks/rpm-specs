@@ -90,7 +90,7 @@
 
 Name:           git
 Version:        2.30.2
-Release:        1%{?rcrev}%{?dist}
+Release:        2%{?rcrev}%{?dist}
 Summary:        Fast Version Control System
 License:        GPLv2
 URL:            https://git-scm.com/
@@ -335,8 +335,8 @@ Requires:       git-cvs = %{version}-%{release}
 %endif
 # endif with cvs
 Requires:       git-daemon = %{version}-%{release}
-Requires:       git-email = %{version}-%{release}
 %if !0%{?os2_version}
+Requires:       git-email = %{version}-%{release}
 Requires:       git-gui = %{version}-%{release}
 %endif
 %if %{with p4}
@@ -422,6 +422,7 @@ Requires(postun): systemd
 %description daemon
 The git daemon for supporting git:// access to git repositories
 
+%if !0%{?os2_version}
 %package email
 Summary:        Git tools for sending patches via email
 BuildArch:      noarch
@@ -430,6 +431,7 @@ Requires:       perl(Authen::SASL)
 Requires:       perl(Net::SMTP::SSL)
 %description email
 %{summary}.
+%endif
 
 %if !0%{?os2_version}
 %package -n gitk
@@ -798,6 +800,8 @@ rm -rf %{buildroot}%{_mandir}/man1/git-citool.1*
 rm -rf %{buildroot}%{_mandir}/man1/gitweb.1*
 rm -rf %{buildroot}%{_mandir}/man5/gitweb.conf.5*
 rm -rf %{buildroot}%{_mandir}/man1/*gitk*.1*
+rm -rf %{buildroot}%{gitexecdir}/*email*
+rm -rf %{buildroot}%{_mandir}/man1/*email*.1*
 rm -rf %{buildroot}%{_localstatedir}/www/git/
 %endif
 
@@ -916,6 +920,7 @@ rm -rf %{buildroot}%{_pkgdocdir}/git-gui.txt
 rm -rf %{buildroot}%{_pkgdocdir}/git-svn.txt
 rm -rf %{buildroot}%{_pkgdocdir}/*gitk*.txt
 rm -rf %{buildroot}%{_pkgdocdir}/gitweb*.txt
+rm -rf %{buildroot}%{_pkgdocdir}/*email*.txt
 %endif
 
 %if %{with docs}
@@ -932,6 +937,7 @@ rm -rf %{buildroot}%{_pkgdocdir}/git-gui.html
 rm -rf %{buildroot}%{_pkgdocdir}/git-svn.html
 rm -rf %{buildroot}%{_pkgdocdir}/*gitk*.html
 rm -rf %{buildroot}%{_pkgdocdir}/gitweb*.html
+rm -rf %{buildroot}%{_pkgdocdir}/*email*.html
 cp -pr Documentation/howto %{buildroot}%{_pkgdocdir}/
 cp -pr Documentation/technical %{buildroot}%{_pkgdocdir}/
 find %{buildroot}%{_pkgdocdir}/howto %{buildroot}%{_pkgdocdir}/technical -type f \
@@ -1112,6 +1118,7 @@ rmdir --ignore-fail-on-non-empty "$testdir"
 %{?with_docs:%{_mandir}/man1/git-daemon*.1*}
 %{?with_docs:%{_pkgdocdir}/git-daemon*.html}
 
+%if !0%{?os2_version}
 %files email
 %{_pkgdocdir}/*email*.txt
 %{gitexecdir}/*email*
@@ -1120,6 +1127,7 @@ rmdir --ignore-fail-on-non-empty "$testdir"
 %endif
 %{?with_docs:%{_mandir}/man1/*email*.1*}
 %{?with_docs:%{_pkgdocdir}/*email*.html}
+%endif
 
 %if !0%{?os2_version}
 %files -n gitk
@@ -1197,6 +1205,9 @@ rmdir --ignore-fail-on-non-empty "$testdir"
 %endif
 
 %changelog
+* Wed Dec 01 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.30.2-2
+- disable email, as we lack still some perl stuff
+
 * Thu Oct 14 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.30.2-1
 - update to version 2.32.2
 - resync spec with fedora spec
