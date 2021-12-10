@@ -34,6 +34,10 @@ Vendor:  bww bitwise works GmbH
 %scm_source github https://github.com/bitwiseworks/qttools-os2 v%{version}-os2-b1
 #scm_source git file://D:/Coding/qt5/qt5/qttools xxxxxxx
 
+# help lrelease/lupdate use/prefer qmake-qt5
+# https://bugzilla.redhat.com/show_bug.cgi?id=1009893
+Patch2: qttools-opensource-src-5.13.2-runqttools-with-qt5-suffix.patch
+
 # filter plugin/qml/examples provides
 %global __provides_exclude_from ^(%{_qt5_qmldir}|%{_qt5_plugindir}|%{_qt5_examplesdir})/.*\\.dll$
 
@@ -193,6 +197,8 @@ Requires: %{name}-common = %{version}-%{release}
 %prep
 #%setup -q -n %{qt_module}-everywhere-src-%{version}
 %scm_setup
+
+%patch2 -p1 -b ..runqttools-with-qt5-suffix.patch
 
 
 %build
@@ -445,6 +451,9 @@ fi
 %endif
 
 %changelog
+* xxx xxx xx xxxx Dmitriy Kuminov <coding@dmik.org> 5.15.2-x
+- Add Fedora patch to help lrelease/lupdate use/prefer qmake-qt5 [#2].
+
 * Wed Sep 22 2021 Dmitriy Kuminov <coding@dmik.org> 5.15.2-1
 - Release version 5.15.2 for OS/2.
 - Filter out qml/plugin/examples DLLs from Provides.
