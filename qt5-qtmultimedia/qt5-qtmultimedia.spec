@@ -39,6 +39,8 @@ Vendor:  bww bitwise works GmbH
 
 # filter plugin/qml/examples provides
 %global __provides_exclude_from ^(%{_qt5_qmldir}|%{_qt5_plugindir}|%{_qt5_examplesdir})/.*\\.dll$
+# filter examples requires
+%global __requires_exclude_from ^(%{_qt5_examplesdir})/.*\\.dll$
 
 BuildRequires: make
 BuildRequires: qt5-rpm-macros >= %{version}
@@ -192,5 +194,8 @@ cd $PWD_SAVE
 
 
 %changelog
+* xxx 5.15.2-2
+- Make examples not depend on examples' own DLLs (fftreal.dll).
+
 * Wed Sep 22 2021 Dmitriy Kuminov <coding@dmik.org> 5.15.2-1
 - Initial release.
