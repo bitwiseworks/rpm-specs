@@ -87,7 +87,7 @@ Vendor: bww bitwise works GmbH
 #global prerel ...
 %global upstream_version %{general_version}%{?prerel}
 Version: %{general_version}%{?prerel:~%{prerel}}
-Release: 2%{?dist}
+Release: 3%{?dist}
 %if %{with rpmwheels}
 License: Python
 %else
@@ -837,7 +837,7 @@ Patch4000: 04000-disable-tk.patch
 
 Patch5000: 05000-autotool-intermediates.patch
 %else
-%scm_source github http://github.com/bitwiseworks/python-os2 v%{version}-os2-1
+%scm_source github http://github.com/bitwiseworks/python-os2 v%{version}-os2-2
 %endif
 
 # ======================================================
@@ -1832,6 +1832,9 @@ fi
 # ======================================================
 
 %changelog
+* Mon Dec 27 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.7.18-3
+- Fix issue #7
+
 * Wed May 26 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.7.18-2
 - Add a symlink for python2.7
 - Add python2.7-unversioned-command files
