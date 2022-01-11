@@ -1,11 +1,9 @@
-### remark: as soon as setuptools is done, enable it here also !!!
-
 
 %global srcname pyparsing
 %global sum Python package with an object-oriented approach to text processing
 
 %global build_wheel 0
-%global with_python3 0
+%global with_python3 1
 
 %global python2_wheelname %{srcname}-%{version}-py2.py3-none-any.whl
 %global python3_wheelname %python2_wheelname
@@ -13,7 +11,7 @@
 Summary:        %{sum}
 Name:           pyparsing
 Version:        2.1.10
-Release:        2%{?dist}
+Release:        3%{?dist}
 
 License:        MIT
 URL:            http://pyparsing.wikispaces.com/
@@ -23,10 +21,10 @@ Vendor:         bww bitwise works GmbH
 BuildArch:      noarch
 BuildRequires:  dos2unix
 BuildRequires:  python2-devel
-#BuildRequires:  python2-setuptools
+BuildRequires:  python2-setuptools
 %if 0%{?with_python3}
 BuildRequires:  python3-devel
-BuildRequires:  python3-setuptools
+#BuildRequires:  python3-setuptools
 %endif
 
 %if 0%{?build_wheel}
@@ -119,7 +117,7 @@ dos2unix -k CHANGES LICENSE README
 %doc CHANGES README LICENSE
 %{python3_sitelib}/pyparsing.py
 %{python3_sitelib}/__pycache__/*
-%{python3_sitelib}/pyparsing-*dist-info/
+%{python3_sitelib}/pyparsing-*egg-info
 %endif
 
 %files doc
@@ -127,6 +125,9 @@ dos2unix -k CHANGES LICENSE README
 %doc CHANGES README HowToUsePyparsing.html docs examples htmldoc
 
 %changelog
+* Tue Jan 11 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.1.10-3
+- enabled python3
+
 * Thu Apr 13 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.1.10-2
 - moved source to github
 
