@@ -2,7 +2,7 @@
 %global with_check 0
 %global build_wheel 0
 
-%global with_python3 0
+%global with_python3 1
 
 %global main_name setuptools
 %if 0%{?build_wheel}
@@ -16,7 +16,7 @@
 
 Name:           python-setuptools
 Version:        34.4.1
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Easily build and distribute Python packages
 
 Group:          Applications/System
@@ -109,7 +109,7 @@ execute the software that requires pkg_resources.py.
 
 %prep
 %scm_setup
-python bootstrap.py
+python2.7 bootstrap.py
 
 # We can't remove .egg-info (but it doesn't matter, since it'll be rebuilt):
 #  The problem is that to properly execute setuptools' setup.py,
@@ -217,6 +217,9 @@ LANG=en_US.utf8 PYTHONPATH=$(pwd) py.test-%{python3_version}
 %endif # with_python3
 
 %changelog
+* Wed Jan 12 2022 Silvan Scherrer <silvan.scherrer@aroa.ch> 34.4.1-3
+- enabled python3
+
 * Mon Jan 21 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 34.4.1-2
 - rebuilt with latest python macros
 
