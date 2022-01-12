@@ -1,11 +1,11 @@
 %bcond_with tests
 
 %global srcname setuptools_scm
-%global with_python3 0
+%global with_python3 1
 
 Name:           python-%{srcname}
 Version:        3.3.3
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Blessed package to manage your versions by SCM tags
 
 License:        MIT
@@ -87,9 +87,12 @@ PYTHONPATH=%{buildroot}%{python3_sitelib} py.test-%{python3_version} -v -k 'not 
 %license LICENSE
 %doc README.rst
 %{python3_sitelib}/%{srcname}/
-%{python3_sitelib}/%{srcname}-*.egg-info
+%{python3_sitelib}/%{srcname}-*.egg-info/
 %endif
 
 %changelog
+* Wed Jan 12 2022 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.3.3-2
+- enabled python3
+
 * Fri Nov 22 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.3.3-1
 - first rpm version
