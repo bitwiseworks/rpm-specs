@@ -112,7 +112,7 @@ sed -i -e '1{\@^#!/usr/bin/env python@d}' %{buildroot}%{python3_sitelib}/%{modna
 %endif
 
 %changelog
-* Tue Jan 11 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.4.3-2
+* Tue Jan 11 2022 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.4.3-2
 - enabled python3
 
 * Thu Apr 13 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.4.3-1

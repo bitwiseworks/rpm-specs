@@ -150,7 +150,7 @@ rm -rf html/_static/fonts/
 %license LICENSE LICENSE.APACHE LICENSE.BSD
 
 %changelog
-* Tue Jan 11 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 16.8-3
+* Tue Jan 11 2022 Silvan Scherrer <silvan.scherrer@aroa.ch> 16.8-3
 - enabled python3
 
 * Thu Apr 13 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 16.8-2

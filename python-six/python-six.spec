@@ -77,7 +77,7 @@ Python 3 version.
 %{python3_sitelib}/__pycache__/%{modname}.*
 
 %changelog
-* Tue Jan 11 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.10.0-2
+* Tue Jan 11 2022 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.10.0-2
 - clean up spec a bit
 - enable python3 version
 

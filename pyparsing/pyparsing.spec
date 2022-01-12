@@ -125,7 +125,7 @@ dos2unix -k CHANGES LICENSE README
 %doc CHANGES README HowToUsePyparsing.html docs examples htmldoc
 
 %changelog
-* Tue Jan 11 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.1.10-3
+* Tue Jan 11 2022 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.1.10-3
 - enabled python3
 
 * Thu Apr 13 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.1.10-2
