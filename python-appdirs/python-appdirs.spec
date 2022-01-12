@@ -1,8 +1,6 @@
-### remark: as soon as setuptools is done, enable it here also !!!
-
 %global modname appdirs
 %global build_wheel 0
-%global with_python3 0
+%global with_python3 1
 %global with_test 0
 
 %global python2_wheelname %{modname}-%{version}-py2.py3-none-any.whl
@@ -10,7 +8,7 @@
 
 Name:          python-%{modname}
 Version:       1.4.3
-Release:       1%{?dist}
+Release:       2%{?dist}
 Summary:       Python module for determining platform-specific directories
 
 License:       MIT
@@ -19,9 +17,10 @@ Vendor:        bww bitwise works GmbH
 %scm_source github https://github.com/bitwiseworks/%{modname}-os2 %{version}-os2
 
 BuildRequires: python2-devel
-#BuildRequires: python-setuptools
+BuildRequires: python2-setuptools
 %if 0%{?with_python3}
-BuildRequires: python3-devel python3-setuptools
+BuildRequires: python3-devel
+#BuildRequires: python3-setuptools
 %endif
 BuildArch:     noarch
 
@@ -113,6 +112,9 @@ sed -i -e '1{\@^#!/usr/bin/env python@d}' %{buildroot}%{python3_sitelib}/%{modna
 %endif
 
 %changelog
+* Tue Jan 11 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.4.3-2
+- enabled python3
+
 * Thu Apr 13 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.4.3-1
 - update to version 1.4.3
 - moved source to github
