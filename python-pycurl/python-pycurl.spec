@@ -1,5 +1,5 @@
 # python3 is not available on RHEL <= 7
-%if 0%{?fedora} || 0%{?rhel} > 7
+%if 0%{?fedora} || 0%{?rhel} > 7 || 0%{?os2_version}
 %bcond_without python3
 %else
 %bcond_with python3
@@ -23,7 +23,7 @@
 
 Name:           python-%{modname}
 Version:        7.44.1
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        A Python interface to libcurl
 
 License:        LGPLv2+ or MIT
@@ -35,8 +35,7 @@ Source0:        https://files.pythonhosted.org/packages/47/f9/c41d6830f7bd4e70d5
 Patch2:         0002-python-pycurl-7.43.0-tls-backend.patch
 %else
 Vendor:         bww bitwise works GmbH
-#scm_source github http://github.com/bitwiseworks/pycurl-os2 %{version}-os2
-%scm_source git e:/trees/pycurl/git master-os2
+%scm_source github http://github.com/bitwiseworks/pycurl-os2 REL_7_44_1-os2
 %endif
 
 BuildRequires:  gcc
@@ -150,6 +149,7 @@ sed -e 's|^#! */usr/bin/env python$|#! /usr/bin/env %{python3}|' \
     -i tests/*.py setup.py
 
 %build
+export VENDOR="%{vendor}"
 %if %{with python2}
 %py2_build -- --with-openssl
 %endif
@@ -167,7 +167,7 @@ export PYCURL_SSL_LIBRARY=openssl
 %endif
 rm -rf %{buildroot}%{_datadir}/doc/pycurl
 
-%if %{with python3}
+%if %{with python3} && %{with tests}
 %check
 # relax crypto policy for the test-suite to make it pass again (#1863711)
 export OPENSSL_SYSTEM_CIPHERS_OVERRIDE=XXX
@@ -201,12 +201,15 @@ rm -fv tests/fake-curl/libcurl/*.so
 %if !0%{?os2_version}
 %{python3_sitearch}/%{modname}.*.so
 %else
-%{python3_sitearch}/%{modname}.*.pyd
+%{python3_sitearch}/%{modname}.pyd
 %endif
 %{python3_sitearch}/%{modname}-%{version}-*.egg-info
 %endif
 
 %changelog
+* Wed Jan 12 2022 Silvan Scherrer <silvan.scherrer@aroa.ch> 7.44.1-3
+- enable python3
+
 * Mon Nov 08 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 7.44.1-2
 - provide a python-pycurl and obsolete the old version
 
