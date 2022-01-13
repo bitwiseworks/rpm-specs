@@ -1,5 +1,5 @@
 Name:           hidapi
-Version:        0.11.0
+Version:        0.11.2
 Release:        1%{?dist}
 Summary:        Library for communicating with USB and Bluetooth HID devices
 
@@ -91,5 +91,9 @@ rm -rf %{buildroot}%{_defaultdocdir}/%{name}
 %endif
 
 %changelog
+* Tue Jan 13 2022 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.11.2-1
+- don't use iconv, as we don't have WCHAR_T iconv functions (Dave Yeo)
+- update to version 0.11.2
+
 * Wed Jan 12 2022 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.11.0-1
 - first OS/2 rpm
