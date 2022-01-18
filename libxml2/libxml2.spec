@@ -1,6 +1,6 @@
 Name:           libxml2
 Version:        2.9.10
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Library providing XML and HTML support
 
 License:        MIT
@@ -68,6 +68,10 @@ BuildRequires:  python2-devel
 Requires:       %{name} = %{version}-%{release}
 Obsoletes:      %{name}-python < %{version}-%{release}
 Provides:       %{name}-python = %{version}-%{release}
+%if 0%{?os2_version}
+Obsoletes:      python-%{name} < %{version}-%{release}
+Provides:       python-%{name} = %{version}-%{release}
+%endif
 
 %description -n python2-%{name}
 The libxml2-python package contains a Python 2 module that permits applications
@@ -266,6 +270,9 @@ ln -s %{python3_sitearch}/xml2mod.dll $RPM_BUILD_ROOT%{python3_sitearch}/libxml2
 %endif
 
 %changelog
+* Tue Jan 18 2022 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.9.10-3
+- provide a python-libxml2 for python2-libxml2
+
 * Fri Jan 14 2022 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.9.10-2
 - enable python3
 - resync with fedora spec
