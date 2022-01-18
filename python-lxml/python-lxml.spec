@@ -1,114 +1,101 @@
-# Note: this .spec is borrowed from http://pkgs.fedoraproject.org/cgit/rpms/python-lxml.git/tree/python-lxml.spec
-# and adapted to our needs
+%global modname lxml
 
-%global pypi_name lxml
+Name:           python-%{modname}
+Version:        4.4.1
+Release:        1%{?dist}
+Summary:        XML processing library combining libxml2/libxslt with the ElementTree API
 
-# remove the comment below, when we have python3 support
-#global with_python3 1
-
-
-%{!?python_sitearch: %global python_sitearch %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)")}
-
-Name:           python-%{pypi_name}
-Version:        3.6.4
-Release:        2%{?dist}
-Summary:        Powerful and Pythonic XML processing library combining libxml2/libxslt with the ElementTree API
-
-Group:          Development/Libraries
 License:        BSD
-URL:            http://lxml.de
-Vendor:		bww bitwise works GmbH
-Source0:        https://files.pythonhosted.org/packages/source/l/%{pypi_name}/%{pypi_name}-%{version}.tar.gz
+URL:            https://github.com/lxml/lxml
+Source0:        https://lxml.de/files/%{modname}-%{version}.tar
+%if 0%{?os2_version}
+Vendor:         bww bitwise works GmbH
+%endif
 
+BuildRequires:  gcc
 BuildRequires:  libxml2-devel
 BuildRequires:  libxslt-devel
 
-BuildRequires:  python2-devel
+%global _description \
+lxml is a Pythonic, mature binding for the libxml2 and libxslt libraries. It\
+provides safe and convenient access to these libraries using the ElementTree It\
+extends the ElementTree API significantly to offer support for XPath, RelaxNG,\
+XML Schema, XSLT, C14N and much more.To contact the project, go to the project\
+home page < or see our bug tracker at case you want to use the current ...
 
-%if 0%{?with_python3}
+%description %{_description}
+
+%package -n     python2-%{modname}
+Summary:        %{summary}
+BuildRequires:  python2-devel
+BuildRequires:  python2-setuptools
+Suggests:       python%{python2_version}dist(cssselect) >= 0.7
+Suggests:       python%{python2_version}dist(html5lib)
+Suggests:       python%{python2_version}dist(beautifulsoup4)
+%{?python_provide:%python_provide python2-%{modname}}
+
+%description -n python2-%{modname} %{_description}
+
+Python 2 version.
+
+%package -n     python3-%{modname}
+Summary:        %{summary}
 BuildRequires:  python3-devel
 BuildRequires:  python3-setuptools
+%if !0%{?os2_version}
+BuildRequires:  python3-Cython
 %endif
+Suggests:       python%{python3_version}dist(cssselect) >= 0.7
+Suggests:       python%{python3_version}dist(html5lib)
+Suggests:       python%{python3_version}dist(beautifulsoup4)
+%{?python_provide:%python_provide python3-%{modname}}
 
-%description
-lxml is a Pythonic, mature binding for the libxml2 and libxslt libraries. It
-provides safe and convenient access to these libraries using the ElementTree It
-extends the ElementTree API significantly to offer support for XPath, RelaxNG,
-XML Schema, XSLT, C14N and much more.To contact the project, go to the project
-home page < or see our bug tracker at case you want to use the current ...
+%description -n python3-%{modname} %{_description}
 
-%package -n     python2-%{pypi_name}
-Summary:        Powerful and Pythonic XML processing library combining libxml2/libxslt with the ElementTree API
-#Requires:       python-cssselect
-#Requires:       python-html5lib
-#Requires:       python-beautifulsoup4
-Provides:	python-%{pypi_name}
-
-%description -n python2-%{pypi_name}
-lxml is a Pythonic, mature binding for the libxml2 and libxslt libraries. It
-provides safe and convenient access to these libraries using the ElementTree It
-extends the ElementTree API significantly to offer support for XPath, RelaxNG,
-XML Schema, XSLT, C14N and much more.To contact the project, go to the project
-home page < or see our bug tracker at case you want to use the current ...
-
-%if 0%{?with_python3}
-%package -n	python3-lxml
-Summary:        Powerful and Pythonic XML processing library combining libxml2/libxslt with the ElementTree API
-Requires:       python3-cssselect
-Requires:       python3-html5lib
-Requires:       python3-beautifulsoup4
-%{?python_provide:%python_provide python3-%{pypi_name}}
-
-%description -n python3-%{pypi_name}
-lxml is a Pythonic, mature binding for the libxml2 and libxslt libraries. It
-provides safe and convenient access to these libraries using the ElementTree It
-extends the ElementTree API significantly to offer support for XPath, RelaxNG,
-XML Schema, XSLT, C14N and much more.To contact the project, go to the project
-home page < or see our bug tracker at case you want to use the current ...
-%endif
+Python 3 version.
 
 %prep
-%setup -q -n lxml-%{version}
+%autosetup -n %{modname}-%{version}
+%if !0%{?os2_version}
+# Remove pregenerated Cython C sources
+find -type f -name '*.c' -print -delete
+%endif
 
 %build
-CFLAGS="%{optflags}" %{__python} setup.py build
-
-%if 0%{?with_python3}
+%if !0%{?os2_version}
+env WITH_CYTHON=true %py3_build
+%else
 %py3_build
 %endif
+%py2_build
 
 %install
-%if 0%{?with_python3}
+%py2_install
 %py3_install
-%endif
-%{__python} setup.py install --skip-build --no-compile --root %{buildroot}
-
 
 %check
-# @todo enable once we got python-unittest
-#{__python2} setup.py test
-
-%if 0%{?with_python3}
+%if !0%{?os2_version}
+%{__python2} setup.py test
 %{__python3} setup.py test
 %endif
 
-
-%files -n python2-%{pypi_name}
-%{!?_licensedir:%global license %%doc}
+%files -n python2-%{modname}
 %license doc/licenses/ZopePublicLicense.txt LICENSES.txt
 %doc README.rst src/lxml/isoschematron/resources/xsl/iso-schematron-xslt1/readme.txt
-%{python_sitearch}/%{pypi_name}
-%{python_sitearch}/%{pypi_name}-%{version}-py?.?.egg-info
+%{python2_sitearch}/%{modname}/
+%{python2_sitearch}/%{modname}-*.egg-info/
 
-%if 0%{?with_python3}
-%files -n python3-%{pypi_name}
+%files -n python3-%{modname}
 %license doc/licenses/ZopePublicLicense.txt LICENSES.txt
 %doc README.rst src/lxml/isoschematron/resources/xsl/iso-schematron-xslt1/readme.txt
-%{python3_sitearch}/%{pypi_name}
-%{python3_sitearch}/%{pypi_name}-%{version}-py?.?.egg-info
-%endif
+%{python3_sitearch}/%{modname}/
+%{python3_sitearch}/%{modname}-*.egg-info/
 
 %changelog
+* Tue Jan 18 2022 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.4.1-1
+- update to version 4.4.1
+- resync with fedora spec
+
 * Fri Nov 25 2016 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.6.4-2
 - small spec cleanup
 - rebuilt with latest libxslt and libxml2
