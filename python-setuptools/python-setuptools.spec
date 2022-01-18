@@ -16,14 +16,14 @@
 
 Name:           python-setuptools
 Version:        34.4.1
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Easily build and distribute Python packages
 
 Group:          Applications/System
 License:        MIT
 URL:            https://pypi.python.org/pypi/%{main_name}
 Vendor:         bww bitwise works GmbH
-%scm_source github  https://github.com/bitwiseworks/%{main_name}-os2 %{version}-os2
+%scm_source github  https://github.com/bitwiseworks/%{main_name}-os2 v%{version}-os2-1
 
 
 BuildArch:      noarch
@@ -217,6 +217,9 @@ LANG=en_US.utf8 PYTHONPATH=$(pwd) py.test-%{python3_version}
 %endif # with_python3
 
 %changelog
+* Tue Jan 18 2022 Silvan Scherrer <silvan.scherrer@aroa.ch> 34.4.1-4
+- fix symlink creation
+
 * Wed Jan 12 2022 Silvan Scherrer <silvan.scherrer@aroa.ch> 34.4.1-3
 - enabled python3
 
