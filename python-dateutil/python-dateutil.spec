@@ -1,28 +1,27 @@
-# Based on https://src.fedoraproject.org/rpms/python-dateutil/blob/master/f/python-dateutil.spec
-
 %global modname dateutil
-%global with_python3 0
-# we don't have sphinx, and I'm really to lazzy to look at that atm :)
-%global with_doc 0
-# not available right now. needs to be ported and then enabled
-%global with_tzdata 0
 
 Name:           python-%{modname}
 Version:        2.8.1
-Release:        2%{?dist}
+Release:        3%{?dist}
+Epoch:          1
 Summary:        Powerful extensions to the standard datetime module
 
 License:        BSD
 URL:            https://github.com/dateutil/dateutil
+Source:         %{pypi_source}
+%if 0%{?os2_version}
 Vendor:         bww bitwise works GmbH
-Source:         https://github.com/dateutil/dateutil/archive/%{version}/%{name}-%{version}.tar.gz
+%endif
 
 # when bootstrapping dateutil-freezegun, we cannot run tests
+%if !0%{?os2_version}
+%bcond_without tests
+%else
 %bcond_with tests
+%endif
 
 BuildArch:      noarch
-BuildRequires:  python-rpm-macros >= 1-3
-%if %{with_python3}
+%if !0%{?os2_version}
 BuildRequires:  python3-sphinx
 BuildRequires:  python3-sphinx_rtd_theme
 %endif
@@ -43,7 +42,7 @@ BuildRequires:  python2-freezegun
 BuildRequires:  python2-pytest
 BuildRequires:  python2-six
 %endif
-%if %{with_tzdata}
+%if !0%{?os2_version}
 Requires:       tzdata
 %endif
 Requires:       python2-six
@@ -51,7 +50,6 @@ Requires:       python2-six
 
 %description -n python2-%{modname}  %_description
 
-%if %{with_python3}
 %package -n python3-%{modname}
 Summary:        %summary
 BuildRequires:  python3-devel
@@ -63,12 +61,13 @@ BuildRequires:  python3-hypothesis
 BuildRequires:  python3-pytest
 BuildRequires:  python3-six
 %endif
+%if !0%{?os2_version}
 Requires:       tzdata
+%endif
 Requires:       python3-six
 %{?python_provide:%python_provide python3-%{modname}}
 
 %description -n python3-%{modname}  %_description
-%endif
 
 %package doc
 Summary: API documentation for python-dateutil
@@ -77,29 +76,27 @@ This package contains %{summary}.
 
 %prep
 %autosetup
+%if !0%{?os2_version}
+iconv --from=ISO-8859-1 --to=UTF-8 NEWS > NEWS.new
+%else
 iconv -f ISO-8859-1 -t UTF-8 NEWS > NEWS.new
+%endif
 mv NEWS.new NEWS
 
 %build
 %py2_build
-%if %{with_python3}
 %py3_build
-%endif
-%if %{with_doc}
+%if !0%{?os2_version}
 make -C docs html
 %endif
 
 %install
 %py2_install
-%if %{with_python3}
 %py3_install
-%endif
 
 %if %{with tests}
 %check
-%if %{with_python3}
 %{__python3} -m pytest -W ignore::pytest.PytestUnknownMarkWarning
-%endif
 
 %if 0%{?fedora} < 32
 # Tests skipped on Python 2:
@@ -119,21 +116,23 @@ make -C docs html
 %{python2_sitelib}/%{modname}/
 %{python2_sitelib}/*.egg-info
 
-%if %{with_python3}
 %files -n python3-%{modname}
 %license LICENSE
 %doc NEWS README.rst
 %{python3_sitelib}/%{modname}/
 %{python3_sitelib}/*.egg-info
-%endif
 
 %files doc
 %license LICENSE
-%if %{with_doc}
+%if !0%{?os2_version}
 %doc docs/_build/html
 %endif
 
 %changelog
+* Thu Jan 20 2022 Silvan Scherrer <silvan.scherrer@aroa.ch> 1:2.8.1-3
+- enable python3
+- resync spec with fedora
+
 * Mon Nov 25 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.8.1-2
 - remove tzdata req for now (needs to be ported once)
 
