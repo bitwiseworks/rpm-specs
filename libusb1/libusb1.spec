@@ -1,12 +1,12 @@
 Summary:        Library for accessing USB devices
 Name:           libusb1
 Version:        1.0.24
-Release:        1%{?dist}
+Release:        2%{?dist}
 %if !0%{?os2_version}
 Source0:        https://github.com/libusb/libusb/releases/download/v%{version}/libusb-%{version}.tar.bz2
 %else
 Vendor:         bww bitwise works GmbH
-%scm_source     github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
+%scm_source     github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2-1
 %endif
 License:        LGPLv2+
 URL:            http://libusb.info
@@ -207,6 +207,9 @@ LD_LIBRARY_PATH=libusb/.libs $RPM_BUILD_ROOT%{_bindir}/libusb-example-listdevs
 
 
 %changelog
+* Mon Jan 24 2022 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.0.24-2
+- reduce number of worker threads (Lars Erdmann)
+
 * Wed Jan 12 2022 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.0.24-1
 - update to version 1.0.24
 - implement iso transfer (Lars Erdmann)
