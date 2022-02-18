@@ -17,7 +17,7 @@ URL: https://www.python.org/
 #global prerel ...
 %global upstream_version %{general_version}%{?prerel}
 Version: %{general_version}%{?prerel:~%{prerel}}
-Release: 7%{?dist}
+Release: 8%{?dist}
 License: Python
 
 
@@ -430,7 +430,7 @@ Patch353: 00353-architecture-names-upstream-downstream.patch
 #     https://github.com/fedora-python/cpython
 %else
 Vendor: bww bitwise works GmbH
-%scm_source github http://github.com/bitwiseworks/python-os2 v%{version}-os2-4
+%scm_source github http://github.com/bitwiseworks/python-os2 v%{version}-os2-5
 %endif
 
 
@@ -2094,6 +2094,10 @@ CheckPython optimized
 # ======================================================
 
 %changelog
+* Fri Feb 18 2022 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.9.5-8
+- fix several glitches in codepage handling
+- enable os2 in bdist as well
+
 * Mon Dec 27 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.9.5-7
 - fix ticket #7
 
