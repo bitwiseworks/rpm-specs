@@ -1,14 +1,15 @@
+%define __python /@unixroot/usr/bin/python2
 %{!?python_sitelib: %define python_sitelib %(python -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
  
 Summary: RPM installer/updater
 Name: yum
 Version: 3.4.3
-Release: 13%{?dist}
+Release: 14%{?dist}
 License: GPLv2+
 Group: System Environment/Base
 Vendor: bww bitwise works GmbH
 
-%scm_source svn http://svn.netlabs.org/repos/rpm/yum/trunk 1779
+%scm_source github https://github.com/bitwiseworks/%{name}-os2 v%{version}-os2
 
 Source1: exec-py.c
 
@@ -87,8 +88,10 @@ touch $RPM_BUILD_ROOT/%{_var}/lib/yum/uuid
 %find_lang %name
 
 
-%clean
-rm -rf $RPM_BUILD_ROOT
+%post
+sed -i -e \
+     "s|http://trac.netlabs.org/rpm/|https://github.com/bitwiseworks/rpm-issues|g" \
+     %{_sysconfdir}/yum/yum.conf
 
 
 %files -f %{name}.lang
@@ -128,6 +131,10 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Fri Feb 18 2022 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.4.3-14
+- change yum.con to new rpm issue location in post section
+- moved source to github
+
 * Mon Jun 07 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.4.3-13
 - use github as rpm issue location instead of netlabs
 
