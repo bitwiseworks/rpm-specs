@@ -1,101 +1,133 @@
 %undefine _debugsource_packages
 
 Name:		dooble
-Version:	2022.03.20
+Version:	2022.04.04
 Release:	1
 Summary:	A colorful Web browser
 Group:		System/Libraries
 License:	GPLv2
 URL:		https://textbrowser.github.io/dooble/
-Requires: libstdc++ >= 9.2.0
-Requires: libicu >= 68.1
-Requires: libcx >= 0.7.2
-Requires: os2-base >= 0.0.1-3
 %if !0%{?os2_version}
-Source0:  U:/rpmbuild/SOURCES/dooble/dooble.pro      
-#https://github.com/textbrowser/dooble/archive/%{version}.tar.gz#/%{name}-%{version}.tar.gz
+Source0:    https://github.com/textbrowser/dooble/archive/%{version}.tar.gz#/%{name}-%{version}.tar.gz
 %else
-%scm_source github https://github.com/textbrowser/dooble 2022.02.15
+#scm_source github https://github.com/bitwiseworks/%{name}-os2 %{version}-os2
+%scm_source git file://D:/Coding/%{name}/main 34dc38c
 %endif
 
+%if 0%{os2_version}
+Vendor:         bww bitwise works GmbH
+
+Source100:      %{name}-os2.ico
+Source101:      %{name}-os2.rc
+
+# For scm macros
+BuildRequires:  curl zip
+
+# for WPS macros
+BuildRequires:  bww-resources-rpm-build
+Requires:       bww-resources-rpm
+%endif
+
+BuildRequires:  make gcc-c++
 BuildRequires:	qt5-qtbase-devel
+BuildRequires:  qt5-qtwebengine-devel
 #BuildRequires:  libgcrypt-devel
 #BuildRequires:  libgpg-error-devel
-#%if !0%{?os2_version}
 #BuildRequires:  desktop-file-utils
-#%endif
-#BuildRequires:  gcc-c++
 #BuildRequires:  sqlite-devel
 
 %description
 Dooble the finest browser known today.
 
+%debug_package
+
+%prep
+%if 0%{?os2_version}
+%scm_setup
+cp -a %{SOURCE100} %{SOURCE101} .
+%else
+%setup -q -n %{name}-%{version}/2.x
+sed -i 's|/usr/local|/usr/libexec|g' dooble.desktop dooble.sh Qt/qt.conf
+sed -i '10i export QT_QPA_PLATFORM_PLUGIN_PATH=%{_libdir}/qt5/plugins/platforms' dooble.sh
+sed -i '1i #include <QWebEngineCertificateError>' Source/dooble_web_engine_page.cc
+sed -i 's|-Werror||' %{name}.pro
+%endif
+
 %build
-qmake-qt5 U:/rpmbuild/SOURCES/dooble/dooble.pro -r
-#%if !0%{?os2_version}
-make
-#%else
-#make %{?_smp_mflags}
-#%endif
-lrelease-qt5 U:/rpmbuild/SOURCES/dooble/Translations/*.ts
-wrc -bt=os2 -zm -r U:/rpmbuild/SOURCES/dooble/Icons/dooble.rc
-wrc -bt=os2 -zm U:/rpmbuild/SOURCES/dooble/Icons/dooble.res Dooble.exe
+qmake-qt5 dooble.pro
+make %{?_smp_mflags}
+#lrelease-qt5 Translations/*.ts
+%if 0%{?os2_version}
+wrc -bt=os2 -zm -r %{name}-os2.rc
+wrc -bt=os2 -zm %{name}-os2.res %{name}.exe
+%endif
 
 %install
 rm -rf %{buildroot}
+%if !0%{?os2_version}
+# Looks like these are not needed in proper RPM environment (needs checking)
 mkdir -p %{buildroot}%{_libexecdir}/%{name}
-cd ../SOURCES/dooble
-cp -a Data Dictionaries Documentation dooble.sh Translations %{buildroot}%{_libexecdir}/%{name}
+cp -a Data Dictionaries Documentation Dooble dooble.sh qwebengine_dictionaries Translations %{buildroot}%{_libexecdir}/%{name}
 rm %{buildroot}%{_libexecdir}/%{name}/Translations/*.ts
 cp Icons/Logo/%{name}.png %{buildroot}%{_libexecdir}/%{name}
 mkdir -p %{buildroot}%{_bindir}
-cd ../../BUILD
-cp -p %{name}.exe %{buildroot}%{_bindir}/
 ln -s ../libexec/%{name}/%{name}.sh %{buildroot}%{_bindir}/%{name}
-cd ../SOURCES/dooble
 install -Dm644 dooble.desktop %{buildroot}%{_datadir}/applications/%{name}.desktop
 ln -s %{_libdir}/qt5/plugins/platforms %{buildroot}%{_libexecdir}/%{name}/Lib
-cd %{buildroot}%{_libexecdir}/%{name}
-rm -rf %{name}.pro Makefile %{name}.doxygen DEBIAN/ Doxygen/ Source/ temp/ Windows/ Translations/*.ts Qt/
-
-
-%files
-%doc U:/rpmbuild/SOURCES/dooble/Documentation/Dooble.html U:\rpmbuild\SOURCES\dooble\Documentation\DOOBLE-LICENSE.html
-%{_libexecdir}/%{name}
-%if !0%{?os2_version}
-%{_datadir}/applications/%{name}.desktop
-%{_bindir}/%{name}
 %else
-%{_bindir}/%{name}.exe
+mkdir -p %{buildroot}%{_bindir}
+cp -a %{name}.exe %{buildroot}%{_bindir}/
+mkdir -p %{buildroot}%{_datadir}/os2/icons/
+cp -a %{name}-os2.ico %{buildroot}%{_datadir}/os2/icons/%{name}.ico
 %endif
+#cd %{buildroot}%{_libexecdir}/%{name}
+#rm -rf %{name}.pro Makefile %{name}.doxygen DEBIAN/ Doxygen/ Source/ temp/ Windows/ Translations/*.ts Qt/
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%files -f %{debug_package_exclude_files}
+%doc README Documentation/TO-DO README-os2.txt
+%license LICENSE
+%if 0%{?os2_version}
+%{_bindir}/%{name}.exe
+%{_datadir}/os2/icons/%{name}.ico
+%else
+%{_libexecdir}/%{name}
+%{_bindir}/%{name}
+%{_datadir}/applications/%{name}.desktop
+%endif
+
+%if 0%{?os2_version}
+%global wps_folder_title Dooble
 
 %post -e
 if [ "$1" -ge 1 ]; then # (upon update)
     %wps_object_delete_all
 fi
-%cube {ADDLINE "SET QTWEBENGINE_CHROMIUM_FLAGS=--single-process" (AFTER "SET "} %%{os2_config_sys} >nul
-echo; echo "NOTE:"
-echo; echo "The file '%%{os2_config_sys}' has been changed. You need to reboot your"
-echo "computer in order to activate these changes."
-echo
-%wps_object_create_begin
-DOOBLE_FOLDER:WPFolder|Dooble Scientific Browser|<WP_DESKTOP>
-DOOBLE_EXE:WPProgram|Dooble Browser|<DOOBLE_FOLDER>|EXENAME=((%{_bindir}/dooble.exe))
-%wps_object_create_end
+%global wps_app_title Dooble
+%bww_folder -t %{wps_folder_title}
+%bww_app -f %{_bindir}/%{name}.exe -t %{wps_app_title} -i ${name}.ico
+%bww_app_shadow
+%bww_readme -f %_defaultdocdir/%{name}-%{version}/README
+%bww_license -f %_defaultlicensedir/%{name}-%{version}/LICENSE
+%bww_file TODO -f %_defaultdocdir/%{name}-%{version}/TO-DO
+%bww_file README_OS2 -f %_defaultdocdir/%{name}-%{version}/README-os2.txt
 
 %postun
 if [ "$1" -eq 0 ]; then # (upon removal)
     %wps_object_delete_all
 fi
-%cube {DELLINE "SET QTWEBENGINE_CHROMIUM_FLAGS="} %%{os2_config_sys} >nul
-echo; echo "NOTE:"
-echo; echo "The file '%%{os2_config_sys}' has been changed. You need to reboot your"
-echo "computer in order to activate these changes."
-echo
-
-%clean
-rm -rf $RPM_BUILD_ROOT
+%endif
 
 %changelog
-* Sun Mar 20 2022 Gregg Young <ygk@qwest.com>
+* Sun Apr 10 2022 Dmitriy Kuminov <coding@dmik.org> 2022.04.04-1
+- Update source to build 2022.04.04.
+- Make it build from bww repo using scm macros.
+- Create standard BWW folders with app exe and readmes.
+- Add debuginfo package.
+- Remove CONFIG.SYS change (to be done by a separate RPM).
+- Cleanup and comment out non-OS/2 stuff.
+
+* Sun Mar 20 2022 Gregg Young <ygk@qwest.com> 2022.03.20-1
 - Initial OS2 release
