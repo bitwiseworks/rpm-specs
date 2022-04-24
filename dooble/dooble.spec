@@ -2,16 +2,16 @@
 
 Name:		dooble
 Version:	2022.04.04
-Release:	1
-Summary:	A colorful Web browser
+Release:	1%{?dist}
+Summary:	Free and opensource Web browser
 Group:		System/Libraries
 License:	GPLv2
 URL:		https://textbrowser.github.io/dooble/
 %if !0%{?os2_version}
 Source0:    https://github.com/textbrowser/dooble/archive/%{version}.tar.gz#/%{name}-%{version}.tar.gz
 %else
-#scm_source github https://github.com/bitwiseworks/%{name}-os2 %{version}-os2
-%scm_source git file://D:/Coding/%{name}/main 34dc38c
+%scm_source github https://github.com/bitwiseworks/%{name}-os2 %{version}-os2
+#scm_source git file://D:/Coding/%{name}/main 5040150
 %endif
 
 %if 0%{os2_version}
@@ -121,7 +121,7 @@ fi
 %endif
 
 %changelog
-* Sun Apr 10 2022 Dmitriy Kuminov <coding@dmik.org> 2022.04.04-1
+* Sun Apr 24 2022 Dmitriy Kuminov <coding@dmik.org> 2022.04.04-1
 - Update source to build 2022.04.04.
 - Make it build from bww repo using scm macros.
 - Create standard BWW folders with app exe and readmes.
