@@ -25,7 +25,7 @@ License:        MIT and Python
 # The macro is defined in python-srpm-macros.
                 %{?load:%{SOURCE102}}
 Version:        %{__default_python3_version}
-Release:        2%{?dist}
+Release:        3%{?dist}
 
 BuildArch:      noarch
 
@@ -79,13 +79,8 @@ cp -a %{sources} .
 mkdir -p %{buildroot}%{rpmmacrodir}
 install -m 644 macros.* %{buildroot}%{rpmmacrodir}/
 
-%if !0%{?os2_version}
 mkdir -p %{buildroot}%{_rpmluadir}/fedora/srpm
 install -p -m 644 -t %{buildroot}%{_rpmluadir}/fedora/srpm python.lua
-%else
-mkdir -p %{buildroot}%{_rpmluadir}
-install -p -m 644 -t %{buildroot}%{_rpmluadir} python.lua
-%endif
 
 %if !0%{?os2_version}
 mkdir -p %{buildroot}%{_rpmconfigdir}/redhat
@@ -104,17 +99,19 @@ install -m 644 compileall2.py %{buildroot}%{_rpmconfigdir_os2}/
 %{rpmmacrodir}/macros.python-srpm
 %if !0%{?os2_version}
 %{_rpmconfigdir}/redhat/compileall2.py
-%{_rpmluadir}/fedora/srpm/python.lua
 %else
 %{_rpmconfigdir_os2}/compileall2.py
-%{_rpmluadir}/python.lua
 %endif
+%{_rpmluadir}/fedora/srpm/python.lua
 
 %files -n python3-rpm-macros
 %{rpmmacrodir}/macros.python3
 
 
 %changelog
+* Fri Apr 29 2022 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.9-3
+- use the same location for the python.lua script as fedora
+
 * Wed Sep 15 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.9-2
 - use the right location for the python.lua script
 - use new %%{_rpmluadir} macro instead of %%{_rpmconfigdir}/lua
