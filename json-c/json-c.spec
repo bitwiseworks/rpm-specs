@@ -1,6 +1,7 @@
 %if !0%{?os2_version}
 %{!?_pkgdocdir:%global _pkgdocdir %{_docdir}/%{name}-%{version}}
 %else
+# this hack is needed because of the legacy macro
 %global _pkgdocdir %{_docdir}/%{name}-%{main_version}
 %endif
 
@@ -39,8 +40,7 @@ URL:            https://github.com/%{name}/%{name}
 Source0:        %{url}/archive/%{name}-%{version}-%{reldate}.tar.gz
 %else
 Vendor:         bww bitwise works GmbH
-#scm_source     github https://github.com/bitwiseworks/%{name}-os2 %{name}-%{version}-%{reldate}-os2
-%scm_source     git e:/trees/json-c/git master-os2
+%scm_source     github https://github.com/bitwiseworks/%{name}-os2 %{name}-%{version}-%{reldate}-os2
 %global __cmake_in_source_build 1
 %endif
 
