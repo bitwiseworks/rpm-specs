@@ -4,7 +4,7 @@
 
 Name:           foo2zjs
 Version:        0.%{foo2zjs_ver}
-Release:        1%{?dist}
+Release:        2%{?dist}
 
 # Main code - GPLv2.
 # Some PPD files - GPLv3+
@@ -21,8 +21,7 @@ Patch2:         %{name}-fsf-address.patch
 Patch3:         %{name}-man-pages.patch
 %else
 Vendor:         bww bitwise works GmbH
-#scm_source     github http://github.com/bitwiseworks/%{name}-os2 %{foo2zjs_ver}-os2
-%scm_source     git e:/trees/foo2zjs/git master-os2
+%scm_source     github http://github.com/bitwiseworks/%{name}-os2 %{foo2zjs_ver}-os2
 %endif
 
 BuildRequires:  bc
@@ -44,51 +43,71 @@ Requires:       cups-filesystem
 %if !0%{?os2_version}
 Requires:       foomatic-db-filesystem
 %endif
+%if !0%{?os2_version}
 Requires:       lcms
+%endif
 
 %package -n foo2hp
 Summary:        Linux printer driver for HP 1600, HP 2600n
+%if !0%{?os2_version}
 Requires:       lcms
+%endif
 Requires:       %{name} = %{?epoch:%{epoch}:}%{version}-%{release}
 
 %package -n foo2xqx
 Summary:        Linux printer driver for HP LaserJet M1005 MFP
+%if !0%{?os2_version}
 Requires:       lcms
+%endif
 Requires:       %{name} = %{?epoch:%{epoch}:}%{version}-%{release}
 
 %package -n foo2lava
 Summary:        Linux printer driver for Zenographics LAVAFLOW protocol
+%if !0%{?os2_version}
 Requires:       lcms
+%endif
 Requires:       %{name} = %{?epoch:%{epoch}:}%{version}-%{release}
 
 %package -n foo2qpdl
 Summary:        Linux printer driver for Samsung CLP-300, CLP-600, CLP-3160
+%if !0%{?os2_version}
 Requires:       lcms
+%endif
 Requires:       %{name} = %{?epoch:%{epoch}:}%{version}-%{release}
 
 %package -n foo2slx
 Summary:        Linux printer driver for SLX protocol (Lexmark C500n etc.)
+%if !0%{?os2_version}
 Requires:       lcms
+%endif
 Requires:       %{name} = %{?epoch:%{epoch}:}%{version}-%{release}
 
 %package -n foo2hiperc
 Summary:        Linux printer driver for HIPERC protocol (Oki C3400n etc.)
+%if !0%{?os2_version}
 Requires:       lcms
+%endif
 Requires:       %{name} = %{?epoch:%{epoch}:}%{version}-%{release}
 
 %package -n foo2oak
 Summary:        Linux printer driver for OAKT protocol (HPLJ1500 etc.)
+%if !0%{?os2_version}
 Requires:       lcms
+%endif
 Requires:       %{name} = %{?epoch:%{epoch}:}%{version}-%{release}
 
 %package -n foo2hbpl
 Summary:        Linux printer driver for HBPL protocol
+%if !0%{?os2_version}
 Requires:       lcms
+%endif
 Requires:       %{name} = %{?epoch:%{epoch}:}%{version}-%{release}
 
 %package -n foo2ddst
 Summary:        Linux printer driver for DDST protocol
+%if !0%{?os2_version}
 Requires:       lcms
+%endif
 Requires:       %{name} = %{?epoch:%{epoch}:}%{version}-%{release}
 
 %description
@@ -242,7 +261,7 @@ rm -f jbig*.h
 %set_build_flags
 %make_build
 %else
-export CFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp -lcx"
+export CFLAGS="%optflags -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp -lcx"
 export VENDOR="%{vendor}"
 make -j 1
 %endif
@@ -481,5 +500,8 @@ rm -f %{buildroot}%{_mandir}/man1/usb_printerid.1
 %{_datadir}/cups/model/Ricoh-SP_201Nw.ppd.gz
 
 %changelog
+* Mon May 09 2022 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.20201003-2
+- remove lcms req. I wonder why fedora has it
+
 * Fri May 06 2022 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.20201003-1
 - first OS/2 rpm
