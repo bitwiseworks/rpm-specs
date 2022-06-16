@@ -1,6 +1,6 @@
 Name:           libuvc
 Version:        0.0.6
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        A cross-platform library for USB video devices
 
 License:        GPLv3 or BSD
@@ -10,7 +10,8 @@ URL:            https://github.com/libuvc/libuvc
 Source0:        https://github.com/libuvc/libuvc/archive/%{name}-%{version}.tar.gz
 %else
 Vendor:         bww bitwise works GmbH
-%scm_source     github https://github.com/bitwiseworks/%{name}-os2 v%{version}-os2-3
+%scm_source     github https://github.com/bitwiseworks/%{name}-os2 v%{version}-os2-4
+%global __cmake_in_source_build 1
 %endif
 
 BuildRequires: cmake
@@ -51,10 +52,10 @@ export VENDOR="%{vendor}"
 %{cmake} \
          -DCMAKE_BUILD_TARGET:STRING=Shared \
          .
-make %{?_smp_mflags} V=1
+%cmake_build
 
 %install
-%make_install
+%cmake_install
 
 %files
 %doc README.md LICENSE.txt
@@ -75,6 +76,10 @@ make %{?_smp_mflags} V=1
 %{_libdir}/cmake/libuvc/
 
 %changelog
+* Thu Jun 16 2022 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.0.6-4
+- some more fixes/changes done by Lars Erdmann
+- merged with latest upstream sources
+
 * Thu Apr 07 2022 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.0.6-4
 - some more fixes/changes done by Lars Erdmann
 
