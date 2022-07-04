@@ -13,11 +13,11 @@ URL: https://www.python.org/
 
 #  WARNING  When rebasing to a new Python version,
 #           remember to update the python3-docs package as well
-%global general_version %{pybasever}.5
+%global general_version %{pybasever}.13
 #global prerel ...
 %global upstream_version %{general_version}%{?prerel}
 Version: %{general_version}%{?prerel:~%{prerel}}
-Release: 8%{?dist}
+Release: 1%{?dist}
 License: Python
 
 
@@ -430,7 +430,7 @@ Patch353: 00353-architecture-names-upstream-downstream.patch
 #     https://github.com/fedora-python/cpython
 %else
 Vendor: bww bitwise works GmbH
-%scm_source github http://github.com/bitwiseworks/python-os2 v%{version}-os2-5
+%scm_source github http://github.com/bitwiseworks/python-os2 v%{version}-os2
 %endif
 
 
@@ -2094,6 +2094,9 @@ CheckPython optimized
 # ======================================================
 
 %changelog
+* Mon Jul 04 2022 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.9.13-1
+- update to version 3.9.13
+
 * Fri Feb 18 2022 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.9.5-8
 - fix several glitches in codepage handling
 - enable os2 in bdist as well
