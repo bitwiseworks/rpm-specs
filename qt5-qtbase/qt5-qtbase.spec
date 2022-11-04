@@ -22,7 +22,7 @@ BuildRequires: make
 Name:    qt5-qtbase
 Summary: Qt5 - QtBase components
 Version: 5.15.2
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 # See LGPL_EXCEPTIONS.txt, for exception details
 License: LGPLv2 with exceptions or GPLv3 with exceptions
@@ -34,7 +34,7 @@ Url:     http://qt-project.org/
 
 Vendor:  bww bitwise works GmbH
 
-%scm_source github https://github.com/bitwiseworks/qtbase-os2 v%{version}-os2-b1
+%scm_source github https://github.com/bitwiseworks/qtbase-os2 v%{version}-os2-b2
 #scm_source git file://D:/Coding/qt5/qt5/qtbase xxxxxxx
 
 # Disable debug messages by default.
@@ -741,8 +741,11 @@ fi
 %endif
 
 %changelog
+* Fri Nov 04 2022 Dmitriy Kuminov <coding@dmik.org> 5.15.2-2
+- Release version 5.15.2 Beta 2 for OS/2.
+
 * Wed Sep 22 2021 Dmitriy Kuminov <coding@dmik.org> 5.15.2-1
-- Release version 5.15.2 for OS/2.
+- Release version 5.15.2 Beta 1 for OS/2.
 - Add -no-debug-and-release to disable dual build useless with debug libs not built.
 - Filter out qml/plugin/examples DLLs from Provides.
 
