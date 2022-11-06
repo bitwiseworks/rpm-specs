@@ -1,7 +1,7 @@
 %undefine _debugsource_packages
 
 Name:		dooble
-Version:	2022.04.04
+Version:	2022.10.15
 Release:	1%{?dist}
 Summary:	Free and opensource Web browser
 Group:		System/Libraries
@@ -75,6 +75,8 @@ ln -s ../libexec/%{name}/%{name}.sh %{buildroot}%{_bindir}/%{name}
 install -Dm644 dooble.desktop %{buildroot}%{_datadir}/applications/%{name}.desktop
 ln -s %{_libdir}/qt5/plugins/platforms %{buildroot}%{_libexecdir}/%{name}/Lib
 %else
+mkdir -p %{buildroot}%{_datadir}/%{name}/Translations
+cp -a Translations/dooble_*.qm %{buildroot}%{_datadir}/%{name}/Translations
 mkdir -p %{buildroot}%{_bindir}
 cp -a %{name}.exe %{buildroot}%{_bindir}/
 mkdir -p %{buildroot}%{_datadir}/os2/icons/
@@ -87,10 +89,11 @@ cp -a %{name}-os2.ico %{buildroot}%{_datadir}/os2/icons/%{name}.ico
 rm -rf $RPM_BUILD_ROOT
 
 %files -f %{debug_package_exclude_files}
-%doc README Documentation/TO-DO README-os2.txt
+%doc README Documentation/TO-DO README-os2.txt CHANGES-os2.txt
 %license LICENSE
 %if 0%{?os2_version}
 %{_bindir}/%{name}.exe
+%{_datadir}/%{name}/Translations
 %{_datadir}/os2/icons/%{name}.ico
 %else
 %{_libexecdir}/%{name}
@@ -113,6 +116,7 @@ fi
 %bww_license -f %_defaultlicensedir/%{name}-%{version}/LICENSE
 %bww_file TODO -f %_defaultdocdir/%{name}-%{version}/TO-DO
 %bww_file README_OS2 -f %_defaultdocdir/%{name}-%{version}/README-os2.txt
+%bww_file CHANGES_OS2 -f %_defaultdocdir/%{name}-%{version}/CHANGES-os2.txt
 
 %postun
 if [ "$1" -eq 0 ]; then # (upon removal)
@@ -121,6 +125,10 @@ fi
 %endif
 
 %changelog
+* Sun Nov 06 2022 Dmitriy Kuminov <coding@dmik.org> 2022.10.15-1
+- Release new version (see CHANGES-os2.txt for details).
+- Install Translation files.
+
 * Sun Apr 24 2022 Dmitriy Kuminov <coding@dmik.org> 2022.04.04-1
 - Update source to build 2022.04.04.
 - Make it build from bww repo using scm macros.
