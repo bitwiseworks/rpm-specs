@@ -24,7 +24,7 @@
 
 Summary: Utilities from the general purpose cryptography library with TLS implementation
 Name: openssl
-Version: 1.1.1q
+Version: 1.1.1s
 Release: 1%{?dist}
 Epoch: 1
 
@@ -484,6 +484,9 @@ export LD_LIBRARY_PATH
 %endif
 
 %changelog
+* Wed Jan 11 2023 Silvan Scherrer <silvan.scherrer@aroa.ch> 1:1.1.1s-1
+- Update to version 1.1.1s.
+
 * Thu Jul 07 2022 Silvan Scherrer <silvan.scherrer@aroa.ch> 1:1.1.1q-1
 - Update to version 1.1.1q.
 
