@@ -11,7 +11,7 @@ Version:        1.44.3
 %if !0%{?os2_version}
 Release:        %autorelease
 %else
-Release:        1%{?dist}
+Release:        2%{?dist}
 %endif
 Summary:        Platform layer for node.js
 
@@ -148,6 +148,9 @@ install -Dm0644 -t %{buildroot}%{_libdir}/libuv/ %{SOURCE3}
 %if !0%{?os2_version}
 %autochangelog
 %else
+* Thu Jan 12 2023 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.44.3-2
+- some fixes
+
 * Tue Jan 10 2023 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.44.3-1
 - first rpm version
 %endif
