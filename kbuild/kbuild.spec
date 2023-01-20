@@ -7,10 +7,9 @@ Url:        https://github.com/bitwiseworks/kbuild-os2
 Epoch:      1
 
 Version:    0.1.9998
-Release:    15%{?dist}
+Release:    16%{?dist}
 
-%scm_source github https://github.com/bitwiseworks/kbuild-os2 5715e368625237640255c60127df2f3042e37b06
-#scm_source git file://D:/Coding/kbuild/master d197e375ed672dbe2c78f55313ffe0d826e7a484
+%scm_source github https://github.com/bitwiseworks/kbuild-os2 a9fd4c1891ab024cb2b85c36ec00b33492365369
 
 %define descr_brief kBuild is a GNU Make fork with a set of scripts to simplify\
 complex build tasks and portable versions of various UNIX tools to ensure\
@@ -123,6 +122,11 @@ cmd /c "kBuild\envos2.cmd" kmk $KMK_FLAGS PATH_INS="%{buildroot}" install
 
 #------------------------------------------------------------------------------
 %changelog
+* Fri Jan 20 2023 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.1.9998-16
+- update to latest kbuild source
+- disabled output sync (-O option) completely for now.
+  See libc ticket #125 and libcx ticket #102
+
 * Fri Mar 27 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> 0.1.9998-15
 - EMX: Make memchr assembly override work with GCC 9 optimizer
 
