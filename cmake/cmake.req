@@ -23,21 +23,21 @@
 # Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
- 
+
 import sys
 import re
 import subprocess
- 
+
 class CMakeParser:
     def __init__(self, filelist = None):
         if filelist == None:
             filelist = sys.stdin
- 
+
         has_module = False
         is_arched = False
- 
+
         isa_suf = subprocess.check_output(["/@unixroot/usr/bin/rpm", "-E %{?_isa}"]).decode().strip()
- 
+
         paths = map(lambda x: x.rstrip(), filelist.readlines())
         for path in paths:
             modulePath, cmakeModule, lowercase = self.parseCmakeModuleConfig(path)
@@ -45,17 +45,17 @@ class CMakeParser:
                 has_module = True
                 if re.match(".*/usr/lib(64)?/cmake/.*", modulePath):
                     is_arched = True
- 
+
         if has_module:
             if is_arched:
                 print("cmake-filesystem%s" % isa_suf)
             else:
                 print("cmake-filesystem")
- 
- 
+
+
     def parseCmakeModuleConfig(self, configFile):
         paths = configFile.rsplit("/", 3)
- 
+
         modulePath = "%s/cmake/%s" % (paths[0], paths[2])
         cfgFile = paths[3]
         if cfgFile.endswith("Config.cmake"):
@@ -64,7 +64,7 @@ class CMakeParser:
            return (modulePath, cfgFile[0:-len("-config.cmake")], True)
         else:
             return (None, None, False)
- 
- 
+
+
 if __name__ == "__main__":
     parser = CMakeParser()
