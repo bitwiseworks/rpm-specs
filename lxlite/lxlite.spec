@@ -4,14 +4,14 @@
 Summary:       OS/2 LX executable packer
 Name:          lxlite
 Version:       1.3.9
-Release:       6%{?dist}
+Release:       7%{?dist}
 License:       GPL
 Group:         Applications/System
 URL:           http://github.com/bitwiseworks/lxlite
 Vendor:        bww bitwise works GmbH
 Obsoletes:     lxLite
 Provides:      lxLite = %{version}-%{release}
-%scm_source github https://github.com/bitwiseworks/lxlite %{version}
+%scm_source github https://github.com/bitwiseworks/lxlite %{version}-1
 
 
 %description
@@ -79,6 +79,9 @@ rm -rf "$RPM_BUILD_ROOT"
 %exclude %{_bindir}/lxLite.exe
 
 %changelog
+* Mon Jan 30 2023 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.3.9-7
+- enhance messages 424 to print larger value, as else it might cut of some values
+
 * Wed Feb 28 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.3.9-6
 - add the executable flag to the exe
 
