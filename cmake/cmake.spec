@@ -1,16 +1,33 @@
-# Do we add appdata-files? (disabled)
+# Do we add appdata-files?
 # consider conditional on whether %%_metainfodir is defined or not instead -- rex
+%if 0%{?fedora} || 0%{?rhel} > 7
+%bcond_without appdata
+%else
 %bcond_with appdata
+%endif
 
 # Set to bcond_without or use --with bootstrap if bootstrapping a new release
 # or architecture
+%if !0%{?os2_version}
+%bcond_with bootstrap
+%else
 %bcond_without bootstrap
+%endif
 
-# Build with Emacs support (disabled)
+# Build with Emacs support
+%if !0%{?os2_version}
+%bcond_without emacs
+%else
 %bcond_with emacs
+%global _emacs_sitelispdir %{_prefix}/share/emacs
+%endif
 
-# Run git tests (disabled)
+# Run git tests
+%if !0%{?os2_version}
+%bcond_without git_test
+%else
 %bcond_with git_test
+%endif
 
 # Set to bcond_with or use --without gui to disable qt4 gui build
 %bcond_without gui
@@ -19,19 +36,45 @@
 %bcond_without ncurses
 
 # Setting the Python-version used by default
+%if 0%{?rhel} && 0%{?rhel} < 8
 %bcond_with python3
+%else
+%bcond_without python3
+%endif
 
 # Enable RPM dependency generators for cmake files written in Python
 %bcond_without rpm
 
-# enable this when we have Sphinx-build (disabled)
+%if !0%{?os2_version}
+%bcond_without sphinx
+%else
 %bcond_with sphinx
+%endif
 
-# Run tests (disabled)
+%if !0%{?rhel} && !0%{?os2_version}
+%bcond_with bundled_jsoncpp
+%bcond_with bundled_rhash
+%else
+%bcond_without bundled_jsoncpp
+%bcond_without bundled_rhash
+%endif
+
+# Run tests
+%if !0%{?os2_version}
+%bcond_without test
+%else
 %bcond_with test
+%endif
 
-# Enable X11 tests (disabled)
+# Enable X11 tests
+%if !0%{?os2_version}
+%bcond_without X11_test
+%else
 %bcond_with X11_test
+%endif
+
+# Do not build non-lto objects to reduce build time significantly.
+%global optflags %(echo '%{optflags}' | sed -e 's!-ffat-lto-objects!-fno-fat-lto-objects!g')
 
 # Place rpm-macros into proper location
 %global rpm_macros_dir %(d=%{_rpmconfigdir}/macros.d; [ -d $d ] || d=%{_sysconfdir}/rpm; echo $d)
@@ -39,20 +82,25 @@
 # Setup _pkgdocdir if not defined already
 %{!?_pkgdocdir:%global _pkgdocdir %{_docdir}/%{name}-%{version}}
 
+# Setup _vpath_builddir if not defined already
+%{!?_vpath_builddir:%global _vpath_builddir %(echo '%{_target_platform}' | sed -e 's!/!!g')}
+
 %global major_version 3
-%global minor_version 15
+%global minor_version 20
 # Set to RC version if building RC, else %%{nil}
-#global rcsuf rc3
+#global rcsuf rc1
 %{?rcsuf:%global relsuf .%{rcsuf}}
 %{?rcsuf:%global versuf -%{rcsuf}}
+
+# For handling bump release by rpmdev-bumpspec and mass rebuild
+%global baserelease 1
 
 # Uncomment if building for EPEL
 #global name_suffix %%{major_version}
 %global orig_name cmake
 
-
 Name:           %{orig_name}%{?name_suffix}
-Version:        %{major_version}.%{minor_version}.3
+Version:        %{major_version}.%{minor_version}.6
 Release:        1%{?dist}
 Summary:        Cross-platform make system
 
@@ -63,20 +111,55 @@ Summary:        Cross-platform make system
 # exception granting redistribution under terms of your choice
 License:        BSD and MIT and zlib
 URL:            http://www.cmake.org
+%if !0%{?os2_version}
+Source0:        http://www.cmake.org/files/v%{major_version}.%{minor_version}/%{orig_name}-%{version}%{?versuf}.tar.gz
+Source1:        %{name}-init.el
+%else
 Vendor:         bww bitwise works GmbH
 %scm_source github http://github.com/bitwiseworks/cmake-os2 %{version}-os2
+%endif
 Source2:        macros.%{name}
 # See https://bugzilla.redhat.com/show_bug.cgi?id=1202899
 Source3:        %{name}.attr
 Source4:        %{name}.prov
 Source5:        %{name}.req
 
+%if !0%{?os2_version}
+# Always start regular patches with numbers >= 100.
+# We need lower numbers for patches in compat package.
+# And this enables us to use %%autosetup
+#
+# Patch to fix RindRuby vendor settings
+# http://public.kitware.com/Bug/view.php?id=12965
+# https://bugzilla.redhat.com/show_bug.cgi?id=822796
+Patch100:       %{name}-findruby.patch
+# Add dl to CMAKE_DL_LIBS on MINGW
+# https://gitlab.kitware.com/cmake/cmake/issues/17600
+%if 0%{?fedora} && 0%{?fedora} < 38
+Patch102:       %{name}-mingw-dl.patch
+%endif
+
+# Patch for renaming on EPEL
+%if 0%{?name_suffix:1}
+Patch1:         %{name}-rename.patch
+%endif
+%endif
+
 BuildRequires:  coreutils
 BuildRequires:  findutils
-BuildRequires:  gcc g++
-#BuildRequires:  gcc-gfortran
+BuildRequires:  gcc-c++
+%if !0%{?os2_version}
+BuildRequires:  gcc-gfortran
+%endif
 BuildRequires:  sed
+%if !0%{?os2_version}
+%if %{with git_test}
+# Tests fail if only git-core is installed, bug #1488830
 BuildRequires:  git
+%else
+BuildConflicts: git-core
+%endif
+%endif
 %if %{with X11_test}
 BuildRequires:  libX11-devel
 %endif
@@ -86,20 +169,38 @@ BuildRequires:  ncurses-devel
 %if %{with sphinx}
 BuildRequires:  %{_bindir}/sphinx-build
 %endif
-%if %{without bootstrap}
+%if %{without bootstrap} || 0%{?os2_version}
 BuildRequires:  bzip2-devel
 BuildRequires:  curl-devel
 BuildRequires:  expat-devel
-#BuildRequires:  jsoncpp-devel
-#BuildRequires:  libarchive-devel
-#BuildRequires:  libuv-devel
-#BuildRequires:  rhash-devel
+%if %{with bundled_jsoncpp}
+Provides: bundled(jsoncpp)
+%else
+BuildRequires:  jsoncpp-devel
+%endif
+%if !0%{?os2_version}
+%if 0%{?fedora} || 0%{?rhel} >= 7
+BuildRequires:  libarchive-devel
+%else
+BuildRequires:  libarchive3-devel
+%endif
+%endif
+BuildRequires:  libuv-devel
+%if %{with bundled_rhash}
+Provides:  bundled(rhash)
+%else
+BuildRequires:  rhash-devel
+%endif
 BuildRequires:  xz-devel
 BuildRequires:  zlib-devel
+%if !0%{?os2_version}
+BuildRequires:  vim-filesystem
+%endif
 %endif
 %if %{with emacs}
 BuildRequires:  emacs
 %endif
+BuildRequires:  openssl-devel
 %if %{with rpm}
 %if %{with python3}
 %{!?python3_pkgversion: %global python3_pkgversion 3}
@@ -109,24 +210,47 @@ BuildRequires:  python2-devel
 %endif
 %endif
 %if %{with gui}
+%if 0%{?fedora} || 0%{?rhel} > 7 || 0%{?os2_version}
 BuildRequires: pkgconfig(Qt5Widgets)
-%if %{with appdata}
+%else
+BuildRequires: pkgconfig(QtGui)
+%endif
+%if !0%{?os2_version}
 BuildRequires: desktop-file-utils
 %endif
+%endif
+
+%if !0%{?os2_version}
+BuildRequires: pkgconfig(bash-completion)
+%global bash_completionsdir %(pkg-config --variable=completionsdir bash-completion 2>/dev/null || echo '%{_datadir}/bash-completion/completions')
 %endif
 
 %if %{without bootstrap}
 # Ensure we have our own rpm-macros in place during build.
 BuildRequires:  %{name}-rpm-macros
 %endif
+BuildRequires: make
 
 Requires:       %{name}-data = %{version}-%{release}
 Requires:       %{name}-rpm-macros = %{version}-%{release}
+%if !0%{?os2_version}
+Requires:       %{name}-filesystem%{?_isa} = %{version}-%{release}
+%else
 Requires:       %{name}-filesystem = %{version}-%{release}
+%endif
+
+# Explicitly require make.  (rhbz#1862014)
+Requires:       make
 
 # Provide the major version name
 Provides: %{orig_name}%{major_version} = %{version}-%{release}
 
+# Source/kwsys/MD5.c
+# see https://fedoraproject.org/wiki/Packaging:No_Bundled_Libraries
+Provides: bundled(md5-deutsch)
+
+# https://fedorahosted.org/fpc/ticket/555
+Provides: bundled(kwsys)
 
 %description
 CMake is used to control the software compilation process using simple
@@ -143,7 +267,12 @@ Requires:       %{name} = %{version}-%{release}
 Requires:       %{name}-filesystem = %{version}-%{release}
 Requires:       %{name}-rpm-macros = %{version}-%{release}
 %if %{with emacs}
+%if 0%{?fedora} || 0%{?rhel} >= 7
 Requires:       emacs-filesystem%{?_emacs_version: >= %{_emacs_version}}
+%endif
+%endif
+%if !0%{?os2_version}
+Requires:       vim-filesystem
 %endif
 
 BuildArch:      noarch
@@ -171,10 +300,12 @@ This package owns all directories used by CMake modules.
 %package        gui
 Summary:        Qt GUI for %{name}
 
-Requires:       %{name} = %{version}-%{release}
-%if %{with appdata}
+%if !0%{?os2_version}
+Requires:       %{name}%{?_isa} = %{version}-%{release}
 Requires:       hicolor-icon-theme
-Requires:       shared-mime-info
+Requires:       shared-mime-info%{?_isa}
+%else
+Requires:       %{name} = %{version}-%{release}
 %endif
 
 %description    gui
@@ -194,11 +325,16 @@ BuildArch:      noarch
 This package contains common RPM macros for %{name}.
 
 
+%if !0%{?os2_version}
 %debug_package
-
+%endif
 
 %prep
+%if !0%{?os2_version}
+%autosetup -n %{orig_name}-%{version}%{?versuf} -p 1
+%else
 %scm_setup
+%endif
 
 %if %{with rpm}
 %if %{with python3}
@@ -214,52 +350,96 @@ tail -n +2 %{SOURCE5} >> %{name}.req
 
 
 %build
-export CFLAGS="%{optflags}"
-export CXXFLAGS="%{optflags}"
+%if 0%{?set_build_flags:1}
+%{set_build_flags}
+%else
+CFLAGS="${CFLAGS:-%optflags}" ; export CFLAGS
+CXXFLAGS="${CXXFLAGS:-%optflags}" ; export CXXFLAGS
+FFLAGS="${FFLAGS:-%optflags%{?_fmoddir: -I%_fmoddir}}" ; export FFLAGS
+FCFLAGS="${FCFLAGS:-%optflags%{?_fmoddir: -I%_fmoddir}}" ; export FCFLAGS
+%if !0%{?os2_version}
+%{?__global_ldflags:LDFLAGS="${LDFLAGS:-%__global_ldflags}" ; export LDFLAGS ;}
+%else
 export LDFLAGS="-Zomf -Zhigh-mem -lcx %{?__global_ldflags}"
 export VENDOR="%{vendor}"
-mkdir build
-cd build
-#             --%{?with_bootstrap:no-}system-libs \
-#             --parallel=`/usr/bin/getconf _NPROCESSORS_ONLN` \
-../bootstrap --prefix=%{_prefix} --datadir=/share/%{name} \
-             --docdir=/share/doc/%{name} --mandir=/share/man \
-             --verbose --system-bzip2 --system-curl --system-expat \
-             --system-liblzma --system-zlib \
-%if %{with sphinx}
-             --sphinx-man --sphinx-html} \
-%else
-             --sphinx-build=%{_bindir}/false \
 %endif
-             --%{!?with_gui:no-}qt-gui \
-             -- -DCMAKE_USE_OPENSSL:BOOL=ON \
-;
-make VERBOSE=1
+%endif
+%if !0%{?os2_version}
+SRCDIR="$(/usr/bin/pwd)"
+mkdir %{_vpath_builddir}
+pushd %{_vpath_builddir}
+%else
+SRCDIR="$(/@unixroot/usr/bin/pwd)"
+mkdir %{_vpath_builddir}
+cd %{_vpath_builddir}
+%endif
+$SRCDIR/bootstrap --prefix=%{_prefix} \
+                  --datadir=/share/%{name} \
+                  --docdir=/share/doc/%{name} \
+                  --mandir=/share/man \
+%if !0%{?os2_version}
+                  --%{?with_bootstrap:no-}system-libs \
+%else
+                  --bootstrap-system-libuv \
+                  --system-libs \
+                  --no-system-libarchive \
+                  --no-system-nghttp2 \
+                  --no-system-zstd \
+%endif
+                  --parallel="$(echo %{?_smp_mflags} | sed -e 's|-j||g')" \
+%if %{with bundled_rhash}
+                  --no-system-librhash \
+%endif
+%if %{with bundled_jsoncpp}
+                  --no-system-jsoncpp \
+%endif
+%if %{with sphinx}
+                  --sphinx-man --sphinx-html \
+%else
+                  --sphinx-build=%{_bindir}/false \
+%endif
+                  --%{!?with_gui:no-}qt-gui \
+                  -- \
+                  -DCMAKE_C_FLAGS_RELEASE:STRING="-O2 -g -DNDEBUG" \
+                  -DCMAKE_CXX_FLAGS_RELEASE:STRING="-O2 -g -DNDEBUG" \
+                  -DCMAKE_Fortran_FLAGS_RELEASE:STRING="-O2 -g -DNDEBUG" \
+                  -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
+                  -DCMAKE_INSTALL_DO_STRIP:BOOL=OFF
+%if !0%{?os2_version}
+popd
+%make_build -C %{_vpath_builddir}
+%else
+cd ..
+make -C %{_vpath_builddir}
+%endif
 
 
 %install
-rm -rf %{buildroot}
 mkdir -p %{buildroot}%{_pkgdocdir}
-%make_install -C build CMAKE_DOC_DIR=%{buildroot}%{_pkgdocdir}
-find %{buildroot}/%{_datadir}/%{name}/Modules -type f | xargs chmod -x
-[ -n "$(find %{buildroot}/%{_datadir}/%{name}/Modules -name \*.orig)" ] &&
+%make_install -C %{_vpath_builddir} CMAKE_DOC_DIR=%{buildroot}%{_pkgdocdir}
+find %{buildroot}%{_datadir}/%{name}/Modules -type f | xargs chmod -x
+[ -n "$(find %{buildroot}%{_datadir}/%{name}/Modules -name \*.orig)" ] &&
   echo "Found .orig files in %{_datadir}/%{name}/Modules, rebase patches" &&
   exit 1
 # Install major_version name links
+%if !0%{?os2_version}
+%{!?name_suffix:for f in ccmake cmake cpack ctest; do ln -s $f %{buildroot}%{_bindir}/${f}%{major_version}; done}
+%else
 %{!?name_suffix:for f in ccmake cmake cpack ctest; do ln -s ${f}.exe %{buildroot}%{_bindir}/${f}%{major_version}; done}
-# Install bash completion symlinks
-#mkdir -p %{buildroot}%{_datadir}/bash-completion/completions
-#for f in %{buildroot}%{_datadir}/%{name}/completions/*
-#do
-#  ln -s ../../%{name}/completions/$(basename $f) %{buildroot}%{_datadir}/bash-completion/completions
-#done
+%endif
+
+%if 0%{?os2_version}
+rm -rf %{buildroot}%{_prefix}/share/vim
+rm -rf %{buildroot}%{_prefix}/share/bash-completion
+%endif
 %if %{with emacs}
 # Install emacs cmake mode
-mkdir -p %{buildroot}%{_emacs_sitelispdir}/%{name}
-install -p -m 0644 Auxiliary/cmake-mode.el %{buildroot}%{_emacs_sitelispdir}/%{name}/%{name}-mode.el
+mkdir -p %{buildroot}%{_emacs_sitelispdir}/%{name} %{buildroot}%{_emacs_sitestartdir}
+mv %{buildroot}%{_emacs_sitelispdir}/%{name}-mode.el %{buildroot}%{_emacs_sitelispdir}/%{name}
 %{_emacs_bytecompile} %{buildroot}%{_emacs_sitelispdir}/%{name}/%{name}-mode.el
-mkdir -p %{buildroot}%{_emacs_sitestartdir}
-install -p -m 0644 %SOURCE1 %{buildroot}%{_emacs_sitestartdir}
+install -p -m 0644 %{SOURCE1} %{buildroot}%{_emacs_sitestartdir}
+%else
+rm -rf %{buildroot}%{_emacs_sitelispdir}
 %endif
 # RPM macros
 install -p -m0644 -D %{SOURCE2} %{buildroot}%{rpm_macros_dir}/macros.%{name}
@@ -295,11 +475,13 @@ mv html %{buildroot}%{_pkgdocdir}
 
 %if %{with gui}
 # Desktop file
-%if %{with appdata}
+%if !0%{?os2_version}
 desktop-file-install --delete-original \
   --dir=%{buildroot}%{_datadir}/applications \
   %{buildroot}%{_datadir}/applications/%{name}-gui.desktop
+%endif
 
+%if %{with appdata}
 # Register as an application to be visible in the software center
 #
 # NOTE: It would be *awesome* if this file was maintained by the upstream
@@ -348,24 +530,38 @@ find %{buildroot}%{_libdir}/%{orig_name} -type d | \
   sed -e 's!^%{buildroot}!%%dir "!g' -e 's!$!"!g' > lib_dirs.mf
 find %{buildroot}%{_libdir}/%{orig_name} -type f | \
   sed -e 's!^%{buildroot}!"!g' -e 's!$!"!g' > lib_files.mf
+%if !0%{?os2_version}
+find %{buildroot}%{_bindir} -type f -or -type l -or -xtype l | \
+  sed -e '/.*-gui$/d' -e '/^$/d' -e 's!^%{buildroot}!"!g' -e 's!$!"!g' >> lib_files.mf
+%else
 find %{buildroot}%{_bindir} -type f -or -type l -or -xtype l | \
   sed -e '/.*-gui.exe$/d' -e '/^$/d' -e 's!^%{buildroot}!"!g' -e 's!$!"!g' >> lib_files.mf
-
+%endif
 
 %if %{with test}
 %check
-cd build
-#CMake.FileDownload, CTestTestUpload, and curl require internet access
-# RunCMake.CPack_RPM is broken if disttag contains "+", bug #1499151
-NO_TEST="CMake.FileDownload|CTestTestUpload|curl|RunCMake.CPack_RPM"
-NO_TEST="$NO_TEST|CPackComponentsForAll-RPM-IgnoreGroup"
-# RunCMake.File_Generate fails on S390X
-%ifarch s390x
-NO_TEST="$NO_TEST|RunCMake.File_Generate"
+%if !0%{?os2_version}
+pushd %{_vpath_builddir}
+%else
+cd %{_vpath_builddir}
 %endif
-export NO_TEST
-bin/ctest%{?name_suffix} -V -E "$NO_TEST" %{?_smp_mflags}
+# CTestTestUpload requires internet access.
+NO_TEST="CTestTestUpload"
+# Likely failing for hardening flags from system.
+NO_TEST="$NO_TEST|CustomCommand|RunCMake.PositionIndependentCode"
+# curl test may fail during bootstrap
+%if %{with bootstrap}
+NO_TEST="$NO_TEST|curl"
+%endif
+bin/ctest%{?name_suffix} %{?_smp_mflags} -V -E "$NO_TEST" --output-on-failure
+## do this only periodically, not for every build -- besser82 20221102
+# Keep an eye on failing tests
+#bin/ctest%{?name_suffix} %{?_smp_mflags} -V -R "$NO_TEST" --output-on-failure || :
+%if !0%{?os2_version}
+popd
+%else
 cd ..
+%endif
 %endif
 
 
@@ -384,17 +580,27 @@ cd ..
 
 %files data -f data_files.mf
 %{_datadir}/aclocal/%{name}.m4
-#%{_datadir}/bash-completion
+%if !0%{?os2_version}
+%{bash_completionsdir}/c*
+%endif
 %if %{with emacs}
+%if 0%{?fedora} || 0%{?rhel} >= 7
+%{_emacs_sitelispdir}/%{name}
+%{_emacs_sitestartdir}/%{name}-init.el
+%else
 %{_emacs_sitelispdir}
 %{_emacs_sitestartdir}
 %endif
-
+%endif
+%if !0%{?os2_version}
+%{vimfiles_root}/indent/%{name}.vim
+%{vimfiles_root}/syntax/%{name}.vim
+%endif
 
 %files doc
 # Pickup license-files from main-pkg's license-dir
 # If there's no license-dir they are picked up by %%doc previously
-#%{?_licensedir:%license %{_datadir}/licenses/%{name}*}
+%{?_licensedir:%license %{_datadir}/licenses/%{name}*}
 %doc %{_pkgdocdir}
 
 
@@ -403,11 +609,17 @@ cd ..
 
 %if %{with gui}
 %files gui
+%if !0%{?os2_version}
+%{_bindir}/%{name}-gui
+%else
 %{_bindir}/%{name}-gui.exe
+%endif
 %if %{with appdata}
 %{_metainfodir}/*.appdata.xml
-%{_datadir}/applications/CMake%{?name_suffix}.desktop
-%{_datadir}/mime/packages/
+%endif
+%if !0%{?os2_version}
+%{_datadir}/applications/%{name}-gui.desktop
+%{_datadir}/mime/packages
 %{_datadir}/icons/hicolor/*/apps/CMake%{?name_suffix}Setup.png
 %endif
 %if %{with sphinx}
@@ -426,6 +638,10 @@ cd ..
 
 
 %changelog
+* Fri Jan 27 2023 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.20.6-1
+- update to vendor version 3.20.6
+- resync spec file with fedora
+
 * Fri Jan 31 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.15.3-1
 - update to vendor version 3.15.3
 - build with gcc9

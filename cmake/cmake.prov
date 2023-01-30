@@ -37,9 +37,16 @@ class CMakeParser:
                 version = self.resolveCMakeModuleVersion(modulePath, cmakeModule, lowercase)
 
                 if version:
-                    print("cmake(%s) = %s" % (cmakeModule, version))
+                    string = "cmake(" + cmakeModule + ") = " + version
                 else:
-                    print("cmake(%s)" % cmakeModule)
+                    string = "cmake(" + cmakeModule + ")"
+                if string == string.lower():
+                    print(string)
+                else:
+                    # Temporarily print both variants to satisfy requires
+                    # by the old version of this generator which made mistakes
+                    print(string)
+                    print(string.lower())
 
 
     def parseCmakeModuleConfig(self, configFile):
