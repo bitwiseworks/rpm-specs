@@ -11,7 +11,7 @@ Version:        1.44.3
 %if !0%{?os2_version}
 Release:        %autorelease
 %else
-Release:        2%{?dist}
+Release:        3%{?dist}
 %endif
 Summary:        Platform layer for node.js
 
@@ -24,7 +24,7 @@ Source2:        %{name}.pc.in
 Source3:        libuv.abignore
 %else
 Vendor:         bww bitwise works GmbH
-%scm_source github http://github.com/bitwiseworks/%{name}-os2 v1.x-os2
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
 %endif
 %if !0%{?os2_version}
 BuildRequires:  autoconf automake libtool
@@ -96,7 +96,7 @@ make %{?_smp_mflags} -C build V=1
 %make_install
 %else
 %make_install -C build
-rm -f %{buildroot}%{_docdir}/libuv/LICENSE
+rm -f %{buildroot}%{_docdir}/libuv/LICENSE*
 %endif
 rm -f %{buildroot}%{_libdir}/libuv.la
 
@@ -117,7 +117,7 @@ install -Dm0644 -t %{buildroot}%{_libdir}/libuv/ %{SOURCE3}
 %files
 %doc README.md AUTHORS CONTRIBUTING.md MAINTAINERS.md SUPPORTED_PLATFORMS.md
 %doc ChangeLog
-%license LICENSE
+%license LICENSE LICENSE-extra
 %if !0%{?os2_version}
 %{_libdir}/%{name}.so.*
 %{_libdir}/libuv/libuv.abignore
@@ -140,14 +140,17 @@ install -Dm0644 -t %{buildroot}%{_libdir}/libuv/ %{SOURCE3}
 %if !0%{?os2_version}
 %{_libdir}/%{name}.a
 %else
+%{_libdir}/uv.a
 %{_libdir}/pkgconfig/%{name}-static.pc
-%{_libdir}/uv_a.a
 %endif
 
 %changelog
 %if !0%{?os2_version}
 %autochangelog
 %else
+* Fri Feb 24 2023 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.44.3-3
+- fix a possible race
+
 * Thu Jan 12 2023 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.44.3-2
 - some fixes
 
