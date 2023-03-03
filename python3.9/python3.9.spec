@@ -17,7 +17,7 @@ URL: https://www.python.org/
 #global prerel ...
 %global upstream_version %{general_version}%{?prerel}
 Version: %{general_version}%{?prerel:~%{prerel}}
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: Python
 
 
@@ -430,7 +430,7 @@ Patch353: 00353-architecture-names-upstream-downstream.patch
 #     https://github.com/fedora-python/cpython
 %else
 Vendor: bww bitwise works GmbH
-%scm_source github http://github.com/bitwiseworks/python-os2 v%{version}-os2
+%scm_source github http://github.com/bitwiseworks/python-os2 v%{version}-os2-1
 %endif
 
 
@@ -2094,6 +2094,9 @@ CheckPython optimized
 # ======================================================
 
 %changelog
+* Fri Mar 03 2023 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.9.13-2
+- fix ticket #9
+
 * Mon Jul 04 2022 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.9.13-1
 - update to version 3.9.13
 
