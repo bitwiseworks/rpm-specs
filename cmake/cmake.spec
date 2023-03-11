@@ -51,12 +51,17 @@
 %bcond_with sphinx
 %endif
 
-%if !0%{?rhel} && !0%{?os2_version}
+%if 0%{?os2_version}
+%bcond_with bundled_jsoncpp
+%bcond_without bundled_rhash
+%else
+%if !0%{?rhel}
 %bcond_with bundled_jsoncpp
 %bcond_with bundled_rhash
 %else
 %bcond_without bundled_jsoncpp
 %bcond_without bundled_rhash
+%endif
 %endif
 
 # Run tests
@@ -101,7 +106,7 @@
 
 Name:           %{orig_name}%{?name_suffix}
 Version:        %{major_version}.%{minor_version}.6
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Cross-platform make system
 
 # most sources are BSD
@@ -325,7 +330,7 @@ BuildArch:      noarch
 This package contains common RPM macros for %{name}.
 
 
-%if !0%{?os2_version}
+%if 0%{?os2_version}
 %debug_package
 %endif
 
@@ -596,6 +601,9 @@ cd ..
 %{vimfiles_root}/indent/%{name}.vim
 %{vimfiles_root}/syntax/%{name}.vim
 %endif
+%if 0%{?os2_version}
+%ghost %{_datadir}/%{name}/Modules/Platform/os2.cmake
+%endif
 
 %files doc
 # Pickup license-files from main-pkg's license-dir
@@ -638,6 +646,10 @@ cd ..
 
 
 %changelog
+* Fri Feb 24 2023 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.20.6-2
+- fix a crash
+- enable system jsoncpp
+
 * Fri Jan 27 2023 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.20.6-1
 - update to vendor version 3.20.6
 - resync spec file with fedora
