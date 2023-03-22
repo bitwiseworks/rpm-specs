@@ -5,7 +5,7 @@
 
 Summary:    (kLIBC) User Manager
 Name:       klusrmgr
-Version:    1.4.2
+Version:    1.4.4
 Release:    1%{?dist}
 License:    proprietary
 Group:      Applications/System
@@ -51,6 +51,10 @@ for f in *.msg ; do
   install -p -m0644 -D $f $RPM_BUILD_ROOT%{_datadir}/os2/lang/$f
 done
 
+# for f in *.hlp ; do
+#  install -p -m0644 -D $f $RPM_BUILD_ROOT%{_datadir}/os2/help/$f
+# done
+
 
 %clean
 rm -rf "$RPM_BUILD_ROOT"
@@ -86,6 +90,12 @@ fi
 
 
 %changelog
+* Wed Mar 22 2023 hb <herwig.bauernfeind@bitwiseworks.com> 1.4.4-1
+- fix ticket #9 
+
+* Wed Jun 23 2021 hb <herwig.bauernfeind@bitwiseworks.com> 1.4.3-1
+- fix error when WarpIN is not present, do not crash
+
 * Tue Jan 5 2021 hb <herwig.bauernfeind@bitwiseworks.com> 1.4.2-1
 - add context menu for users and groups pages
 - fix error when manipulating groups with numbers below 10
