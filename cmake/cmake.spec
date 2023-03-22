@@ -106,7 +106,7 @@
 
 Name:           %{orig_name}%{?name_suffix}
 Version:        %{major_version}.%{minor_version}.6
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Cross-platform make system
 
 # most sources are BSD
@@ -330,7 +330,7 @@ BuildArch:      noarch
 This package contains common RPM macros for %{name}.
 
 
-%if 0%{?os2_version}
+%if 0%{?os2_version} && 0
 %debug_package
 %endif
 
@@ -358,8 +358,8 @@ tail -n +2 %{SOURCE5} >> %{name}.req
 %if 0%{?set_build_flags:1}
 %{set_build_flags}
 %else
-CFLAGS="${CFLAGS:-%optflags}" ; export CFLAGS
-CXXFLAGS="${CXXFLAGS:-%optflags}" ; export CXXFLAGS
+CFLAGS="$(echo ${CFLAGS:-%optflags} | sed -re "s/(^|\s)-g(\s|\$)/ /g") -s" ; export CFLAGS
+CXXFLAGS="$(echo ${CFLAGS:-%optflags} | sed -re "s/(^|\s)-g(\s|\$)/ /g") -s" ; export CXXFLAGS
 FFLAGS="${FFLAGS:-%optflags%{?_fmoddir: -I%_fmoddir}}" ; export FFLAGS
 FCFLAGS="${FCFLAGS:-%optflags%{?_fmoddir: -I%_fmoddir}}" ; export FCFLAGS
 %if !0%{?os2_version}
@@ -405,9 +405,9 @@ $SRCDIR/bootstrap --prefix=%{_prefix} \
 %endif
                   --%{!?with_gui:no-}qt-gui \
                   -- \
-                  -DCMAKE_C_FLAGS_RELEASE:STRING="-O2 -g -DNDEBUG" \
-                  -DCMAKE_CXX_FLAGS_RELEASE:STRING="-O2 -g -DNDEBUG" \
-                  -DCMAKE_Fortran_FLAGS_RELEASE:STRING="-O2 -g -DNDEBUG" \
+                  -DCMAKE_C_FLAGS_RELEASE:STRING="-DNDEBUG" \
+                  -DCMAKE_CXX_FLAGS_RELEASE:STRING="-DNDEBUG" \
+                  -DCMAKE_Fortran_FLAGS_RELEASE:STRING="-DNDEBUG" \
                   -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
                   -DCMAKE_INSTALL_DO_STRIP:BOOL=OFF
 %if !0%{?os2_version}
@@ -420,6 +420,7 @@ make -C %{_vpath_builddir}
 
 
 %install
+rm -rf %{buildroot}
 mkdir -p %{buildroot}%{_pkgdocdir}
 %make_install -C %{_vpath_builddir} CMAKE_DOC_DIR=%{buildroot}%{_pkgdocdir}
 find %{buildroot}%{_datadir}/%{name}/Modules -type f | xargs chmod -x
@@ -570,6 +571,10 @@ cd ..
 %endif
 
 
+%clean
+rm -rf %{buildroot}
+
+
 %files -f lib_files.mf
 %doc %dir %{_pkgdocdir}
 %license Copyright.txt*
@@ -646,6 +651,10 @@ cd ..
 
 
 %changelog
+* Wed Mar 22 2023 Dmitriy Kuminov <coding@dmik.org> 3.20.6-3
+- Disable HLL debug info due to overflows in EMXOMF tools.
+- Clean up BUILDROOT before and after installing.
+
 * Fri Feb 24 2023 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.20.6-2
 - fix a crash
 - enable system jsoncpp
