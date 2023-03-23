@@ -9,7 +9,7 @@ Version:    1.4.5
 Release:    1%{?dist}
 License:    proprietary
 Group:      Applications/System
-URL:        http://www.netlabs.org/vxapps
+URL:        https://github.com/bitwiseworks/klusrmgr
 Vendor:     bww bitwise works GmbH
 Source:     %{name}-%{version}.zip
 BuildRoot:  %_tmppath/%name-%version-%release-root
