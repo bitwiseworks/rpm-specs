@@ -5,7 +5,7 @@
 
 Summary:    (kLIBC) User Manager
 Name:       klusrmgr
-Version:    1.4.4
+Version:    1.4.5
 Release:    1%{?dist}
 License:    proprietary
 Group:      Applications/System
@@ -51,9 +51,9 @@ for f in *.msg ; do
   install -p -m0644 -D $f $RPM_BUILD_ROOT%{_datadir}/os2/lang/$f
 done
 
-# for f in *.hlp ; do
-#  install -p -m0644 -D $f $RPM_BUILD_ROOT%{_datadir}/os2/help/$f
-# done
+for f in *.hlp ; do
+  install -p -m0644 -D $f $RPM_BUILD_ROOT%{_datadir}/os2/help/$f
+done
 
 
 %clean
@@ -90,6 +90,9 @@ fi
 
 
 %changelog
+* Thu Mar 23 2023 hb <herwig.bauernfeind@bitwiseworks.com> 1.4.5-1
+- Add helpfiles for several languages
+
 * Wed Mar 22 2023 hb <herwig.bauernfeind@bitwiseworks.com> 1.4.4-1
 - fix ticket #9 
 
