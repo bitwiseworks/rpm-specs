@@ -6,7 +6,7 @@
 Summary:    (kLIBC) User Manager
 Name:       klusrmgr
 Version:    1.4.5
-Release:    1%{?dist}
+Release:    2%{?dist}
 License:    proprietary
 Group:      Applications/System
 URL:        https://github.com/bitwiseworks/klusrmgr
@@ -86,10 +86,15 @@ fi
 %defattr(-,root,root,-)
 %doc readme.txt
 %_bindir/*
-%_datadir/os2/lang/*.msg
+%{os2_langdir}/klusrmgr_*.msg
+%{os2_helpdir}/klusrmgr_*.hlp
+
 
 
 %changelog
+* Tue Mar 28 2023 hb <herwig.bauernfeind@bitwiseworks.com> 1.4.5-2
+- Really add helpfiles for several languages
+
 * Thu Mar 23 2023 hb <herwig.bauernfeind@bitwiseworks.com> 1.4.5-1
 - Add helpfiles for several languages
 
