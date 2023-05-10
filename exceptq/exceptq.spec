@@ -3,11 +3,11 @@
 
 Summary: Exceptq creates a debugging report.
 Name: exceptq
-Version: 7.11.5
+Version: 7.11.6
 Release: 1%{?dist}
 License: custom
 Group: Development/Libraries
-Source: exceptq-7.11.5-shl-beta8-2020-06-01.zip
+Source: exceptq-7.11.6-shl-2023-02-23.zip
 
 %description
 Exceptq creates a debugging report whenever a program that uses it
@@ -76,6 +76,9 @@ rm -rf %{buildroot}
 %{_includedir}/*.h
 
 %changelog
+* Wed May 10 2023 Dmitriy Kuminov <coding@dmik.org> 7.11.6-1
+- Update to 7.11.6-shl-2023-02-23 binaries.
+
 * Fri Feb 26 2021 Dmitriy Kuminov <coding@dmik.org> 7.11.5-1
 - Update to 7.11.5-shl-beta8-2020-06-01 binaries.
 - Clean up spec file.
