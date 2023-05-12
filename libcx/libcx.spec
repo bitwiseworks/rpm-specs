@@ -1,6 +1,6 @@
 Name: libcx
 Summary: kLIBC Extension Library
-Version: 0.7.2
+Version: 0.7.3
 Release: 1%{?dist}
 License: LGPLv2.1+
 Group: System/Libraries
@@ -90,6 +90,10 @@ rm -rf %{buildroot}
 %{_includedir}/libcx/handles.h
 
 %changelog
+* Fri May 12 2023 Dmitriy Kuminov <coding@dmik.org> 0.7.3-1
+- Release version 0.7.3
+  (https://github.com/bitwiseworks/libcx/blob/0.7.3/CHANGELOG.md).
+
 * Thu Aug 26 2021 Dmitriy Kuminov <coding@dmik.org> 0.7.2-1
 - Release version 0.7.2
   (https://github.com/bitwiseworks/libcx/blob/0.7.2/CHANGELOG.md).
