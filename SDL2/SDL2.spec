@@ -10,7 +10,7 @@
 
 Name:           SDL2
 Version:        2.0.18
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Cross-platform multimedia library
 License:        zlib and MIT
 URL:            http://www.libsdl.org/
@@ -32,7 +32,7 @@ Patch100:       SDL2-2.0.18-Fix-build-against-wayland-1.20.patch
 Patch500:       PR5171-split-static-cmake-targets.patch
 %else
 Vendor:         bww bitwise works GmbH
-%scm_source     github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2-1
+%scm_source     github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2-2
 %endif
 
 BuildRequires:  git-core
@@ -236,6 +236,9 @@ install -p -m 644 %{SOURCE2} %{buildroot}%{_includedir}/SDL2/SDL_revision.h
 %endif
 
 %changelog
+* Wed Jul 26 2023 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.0.18-3
+- added/changed/fixed audio suppoert (mostly done by Lars and Josch)
+
 * Sun Jun 18 2023 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.0.18-2
 - fixed some issues (mostly done by Josch)
 
