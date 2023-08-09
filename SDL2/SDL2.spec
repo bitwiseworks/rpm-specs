@@ -9,10 +9,10 @@
 %global libdecor_majver 0
 
 Name:           SDL2
-Version:        2.0.18
-Release:        3%{?dist}
+Version:        2.28.1
+Release:        1%{?dist}
 Summary:        Cross-platform multimedia library
-License:        zlib and MIT
+License:        Zlib AND MIT AND Apache-2.0 AND (Apache-2.0 OR MIT)
 URL:            http://www.libsdl.org/
 %if !0%{?os2_version}
 Source0:        http://www.libsdl.org/release/%{name}-%{version}.tar.gz
@@ -20,19 +20,12 @@ Source1:        SDL_config.h
 Source2:        SDL_revision.h
 
 Patch0:         multilib.patch
-# ptrdiff_t is not the same as khronos defines on 32bit arches
-Patch1:         SDL2-2.0.9-khrplatform.patch
+# Prefer Wayland by default
+Patch1:         SDL2-2.0.22-prefer-wayland.patch
 
-# Backports from upstream
-## From: https://github.com/libsdl-org/SDL/commit/e2ade2bfc46d915cd306c63c830b81d800b2575f
-Patch100:       SDL2-2.0.18-Fix-build-against-wayland-1.20.patch
-
-# Proposed upstream
-## From: https://github.com/libsdl-org/SDL/pull/5171
-Patch500:       PR5171-split-static-cmake-targets.patch
 %else
 Vendor:         bww bitwise works GmbH
-%scm_source     github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2-2
+%scm_source     github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
 %endif
 
 BuildRequires:  git-core
@@ -52,14 +45,14 @@ BuildRequires:  libXi-devel
 BuildRequires:  libXrandr-devel
 BuildRequires:  libXrender-devel
 BuildRequires:  libXScrnSaver-devel
-BuildRequires:  libusb-devel
-%else
-BuildRequires:  libusb1-devel
 %endif
 %if !0%{?os2_version}
 BuildRequires:  libXinerama-devel
 BuildRequires:  libXcursor-devel
 BuildRequires:  systemd-devel
+%endif
+BuildRequires:  pkgconfig(libusb-1.0)
+%if !0%{?os2_version}
 # PulseAudio
 BuildRequires:  pkgconfig(libpulse-simple)
 # Jack
@@ -99,12 +92,14 @@ to provide fast access to the graphics frame buffer and audio device.
 
 %package devel
 Summary:        Files needed to develop Simple DirectMedia Layer applications
-Requires:       %{name} = %{version}-%{release}
+Requires:       %{name}%{?_isa} = %{version}-%{release}
 %if !0%{?os2_version}
-Requires:       mesa-libEGL-devel
-Requires:       mesa-libGLES-devel
-Requires:       libX11-devel
+Requires:       mesa-libEGL-devel%{?_isa}
+Requires:       mesa-libGLES-devel%{?_isa}
+Requires:       libX11-devel%{?_isa}
 %endif
+# Conflict with versions before libSDLmain moved here
+Conflicts:      %{name}-static < 2.0.18-4
 
 %description devel
 Simple DirectMedia Layer (SDL) is a cross-platform multimedia library designed
@@ -116,6 +111,8 @@ developing SDL applications.
 Summary:        Static libraries for SDL2
 # Needed to keep CMake happy
 Requires:       %{name}-devel = %{version}-%{release}
+# Conflict with versions before libSDLmain moved to -devel
+Conflicts:      %{name}-devel < 2.0.18-4
 
 %description static
 Static libraries for SDL2.
@@ -198,6 +195,8 @@ install -p -m 644 %{SOURCE1} %{buildroot}%{_includedir}/SDL2/SDL_config.h
 # TODO: Figure out how in the hell the SDL_REVISION changes between architectures on the same SRPM.
 mv %{buildroot}%{_includedir}/SDL2/SDL_revision.h %{buildroot}%{_includedir}/SDL2/SDL_revision-%{_arch}.h
 install -p -m 644 %{SOURCE2} %{buildroot}%{_includedir}/SDL2/SDL_revision.h
+%else
+rm -rf ${RPM_BUILD_ROOT}/%{_licensedir}/SDL2
 %endif
 
 %files
@@ -214,28 +213,40 @@ install -p -m 644 %{SOURCE2} %{buildroot}%{_includedir}/SDL2/SDL_revision.h
 %{_bindir}/*-config
 %if !0%{?os2_version}
 %{_libdir}/lib*.so
+%{_libdir}/libSDL2main.a
 %else
 %{_libdir}/*_dll.a
+%{_libdir}/SDL2main.a
 %endif
 %{_libdir}/pkgconfig/sdl2.pc
 %dir %{_libdir}/cmake/SDL2
 %{_libdir}/cmake/SDL2/SDL2Config*.cmake
+%{_libdir}/cmake/SDL2/sdlfind.cmake
 %{_libdir}/cmake/SDL2/SDL2Targets*.cmake
+%{_libdir}/cmake/SDL2/SDL2mainTargets*.cmake
 %{_includedir}/SDL2
 %{_datadir}/aclocal/*
+%if !0%{?os2_version}
+%{_libdir}/libSDL2_test.a
+%else
+%{_libdir}/SDL2_test.a
+%endif
+%{_libdir}/cmake/SDL2/SDL2testTargets*.cmake
 
 %files static
 %license LICENSE.txt
 %if !0%{?os2_version}
-%{_libdir}/lib*.a
-%{_libdir}/cmake/SDL2/SDL2mainTargets*.cmake
-%{_libdir}/cmake/SDL2/SDL2staticTargets*.cmake
+%{_libdir}/libSDL2.a
 %else
-%{_libdir}/*.a
-%exclude %{_libdir}/*_dll.a
+%{_libdir}/SDL2.a
 %endif
+%{_libdir}/cmake/SDL2/SDL2staticTargets*.cmake
 
 %changelog
+* Wed Aug 09 2023 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.28.1-1
+- updated to vendor version 2.28.1
+- resync with latest fedora spec
+
 * Wed Jul 26 2023 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.0.18-3
 - added/changed/fixed audio suppoert (mostly done by Lars and Josch)
 
