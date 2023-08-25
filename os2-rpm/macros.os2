@@ -110,3 +110,76 @@
 
 # Disable using find-debuginfo.sh, brp-strip-os2 does the job.
 %__debug_install_post %{nil}
+
+# GCC toolchain
+%__cc_gcc gcc
+%__cxx_gcc g++
+%__cpp_gcc gcc -E
+
+# Default to the GCC toolchain
+%toolchain gcc
+
+%__cc %{expand:%%{__cc_%{toolchain}}}
+%__cxx %{expand:%%{__cxx_%{toolchain}}}
+%__cpp %{expand:%%{__cpp_%{toolchain}}}
+
+# Compiler macros to use for invoking compilers in spec files for packages that
+# want to use the default compiler and don't care which compiler that is.
+%build_cc %{__cc}
+%build_cxx %{__cxx}
+%build_cpp %{__cpp}
+
+#==============================================================================
+# ---- compiler flags.
+
+# C compiler flags.  This is traditionally called CFLAGS in makefiles.
+# Historically also available as %%{optflags}, and %%build sets the
+# environment variable RPM_OPT_FLAGS to this value.
+%build_cflags %{optflags} %{?_distro_extra_cflags}
+
+# C++ compiler flags.  This is traditionally called CXXFLAGS in makefiles.
+%build_cxxflags %{optflags} %{?_distro_extra_cxxflags}
+
+# Fortran compiler flags.  Makefiles use both FFLAGS and FCFLAGS as
+# the corresponding variable names.
+%build_fflags %{optflags} -I%{_fmoddir} %{?_distro_extra_fflags}
+
+# Link editor flags.  This is usually called LDFLAGS in makefiles.
+# (Some makefiles use LFLAGS instead.)  The default value assumes that
+# the flags, while intended for ld, are still passed through the gcc
+# compiler driver.  At the beginning of %%build, the environment
+# variable RPM_LD_FLAGS to this value.
+%build_ldflags -Zomf -Zhigh-mem -lcx %{?_distro_extra_ldflags}
+
+# Expands to shell code to set the compiler/linker environment
+# variables CFLAGS, CXXFLAGS, FFLAGS, LDFLAGS if they
+# have not been set already.  RPM_OPT_FLAGS and RPM_LD_FLAGS have already
+# been set implicitly at the start of the %%build section.
+# LT_SYS_LIBRARY_PATH is used by libtool script.
+%set_build_flags \
+  CFLAGS="${CFLAGS:-%{build_cflags}}" ; export CFLAGS ; \
+  CXXFLAGS="${CXXFLAGS:-%{build_cxxflags}}" ; export CXXFLAGS ; \
+  FFLAGS="${FFLAGS:-%{build_fflags}}" ; export FFLAGS ; \
+  FCFLAGS="${FCFLAGS:-%{build_fflags}}" ; export FCFLAGS ; \
+  LDFLAGS="${LDFLAGS:-%{build_ldflags}}" ; export LDFLAGS ; \
+  CC="${CC:-%{__cc}}" ; export CC ; \
+  CXX="${CXX:-%{__cxx}}" ; export CXX
+
+# Automatically use set_build_flags macro for build, check, and
+# install phases.
+# Use "%undefine _auto_set_build_flags" to disable"
+%_auto_set_build_flags 1
+%__spec_build_pre %{___build_pre} \
+  %{?_auto_set_build_flags:%{set_build_flags}} \
+  %{?_generate_package_note_file}
+
+%__spec_check_pre %{___build_pre} \
+  %{?_auto_set_build_flags:%{set_build_flags}} \
+  %{?_generate_package_note_file}
+
+# Deprecated names.  For backwards compatibility only.
+%__global_cflags %{build_cflags}
+%__global_cxxflags %{build_cxxflags}
+%__global_fflags %{build_fflags}
+%__global_fcflags %{build_fflags}
+%__global_ldflags %{build_ldflags}
