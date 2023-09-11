@@ -12,7 +12,7 @@ Name:           libc
 License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Standard Shared Libraries
 Group:          System/Libraries
-Version:        %{ver_maj}.1.11
+Version:        %{ver_maj}.1.12
 Release:        1%{?dist}
 Vendor:         bww bitwise works GmbH
 Url:            https://github.com/bitwiseworks/libc
@@ -214,6 +214,10 @@ rm -rf "%{buildroot}"
 
 
 %changelog
+* Mon Sep 11 2023 Dmitriy Kuminov <coding@dmik.org> 1:0.1.12-1
+- Release LIBC Next version 0.1.12
+  (https://github.com/bitwiseworks/libc/blob/0.1.12/CHANGELOG.md).
+
 * Wed Aug 30 2023 Dmitriy Kuminov <coding@dmik.org> 1:0.1.11-1
 - Release LIBC Next version 0.1.11
   (https://github.com/bitwiseworks/libc/blob/0.1.11/CHANGELOG.md).
