@@ -4,17 +4,16 @@
 
 %global no_systemd 1
 %global no_webkit 1
-%global no_multimedia 1
 
 Name:    quassel
 Summary: A modern distributed IRC system
-Version: 0.14
-Release: 1.pre%{?dist}
+Version: 0.14.0
+Release: 1%{?dist}
 
 License: GPLv2 or GPLv3
 URL:     http://quassel-irc.org/
 Vendor:  bww bitwise works GmbH
-%scm_source github http://github.com/bitwiseworks/%{name}-os2 master-os2
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
 
 Requires: bww-resources-rpm
 BuildRequires: cmake
@@ -30,9 +29,7 @@ BuildRequires: qt5-qtbase-devel
 %if !0%{?no_webkit}
 BuildRequires: qt5-qtwebkit-devel
 %endif
-%if !0%{?no_multimedia}
 BuildRequires: qt5-qtmultimedia-devel
-%endif
 BuildRequires: qt5-rpm-macros
 #BuildRequires: openldap-devel
 
@@ -93,7 +90,7 @@ Requires: %{name}-common = %{version}-%{release}
 %description client
 Quassel client
 
-%debuglevel
+%debug_package
 
 %prep
 %scm_setup
@@ -108,16 +105,12 @@ export BOOST_LDFLAGS="-LE:/Trees/boost/trunk/stage/lib"
 export LDFLAGS="-Zomf -Zhigh-mem -lcx -lssp %{?__global_ldflags}"
 export VENDOR="%{vendor}"
 
-mkdir build
-cd build
-%{cmake} .. -DWANT_MONO=1 -DUSE_QT5=1 -DHAVE_SSL=1 \
-  -DENABLE_SHARED=OFF
-cd ..
+%cmake -DWANT_MONO=1 -DUSE_QT5=1 -DHAVE_SSL=1 -DENABLE_SHARED=OFF
 
-make %{?_smp_mflags} -C build
+%cmake_build
 
 %install
-make install/fast DESTDIR=%{buildroot} -C build
+%cmake_install
 
 # unpackaged files
 rm -f %{buildroot}/%{_datadir}/pixmaps/quassel.png
@@ -136,7 +129,6 @@ install -p -m 0644 %{SOURCE1} %{buildroot}/%{_unitdir}/
 install -d -m 0750 %{buildroot}/%{quassel_data_dir}
 
 # Core pre/post macros.
-
 %pre core
 groupadd -r %{quassel_user}
 useradd -r -g %{quassel_user} -d %{quassel_data_dir} -s /sbin/nologin \
@@ -149,6 +141,11 @@ exit 0
 %systemd_post quasselcore.service
 %endif
 
+# for the definition of the parameters see macros.bww
+%global app_title Quassel IRC core
+%bww_folder -t %{title} -s %{name}-apps
+%bww_app -f %{_bindir}/%{name}client.exe -t %{app_title}
+
 %preun core
 %if !0%{?no_systemd}
 %systemd_preun quasselcore.service
@@ -159,16 +156,23 @@ exit 0
 %systemd_postun_with_restart quasselcore.service
 %endif
 
+if [ "$1" -ge 1 ]; then # (upon update)
+    %wps_object_delete_all
+fi
+
+
+# pre/post macros.
 %post
 if [ "$1" -ge 1 ]; then # (upon update)
     %wps_object_delete_all
 fi
+
 # for the definition of the parameters see macros.bww
+%global app_title Quassel IRC
 %bww_folder -t %{title} -s %{name}-apps
-%bww_app -f %{_bindir}/%{name}.exe -t %{title}
+%bww_app -f %{_bindir}/%{name}.exe -t %{app_title}
 %bww_app_shadow
 %bww_readme -f %_defaultdocdir/%{name}-common-%{version}/README.md
-
 
 %postun
 if [ "$1" -eq 0 ]; then # (upon removal)
@@ -176,19 +180,23 @@ if [ "$1" -eq 0 ]; then # (upon removal)
 fi
 
 
+# client pre/post macros.
 %post client
 if [ "$1" -ge 1 ]; then # (upon update)
     %wps_object_delete_all
 fi
+
 # for the definition of the parameters see macros.bww
+%global app_title Quassel IRC client
 %bww_folder -t %{title} -s %{name}-apps
-%bww_app -f %{_bindir}/%{name}client.exe -t %{title}
+%bww_app -f %{_bindir}/%{name}client.exe -t %{app_title}
 
 
 %postun client
 if [ "$1" -eq 0 ]; then # (upon removal)
     %wps_object_delete_all
 fi
+
 
 %files
 %{_bindir}/quassel.exe
@@ -215,6 +223,10 @@ fi
 
 
 %changelog
+* Fri Nov 03 2023 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.14.0-1
+- update to version 0.14.0
+- add icon to quassel.exe
+- add wps objects to core
+
 * Mon Jan 27 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.14-1.pre
 - initial OS/2 rpm
-
