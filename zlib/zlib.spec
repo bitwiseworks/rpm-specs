@@ -1,13 +1,13 @@
 
 Summary: The compression and decompression library
 Name: zlib
-Version: 1.2.11
-Release: 2%{?dist}
+Version: 1.3
+Release: 1%{?dist}
 License: zlib and Boost
 Group: System Environment/Libraries
 URL: http://www.zlib.net
 Vendor:  bww bitwise works GmbH
-%scm_source  svn http://svn.netlabs.org/repos/ports/zlib/trunk 1948
+%scm_source  github http://github.com/bitwiseworks/%{name}-os2 v%{version}-os2
 
 # DEF files to create forwarders for the legacy package
 Source10:       z.def
@@ -80,6 +80,8 @@ autoreconf -fvi
 make %{?_smp_mflags}
 
 %check
+export LIBPATHSTRICT=T
+export BEGINLIBPATH=%{_builddir}/%{buildsubdir}
 make test
 
 %install
@@ -137,6 +139,9 @@ gcc -Zomf -Zdll -nostdlib z.def -l$RPM_BUILD_ROOT/%{_libdir}/z1.dll -lend -o $RP
 %{_libdir}/pkgconfig/minizip.pc
 
 %changelog
+* Fri Nov 03 2023 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.3-1
+- update to latest version
+
 * Wed Aug 09 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.2.11-2
 - use new scm_source and scm_setup macro
 
