@@ -1,16 +1,31 @@
 Summary:       Library of functions for manipulating TIFF format image files
 Name:          libtiff
-Version:       4.0.9
+Version:       4.6.0
 Release:       1%{?dist}
 License:       libtiff
-Group:         System Environment/Libraries
 URL:           http://www.simplesystems.org/libtiff/
 
+%if !0%{?os2_version}
+Source:        http://download.osgeo.org/libtiff/tiff-%{version}.tar.gz
+
+Patch0:        libtiff-am-version.patch
+Patch4:        libtiff-CVE-2023-0804.patch
+%else
 Vendor:        bww bitwise works GmbH
 %scm_source  github https://github.com/bitwiseworks/libtiff-os2 %{version}-os2
+%endif
 
-BuildRequires: zlib-devel libjpeg-devel jbigkit-devel
+BuildRequires: gcc, gcc-c++
+%if !0%{?os2_version}
+BuildRequires: zlib-devel libjpeg-devel jbigkit-devel libzstd-devel libwebp-devel liblerc-devel
+%else
+BuildRequires: zlib-devel libjpeg-devel jbigkit-devel libzstd-devel libwebp-devel
+%endif
 BuildRequires: libtool automake autoconf pkgconfig
+
+# Add old libtiff to work with packages not built with new libtiff.so.6
+BuildRequires: libtiff
+BuildRequires: make
 
 %description
 The libtiff package contains a library of functions for manipulating
@@ -23,10 +38,15 @@ format image files.
 
 %package devel
 Summary:       Development tools for programs which will use the libtiff library
-Group:         Development/Libraries
+%if !0%{?os2_version}
+Requires:      %{name}%{?_isa} = %{version}-%{release}
+%else
 Requires:      %{name} = %{version}-%{release}
+%endif
 Requires:      pkgconfig
+%if 0%{?os2_version}
 Obsoletes:     %{name}-legacy-devel
+%endif
 
 %description devel
 This package contains the header files and documentation necessary for
@@ -38,10 +58,13 @@ image files, you should install this package.  You'll also need to
 install the libtiff package.
 
 %package static
-Summary:       Static TIFF image format file library
-Group:         Development/Libraries
-Requires:      %{name}-devel = %{version}-%{release}
-Obsoletes:     %{name}-legacy-static
+Summary:     Static TIFF image format file library
+%if !0%{?os2_version}
+Requires:    %{name}-devel%{?_isa} = %{version}-%{release}
+%else
+Requires:    %{name}-devel = %{version}-%{release}
+Obsoletes:   %{name}-legacy-static
+%endif
 
 %description static
 The libtiff-static package contains the statically linkable version of libtiff.
@@ -49,34 +72,58 @@ Linking to static libraries is discouraged for most applications, but it is
 necessary for some boot packages.
 
 %package tools
-Summary:       Command-line utility programs for manipulating TIFF files
-Group:         Development/Libraries
-Requires:      %{name} = %{version}-%{release}
-Obsoletes:     %{name}-legacy-tools
+Summary:    Command-line utility programs for manipulating TIFF files
+%if !0%{?os2_version}
+Requires:   %{name}%{?_isa} = %{version}-%{release}
+%else
+Requires:   %{name} = %{version}-%{release}
+Obsoletes:  %{name}-legacy-tools
+%endif
 
 %description tools
 This package contains command-line programs for manipulating TIFF format
 image files using the libtiff library.
 
+%if 0%{?os2_version}
 %legacy_runtime_packages
 
 %debug_package
+%endif
 
 %prep
+%if !0%{?os2_version}
+%autosetup -n tiff-%{version} -N
+
+%patch0 -p1 -b .backup
+%patch4 -p1 -b .backup
+%else
 %scm_setup
+%endif
 
 # Use build system's libtool.m4, not the one in the package.
-autogen.sh
+rm -f libtool.m4
+
+libtoolize --force  --copy
+aclocal -I . -I m4
+automake --add-missing --copy
+autoconf
+autoheader
 
 %build
-export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
-export CFLAGS="%{optflags} -fno-strict-aliasing"
+%if 0%{?os2_version}
 export VENDOR="%{vendor}"
-%configure
+export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+%endif
+export CFLAGS="%{optflags} -fno-strict-aliasing"
+%configure --enable-ld-version-script
+%if !0%{?os2_version}
+%make_build
+%else
 make %{?_smp_mflags}
+%endif
 
 %install
-make DESTDIR=$RPM_BUILD_ROOT install
+%make_install
 
 # remove what we didn't want installed
 rm $RPM_BUILD_ROOT%{_libdir}/*.la
@@ -84,48 +131,112 @@ rm -rf $RPM_BUILD_ROOT%{_datadir}/doc/
 
 # no libGL dependency, please
 rm -f $RPM_BUILD_ROOT%{_bindir}/tiffgt
-rm -f $RPM_BUILD_ROOT%{_mandir}/man1/tiffgt.1
 
 # no sgi2tiff or tiffsv, either
 rm -f $RPM_BUILD_ROOT%{_bindir}/sgi2tiff
-rm -f $RPM_BUILD_ROOT%{_mandir}/man1/sgi2tiff.1
 rm -f $RPM_BUILD_ROOT%{_bindir}/tiffsv
+
+rm -f $RPM_BUILD_ROOT%{_mandir}/man1/tiffgt.1
+rm -f $RPM_BUILD_ROOT%{_mandir}/man1/sgi2tiff.1
 rm -f $RPM_BUILD_ROOT%{_mandir}/man1/tiffsv.1
 
-%clean
-rm -rf $RPM_BUILD_ROOT
+%if !0%{?os2_version}
+# multilib header hack
+# we only apply this to known Red Hat multilib arches, per bug #233091
+case `uname -i` in
+  i386 | ppc | s390 | sparc )
+    wordsize="32"
+    ;;
+  x86_64 | ppc64 | s390x | sparc64 )
+    wordsize="64"
+    ;;
+  *)
+    wordsize=""
+    ;;
+esac
 
-#post -p /sbin/ldconfig
+if test -n "$wordsize"
+then
+  mv $RPM_BUILD_ROOT%{_includedir}/tiffconf.h \
+     $RPM_BUILD_ROOT%{_includedir}/tiffconf-$wordsize.h
 
-#postun -p /sbin/ldconfig
+  cat >$RPM_BUILD_ROOT%{_includedir}/tiffconf.h <<EOF
+#ifndef TIFFCONF_H_MULTILIB
+#define TIFFCONF_H_MULTILIB
+
+#include <bits/wordsize.h>
+
+#if __WORDSIZE == 32
+# include "tiffconf-32.h"
+#elif __WORDSIZE == 64
+# include "tiffconf-64.h"
+#else
+# error "unexpected value for __WORDSIZE macro"
+#endif
+
+#endif
+EOF
+
+fi
+
+# Copy old soname %{_libdir}/libtiff.so.5
+# Copy old soname %{_libdir}/libtiffxx.so.5
+cp %{_libdir}/libtiff.so.5* $RPM_BUILD_ROOT%{_libdir}
+cp %{_libdir}/libtiffxx.so.5* $RPM_BUILD_ROOT%{_libdir}
+
+%ldconfig_scriptlets
+%endif
 
 %check
-# remember to set beginlibpath by hand for now, as dash doesn't do it so far
-# as soon as it's fixed the below line will work
+%if !0%{?os2_version}
+LD_LIBRARY_PATH=$PWD:$LD_LIBRARY_PATH make check
+%else
 export BEGINLIBPATH=%{_builddir}/%{buildsubdir}/libtiff/.libs
 make check
+%endif
 
 %files
-%doc COPYRIGHT README RELEASE-DATE VERSION
+%license LICENSE.md
+%doc README.md RELEASE-DATE VERSION
+%if !0%{?os2_version}
+%{_libdir}/libtiff.so.*
+%{_libdir}/libtiffxx.so.*
+%else
 %{_libdir}/tiff*.dll
 %exclude %{_libdir}/tiff.dll
+%endif
 
 %files devel
-%doc TODO ChangeLog html
+%doc TODO ChangeLog
 %{_includedir}/*
+%if !0%{?os2_version}
+%{_libdir}/libtiff.so
+%{_libdir}/libtiffxx.so
+%else
 %{_libdir}/tiff*_dll.a
+%endif
 %{_libdir}/pkgconfig/libtiff*.pc
 %{_mandir}/man3/*
 
 %files static
 %{_libdir}/*.a
+%if 0%{?os2_version}
 %exclude %{_libdir}/*_dll.a
+%endif
 
 %files tools
+%if !0%{?os2_version}
+%{_bindir}/*
+%else
 %{_bindir}/*.exe
+%endif
 %{_mandir}/man1/*
 
 %changelog
+* Mon Nov 27 2023 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.6.0-1
+- update to version 4.6.0
+- resync spec with fedora
+
 * Fri Dec 01 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.0.9-1
 - enable jbig encoding
 - updated source to 4.0.9 version
