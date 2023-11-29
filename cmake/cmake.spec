@@ -91,7 +91,7 @@
 %{!?_vpath_builddir:%global _vpath_builddir %(echo '%{_target_platform}' | sed -e 's!/!!g')}
 
 %global major_version 3
-%global minor_version 20
+%global minor_version 25
 # Set to RC version if building RC, else %%{nil}
 #global rcsuf rc1
 %{?rcsuf:%global relsuf .%{rcsuf}}
@@ -105,8 +105,8 @@
 %global orig_name cmake
 
 Name:           %{orig_name}%{?name_suffix}
-Version:        %{major_version}.%{minor_version}.6
-Release:        3%{?dist}
+Version:        %{major_version}.%{minor_version}.2
+Release:        %{baserelease}%{?relsuf}%{?dist}
 Summary:        Cross-platform make system
 
 # most sources are BSD
@@ -183,12 +183,10 @@ Provides: bundled(jsoncpp)
 %else
 BuildRequires:  jsoncpp-devel
 %endif
-%if !0%{?os2_version}
-%if 0%{?fedora} || 0%{?rhel} >= 7
+%if 0%{?fedora} || 0%{?rhel} >= 7 || 0%{?os2_version}
 BuildRequires:  libarchive-devel
 %else
 BuildRequires:  libarchive3-devel
-%endif
 %endif
 BuildRequires:  libuv-devel
 %if %{with bundled_rhash}
@@ -355,7 +353,7 @@ tail -n +2 %{SOURCE5} >> %{name}.req
 
 
 %build
-%if 0%{?set_build_flags:1}
+%if !0%{?os2_version} && 0%{?set_build_flags:1}
 %{set_build_flags}
 %else
 CFLAGS="$(echo ${CFLAGS:-%optflags} | sed -re "s/(^|\s)-g(\s|\$)/ /g") -s" ; export CFLAGS
@@ -387,9 +385,7 @@ $SRCDIR/bootstrap --prefix=%{_prefix} \
 %else
                   --bootstrap-system-libuv \
                   --system-libs \
-                  --no-system-libarchive \
                   --no-system-nghttp2 \
-                  --no-system-zstd \
 %endif
                   --parallel="$(echo %{?_smp_mflags} | sed -e 's|-j||g')" \
 %if %{with bundled_rhash}
@@ -651,6 +647,9 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Wed Nov 29 2023 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.25.2-1
+- update to vendor version 3.25.2
+
 * Wed Mar 22 2023 Dmitriy Kuminov <coding@dmik.org> 3.20.6-3
 - Disable HLL debug info due to overflows in EMXOMF tools.
 - Clean up BUILDROOT before and after installing.
