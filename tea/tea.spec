@@ -5,7 +5,7 @@ Summary:       A powerful and easy-to-use Qt4-based editor with many useful feat
 Group:         Graphical Desktop/Applications/Development
 Vendor:        TeLLie OS2 forever
 Distribution:  OS/2
-Packager:      TeLLie elbert.pol@gmail.com
+Packager:      TeLLie 
 URL:           http://semiletov.org/tea/
 %if !0%{?os2_version}
 Source:       http://downloads.sourceforge.net/project/tea-editor/tea-editor/%{version}/tea-%{version}.tar.bz2
