@@ -4,7 +4,9 @@
 
 %global bash_completion %{_datadir}/bash-completion/completions/*
 
-%if 0%{?rhel} && ( 0%{?rhel} <= 7 || 0%{?rhel} >= 9 ) || 0%{?os2_version}
+# Fedora infrastructure needs it for producing Fedora  39 and EPEL  7 repositories
+# See https://github.com/rpm-software-management/createrepo_c/issues/398
+%if ( 0%{?rhel} && ( 0%{?rhel} <= 7 || 0%{?rhel} >= 9 ) ) || ( 0%{?fedora} && 0%{?fedora} >= 45 ) || 0%{?os2_version}
 %bcond_with drpm
 %else
 %bcond_without drpm
@@ -22,24 +24,34 @@
 %bcond_without libmodulemd
 %endif
 
+%if 0%{?rhel} && 0%{?rhel} <= 8
+%bcond_without legacy_hashes
+%else
+%bcond_with legacy_hashes
+%endif
+
+%bcond_with sanitizers
+
 Summary:        Creates a common metadata repository
 Name:           createrepo_c
-Version:        0.17.3
-Release:        2%{?dist}
-License:        GPLv2+
+Version:        1.0.2
+Release:        1%{?dist}
+License:        GPL-2.0-or-later
 %if !0%{?os2_version}
 URL:            https://github.com/rpm-software-management/createrepo_c
 Source0:        %{url}/archive/%{version}/%{name}-%{version}.tar.gz
+Patch0:         0001-build-Restore-compatiblity-with-libxml2-2.12.0.patch
 %else
 Vendor:         bww bitwise works GmbH
 %scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
 %endif
 
+%global epoch_dep %{?epoch:%{epoch}:}
+
 BuildRequires:  cmake
 BuildRequires:  gcc
 BuildRequires:  bzip2-devel
 BuildRequires:  doxygen
-BuildRequires:  file-devel
 BuildRequires:  glib2-devel >= 2.22.0
 BuildRequires:  libcurl-devel
 BuildRequires:  libxml2-devel
@@ -55,10 +67,15 @@ BuildRequires:  zchunk
 %endif
 %if %{with libmodulemd}
 BuildRequires:  pkgconfig(modulemd-2.0) >= %{libmodulemd_version}
+%if 0%{?rhel} && 0%{?rhel} <= 7
+BuildRequires:  libmodulemd2
+Requires:       libmodulemd2%{?_isa} >= %{libmodulemd_version}
+%else
 BuildRequires:  libmodulemd
 Requires:       libmodulemd%{?_isa} >= %{libmodulemd_version}
 %endif
-Requires:       %{name}-libs =  %{version}-%{release}
+%endif
+Requires:       %{name}-libs = %{epoch_dep}%{version}-%{release}
 %if !0%{?os2_version}
 BuildRequires:  bash-completion
 %endif
@@ -66,10 +83,18 @@ Requires: rpm >= 4.9.0
 %if %{with drpm}
 BuildRequires:  drpm-devel >= 0.4.0
 %endif
+# dnf supports zstd since 8.4: https://bugzilla.redhat.com/show_bug.cgi?id=1914876
+BuildRequires:  pkgconfig(libzstd)
+
+%if %{with sanitizers}
+BuildRequires:  libasan
+BuildRequires:  liblsan
+BuildRequires:  libubsan
+%endif
 
 %if 0%{?fedora} || 0%{?rhel} > 7 || 0%{?os2_version}
 Obsoletes:      createrepo < 0.11.0
-Provides:       createrepo = %{version}-%{release}
+Provides:       createrepo = %{epoch_dep}%{version}-%{release}
 %endif
 
 %description
@@ -87,23 +112,24 @@ for easy manipulation with a repodata.
 
 %package devel
 Summary:    Library for repodata manipulation
-Requires:   %{name}-libs%{?_isa} = %{version}-%{release}
+Requires:   %{name}-libs = %{epoch_dep}%{version}-%{release}
 
 %description devel
 This package contains the createrepo_c C library and header files.
 These development files are for easy manipulation with a repodata.
 
-%if !0%{?os2_version}
 %package -n python3-%{name}
 Summary:        Python 3 bindings for the createrepo_c library
 %{?python_provide:%python_provide python3-%{name}}
 BuildRequires:  python3-devel
+BuildRequires:  python3-setuptools
+%if !0%{?os2_version}
 BuildRequires:  python3-sphinx
-Requires:       %{name}-libs = %{version}-%{release}
+%endif
+Requires:       %{name}-libs = %{epoch_dep}%{version}-%{release}
 
 %description -n python3-%{name}
 Python 3 bindings for the createrepo_c library.
-%endif
 
 %if 0%{?os2_version}
 %debug_package
@@ -114,6 +140,9 @@ Python 3 bindings for the createrepo_c library.
 %autosetup -p1
 %else
 %scm_setup
+# we need to restore the symlink, as git archive doesnt preserve it
+rm -f tests/createrepo
+ln -s ../src/ tests/createrepo
 %endif
 
 mkdir build-py3
@@ -129,10 +158,11 @@ export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp -Zbin-files -lcx"
 export VENDOR="%{vendor}"
 %endif
   %cmake .. \
-      -DENABLE_PYTHON=%{?os2_version:OFF}%{!?os2_version:ON} \
       -DWITH_ZCHUNK=%{?with_zchunk:ON}%{!?with_zchunk:OFF} \
       -DWITH_LIBMODULEMD=%{?with_libmodulemd:ON}%{!?with_libmodulemd:OFF} \
-      -DENABLE_DRPM=%{?with_drpm:ON}%{!?with_drpm:OFF}
+      -DWITH_LEGACY_HASHES=%{?with_legacy_hashes:ON}%{!?with_legacy_hashes:OFF} \
+      -DENABLE_DRPM=%{?with_drpm:ON}%{!?with_drpm:OFF} \
+      -DWITH_SANITIZERS=%{?with_sanitizers:ON}%{!?with_sanitizers:OFF}
   make %{?_smp_mflags} RPM_OPT_FLAGS="%{optflags}"
   # Build C documentation
   make doc-c
@@ -143,10 +173,6 @@ cd ..
 %endif
 
 %check
-%if 0%{?os2_version}
-# tests are disabled as we have a way to old glib2. g_autoptr is needed and was
-# added in 2.44 while we stil are at 2.33.
-%else
 # Run Python 3 tests
 %if !0%{?os2_version}
 pushd build-py3
@@ -157,12 +183,14 @@ cd build-py3
   make tests
 
   # Run Python 3 tests
+  # one day we might have all tests running, who knows
+%if !0%{?os2_version}
   make ARGS="-V" test
+%endif
 %if !0%{?os2_version}
 popd
 %else
 cd ..
-%endif
 %endif
 
 %install
@@ -242,14 +270,17 @@ ln -sr %{buildroot}%{_bindir}/modifyrepo_c.exe %{buildroot}%{_bindir}/modifyrepo
 %{_libdir}/pkgconfig/%{name}.pc
 %{_includedir}/%{name}/
 
-%if !0%{?os2_version}
 %files -n python3-%{name}
 %{python3_sitearch}/%{name}/
 %{python3_sitearch}/%{name}-%{version}-py%{python3_version}.egg-info
-%endif
 
 %changelog
-* Tue Sep 23 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.17.3-2
+* Fri Dec 15 2023 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.0.2-1
+- update to version 1.0.2
+- enable python3
+- merge with latest fedora spec
+
+* Thu Sep 23 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.17.3-2
 - add -Zbin-files, as the rpm dll need it. which is a rpm dll flaw!!!
 
 * Wed Jul 14 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.17.3-1
