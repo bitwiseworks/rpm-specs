@@ -1,30 +1,32 @@
 Name:          tea
 Version:       62.1.2
-Release:       1%{?dist}
+Release:       3%{?dist}
 Summary:       A powerful and easy-to-use Qt4-based editor with many useful features for HTML, Docbook, and LaTeX editing
 Group:         Graphical Desktop/Applications/Development
+%if 0%{?os2_version}
 Vendor:        TeLLie OS2 forever
 Distribution:  OS/2
-Packager:      TeLLie 
+Packager:      TeLLie
+%endif 
 URL:           http://semiletov.org/tea/
 %if !0%{?os2_version}
 Source:       http://downloads.sourceforge.net/project/tea-editor/tea-editor/%{version}/tea-%{version}.tar.bz2
 %else
-%scm_source github https://github.com/psemiletov/tea-qt master
+%scm_source github https://github.com/Tellie/%{name}-os2 %{version}-os2
 %endif
 
 License:       GPL
-%if !0%{?os2_version}
 # AUTOBUILDREQ-BEGIN
+%if !0%{?os2_version}
 BuildRequires: glibc-devel
 BuildRequires: libGL-devel
-%else
+%endif
 BuildRequires: hunspell-devel
 BuildRequires: qt5-qtbase-devel
 BuildRequires: poppler-devel
 BuildRequires: zlib-devel
 BuildRequires: aspell-devel
-%endif
+
 ## AUTOBUILDREQ-END
 BuildRoot:     %{_tmppath}/%{name}-%{version}-root
 
@@ -40,37 +42,92 @@ Morse-code tools, bookmarks, syntax highlighting, and more.
 %scm_setup
 
 %build
+%if 0%{?os2_version}
 export LDFLAGS="-Zhigh-mem -Zomf -lcx"
 export CFLAGS="-O2 -g -march=pentium4"
 export CXXFLAGS="-O2 -g -march=pentium4"
 export FFLAGS="-O2 -g -march=pentium4"
 export FCFLAGS="-O2 -g -march=pentium4"
+%endif
 
-mkdir builder
-cd builder
-
-cmake -DCMAKE_INSTALL_PREFIX:PATH=/@unixroot/usr \
+%cmake . -DCMAKE_INSTALL_PREFIX:PATH=/@unixroot/usr \
       -DCMAKE_SKIP_RPATH:BOOL=YES \
       -DCMAKE_BUILD_TYPE=release \
       -DUSE_ASPELL=ON \
       -DUSE_PRINTER=ON \
       -DUSE_PDF=ON \
       -DUSE_DJVU=ON \
-      -Wno-dev ..
+      -Wno-dev
 
-make %{?_smp_mflags}
+%cmake_build
 
-%install  
-%make_install INSTALL_ROOT=%{buildroot} DESTDIR=$RPM_BUILD_ROOT
-mkdir -p %{buildroot}%{_bindir}
-install -Dm 0755 builder/%{name}.exe %{buildroot}%{_bindir}
-     
+%install
+%cmake_install
+
+%if 0%{?os2_version}     
+mkdir -p %{buildroot}%{_datadir}/os2/icons/
+cp -a icons/%{name}.ico %{buildroot}%{_datadir}/os2/icons/%{name}.ico
+mkdir -p %{buildroot}%{_datadir}/doc/%{name}-%{version}/
+cp -a todo %{buildroot}%{_datadir}/doc/%{name}-%{version}/TO-DO
+cp -a README_OS2 %{buildroot}%{_datadir}/doc/%{name}-%{version}/readme-os2.txt
+cp -a CHANGES_OS2 %{buildroot}%{_datadir}/doc/%{name}-%{version}/changes-os2.txt
+cp -a README.md %{buildroot}%{_datadir}/doc/%{name}-%{version}/readme.txt
+mkdir -p %{buildroot}%{_datadir}/licenses/%{name}-%{version}/
+cp -a copying %{buildroot}%{_datadir}/licenses/%{name}-%{version}/copying.txt
+%endif
+
+
 %files
-%defattr(-,root,root)
 %doc AUTHORS COPYING README.md NEWS NEWS-RU
+%exclude %{_datadir}/applications/%{name}.desktop
+%if !0%{?os2_version}
+%{_bindir}/tea
+%else
 %{_bindir}/tea.exe
+%{_datadir}/os2/icons/%{name}.ico
+%{_datadir}/doc/%{name}-%{version}/TO-DO
+%{_datadir}/doc/%{name}-%{version}/readme-os2.txt
+%{_datadir}/doc/%{name}-%{version}/changes-os2.txt
+%{_datadir}/doc/%{name}-%{version}/readme.txt
+%{_datadir}/licenses/%{name}-%{version}/copying.txt
+%endif
+%{_datadir}/icons/hicolor/32x32/apps/tea.png
+%{_datadir}/icons/hicolor/48x48/apps/tea.png
+%{_datadir}/icons/hicolor/64x64/apps/tea.png
+%{_datadir}/icons/hicolor/128x128/apps/tea.png
+%{_datadir}/icons/hicolor/scalable/apps/tea.svg
+
+%if 0%{?os2_version}
+%global wps_folder_title Tea
+
+%post -e
+if [ "$1" -ge 1 ]; then # (upon update)
+    %wps_object_delete_all
+fi
+%global wps_app_title Tea
+%bww_folder -t %{wps_folder_title}
+%bww_app -f %{_bindir}/%{name}.exe -t %{wps_app_title} -i ${name}.ico
+%bww_app_shadow
+%bww_file TODO -f %_defaultdocdir/%{name}-%{version}/TO-DO
+%bww_file README_OS2 -f %_defaultdocdir/%{name}-%{version}/README-os2.txt
+%bww_file CHANGES_OS2 -f %_defaultdocdir/%{name}-%{version}/CHANGES-os2.txt
+%bww_file README.md -f %_defaultdocdir/%{name}-%{version}/README.txt
+%bww_file copying -f %_defaultlicensedir/%{name}-%{version}/COPYING.txt
+
+%postun
+if [ "$1" -eq 0 ]; then # (upon removal)
+    %wps_object_delete_all
+fi
+%endif
 
 %changelog
+* Wed Dec 13 2023 Elbert Pol <elbert.pol@gmail.com> 62.1.2-3
+- Updated spec and add desktop map and icon
+- Add spec file to BWW reposito
+
+* Mon Dec 11 2023 Elbert Pol <elbert.pol@gmail.com> 62.1.2-2
+- Update the spec file more to os2 specifications
+
 * Sat Dec 09 2023 Elbert Pol <elbert.pol@gmail.com> 62.1.2-1
 - Updated to latest version
 
