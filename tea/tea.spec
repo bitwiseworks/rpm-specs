@@ -1,6 +1,6 @@
 Name:          tea
 Version:       62.1.2
-Release:       3%{?dist}
+Release:       4%{?dist}
 Summary:       A powerful and easy-to-use Qt4-based editor with many useful features for HTML, Docbook, and LaTeX editing
 Group:         Graphical Desktop/Applications/Development
 %if 0%{?os2_version}
@@ -21,6 +21,7 @@ License:       GPL
 BuildRequires: glibc-devel
 BuildRequires: libGL-devel
 %endif
+BuildRequires: bww-resources-rpm
 BuildRequires: hunspell-devel
 BuildRequires: qt5-qtbase-devel
 BuildRequires: poppler-devel
@@ -67,29 +68,18 @@ export FCFLAGS="-O2 -g -march=pentium4"
 %if 0%{?os2_version}     
 mkdir -p %{buildroot}%{_datadir}/os2/icons/
 cp -a icons/%{name}.ico %{buildroot}%{_datadir}/os2/icons/%{name}.ico
-mkdir -p %{buildroot}%{_datadir}/doc/%{name}-%{version}/
-cp -a todo %{buildroot}%{_datadir}/doc/%{name}-%{version}/TO-DO
-cp -a README_OS2 %{buildroot}%{_datadir}/doc/%{name}-%{version}/readme-os2.txt
-cp -a CHANGES_OS2 %{buildroot}%{_datadir}/doc/%{name}-%{version}/changes-os2.txt
-cp -a README.md %{buildroot}%{_datadir}/doc/%{name}-%{version}/readme.txt
-mkdir -p %{buildroot}%{_datadir}/licenses/%{name}-%{version}/
-cp -a copying %{buildroot}%{_datadir}/licenses/%{name}-%{version}/copying.txt
 %endif
 
 
 %files
-%doc AUTHORS COPYING README.md NEWS NEWS-RU
+%doc AUTHORS COPYING README.md NEWS NEWS-RU TODO 
 %exclude %{_datadir}/applications/%{name}.desktop
 %if !0%{?os2_version}
 %{_bindir}/tea
 %else
+%doc README-OS2.txt CHANGES-OS2.txt
 %{_bindir}/tea.exe
 %{_datadir}/os2/icons/%{name}.ico
-%{_datadir}/doc/%{name}-%{version}/TO-DO
-%{_datadir}/doc/%{name}-%{version}/readme-os2.txt
-%{_datadir}/doc/%{name}-%{version}/changes-os2.txt
-%{_datadir}/doc/%{name}-%{version}/readme.txt
-%{_datadir}/licenses/%{name}-%{version}/copying.txt
 %endif
 %{_datadir}/icons/hicolor/32x32/apps/tea.png
 %{_datadir}/icons/hicolor/48x48/apps/tea.png
@@ -108,11 +98,10 @@ fi
 %bww_folder -t %{wps_folder_title}
 %bww_app -f %{_bindir}/%{name}.exe -t %{wps_app_title} -i ${name}.ico
 %bww_app_shadow
-%bww_file TODO -f %_defaultdocdir/%{name}-%{version}/TO-DO
-%bww_file README_OS2 -f %_defaultdocdir/%{name}-%{version}/README-os2.txt
-%bww_file CHANGES_OS2 -f %_defaultdocdir/%{name}-%{version}/CHANGES-os2.txt
-%bww_file README.md -f %_defaultdocdir/%{name}-%{version}/README.txt
-%bww_file copying -f %_defaultlicensedir/%{name}-%{version}/COPYING.txt
+%bww_file TODO -f %_defaultdocdir/%{name}-%{version}/TODO
+%bww_file README-OS2.txt -f %_defaultdocdir/%{name}-%{version}/README-os2.txt
+%bww_file CHANGES-OS2.txt -f %_defaultdocdir/%{name}-%{version}/CHANGES-os2.txt
+%bww_file README.md -f %_defaultdocdir/%{name}-%{version}/README.md
 
 %postun
 if [ "$1" -eq 0 ]; then # (upon removal)
@@ -121,6 +110,10 @@ fi
 %endif
 
 %changelog
+* Tue Dec 19 2023 Elbert Pol <elbert.pol@gmail.com> 62.1.2-4
+- Tweaked the spec file some more.
+- Add some BuildRequires
+
 * Wed Dec 13 2023 Elbert Pol <elbert.pol@gmail.com> 62.1.2-3
 - Updated spec and add desktop map and icon
 - Add spec file to BWW reposito
