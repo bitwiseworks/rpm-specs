@@ -1,5 +1,5 @@
 Name:           libjpeg-turbo
-Version:        2.1.4
+Version:        3.0.1
 Release:        1%{?dist}
 Summary:        A MMX/SSE2/SIMD accelerated library for manipulating JPEG image files
 License:        IJG
@@ -12,7 +12,6 @@ Patch1:         libjpeg-turbo-CET.patch
 %else
 Vendor:         bww bitwise works GmbH
 %scm_source github https://github.com/bitwiseworks/%{name}-os2 %{version}-os2
-%global __cmake_in_source_build .
 # DEF files to create forwarders for the legacy package
 Source10:       jpeg.def
 %endif
@@ -212,7 +211,7 @@ export BEGINLIBPATH=%{_builddir}/%{buildsubdir}
 %endif
 
 %files devel
-%doc coderules.txt jconfig.txt libjpeg.txt structure.txt example.txt
+%doc coderules.txt jconfig.txt libjpeg.txt structure.txt example.c
 %{_includedir}/jconfig*.h
 %{_includedir}/jerror.h
 %{_includedir}/jmorecfg.h
@@ -267,6 +266,9 @@ export BEGINLIBPATH=%{_builddir}/%{buildsubdir}
 %{_libdir}/pkgconfig/libturbojpeg.pc
 
 %changelog
+* Thu Dec 21 2023 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.0.1-1
+- update version to 2.1.4
+
 * Fri Jan 13 2023 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.1.4-1
 - update version to 2.1.4
 - merged spec to fedora version
