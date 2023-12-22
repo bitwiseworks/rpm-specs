@@ -63,6 +63,7 @@ kernel space.  This package contains the files needed for developing
 applications with nettle.
 
 %if 0%{?os2_version}
+%legacy_runtime_packages
 %debug_package
 %endif
 
