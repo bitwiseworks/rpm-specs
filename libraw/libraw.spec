@@ -1,32 +1,31 @@
-
-# feature macro to enable samples (or not)
-%if 0%{?rhel} != 7
-%global samples 1
-%endif
+%global somajor 23
 
 Summary: Library for reading RAW files obtained from digital photo cameras
-Name: LibRaw
-Version: 0.21.1
-Release: 2%{?dist}
-License: BSD-3-Clause and (CDDL-1.0 or  LGPL-2.1-only)
-URL: http://www.libraw.org
+Name: libraw
+Version: 0.21.2
+Release: 1%{?dist}
+License: BSD-3-Clause and (CDDL-1.0 or LGPL-2.1-only)
+URL: https://www.libraw.org
+%if 0%{?os2_version}
+Vendor:         TeLLie OS2 forever
+Distribution:   OS/2
+Packager:       TeLLeRBoP
+%endif
+%if !0%{?os2_version}
+Source0: %{url}/data/%{name}-%{version}.tar.gz
+Patch0: LibRaw-pkgconfig.patch
+%else
+%scm_source github https://github.com/Tellie/%{name}-os2 %{version}-os2
+%endif
 
 BuildRequires: gcc-c++
 BuildRequires: pkgconfig(lcms2)
 BuildRequires: pkgconfig(jasper)
 BuildRequires: pkgconfig(libjpeg)
+BuildRequires: pkgconfig(zlib)
 BuildRequires: autoconf automake libtool
 BuildRequires: make
 
-%if !0%{?os2_version}
-Source0: http://github.com/LibRaw/LibRaw/archive/%{version}.tar.gz
-%else
-%scm_source github https://github.com/Tellie//%{name}-os2 %{version}-os2
-%endif
-%if !0%{?os2_version}
-Patch0: LibRaw-pkgconfig.patch
-Patch1: 9ab70f6dca19229cb5caad7cc31af4e7501bac93.patch
-%endif
 Provides: bundled(dcraw) = 9.25
 
 %description
@@ -38,7 +37,7 @@ drawbacks have already been eliminated and part will be fixed in future.
 
 %package devel
 Summary: LibRaw development libraries
-Requires:   %{name}%{?_isa} = %{version}-%{release}
+Requires: %{name}%{?_isa} = %{version}-%{release}
 
 %description devel
 LibRaw development libraries.
@@ -55,7 +54,7 @@ LibRaw static development libraries.
 
 %package samples
 Summary: LibRaw sample programs
-Requires: %{name} = %{version}-%{release}
+Requires: %{name}%{?_isa} = %{version}-%{release}
 
 %description samples
 LibRaw sample programs
@@ -68,17 +67,17 @@ LibRaw sample programs
 %endif
 
 %build
-autoreconf -ifv
-export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
-export LIBS="-lcx -lpthread"
-
+autoreconf -if
 %configure \
-    --enable-examples=%{?samples:yes}%{!?samples:no} \
+    --enable-examples=yes \
     --enable-jasper \
     --enable-jpeg \
-    --enable-lcms
+    --enable-lcms \
+    --enable-zlib \
 %if !0%{?os2_version}
-    --enable-openmp
+    --enable-openmp \
+%else
+   --disable-openmp
 %endif
 
 # https://fedoraproject.org/wiki/Packaging:Guidelines#Beware_of_Rpath
@@ -105,16 +104,12 @@ rm -fv samples/*.o
 
 rm -fv %{buildroot}%{_libdir}/lib*.la
 
-%if !0%{?os2_version}
-%ldconfig_scriptlets
-%endif
-
 %files
 %doc Changelog.txt
 %license LICENSE.CDDL LICENSE.LGPL COPYRIGHT
 %if !0%{?os2_version}
-%{_libdir}/libraw.so.23*
-%{_libdir}/libraw_r.so.23*
+%{_libdir}/libraw.so.%{somajor}{,.*}
+%{_libdir}/libraw_r.so.%{somajor}{,.*}
 %else
 %{_libdir}/*.dll
 %endif
@@ -145,12 +140,15 @@ rm -fv %{buildroot}%{_libdir}/lib*.la
 %{_libdir}/pkgconfig/libraw_r.pc
 %exclude %{_docdir}/libraw/*
 
-%if 0%{?samples}
 %files samples
 %{_bindir}/*
-%endif
+
 
 %changelog
+* Wed Dec 27 2023 Elbert Pol <elbert.pol@gmail,com> - 0.21.2-1
+- Updated to latest version
+- Updated to latest Fedora spec
+
 * Tue Sep 19 2023 Elbert Pol <elbert.pol@gmail.com> - 0.21.1-2
 - Set the static files to the right section
 - Remove defattr frpm spec file
@@ -175,4 +173,3 @@ rm -fv %{buildroot}%{_libdir}/lib*.la
 
 * Thu Dec 27 2018 Elbert Pol <elbert.pol@gmail.com> - 0.19.2-1
 - First Rpm version OS/2
-
