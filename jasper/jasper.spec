@@ -5,34 +5,41 @@
 
 Summary: Implementation of the JPEG-2000 standard, Part 1
 Name:    jasper
-Version: 3.0.3
+Version: 4.1.1
 Release: 1%{?dist}
-
-License: JasPer
+License: JasPer-2.0
+%if 0%{?os2_version}
+Vendor:         TeLLie OS2 forever
+Distribution:   OS/2
+Packager:       TeLLeRBoP
+%endif
 URL:     http://www.ece.uvic.ca/~frodo/jasper/
 %if !0%{?os2_version}
 Source0: https://github.com/jasper-software/%{name}/archive/refs/tags/version-%{version}.tar.gz
 %else
-%scm_source github http://github.com/TeLLie/%{name}-os2 %{version}-os2
+%scm_source github https://github.com/Tellie/%{name}-os2 %{version}-os2
 %endif
+
+%if !0%{?os2_version}
 # skip hard-coded prefix/lib rpath
-Patch1: jasper-3.0.0-rpath.patch
+Patch1: jasper-4.1.0-rpath.patch
 
 # architecture related patches
 Patch100: jasper-2.0.2-test-ppc64-disable.patch
 Patch101: jasper-2.0.2-test-ppc64le-disable.patch
+patch102: jasper-4.1.0-test-i686-disable.patch
+%endif
 
 # autoreconf
 BuildRequires: cmake
 %if !0%{?os2_version}
 BuildRequires: freeglut-devel 
 BuildRequires: libGLU-devel
-BuildRequires: mesa-libGL-devel
 BuildRequires: libXmu-devel libXi-devel
-%else
-BuildRequires: pkgconfig doxygen
-BuildRequires: libjpeg-devel
+BuildRequires: mesa-libGL-devel
 %endif
+BuildRequires: libjpeg-devel
+BuildRequires: pkgconfig doxygen
 
 Requires: %{name}-libs%{?_isa} = %{version}-%{release}
 BuildRequires: gcc
@@ -73,63 +80,67 @@ Requires: %{name}-libs%{?_isa} = %{version}-%{release}
 %scm_setup
 %endif
 
-%patch1 -p1 -b .rpath
+%if !0%{?os2_version}
+patch 1 -p1 -b .-rpath
+%endif
+
 # Need to disable one test to be able to build it on ppc64 arch
 # At ppc64 this test just stuck (nothing happend - no exception or error)
-
 %if "%{_arch}" == "ppc64"
-%patch100 -p1 -b .test-ppc64-disable
+%patch 100 -p1 -b .test-ppc64-disable
 %endif
 
 # Need to disable two tests to be able to build it on ppc64le arch
 # At ppc64le this tests just stuck (nothing happend - no exception or error)
-
 %if "%{_arch}" == "ppc64le"
-%patch101 -p1 -b .test-ppc64le-disable
+%patch 101 -p1 -b .test-ppc64le-disable
 %endif
 
+%if !0%{?os2_version}
+%ifarch %ix86
+%patch102 -p1 -b .test-i686-disable
+%endif
+%endif
 
 %build
+%if !0%{?os2_version}
 mkdir builder
-cd builder
+%endif
+
 %if 0%{?os2_version}
 export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp" 
 export LIBS="-lcx -lpthread"
 %endif
 %cmake \
-  -DJAS_ENABLE_DOC:BOOL=OFF \
-   ..
-
+  -DJAS_ENABLE_DOC:BOOL=OFF 
 %if !0%{?os2_version}
+  -B builder
+
 %make_build -C builder
-%else
-make %{?_smp_mflags}
-%endif
 
 %install
 make install/fast DESTDIR=%{buildroot} -C builder
+%endif
+
+%if 0%{?os2_version}
+%cmake_build
+
+%install
+%cmake_install
+%endif
 
 # Unpackaged files
 rm -f doc/README
 rm -f %{buildroot}%{_libdir}/lib*.la
 
-
 %check
-%if 0%{?os2_version}
-export BEGINLIBPATH=%{_builddir}/%{buildsubdir}/builder/src/libjasper
-%endif
+%if !0%{?os2_version}
 make test -C builder
 
-%if !0%{?os2_version}
 %ldconfig_scriptlets libs
 %endif
 
-%clean
-rm -rf $RPM_BUILD_ROOT
-
 %files
-%defattr(-,root,root,-)
-/@unixroot/usr/share/doc/JasPer/
 %if !0%{?os2_version}
 %{_bindir}/imgcmp
 %{_bindir}/imginfo
@@ -141,7 +152,7 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 %{_mandir}/man1/img*
 %{_mandir}/man1/jasper.1*
-%{_docdir}/Jasper/README.md
+%{_docdir}/JasPer/*
 
 %files devel
 %doc doc/*
@@ -149,27 +160,31 @@ rm -rf $RPM_BUILD_ROOT
 %if !0%{?os2_version}
 %{_libdir}/libjasper.so
 %else
-%{_libdir}/*.a
+%{_libdir}/*_dll.a
 %endif
 %{_libdir}/pkgconfig/jasper.pc
 
 %files libs
-%doc README
-%license COPYRIGHT LICENSE
+%doc README.md
+%license COPYRIGHT.txt LICENSE.txt
 %if !0%{?os2_version}
-%{_libdir}/libjasper.so.6*
+%{_libdir}/libjasper.so.7*
 %else
 %{_libdir}/*.dll
 %endif
 
-%files utils
 %if !0%{?os2_version}
+%files utils
 %{_bindir}/jiv
 %{_mandir}/man1/jiv.1*
 %endif
 
 %changelog
-* Fri Apr 09 2022 Elbert Pol <elbert.pol@gmail.com> - 3.0.3-1
+* Tue Dec 26 2023 Elbert Pol <elbert.pol@gmail.com> - 4.1.1-1
+- Updated to latest version
+- Disable utils, as jiv required opengl and glut
+
+* Sat Apr 09 2022 Elbert Pol <elbert.pol@gmail.com> - 3.0.3-1
 - Updated to latest version
 
 * Fri Oct 08 2021 Elbert Pol <elbert.pol@gmail.com> - 2.0.33-1
