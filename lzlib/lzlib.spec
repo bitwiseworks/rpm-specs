@@ -1,11 +1,12 @@
 Name:           lzlib
-Version:        1.12
+Version:        1.14
 Release:	1%{?dist}
 Summary:        LZMA Compression and Decompression Library
 License:        GPL-2.0+
 Group:          Development/Libraries/C and C++
 Url:            http://www.nongnu.org/lzip/lzlib.html
 %scm_source github http://github.com/TeLLie/%{name}-os2 %{version}-os2
+
 %if !0%{?os2_version}
 Source3:        %name.keyring
 %endif
@@ -53,7 +54,7 @@ make %{?_smp_flags}
 make DESTDIR="%{buildroot}" LDCONFIG=echo install
 %if !0%{?os2_version}
 # configure had no --disable-static
-#rm -f "%buildroot/%_libdir"/*.a
+rm -f "%buildroot/%_libdir"/*.a
 %endif
 
 %check
@@ -70,11 +71,9 @@ make -k check
 %endif
 
 %files
-%defattr(-,root,root)
 %doc AUTHORS ChangeLog COPYING NEWS README
 
 %files devel
-%defattr(-,root,root)
 %{_includedir}/lzlib.h
 %{_libdir}/liblz.a
 %exclude /@unixroot/usr/share/info/dir
@@ -84,6 +83,9 @@ make -k check
 %doc %{_infodir}/lzlib.info*
 
 %changelog
+* Tue Jan 22 2024 Elbert Pol <elbert.pol@gmail.com> - 1.14-1
+- Updated to latest version
+
 * Wed Jan 06 2021 Elbert Pol <elbert.pol@gmail.com> - 1.12 - 1
 - Updated to latest version
 
