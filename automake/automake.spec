@@ -82,8 +82,7 @@ Patch5: v2-0001-tests-Don-t-try-to-prevent-flex-to-include-unistd.patch
 Patch6: 0001-tests-depcomp-ensure-make_ok-fails-when-run_make-fai.patch
 %else
 Vendor:     bww bitwise works GmbH
-#scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
-%scm_source git e:/trees/automake/git master
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
 %endif
 
 URL:        http://www.gnu.org/software/automake/
