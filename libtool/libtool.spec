@@ -3,23 +3,95 @@
 # See rhbz#1193591
 %global automake_version %(set -- `automake --version | head -n 1` ; echo ${4-unknown})
 
+%if !0%{?os2_version}
+%bcond_without check
+%else
 # TODO make check takes insanely long when run by rpmbuild on OS/2.
 %bcond_with check
+%endif
 
 Summary: The GNU Portable Library Tool
 Name:    libtool
-Version: 2.4.6
-Release: 4%{?dist}
-License: GPLv2+ and LGPLv2+ and GFDL
+Version: 2.4.7
+Release: 1%{?dist}
+
+# To help future rebase, the following licenses were seen in the following files/folders:
+# '*' is anything that was not explicitly listed earlier in the folder
+#
+# From libtool package:
+# usr/bin/:
+#  libtool - GPL-2.0-or-later WITH Libtool-exception AND MIT
+#  libtoolize - GPL-2.0-or-later AND MIT
+# usr/share/:
+#  aclocal/* - FSFULLR
+#  doc/libtool:
+#    AUTHORS - GPL-2.0-or-later
+#    * - FSFAP
+#  info/* - GFDL-1.3-or-later
+#  libtool/build-aux/:
+#    {compile,depcomp,missing} - GPL-2.0-or-later WITH Autoconf-exception-generic
+#    config.{guess,sub} - GPL-3.0-or-later WITH Autoconf-exception-generic-3.0
+#    install-sh - X11 AND LicenseRef-Fedora-public-domain
+#    ltmain.sh - GPL-2.0-or-later WITH Libtool-exception AND MIT
+# usr/share/man/man1/*: generated from usr/bin/libtool{,ize} using help2man
+#
+# From libtool-ltdl package:
+# usr/lib64/
+#  * - LGPL-2.0-or-later WITH Libtool-exception
+#
+# From libtool-ltdl-devel package:
+# usr/include/* - LGPL-2.0-or-later WITH Libtool-exception
+# usr/share/:
+#  README - FSFAP
+#  {*.c,*.h,Makefile.am,configure.ac,ltdl.mk} - LGPL-2.0-or-later WITH Libtool-exception
+#  Makefile.in - FSFULLRWD
+#  aclocal.m4 - FSFULLR AND FSFULLRWD
+#  configure - FSFUL
+License: GPL-2.0-or-later AND GPL-2.0-or-later WITH Autoconf-exception-generic AND GPL-2.0-or-later WITH Libtool-exception AND LGPL-2.0-or-later WITH Libtool-exception AND GPL-3.0-or-later WITH Autoconf-exception-generic-3.0 AND MIT AND FSFAP AND FSFULLR AND FSFULLRWD AND GFDL-1.3-or-later AND X11 AND LicenseRef-Fedora-public-domain
 URL:     http://www.gnu.org/software/libtool/
+
+%if !0%{?os2_version}
+Source:  http://ftp.gnu.org/gnu/libtool/libtool-%{version}.tar.xz
+
+# ~> downstream
+# ~> remove possibly once #1158915 gets fixed somehow
+Patch0:  libtool-2.4.5-rpath.patch
+
+# See the rhbz#1289759 and rhbz#1214506.  We disable hardening namely because
+# that bakes the CFLAGS/LDFLAGS into installed /bin/libtool and ltmain.sh files.
+# At the same time we want to have libltdl.so hardened.  Downstream-only patch.
+%undefine _hardened_build
+Patch1: libtool-2.4.6-hardening.patch
+
+# The testsuite seems to not properly handle template instantiation and as
+# a result fails.  libtool itself appears to be OK from my by-hand testing. (by Jeff Law)
+# Disable LTO for link-order2 test (Related: #1988112)
+Patch2: libtool-2.4.6-disable-lto-link-order2.patch
+
+# non-PIC libraries are not supported on ARMv7
+# Since we removed "-fPIC" from global CFLAGS this test fails on this arch (as expected)
+# Please refer to the following ticket regarding PIC support on ARM:
+# https://bugs.launchpad.net/ubuntu/+source/gcc-4.4/+bug/503448
+Patch3: libtool-2.4.6-disable_non-pic_arm.patch
+
+# rhbz#2047389, patch sent upstream
+# https://lists.gnu.org/archive/html/libtool-patches/2022-02/msg00000.html
+Patch4: libtool-2.4.6-keep-compiler-deps.patch
+
+# Patch sent upstream
+# https://lists.gnu.org/archive/html/libtool-patches/2022-12/msg00004.html
+Patch5: 0001-tests-Fix-grep-warning-about-stray-before.patch
+
+%if ! 0%{?_module_build}
+Patch100: libtool-nodocs.patch
+%endif
+
+Patch101: libtool-c99.patch
+%else
 Vendor:  bww bitwise works GmbH
 
-%scm_source github http://github.com/bitwiseworks/%{name}-os2 60849038f64e593bd4a8deda5321488a0c90786c
-#scm_source git file://D:/Coding/%{name}/master 6084903
-
-BuildRequires: make git zip
-
-%info_requires
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
+%endif
 
 # /usr/bin/libtool includes paths within gcc's versioned directories
 # Libtool must be rebuilt whenever a new upstream gcc is built
@@ -28,17 +100,21 @@ BuildRequires: make git zip
 Requires: gcc(major) = %{gcc_major}
 Requires: autoconf, automake, sed, tar, findutils
 
-BuildRequires: gcc(major) = %{gcc_major}
+%if ! 0%{?_module_build}
 BuildRequires: texinfo
+%endif
 BuildRequires: autoconf, automake
 BuildRequires: help2man
 
 # make sure we can configure all supported langs
+%if !0%{?os2_version}
+BuildRequires: libstdc++-devel, gcc-gfortran
+%else
 BuildRequires: libstdc++-devel
-# TODO no gfortran yet
-# gcc-gfortran
+%endif
 
 BuildRequires: gcc, gcc-c++
+BuildRequires: make
 
 
 %description
@@ -84,10 +160,16 @@ License:  LGPLv2+
 Static libraries and header files for development with ltdl.
 
 
+%if !0%{?os2_version}
 %debug_package
-
+%endif
 
 %prep
+%if !0%{?os2_version}
+%autosetup -n libtool-%{version} -p1
+
+autoreconf -v
+%else
 %scm_setup
 
 # Make sure configure is updated to properly support OS/2
@@ -99,10 +181,11 @@ export PATH=`echo $PATH | tr '\\\\' /`
 rm -f .version ChangeLog
 mv .version~ .version
 mv ChangeLog~ ChangeLog
-
+%endif
 
 %build
 
+%if 0%{?os2_version}
 export CC=gcc
 export CXX=g++
 export F77=gfortran
@@ -110,50 +193,33 @@ export CFLAGS="$RPM_OPT_FLAGS"
 
 # These are for LTDL DLL
 export LDFLAGS="-Zomf -Zmap -Zhigh-mem"
+%endif
 
-%configure  --prefix=%{_prefix}                 \
-            --exec-prefix=%{_prefix}            \
-            --bindir=%{_bindir}                 \
-            --sbindir=%{_sbindir}               \
-            --sysconfdir=%{_sysconfdir}         \
-            --datadir=%{_datadir}               \
-            --includedir=%{_includedir}         \
-            --libdir=%{_libdir}                 \
-            --libexecdir=%{_libexecdir}         \
-            --localstatedir=%{_localstatedir}   \
-            --mandir=%{_mandir}                 \
-            --infodir=%{_infodir}
+%configure
 
-make %{?_smp_mflags}
+%make_build \
+    CUSTOM_LTDL_CFLAGS="%_hardening_cflags" \
+    CUSTOM_LTDL_LDFLAGS="%_hardening_ldflags"
 
 
 %check
 %if %{with check}
-make check VERBOSE=yes || { cat testsuite.log ; false ; }
+make check VERBOSE=yes || { cat tests/testsuite.dir/*/testsuite.log ; false ; }
 %endif
 
 
 %install
-rm -rf ${buildroot}
-make install DESTDIR=%{buildroot}
+%make_install
 # info's TOP dir (by default owned by info)
 rm -f %{buildroot}%{_infodir}/dir
 # *.la *.a files generated by libtool shouldn't be distributed (and the
 # `./configure --disable-static' breaks testsuite)
+%if !0%{?os2_version}
+rm -f %{buildroot}%{_libdir}/libltdl.{a,la}
+%else
 rm -f %{buildroot}%{_libdir}/libltdl.la
 rm -f %{buildroot}%{_libdir}/ltdl.a
-
-
-%clean
-rm -rf $RPM_BUILD_ROOT
-
-
-%post
-%info_post %{name}.info
-
-
-%preun
-%info_preun %{name}.info
+%endif
 
 
 %files
@@ -171,7 +237,11 @@ rm -rf $RPM_BUILD_ROOT
 
 %files ltdl
 %license libltdl/COPYING.LIB
+%if !0%{?os2_version}
+%{_libdir}/libltdl.so.*
+%else
 %{_libdir}/ltdl*.dll
+%endif
 
 
 %files ltdl-devel
@@ -181,11 +251,19 @@ rm -rf $RPM_BUILD_ROOT
 %exclude %{_datadir}/libtool/build-aux
 %{_includedir}/ltdl.h
 %{_includedir}/libltdl
-# Import libraries must be in -devel subpackage
+# .so files without version must be in -devel subpackage
+%if !0%{?os2_version}
+%{_libdir}/libltdl.so
+%else
 %{_libdir}/ltdl*_dll.a
+%endif
 
 
 %changelog
+* Fri Jan 26 2024 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.4.7-1
+- update to version 2.4.7
+- resync with latest Fedora spec
+
 * Tue Jan 14 2020 Dmitriy Kuminov <coding@dmik.org> 2.4.6-4
 - Use scm_ macros.
 - Resync with latest Fedora spec (11bb551).
