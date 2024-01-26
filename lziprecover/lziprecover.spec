@@ -1,10 +1,15 @@
 Name:           lziprecover
-Version:        1.23
+Version:        1.24
 Release:        1%{?dist}
 Summary:        Data recovery tool and decompressor for files in the lzip compressed format
 
 License:        GPLv3+
 URL:            http://www.nongnu.org/lzip/lziprecover.html
+%if 0%{?os2_version}
+Vendor:         TeLLie OS2 forever
+Distribution:   OS/2
+Packager:       TeLLeRBoP
+%endif
 %if !0%{?os2_version}
 Source0:        http://download.savannah.gnu.org/releases/lzip/lziprecover/lziprecover-%{version}.tar.lz
 Source1:        http://download.savannah.gnu.org/releases/lzip/lziprecover/lziprecover-%{version}.tar.lz.sig
@@ -55,7 +60,7 @@ sed -i 's/\r//' COPYING.txt
     --libdir="%{_libdir}" \
     --mandir="%{_mandir}"
 
-make %{?_smp_mflags}
+%make_build
 
 %install
 %if !0%{?os2_version}
@@ -69,9 +74,7 @@ rm -Rf $RPM_BUILD_ROOT%{_infodir}/dir
 install -Dm 0755 lziprecover.exe %{buildroot}%{_bindir}
 
 %check
-%if !0%{?os2_version}
 make -k check
-%endif
 
 %post
 %if !0%{?os2_version}
@@ -86,7 +89,6 @@ fi
 %endif
 
 %files
-%defattr(-,root,root)
 # TODO is currently empty
 %license COPYING.txt
 %doc AUTHORS ChangeLog NEWS README
@@ -100,6 +102,9 @@ fi
 %{_mandir}/man1/lziprecover.1*
 
 %changelog
+* Fri Jan 26 2024 Elbert pol <elbert.pol@gmail.com> - 1.24-1
+- Update to latest version
+
 * Fri Feb 04 2022 Elbert Pol <elbert.pol@gmail.com> - 1.23 - 1
 - Update to latest version
 
