@@ -3,10 +3,11 @@
 %global syn syn123
 
 Name: mpg123
-Version: 1.31.2
+Version: 1.32.4
 Release: 1%{?dist}
+
 Summary: Real time MPEG 1.0/2.0/2.5 audio player/decoder for layers 1, 2 and 3
-License: LGPLv2+
+License: GPL-2.0-or-later
 URL: https://mpg123.org
 %if !0%{?os2_version}
 Source0: %{url}/download/%{name}-%{version}.tar.bz2
@@ -82,6 +83,7 @@ Supplements: (mpg123%{?_isa} and portaudio%{?_isa})
 PortAudio output plug-in.
 %endif
 
+
 %package libs
 Summary: %{_summary}
 Provides: lib%{name} = %{?epoch:%{epoch}:}%{version}-%{release}
@@ -119,14 +121,14 @@ autoreconf -vfi
 %if !0%{?os2_version}
 %configure --enable-modules=yes --with-default-audio=alsa \
   --with-audio=alsa,%{?enable_jack:jack},pulse,oss,%{?enable_portaudio:portaudio}
-%make_build
 %else
 export LDFLAGS="-Zomf -Zmap -Zhigh-mem -Zargs-resp -Zbin-files"
 export LIBS="-lcx"
 
 %configure --with-cpu=x86 --enable-debug=no --enable-modules=no --with-network=auto --with-default-audio=os2 
-make %{?_smp_mflags}
 %endif
+
+%make_build
 
 %if !0%{?os2_version}
 pushd doc
@@ -134,17 +136,13 @@ pushd doc
 popd
 %else
 cd doc
-  doxygen doxygen.conf
-cd ..
+   doxygen doxygen.conf
+cd ..  
 %endif
-
+   
 %install
-%if !0%{?os2_version}
 %make_install
-%else
-make install DESTDIR=${RPM_BUILD_ROOT}
-rm ${RPM_BUILD_ROOT}/%{_libdir}/*.la
-%endif
+rm %{buildroot}%{_libdir}/*.la
 
 %if !0%{?os2_version}
 %ldconfig_scriptlets libs
@@ -195,9 +193,7 @@ rm ${RPM_BUILD_ROOT}/%{_libdir}/*.la
 %{_libdir}/lib%{out}.so.0*
 %{_libdir}/lib%{syn}.so.0*
 %else
-%{_libdir}/%{name}*.dll
-%{_libdir}/%{out}*.dll
-%{_libdir}/%{syn}*.dll
+%{_libdir}/*.dll
 %endif
 
 %files devel
@@ -211,15 +207,17 @@ rm ${RPM_BUILD_ROOT}/%{_libdir}/*.la
 %{_libdir}/lib%{out}.so
 %{_libdir}/lib%{syn}.so
 %else
-%{_libdir}/%{name}*.a
-%{_libdir}/%{out}*.a
-%{_libdir}/%{syn}*.a
+%{_libdir}/*.a
 %endif
 %{_libdir}/pkgconfig/lib%{name}.pc
 %{_libdir}/pkgconfig/lib%{out}.pc
 %{_libdir}/pkgconfig/lib%{syn}.pc
 
 %changelog
+* Fri Jan 26 2024 Elbert Pol <elbert.pol@gmail.com> - 1.32.4-1
+- Update to latest version
+- Sync with latest Fedora spec
+ 
 * Sun Jan 15 2023 Elbert Pol <elbert.pol@gmail.com> - 1.31.2-1
 - Updated to latest version
 - Thankz to Dave Yeo for the fixes he made for OS2
