@@ -1,9 +1,11 @@
+%bcond_without check
+
 Summary:       A library of functions for manipulating PNG image format files
 Name:          libpng
 %if !0%{?os2_version}
 Epoch:         2
 %endif
-Version:       1.6.37
+Version:       1.6.40
 Release:       1%{?dist}
 License:       zlib
 URL:           http://www.libpng.org/pub/png/
@@ -21,6 +23,7 @@ Vendor:        bww bitwise works GmbH
 BuildRequires: gcc
 BuildRequires: zlib-devel
 BuildRequires: autoconf automake libtool
+BuildRequires: make
 
 %description
 The libpng package contains a library of functions for creating and
@@ -34,8 +37,13 @@ files.
 
 %package devel
 Summary:       Development tools for programs to manipulate PNG image format files
+%if !0%{?os2_version}
+Requires:      %{name}%{?_isa} = %{epoch}:%{version}-%{release}
+Requires:      zlib-devel%{?_isa} pkgconfig
+%else
 Requires:      %{name} = %{version}-%{release}
 Requires:      zlib-devel pkgconfig
+%endif
 
 %description devel
 The libpng-devel package contains header files and documentation necessary
@@ -47,7 +55,11 @@ the libpng package.
 
 %package static
 Summary:       Static PNG image format file library
+%if !0%{?os2_version}
+Requires:      %{name}-devel%{?_isa} = %{epoch}:%{version}-%{release}
+%else
 Requires:      %{name}-devel = %{version}-%{release}
+%endif
 
 %description static
 The libpng-static package contains the statically linkable version of libpng.
@@ -56,7 +68,11 @@ necessary for some boot packages.
 
 %package tools
 Summary:       Tools for PNG image format file library
+%if !0%{?os2_version}
+Requires:      %{name}%{?_isa} = %{epoch}:%{version}-%{release}
+%else
 Requires:      %{name} = %{version}-%{release}
+%endif
 
 %description tools
 The libpng-tools package contains tools used by the authors of libpng.
@@ -77,7 +93,6 @@ cp -p %{SOURCE1} .
 %scm_setup
 %endif
 
-
 %build
 autoreconf -vif
 %if 0%{?os2_version}
@@ -86,11 +101,7 @@ export VENDOR="%{vendor}"
 %endif
 
 %configure
-%if !0%{?os2_version}
 %make_build DFA_XTRA=pngusr.dfa
-%else
-make %{?_smp_mflags}
-%endif
 
 %install
 %make_install
@@ -98,12 +109,11 @@ make %{?_smp_mflags}
 # We don't ship .la files.
 rm -f $RPM_BUILD_ROOT%{_libdir}/*.la
 
+%if 0%{?with_check}
 %check
 %if 0%{?os2_version}
 export BEGINLIBPATH=%{_builddir}/%{buildsubdir}/.libs
 %endif
-#to run make check use "--with check"
-%if %{?_with_check:1}%{!?_with_check:0}
 make check
 %endif
 
@@ -152,6 +162,10 @@ make check
 %endif
 
 %changelog
+* Mon Jan 29 2024 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.6.40-1
+- updated libpng to 1.6.40
+- resynced with latest fedora spec
+
 * Wed Dec 23 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.6.37-1
 - updated libpng to 1.6.37
 - resynced with latest fedora spec
