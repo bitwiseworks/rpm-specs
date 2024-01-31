@@ -1,6 +1,6 @@
 Name:           lzip
 Version:        1.24
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        LZMA compressor with integrity checking
 
 License:        GPL-3.0-or-later
@@ -44,13 +44,7 @@ sed -i 's/\r//' COPYING.txt
 %configure CXXFLAGS="%{build_cxxflags}" LDFLAGS="%{build_ldflags}"
 %else
 export VENDOR="%{vendor}"
-%configure \
-    --prefix="%{_prefix}" \
-    --bindir="%{_bindir}" \
-    --infodir="%{_infodir}" \
-    --mandir="%{_mandir}" \
-    LDFLAGS="-Zomf -Zexe" \
-    LIBS="-lcx"
+%configure LDFLAGS="-Zexe"  
 %endif
 
 %make_build
@@ -84,6 +78,9 @@ make check
 
 
 %changelog
+* Wed Jan 31 2024 Elbert Pol <elbert.pol@gmail.com> - 1.24-2
+- Remove unneeded prefix
+
 * Wed Jan 31 2024 Elbert Pol <elbert.pol@gmail.com> - 1.24-1
 - Updated to latest version
 - resynced with latest fedora spec file
