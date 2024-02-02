@@ -40,22 +40,13 @@ sed -i 's/\r//' COPYING.txt
 
 
 %build
-%if !0%{?os2_version}
 %configure CXXFLAGS="%{build_cxxflags}" LDFLAGS="%{build_ldflags}"
-%else
-export VENDOR="%{vendor}"
-%configure LDFLAGS="-Zexe"  
-%endif
 
 %make_build
 
 
 %install
 %make_install install-man
-%if 0%{?os2_version}
-mkdir -p %{buildroot}%{_bindir}
-install -m 755 lzip.exe %{buildroot}%{_bindir}
-%endif
 
 # if install-info is present, this is created by upstream's makefile
 rm -Rf $RPM_BUILD_ROOT%{_infodir}/dir
@@ -70,7 +61,6 @@ make check
 %if !0%{?os2_version}
 %{_bindir}/lzip
 %else
-%exclude %{_bindir}/lzip
 %{_bindir}/lzip.exe
 %endif
 %{_infodir}/lzip.info*
