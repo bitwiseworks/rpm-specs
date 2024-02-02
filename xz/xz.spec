@@ -3,8 +3,10 @@
 
 Summary:	LZMA compression utilities
 Name:		xz
-Version:	5.2.3
-Release:	3%{?dist}
+# **PLEASE NOTE**: when bumping xz version, please rebuild
+# perl-Compress-Raw-Lzma, it has a strict xz version dep
+Version:	5.4.6
+Release:	1%{?dist}
 
 # Scripts xz{grep,diff,less,more} and symlinks (copied from gzip) are
 # GPLv2+, binaries are Public Domain (linked against LGPL getopt_long but its
@@ -12,32 +14,38 @@ Release:	3%{?dist}
 License:	GPLv2+ and Public Domain
 %if !0%{?os2_version}
 # official upstream release
-Source0:	https://tukaani.org/%{name}/%{name}-%{version}.tar.xz
+Source0:	https://github.com/tukaani-project/%{name}/releases/download/v%{version}/%{name}-%{version}.tar.gz
+Source1:	https://github.com/tukaani-project/%{name}/releases/download/v%{version}/%{name}-%{version}.tar.gz.sig
+Source2:        https://tukaani.org/misc/jia_tan_pubkey.txt
 
 Source100:	colorxzgrep.sh
 Source101:	colorxzgrep.csh
-
-Patch1:   xz-5.2.5-enable_CET.patch
 %else
 Vendor:		bww bitwise works GmbH
 %scm_source	github https://github.com/bitwiseworks/%{name}-os2 v%{version}-os2
 %endif
 
 URL:		https://tukaani.org/%{name}/
+%if !0%{?os2_version}
+Requires:	%{name}-libs%{?_isa} = %{version}-%{release}
+%else
 Requires:	%{name}-libs = %{version}-%{release}
+%endif
 
 # For /usr/libexec/grepconf.sh (RHBZ#1189120).
 # Unfortunately F21 has a newer version of grep which doesn't
 # have grepconf, but we're only concerned with F22 here.
 Requires:	grep >= 2.20-5
 
-BuildRequires:  make
+BuildRequires:	make
 BuildRequires:	gcc
 %if !0%{?os2_version}
+BuildRequires:	gnupg2
 BuildRequires:	perl-interpreter
 %else
 BuildRequires:	perl
 %endif
+
 
 %description
 XZ Utils are an attempt to make LZMA compression easy to use on free (as in
@@ -71,7 +79,11 @@ XZ utils.  Most users should *not* install this.
 %package 	devel
 Summary:	Devel libraries & headers for liblzma
 License:	Public Domain
+%if !0%{?os2_version}
+Requires:	%{name}-libs%{?_isa} = %{version}-%{release}
+%else
 Requires:	%{name}-libs = %{version}-%{release}
+%endif
 
 %description	devel
 Devel libraries and headers for liblzma.
@@ -81,7 +93,11 @@ Devel libraries and headers for liblzma.
 Summary:	Older LZMA format compatibility binaries
 # Just a set of symlinks to 'xz' + two Public Domain binaries.
 License:	Public Domain
+%if !0%{?os2_version}
+Requires:	%{name}%{?_isa} = %{version}-%{release}
+%else
 Requires:	%{name} = %{version}-%{release}
+%endif
 Obsoletes:	lzma < %{version}
 Provides:	lzma = %{version}
 
@@ -96,10 +112,13 @@ commands that deal with the older LZMA format.
 
 %prep
 %if !0%{?os2_version}
+%{gpgverify} --keyring='%{SOURCE2}' --signature='%{SOURCE1}' --data='%{SOURCE0}'
 %autosetup -p1
 %else
 %scm_setup
-autoreconf -fvi
+autogen.sh --no-po4a
+cp /@unixroot/usr/share/aclocal/po.m4 m4
+cp /@unixroot/usr/share/aclocal/iconv.m4 m4 
 %endif
 
 
@@ -122,10 +141,8 @@ export VENDOR="%{vendor}"
 %if !0%{?os2_version}
 sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
 sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
-%make_build
-%else
-make %{?_smp_mflags}
 %endif
+%make_build
 
 
 %install
@@ -146,6 +163,11 @@ install -p -m 644 %{SOURCE101} %{buildroot}%{profiledir}
 %check
 %if !0%{?os2_version}
 LD_LIBRARY_PATH=$PWD/src/liblzma/.libs make check
+%else
+# check is not working, as even with the below export it uses the wrong dll
+# reason is most probably because python loads it by itself
+export BEGINLIBPATH=$PWD/src/liblzma/.libs
+#make check
 %endif
 
 %if !0%{?os2_version}
@@ -168,7 +190,12 @@ LD_LIBRARY_PATH=$PWD/src/liblzma/.libs make check
 %endif
 %{_mandir}/man1/*xz*
 %if !0%{?os2_version}
-%{_mandir}/de/man1/*xz*
+%lang(de) %{_mandir}/de/man1/*xz*
+%lang(fr) %{_mandir}/fr/man1/*xz*
+%lang(ko) %{_mandir}/ko/man1/*xz*
+%lang(ro) %{_mandir}/ro/man1/*xz*
+%lang(uk) %{_mandir}/uk/man1/*xz*
+%lang(pt_BR) %{_mandir}/pt_BR/man1/*xz*
 %{profiledir}/*
 %endif
 
@@ -216,11 +243,20 @@ LD_LIBRARY_PATH=$PWD/src/liblzma/.libs make check
 %endif
 %{_mandir}/man1/*lz*
 %if !0%{?os2_version}
-%{_mandir}/de/man1/*lz*
+%lang(de) %{_mandir}/de/man1/*lz*
+%lang(fr) %{_mandir}/fr/man1/*lz*
+%lang(ko) %{_mandir}/ko/man1/*lz*
+%lang(ro) %{_mandir}/ro/man1/*lz*
+%lang(uk) %{_mandir}/uk/man1/*lz*
+%lang(pt_BR) %{_mandir}/pt_BR/man1/*lz*
 %endif
 
 
 %changelog
+* Fri Feb 02 2024 Silvan Scherrer <silvan.scherrer@aroa.ch> 5.4.6-1
+- resync with fedora spec
+- updated to version 5.4.6
+
 * Mon Jan 17 2022 Silvan Scherrer <silvan.scherrer@aroa.ch> 5.2.3-3
 - resync with fedora spec
 - moved source to github
