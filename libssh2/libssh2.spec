@@ -1,5 +1,5 @@
 Name:		libssh2
-Version:	1.11.0
+Version:	1.11.1_DEV
 Release:	1%{?dist}
 Summary:	A library implementing the SSH2 protocol
 License:	BSD-3-Clause
@@ -187,5 +187,8 @@ LC_ALL=en_US.UTF-8 make -C tests check
 %{_libdir}/pkgconfig/libssh2.pc
 
 %changelog
+* Fri Feb 02 2024 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.11.1_DEV-1
+- use the right version tag
+
 * Thu Feb 01 2024 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.11.0-1
 - first OS/2 version
