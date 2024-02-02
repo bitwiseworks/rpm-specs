@@ -1,6 +1,6 @@
 Name:           lzip
 Version:        1.24
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        LZMA compressor with integrity checking
 
 License:        GPL-3.0-or-later
@@ -14,7 +14,7 @@ Packager:       TeLLeRBoP
 Source0:        http://download.savannah.gnu.org/releases/lzip/lzip-%{version}.tar.gz
 Source1:        http://download.savannah.gnu.org/releases/lzip/lzip-%{version}.tar.gz.sig
 %else
-%scm_source github https://github.com/Tellie/%{name}-os2 %{version}-os2
+%scm_source github https://github.com/Tellie/%{name}-os2 %{version}-os2-1
 %endif
 BuildRequires: make
 BuildRequires:  gcc-c++
@@ -68,6 +68,10 @@ make check
 
 
 %changelog
+* Fri Feb 02 2024 Elbert Pol <elbert.pol@gmail.com> - 1.24-3
+- Update makefile.in and configure the right OS2 way, Thankz to Silvan
+- Also some changes in the spec file
+
 * Wed Jan 31 2024 Elbert Pol <elbert.pol@gmail.com> - 1.24-2
 - Remove unneeded prefix
 
