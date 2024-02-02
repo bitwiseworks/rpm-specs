@@ -1,7 +1,7 @@
 Summary: A utility for getting files from remote servers (FTP, HTTP, and others)
 Name: curl
 Version: 7.75.0
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: MIT
 %if !0%{?os2_version}
 Source: https://curl.se/download/%{name}-%{version}.tar.xz
@@ -18,6 +18,9 @@ Patch104: 0104-curl-7.73.0-localhost6.patch
 # prevent valgrind from reporting false positives on x86_64
 Patch105: 0105-curl-7.63.0-lib1560-valgrind.patch
 %else
+# the legacy scheme screws with the version and release, so save it first
+%global  version_save %{version} 
+%global  release_save %{release} 
 Vendor:  bww bitwise works GmbH
 %scm_source github http://github.com/bitwiseworks/%{name}-os2 curl-7_75_0-os2
 %endif
@@ -42,6 +45,8 @@ BuildRequires: libnghttp2-devel
 BuildRequires: libpsl-devel
 %if !0%{?os2_version}
 BuildRequires: libssh-devel
+%else
+BuildRequires: libssh2-devel
 %endif
 BuildRequires: libtool
 BuildRequires: make
@@ -57,10 +62,8 @@ BuildRequires: perl-interpreter
 BuildRequires: perl
 %endif
 BuildRequires: pkgconfig
-%if !0%{?os2_version}
 BuildRequires: python-unversioned-command
 BuildRequires: python3-devel
-%endif
 BuildRequires: sed
 BuildRequires: zlib-devel
 
@@ -133,7 +136,11 @@ Requires: libcurl >= %{version}-%{release}
 
 # require at least the version of libssh that we were built against,
 # to ensure that we have the necessary symbols available (#525002, #642796)
+%if !0%{?os2_version}
 %global libssh_version %(pkg-config --modversion libssh 2>/dev/null || echo 0)
+%else
+%global libssh_version %(pkg-config --modversion libssh2 2>/dev/null || echo 0)
+%endif
 
 # require at least the version of openssl-libs that we were built against,
 # to ensure that we have the necessary symbols available (#1462184, #1462211)
@@ -152,11 +159,15 @@ Summary: A library for getting files from web servers
 Requires: libpsl >= %{libpsl_version}
 %if !0%{?os2_version}
 Requires: libssh >= %{libssh_version}
+%else
+Requires: libssh2 >= %{libssh_version}
 %endif
 Requires: openssl-libs >= 1:%{openssl_version}
 Provides: libcurl-full = %{version}-%{release}
 %if !0%{?os2_version}
 Provides: libcurl-full%{?_isa} = %{version}-%{release}
+%else
+Provides: libcurl-full = %{version}-%{release}
 %endif
 
 %description -n libcurl
@@ -174,6 +185,8 @@ Requires: libcurl = %{version}-%{release}
 Provides: curl-devel = %{version}-%{release}
 %if !0%{?os2_version}
 Provides: curl-devel%{?_isa} = %{version}-%{release}
+%else
+Provides: curl-devel = %{version}-%{release}
 %endif
 Obsoletes: curl-devel < %{version}-%{release}
 
@@ -272,7 +285,7 @@ export LDFLAGS="-Zomf -Zhigh-mem -Zargs-wild -Zargs-resp"
 export LIBS="-lcx"
 export VENDOR="%{vendor}"
 # Set BUILDLEVEL to be embedded to all DLLs built with Libtool.
-export LT_BUILDLEVEL="@#%{vendor}:%{version}-%{release}#@##1## `LANG=C date +'%%d %%b %%Y %%H:%%M:%%S'`     `uname -n`::::0::"
+export LT_BUILDLEVEL="@#%{vendor}:%{version_save}-%{release_save}#@##1## `LANG=C date +'%%d %%b %%Y %%H:%%M:%%S'`     `uname -n`::::0::"
 %endif
 
 %if !0%{?os2_version}
@@ -326,6 +339,8 @@ export common_configure_opts=" \
         --with-libpsl \
 %if !0%{?os2_version}
         --with-libssh
+%else
+        --with-libssh2
 %endif
 )
 
@@ -334,13 +349,10 @@ export common_configure_opts=" \
 sed -e 's/^runpath_var=.*/runpath_var=/' \
     -e 's/^hardcode_libdir_flag_spec=".*"$/hardcode_libdir_flag_spec=""/' \
     -i build-{full,minimal}/libtool
+%endif
 
 %make_build V=1 -C build-minimal
 %make_build V=1 -C build-full
-%else
-make %{?_smp_mflags} V=1 -C build-minimal
-make %{?_smp_mflags} V=1 -C build-full
-%endif
 
 %check
 %if !0%{?os2_version}
@@ -468,6 +480,9 @@ rm -f ${RPM_BUILD_ROOT}%{_libdir}/libcurl.la
 %endif
 
 %changelog
+* Fri Feb 02 2024 Silvan Scherrer <silvan.scherrer@aroa.ch> 7.75.0-3
+- enable sftp with libssh2
+
 * Mon Mar 15 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 7.75.0-2
 - add a legacy package
 
