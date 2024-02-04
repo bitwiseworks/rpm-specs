@@ -1,6 +1,6 @@
 # we don't want to provide private python extension libs
 %{?filter_setup:
-%filter_provides_in %{python2_sitearch}/.*\.so$
+%filter_provides_in %{python3_sitearch}/.*\.so$
 %filter_setup
 }
 
@@ -9,13 +9,13 @@
 
 Summary: HP Linux Imaging and Printing Project
 Name: hplip
-Version: 3.19.8
-Release: 3%{?dist}
+Version: 3.19.12
+Release: 1%{?dist}
 License: GPLv2+ and MIT and BSD and IJG and Public Domain and GPLv2+ with exceptions and ISC
 
 Url: https://developers.hp.com/hp-linux-imaging-and-printing
 Vendor: bww bitwise works GmbH
-%scm_source github  https://github.com/bitwiseworks/%{name}-os2 %{version}-os2-3
+%scm_source github  https://github.com/bitwiseworks/%{name}-os2 %{version}-os2
 
 # @todo: decide if we need that to
 # if we do it as well, also remove the comment in the post section
@@ -56,7 +56,7 @@ BuildRequires: gcc-c++
 BuildRequires: autoconf automake libtool
 BuildRequires: net-snmp-devel
 BuildRequires: cups-devel
-BuildRequires: python-devel
+BuildRequires: python3-devel
 BuildRequires: libjpeg-devel
 %if !0%{?os2_version}
 BuildRequires: desktop-file-utils
@@ -70,9 +70,7 @@ BuildRequires: pkgconfig(dbus-1)
 
 # Make sure we get postscriptdriver tags - need cups and python3-cups.
 BuildRequires: cups
-%if !0%{?os2_version}
 BuildRequires: python3-cups
-%endif
 
 # macros: %%{_tmpfilesdir}, %%{_udevrulesdir}
 %if !0%{?os2_version}
@@ -105,7 +103,7 @@ License: BSD
 %if !0%{?os2_version}
 BuildRequires: libappstream-glib
 %endif
-Requires: python2-PyQt4
+Requires: python3-PyQt4
 %if !0%{?os2_version}
 Requires: python3-reportlab
 # hpssd.py
@@ -137,8 +135,8 @@ sed -i.duplex-constraints \
 
 # Change shebang /usr/bin/env python -> /usr/bin/python3 (bug #618351).
 find -name '*.py' -print0 | xargs -0 \
-    sed -i.env-python -e 's,^#!/usr/bin/env python,#!%{__python2},'
-sed -i.env-python -e 's,^#!/usr/bin/env python,#!%{__python2},' \
+    sed -i.env-python -e 's,^#!/usr/bin/env python,#!%{__python3},'
+sed -i.env-python -e 's,^#!/usr/bin/env python,#!%{__python3},' \
     prnt/filters/hpps \
     fax/filters/pstotiff
 
@@ -209,7 +207,7 @@ rm -f   %{buildroot}%{_bindir}/hp-logcapture \
 rm -f   %{buildroot}%{_bindir}/foomatic-rip \
         %{buildroot}%{_libdir}/cups/filter/foomatic-rip \
         %{buildroot}%{_libdir}/*.la \
-        %{buildroot}%{python_sitearch}/*.la \
+        %{buildroot}%{python3_sitearch}/*.la \
         %{buildroot}%{_libdir}/sane/*.la \
         %{buildroot}%{_datadir}/cups/model/foomatic-ppds \
         %{buildroot}%{_datadir}/applications/hplip.desktop \
@@ -255,7 +253,7 @@ rm -rf %{buildroot}%{_sysconfdir}/xdg/autostart/hplip-systray.desktop
 # as there is no devel package we don't ship the *.a files either
 rm -f  %{buildroot}%{_libdir}/*.a \
        %{buildroot}%{_libdir}/sane/*.a \
-       %{buildroot}%{python_sitearch}/*.a
+       %{buildroot}%{python3_sitearch}/*.a
 
 # hp-setup needs to have cups service enabled and running for setups of queues
 %pre
@@ -379,7 +377,7 @@ ldconfig_scriptlets libs
 %{_libdir}/hpdis*.dll
 %{_libdir}/hpmud*.dll
 # Python extension
-%{python_sitearch}/*.dll
+%{python3_sitearch}/
 
 %files gui
 %{_bindir}/hp-check
@@ -417,6 +415,9 @@ ldconfig_scriptlets libs
 %config(noreplace) %{_sysconfdir}/sane.d/dll.d/hpaio
 
 %changelog
+* Fri Feb 02 2024 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.19.12-1
+- update to version 3.19.12
+
 * Wed Sep 02 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.19.8-3
 - enable net-snmp
 
