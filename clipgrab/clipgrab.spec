@@ -117,6 +117,7 @@ fi
 %endif
 
 %changelog
+
 * Sun Feb 04 2024 Elbert Pol <elbert.pol@gmail.com> - 3.9.10-1
 - Update to latest version
 - Add support for python3
