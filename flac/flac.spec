@@ -1,21 +1,28 @@
 Summary: An encoder/decoder for the Free Lossless Audio Codec
 Name: flac
-Version: 1.3.4
+Version: 1.4.3
 Release: 1%{?dist}
-License: BSD and GPLv2+ and GFDL
-%if !0%{?os2_version}
-Source0: https://downloads.xiph.org/releases/flac/flac-%{version}.tar.xz
-%else 
-%scm_source github https://github.com/xiph/flac master
+License: BSD-3-Clause AND GPL-2.0-or-later AND GFDL-1.1-or-later
+%if 0%{os2_version}
+Vendor:         TeLLie OS2 forever
+Distribution:   OS/2
+Packager:       TeLLeRBoP
 %endif
+%if !0%{os2_version}
+Source0: https://downloads.xiph.org/releases/flac/flac-%{version}.tar.xz
 URL: https://www.xiph.org/flac/
+%else
+%scm_source github https://github.com/tellie/flac-os2 master-os2
+%endif
+
+%if !0%{?os2_version}
 Requires: %{name}-libs%{?_isa} = %{version}-%{release}
+%else
+Requires: %{name}-libs = %{version}-%{release}
+%endif
+
 BuildRequires: libogg-devel
 BuildRequires: gcc gcc-c++ automake autoconf libtool gettext-devel doxygen
-%ifarch %{ix86}
-# 2.0 supports symbol visibility
-BuildRequires: nasm >= 2.0
-%endif
 BuildRequires: make
 
 %description
@@ -53,7 +60,7 @@ This package contains all the files needed to develop applications that
 will use the Free Lossless Audio Codec.
 
 %prep
-%if !0%{?os2_version}
+%if !0%{os2_version}
 %setup -q
 %else
 %scm_setup
@@ -63,76 +70,71 @@ will use the Free Lossless Audio Codec.
 # use our libtool to avoid problems with RPATH
 ./autogen.sh -V
 
-# -funroll-loops makes encoding about 10% faster
-export LDFLAGS="-Zomf -Zmap -Zhigh-mem -Zargs-wild -Zargs-resp"
-export LIBS="-lcx"
-export CFLAGS="%{optflags} -funroll-loops"
+%if 0%{?os2_version}
+# Set BUILDLEVEL to be embedded to all DLLs built with Libtool.
+export LT_BUILDLEVEL="@#%{vendor}:%{version}-%{release}#@##1## `LANG=C date +'%%d %%b %%Y %%H:%%M:%%S'`     `uname -n`::::0::"
+%endif
+
 %configure \
     --htmldir=%{_docdir}/flac/html \
-    --disable-xmms-plugin \
     --disable-silent-rules \
     --disable-thorough-tests
-%if !0%{?os2_version}
+
 %make_build
-%else
-make %{?_smp_mflags}
-%endif
 
 %install
 %make_install
 
-# split documentation
-mv %{buildroot}%{_docdir}/flac* ./flac-doc
-mkdir -p flac-doc-devel
-%if !0%{?os2_version}
-mv flac-doc{/html/api,-devel}
-%else
-mv flac-doc/html/api/* flac-doc-devel
-%endif
-rm flac-doc/FLAC.tag
-
-
+rm -r %{buildroot}%{_docdir}/flac
 rm %{buildroot}%{_libdir}/*.la
 
 %check
+
 %if !0%{?os2_version}
 make check
+%endif
 
+%if !0%{os2_version}
 %ldconfig_scriptlets libs
 %endif
 
 %files
-%doc flac-doc/*
 %if !0%{?os2_version}
 %{_bindir}/flac
 %{_bindir}/metaflac
 %else
 %{_bindir}/flac.exe
 %{_bindir}/metaflac.exe
-%{_mandir}/man1/*
 %endif
+%{_mandir}/man1/*
 
 %files libs
-%doc AUTHORS COPYING* README
-%if !0%{?os2_version}
-%{_libdir}/libFLAC.so.8*
-%{_libdir}/libFLAC++.so.6*
+%doc AUTHORS README.md CHANGELOG.md
+%license COPYING.*
+%if !0%{os2_version}
+%{_libdir}/libFLAC.so.12*
+%{_libdir}/libFLAC++.so.10*
 %else
 %{_libdir}/*.dll
 %endif
 
 %files devel
-%doc flac-doc-devel/*
+%doc doc/api
 %{_includedir}/*
-%if !0%{?os2_version}
+%if !0%{os2_version}
 %{_libdir}/*.so
 %else
-%{_libdir}/*.a
+%{_libdir}/*_dll.a
 %endif
 %{_libdir}/pkgconfig/*
 %{_datadir}/aclocal/*.m4
 
 %changelog
+* Fri Feb 09 2024 Elbert Pol <elbert.pol@gmail.com> 1.4.3-1
+- Updated to latest version
+- Make a bldlevel for dlls
+- syncronized the spec with lated fedora spec
+
 * Fri Mar 11 2022 Elbert Pol <elbert.pol@gmail.com> 1.3.4-1
 - update to latest version
 
