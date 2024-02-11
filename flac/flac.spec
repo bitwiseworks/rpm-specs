@@ -1,7 +1,7 @@
 Summary: An encoder/decoder for the Free Lossless Audio Codec
 Name: flac
 Version: 1.4.3
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: BSD-3-Clause AND GPL-2.0-or-later AND GFDL-1.1-or-later
 %if 0%{os2_version}
 Vendor:         TeLLie OS2 forever
@@ -12,7 +12,7 @@ Packager:       TeLLeRBoP
 Source0: https://downloads.xiph.org/releases/flac/flac-%{version}.tar.xz
 URL: https://www.xiph.org/flac/
 %else
-%scm_source github https://github.com/tellie/flac-os2 master-os2
+%scm_source github https://github.com/tellie/%{name}-os2 %{version}-os2
 %endif
 
 %if !0%{?os2_version}
@@ -58,6 +58,10 @@ Requires: pkgconfig
 %description devel
 This package contains all the files needed to develop applications that
 will use the Free Lossless Audio Codec.
+
+%if 0%{?os2_version}
+%legacy_runtime_packages
+%endif
 
 %prep
 %if !0%{os2_version}
@@ -130,6 +134,9 @@ make check
 %{_datadir}/aclocal/*.m4
 
 %changelog
+* Sat Feb 10 2024 Elbert Pol <elbert.pol@gmail.com> 1.4.3-2
+- Provide legacy packages with DLLs for old ABI.
+
 * Fri Feb 09 2024 Elbert Pol <elbert.pol@gmail.com> 1.4.3-1
 - Updated to latest version
 - Make a bldlevel for dlls
