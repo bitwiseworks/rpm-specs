@@ -3,7 +3,7 @@
 %global syn syn123
 
 Name: mpg123
-Version: 1.32.4
+Version: 1.32.5
 Release: 1%{?dist}
 
 Summary: Real time MPEG 1.0/2.0/2.5 audio player/decoder for layers 1, 2 and 3
@@ -214,6 +214,9 @@ rm %{buildroot}%{_libdir}/*.la
 %{_libdir}/pkgconfig/lib%{syn}.pc
 
 %changelog
+* Fri Feb 23 2024 Elbert Pol <elbert.pol@gmail.com> - 1.32.5-1
+- Updated to latest version
+
 * Fri Jan 26 2024 Elbert Pol <elbert.pol@gmail.com> - 1.32.4-1
 - Update to latest version
 - Sync with latest Fedora spec
