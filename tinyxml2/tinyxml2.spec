@@ -1,160 +1,107 @@
-#
-# spec file for package tinyxml2
-#
-# Copyright (c) 2021 SUSE LLC
-#
-# All modifications and additions to the file contributed by third parties
-# remain the property of their copyright owners, unless otherwise agreed
-# upon. The license for this file, and modifications and additions to the
-# file, is the same license as for the pristine package itself (unless the
-# license for the pristine package is not an Open Source License, in which
-# case the license is the MIT License). An "Open Source License" is a
-# license that conforms to the Open Source Definition (Version 1.9)
-# published by the Open Source Initiative.
+%global soversion 9
 
-# Please submit bugfixes or comments via https://bugs.opensuse.org/
-#
-
-%if !0%{?os2_version}
-%define so_version 9
-%define lib_package lib%{name}-%{so_version}
-%endif
 Name:           tinyxml2
-Version:        9.0.0
+Version:        10.0.0
 Release:        1%{?dist}
-Vendor:         TeLLie
-Summary:        Basic XML parser in C++
-License:        Zlib
-Group:          Development/Libraries/C and C++
-URL:            https://github.com/leethomason/tinyxml2
-%if !0%{?os2_version}
-Source:         https://github.com/leethomason/tinyxml2/archive/%{version}.tar.gz#/%{name}-%{version}.tar.gz
-%else
-%scm_source github https://github.com/Tellie/%{name}-os2 master-os2
+Summary:        Simple, small and efficient C++ XML parser
+
+License:        zlib
+%if 0%{os2_version}
+Vendor:         TeLLie OS2 forever
+Distribution:   OS/2
+Packager:       TeLLeRBoP
 %endif
-BuildRequires:  cmake >= 3.15
+URL:            https://github.com/leethomason/tinyxml2
+%if !0%{os2_version}
+Source0:        %{url}/archive/%{version}/%{name}-%{version}.tar.gz
+%else
+%scm_source github https://github.com/tellie/%{name}-os2 master-os2
+%endif
+
+BuildRequires:  make
+BuildRequires:  cmake >= 2.6
+BuildRequires:  gcc
 BuildRequires:  gcc-c++
-BuildRequires:  pkgconfig
 
 %description
-TinyXML is a feature-bounded XML parser in C++ that can be integrated
-into other programs.
+TinyXML-2 is a simple, small, efficient, C++ XML parser that can be
+easily integrated into other programs. It uses a Document Object Model
+(DOM), meaning the XML data is parsed into a C++ objects that can be
+browsed and manipulated, and then written to disk or another output stream.
 
-TinyXML-2 does not parse or use DTDs (Document Type Definitions) or
-XSLs (eXtensible Stylesheet Language). There are other parsers (with
-different footprints) to do such.
+TinyXML-2 doesn't parse or use DTDs (Document Type Definitions) nor XSLs
+(eXtensible Stylesheet Language).
 
-%package -n     %{lib_package}
-Summary:        Basic XML parser in C++
-License:        Zlib
-Group:          System/Libraries
+TinyXML-2 uses a similar API to TinyXML-1, But the implementation of the
+parser was completely re-written to make it more appropriate for use in a
+game. It uses less memory, is faster, and uses far fewer memory allocations.
 
-%description -n %{lib_package}
-TinyXML is a feature-bounded XML parser in C++ that can be integrated
-into other programs.
-
-TinyXML-2 does not parse or use DTDs (Document Type Definitions) or
-XSLs (eXtensible Stylesheet Language). There are other parsers (with
-different footprints) to do such.
-
-%package        devel
-Summary:        Development files for libtinyxml2
-License:        GPL-2.0-or-later
-Group:          Development/Libraries/C and C++
-%if !0%{?os2_version}
-Requires:       %{lib_package} = %{version}
-%else
+%package devel
+Summary:        Development files for %{name}
+%if !0%{os2_version}
 Requires:       %{name}%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
+%else
+Requires:       %{name} = %{?epoch:%{epoch}:}%{version}-%{release}
 %endif
-%description    devel
-Contains libraries and header files for
-developing applications that use libtinyxml2.
-
-%debug_package
+%description devel
+This package contains the libraries and header files that are needed
+for writing applications with the %{name} library.
 
 %prep
-%if !0%{?os2_version}
-%setup -q
+%if !0%{os2_version}
+%autosetup
 %else
 %scm_setup
+%endif
 chmod -c -x *.cpp *.h
+
+%if 0%{?os2_version}
+%legacy_runtime_packages
 %endif
 
 %build
-%if 0%{?os2_version}
-mkdir builder
-cd builder
-export LDFLAGS="-Zhigh-mem -Zomf -lcx"
-export CFLAGS="-O2 -g -march=i686"
-export CXXFLAGS="-O2 -g -march=i686"
-export FFLAGS="-O2 -g -march=i686"
-export FCFLAGS="-O2 -g -march=i686"
-
-cmake -DCMAKE_INSTALL_PREFIX:PATH=/@unixroot/usr \
-      -DCMAKE_SKIP_RPATH:BOOL=YES \
-      -DBUILD_SHARED_LIBS=ON \
-      -DCMAKE_BUILD_TYPE=Release \
-      -DOS2_USE_CXX_EMXEXP=ON \
-      -DBUILD_TESTING=ON \
-      -Wno-dev \
-      .. 2>stdout 1>stderr
-make %{?_smp_mflags}
-%else
-%cmake  
-%make_build
+%if 0%{os2_version}
+#Otherwise the test failed!
+mkdir resources/out 
 %endif
+%cmake 
+%cmake_build
+
+# Library tests were disabled in 3.0.0
+# and partially re-enabled in 6.0.0
+%check
+%if 0%{os2_version}
+export BEGINLIBPATH=%{_builddir}/%{buildsubdir}/pc-os2-emx-build
+%endif
+%ctest
 
 %install
-%if !0%{?os2_version}
 %cmake_install
-find %{buildroot} -type f -name "*.la" -delete -print
-# /usr/lib/cmake is not owned by cmake; avoid any further conflicts
-if [ ! -d "%{buildroot}/%{_libdir}/cmake/%{name}" ]; then
-mkdir -p %{buildroot}/%{_libdir}/cmake/%{name}
-mv %{buildroot}%{_prefix}/lib/cmake/tinyxml2 %{buildroot}/%{_libdir}/cmake/tinyxml2
-fi
-%else
-rm -rf %{buildroot}
-cd builder
-make install DESTDIR=%{buildroot}
-%endif
 
-%check
-%if !0%{?os2_version}
-%make_build test
-%else
-cd builder
-export BEGINLIBPATH=%{_builddir}/%{buildsubdir}/builder
-make -k test
-%endif
-
-%if !0%{?os2_version}
-%post -n %{lib_package} -p /sbin/ldconfig
-%postun -n %{lib_package} -p /sbin/ldconfig
-%endif
-
-%files 
-%defattr(-,root,root,-)
-%license LICENSE.txt
+%files
 %doc readme.md
-%if !0%{?os2_version}
-%{_libdir}/libtinyxml2.so.%{so_version}*
+%if !0%{os2_version}
+%{_libdir}/lib%{name}.so.%{soversion}*
 %else
-%{_libdir}/tinyxml9.dll
+%{_libdir}/*.dll
 %endif
 
 %files devel
-%license LICENSE.txt
-%{_includedir}/tinyxml2.h
-%if !0%{?os2_version}
-%{_libdir}/libtinyxml2.so
+%{_includedir}/%{name}.h
+%if !0%{os2_version}
+%{_libdir}/lib%{name}.so
 %else
-%{_libdir}/tinyxml2_dll.a
+%{_libdir}/%{name}_dll.a
 %endif
-%{_libdir}/pkgconfig/tinyxml2.pc
-%{_libdir}/cmake/tinyxml2
+%{_libdir}/pkgconfig/%{name}.pc
+%{_libdir}/cmake/%{name}/
 
 %changelog
+* Sat Feb 24 2024 Elbert Pol <elbert.pol@gmail.com> - 10.0.0-1
+- Updated to latest version
+- Add bldlevel nfo for os2
+- Provide legacy packages with DLLs for old ABI.
+
 * Thu Apr 28 2022 Elbert Pol <elbert.pol@gmail.com> - 9.0.0 -1
 - Updated to latest version
 - Add os2 specification 
