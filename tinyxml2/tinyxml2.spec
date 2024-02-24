@@ -2,7 +2,7 @@
 
 Name:           tinyxml2
 Version:        10.0.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Simple, small and efficient C++ XML parser
 
 License:        zlib
@@ -15,7 +15,7 @@ URL:            https://github.com/leethomason/tinyxml2
 %if !0%{os2_version}
 Source0:        %{url}/archive/%{version}/%{name}-%{version}.tar.gz
 %else
-%scm_source github https://github.com/tellie/%{name}-os2 master-os2
+%scm_source github https://github.com/tellie/%{name}-os2 %{version}-os2
 %endif
 
 BuildRequires:  make
@@ -97,6 +97,10 @@ export BEGINLIBPATH=%{_builddir}/%{buildsubdir}/pc-os2-emx-build
 %{_libdir}/cmake/%{name}/
 
 %changelog
+* Sat Feb 24 2024 Elbert Pol <elbert.pol@gmail.com> - 10.0.0-2
+- Build with the right version, and not with master
+- Add a defination for that we dont have dllimport
+
 * Sat Feb 24 2024 Elbert Pol <elbert.pol@gmail.com> - 10.0.0-1
 - Updated to latest version
 - Add bldlevel nfo for os2
