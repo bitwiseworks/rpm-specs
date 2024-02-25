@@ -1,12 +1,15 @@
 Name:       whois       
-Version:    5.5.20
+Version:    5.5.21
 Release:    1%{?dist}
 Summary:    Improved WHOIS client
 Group:      Applications/Internet
 License:    GPLv2+
 URL:        http://www.linux.it/~md/software/
-
-Vendor:  TeLLie_OS2
+%if 0%{os2_version}
+Vendor:         TeLLie OS2 forever
+Distribution:   OS/2
+Packager:       TeLLeRBoP
+%endif
 %if !0%{?os2_version}
 %scm_source  svn http://svn.netlabs.org/repos/ports/whois/trunk 2373
 %else
@@ -67,6 +70,9 @@ install -p -m644 -D %{cfgfile} $RPM_BUILD_ROOT%{_sysconfdir}/%{cfgfile}
 %{_mandir}/man5/%{cfgfile}.5.gz
 
 %changelog
+* Sun Feb 25 2024 Elbert Pol <elbert.pol@gmail.com> - 5.5.21-1
+- Updated to latest version
+
 * Sun Nov 12 2023 Elbert Pol <elbert.pol@gmail.com> - 5.5.20-1
 - Updated to latest version
 
