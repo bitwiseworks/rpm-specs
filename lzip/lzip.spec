@@ -1,6 +1,6 @@
 Name:           lzip
-Version:        1.24
-Release:        3%{?dist}
+Version:        1.24.1
+Release:        1%{?dist}
 Summary:        LZMA compressor with integrity checking
 
 License:        GPL-3.0-or-later
@@ -14,7 +14,7 @@ Packager:       TeLLeRBoP
 Source0:        http://download.savannah.gnu.org/releases/lzip/lzip-%{version}.tar.gz
 Source1:        http://download.savannah.gnu.org/releases/lzip/lzip-%{version}.tar.gz.sig
 %else
-%scm_source github https://github.com/Tellie/%{name}-os2 %{version}-os2-1
+%scm_source github https://github.com/Tellie/%{name}-os2 %{version}-os2
 %endif
 BuildRequires: make
 BuildRequires:  gcc-c++
@@ -38,8 +38,8 @@ cp -a COPYING COPYING.txt
 # convert CRLF to LF
 sed -i 's/\r//' COPYING.txt 
 
-
 %build
+export VENDOR="%{vendor}"
 %configure CXXFLAGS="%{build_cxxflags}" LDFLAGS="%{build_ldflags}"
 
 %make_build
@@ -68,6 +68,9 @@ make check
 
 
 %changelog
+* Sat Mar 02 2024 Elbert Pol <elbert.pol@gmail.com> - 1.24.1-1
+- Updated to latest version
+
 * Fri Feb 02 2024 Elbert Pol <elbert.pol@gmail.com> - 1.24-3
 - Update makefile.in and configure the right OS2 way, Thankz to Silvan
 - Also some changes in the spec file
