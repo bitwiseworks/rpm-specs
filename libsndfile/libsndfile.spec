@@ -1,21 +1,25 @@
 Summary:	Library for reading and writing sound files
 Name:		libsndfile
-Version:	1.1.0
+Version:	1.2.2
 Release:	1%{?dist}
-License:	LGPLv2+ and GPLv2+ and BSD
+License:	LGPL-2.1-or-later AND GPL-2.0-or-later AND BSD-3-Clause
 URL:		http://libsndfile.github.io/libsndfile/
-%if !0%{?os2_version}
-Source0:        https://github.com/libsndfile/libsndfile/releases/download/%{version}/libsndfile-%{version}.tar.bz2
-%else
-%scm_source github https://github.com/TeLLie/libsndfile-os2 %{version}-os2
+%if 0%{os2_version}
+Vendor:         TeLLie OS2 forever
+Distribution:   OS/2
+Packager:       TeLLeRBoP
 %endif
 %if !0%{?os2_version}
+Source0:        https://github.com/libsndfile/libsndfile/releases/download/%{version}/libsndfile-%{version}.tar.xz
 Patch0:		libsndfile-1.0.25-system-gsm.patch
-Patch1:		libsndfile-1.0.25-zerodivfix.patch
-# from upstream, fix #1984320=CVE-2021-3246, for <= 1.0.31
-Patch2:		libsndfile-1.0.31-deb669ee.patch
-# from upstream, fix #2027692, for <= 1.0.31
-Patch3:		libsndfile-1.0.31-ced91d7b.patch
+%else
+%scm_source github https://github.com/tellie/%{name}-os2 %{version}-os2
+%endif
+%if !0%{?os2_version}
+%if %{undefined rhel}  
+# used to regenerate test .c sources from .def files
+BuildRequires:  autogen
+%endif
 %endif
 BuildRequires:  gcc-c++
 %if !0%{?os2_version}
@@ -34,6 +38,8 @@ BuildRequires:	libtool
 BuildRequires:	make
 BuildRequires:	python3
 BuildRequires:  opus-devel
+BuildRequires:  lame-devel
+BuildRequires:  mpg123-devel
 
 
 %description
@@ -69,53 +75,40 @@ This package contains command line utilities for libsndfile.
 %prep
 %if !0%{?os2_version}
 %setup -q
-%patch0 -p1 -b .system-gsm
+%patch -P0 -p1 -b .system-gsm
 rm -r src/GSM610
 %else
 %scm_setup
 %endif
-# TODO: check if this patch is still needed
-%if !0%{?os2_version}
-%patch1 -p1 -b .zerodivfix
-%patch2 -p1 -b .deb669ee
-%patch3 -p1 -b .ced91d7b
-%endif
+
 
 %build
-%if !0%{?os2_version}
+%if 0%{?os2_version}
+# Set BUILDLEVEL to be embedded to all DLLs built with Libtool.
+export LT_BUILDLEVEL="@#%{vendor}:%{version}-%{release}#@##1## `LANG=C date +'%%d %%b %%Y %%H:%%M:%%S'`     `uname -n`::::0::"
+%endif
+
 autoreconf -I M4 -fiv # for system-gsm patch
 %configure \
 	--disable-dependency-tracking \
 	--enable-sqlite \
-	--enable-alsa \
-	--enable-largefile \
-	--disable-static
-%else
-mkdir build
-cd build
-export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp" 
-export LIBS="-lcx"
-%cmake -DCMAKE_INSTALL_PREFIX:PATH=/@unixroot/usr \
-      -DCMAKE_SKIP_RPATH:BOOL=YES \
-      -DOS2_USE_CXX_EMXEXP=ON \
-      -DCMAKE_BUILD_TYPE=Release \
-      -Wno-dev \
-       ..
-%endif
-# Get rid of rpath
 %if !0%{?os2_version}
+	--enable-alsa \
+%else
+       --disable-alsa \
+%endif 
+	--enable-largefile \
+	--enable-mpeg \
+	--disable-static
+
+# Get rid of rpath
 sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
 sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
-%endif
 
-%if !0%{?os2_version}
 %make_build
-%else
-make %{?_smp_mflags}
-%endif
 
 %install
-%make_install -C build
+%make_install
 rm -rf __docs
 mkdir __docs
 cp -pR $RPM_BUILD_ROOT%{_docdir}/%{name}/* __docs
@@ -138,18 +131,14 @@ cat > %{buildroot}%{_includedir}/sndfile.h <<EOF
 #endif
 EOF
 
-%if 0%{?rhel} != 0 || !0%{?os2_version}
+%if 0%{?rhel} != 0
 rm -f %{buildroot}%{_bindir}/sndfile-jackplay
 %endif
 
 
 %check
-%if 0%{?os2_version}
-LD_LIBRARY_PATH=$PWD/build
-%endif
-cd build
-make -k test
-
+LD_LIBRARY_PATH=$PWD/src/.libs
+make -k check
 
 %if !0%{?os2_version}
 %ldconfig_scriptlets
@@ -158,9 +147,10 @@ make -k test
 %files
 %{!?_licensedir:%global license %%doc}
 %license COPYING
-%doc AUTHORS README NEWS
+# NEWS files is missing in 1.1.0, check if it was re-added
+%doc AUTHORS README
 %if !0%{?os2_version}
-%{_libdir}/%{name}.so.*
+%{_libdir}/%{name}.so.1{,.*}
 %else
 %{_libdir}/*.dll
 %endif
@@ -208,17 +198,18 @@ make -k test
 %if !0%{?os2_version}
 %{_libdir}/%{name}.so
 %else
-%{_libdir}/*.a
+%{_libdir}/*_dll.a
 %endif
-%dir %{_libdir}/cmake/SndFile
-%{_libdir}/cmake/SndFile/SndFileTargets-release.cmake
-%{_libdir}/cmake/SndFile/SndFileConfig.cmake
-%{_libdir}/cmake/SndFile/SndFileConfigVersion.cmake
-%{_libdir}/cmake/SndFile/SndFileTargets.cmake
 %{_libdir}/pkgconfig/sndfile.pc
 
 
 %changelog
+* Mon Mar 04 2024 Elbert Pol <elbert.pol@gmail.com> - 1.2.2-1
+- Updated to latest version
+- Sync with latest Fedora spec file
+- Add bldlevel to dll
+- Make test running, thankz to Silvan
+
 * Sun Apr 10 2022 Elbert Pol <elbert.pol@gmail.com> - 1.0.1-1
 - Updated to latest version
 
