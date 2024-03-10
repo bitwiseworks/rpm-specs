@@ -1,16 +1,16 @@
 Name:           speexdsp
 Version:        1.2.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        A voice compression format (DSP)
 
 License:        BSD-3-Clause
 URL:            http://www.speex.org/
-%if 0%{os2_version}
+%if 0%{?os2_version}
 Vendor:         TeLLie OS2 forever
 Distribution:   OS/2
 Packager:       TeLLeRBoP
 %endif
-%if !0%{os2_version}
+%if !0%{?os2_version}
 Source0:        http://downloads.xiph.org/releases/speex/%{name}-%{version}.tar.gz
 %else
 %scm_source github https://github.com/tellie/speexdsp-os2 %{version}-os2
@@ -46,7 +46,7 @@ This is the DSP package, see the speex package for the codec part.
 
 
 %prep
-%if !0%{os2_version}
+%if !0%{?os2_version}
 %autosetup -p1
 %else
 %scm_setup
@@ -72,7 +72,7 @@ autoreconf -ivf
 # Remove libtool archives
 find %{buildroot} -type f -name "*.la" -delete
 
-%if !0%{os2_version}
+%if !0%{?os2_version}
 %ldconfig_scriptlets
 %endif
 
@@ -80,7 +80,7 @@ find %{buildroot} -type f -name "*.la" -delete
 %license COPYING
 %doc AUTHORS TODO ChangeLog README NEWS doc/manual.pdf
 %doc %{_docdir}/speexdsp/manual.pdf
-%if !0%{os2_version}
+%if !0%{?os2_version}
 %{_libdir}/libspeexdsp.so.1*
 %else
 %{_libdir}/*.dll
@@ -89,13 +89,16 @@ find %{buildroot} -type f -name "*.la" -delete
 %files devel
 %{_includedir}/speex/
 %{_libdir}/pkgconfig/speexdsp.pc
-%if !0%{os2_version}
+%if !0%{?os2_version}
 %{_libdir}/libspeexdsp.so
 %else
 %{_libdir}/*_dll.a
 %endif
 
 %changelog
+* Sun Mar 10 2024 Elbert Pol <elbert.pol@gmail.com> - 1.2.1-2
+- Add forgotten ? to the 0%{?os2_version}
+
 * Sat Mar 09 2024 Elbert pol <elbert.pol@gmail.com> - 1.2.1-1
 - Updated to latest version
 - Add bldlevel to dll
