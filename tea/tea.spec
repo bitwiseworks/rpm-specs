@@ -1,6 +1,6 @@
 Name:          tea
-Version:       62.1.2
-Release:       4%{?dist}
+Version:       62.4.0
+Release:       1%{?dist}
 Summary:       A powerful and easy-to-use Qt4-based editor with many useful features for HTML, Docbook, and LaTeX editing
 Group:         Graphical Desktop/Applications/Development
 %if 0%{?os2_version}
@@ -43,16 +43,8 @@ Morse-code tools, bookmarks, syntax highlighting, and more.
 %scm_setup
 
 %build
-%if 0%{?os2_version}
-export LDFLAGS="-Zhigh-mem -Zomf -lcx"
-export CFLAGS="-O2 -g -march=pentium4"
-export CXXFLAGS="-O2 -g -march=pentium4"
-export FFLAGS="-O2 -g -march=pentium4"
-export FCFLAGS="-O2 -g -march=pentium4"
-%endif
-
 %cmake . -DCMAKE_INSTALL_PREFIX:PATH=/@unixroot/usr \
-      -DCMAKE_SKIP_RPATH:BOOL=YES \
+      -DCMAKE_PREFIX_PATH=/@unixroot/usr/lib/qt5 \
       -DCMAKE_BUILD_TYPE=release \
       -DUSE_ASPELL=ON \
       -DUSE_PRINTER=ON \
@@ -110,6 +102,9 @@ fi
 %endif
 
 %changelog
+* Sun Mar 10 2024 Elbert Pol <elbert.pol@gmail.com> 62.4.0-1
+- U[dated to latest version
+
 * Tue Dec 19 2023 Elbert Pol <elbert.pol@gmail.com> 62.1.2-4
 - Tweaked the spec file some more.
 - Add some BuildRequires
