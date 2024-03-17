@@ -1,6 +1,6 @@
 Name:           iqpuzzle
 Version:        1.2.10
-Release:        1
+Release:        1%{?dist}
 Summary:        A diverting I.Q. challenging pentomino puzzle
 Group:          Games/Puzzles
 License:        GPLv3
@@ -105,3 +105,7 @@ fi
 %endif
 
 %changelog
+* Sun Mar 17 2024 Elbert Pol <elbert.pol@gmail.com> 1.2.10-1
+- Update source to build 14-03-2024
+- Make a WPS desktop map for iqpuzzle
+- Add ico to exe file
