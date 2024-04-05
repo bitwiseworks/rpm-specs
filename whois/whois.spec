@@ -1,5 +1,5 @@
 Name:       whois       
-Version:    5.5.21
+Version:    5.5.22
 Release:    1%{?dist}
 Summary:    Improved WHOIS client
 Group:      Applications/Internet
@@ -11,7 +11,7 @@ Distribution:   OS/2
 Packager:       TeLLeRBoP
 %endif
 %if !0%{?os2_version}
-%scm_source  svn http://svn.netlabs.org/repos/ports/whois/trunk 2373
+%Source0:    https://ftp.debian.org/debian/pool/main/w/%{name}/%{name}_%{version}.tar.xz
 %else
 %scm_source github http://github.com/TeLLie/%{name}-os2 %{version}-os2
 %endif
@@ -46,7 +46,7 @@ BuildRequires:  subversion zip
 
 %build
 export LDFLAGS=" -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
-make CONFIG_FILE="%{_sysconfdir}/%{cfgfile}" HAVE_ICONV=1 \
+%make_build CONFIG_FILE="%{_sysconfdir}/%{cfgfile}" HAVE_ICONV=1 \
     CFLAGS="$RPM_OPT_FLAGS" %{?_smp_mflags}
 
 %install
@@ -70,6 +70,9 @@ install -p -m644 -D %{cfgfile} $RPM_BUILD_ROOT%{_sysconfdir}/%{cfgfile}
 %{_mandir}/man5/%{cfgfile}.5.gz
 
 %changelog
+* Fri Apr 04 2024 Elbert Pol <elbert.pol@gmail.com> - 5.5.22-1
+- Updated to latest version
+
 * Sun Feb 25 2024 Elbert Pol <elbert.pol@gmail.com> - 5.5.21-1
 - Updated to latest version
 
