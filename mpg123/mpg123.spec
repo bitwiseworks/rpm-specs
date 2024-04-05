@@ -3,12 +3,18 @@
 %global syn syn123
 
 Name: mpg123
-Version: 1.32.5
+Version: 1.32.6
 Release: 1%{?dist}
 
 Summary: Real time MPEG 1.0/2.0/2.5 audio player/decoder for layers 1, 2 and 3
 License: GPL-2.0-or-later
 URL: https://mpg123.org
+%if 0%{?os2_version}
+Vendor:        TeLLie OS2 forever
+Distribution:  OS/2
+Packager:      TeLLie
+%endif 
+
 %if !0%{?os2_version}
 Source0: %{url}/download/%{name}-%{version}.tar.bz2
 %else
@@ -117,7 +123,11 @@ Development files for decoding and output libraries.
 %endif
 
 %build
-autoreconf -vfi
+%if 0%{?os2_version}
+# Set BUILDLEVEL to be embedded to all DLLs built with Libtool.
+export LT_BUILDLEVEL="@#%{vendor}:%{version}-%{release}#@##1## `LANG=C date +'%%d %%b %%Y %%H:%%M:%%S'`     `uname -n`::::0::"
+autoreconf -ivf
+%endif
 %if !0%{?os2_version}
 %configure --enable-modules=yes --with-default-audio=alsa \
   --with-audio=alsa,%{?enable_jack:jack},pulse,oss,%{?enable_portaudio:portaudio}
@@ -214,6 +224,10 @@ rm %{buildroot}%{_libdir}/*.la
 %{_libdir}/pkgconfig/lib%{syn}.pc
 
 %changelog
+* Fri Apr 04 2024 Elbert Pol <elbert.pol@gmail.com> - 1.32.6-1
+- Updated to latest version.
+- Add bldlevel to dll
+
 * Fri Feb 23 2024 Elbert Pol <elbert.pol@gmail.com> - 1.32.5-1
 - Updated to latest version
 
