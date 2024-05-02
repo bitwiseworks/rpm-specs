@@ -1,5 +1,5 @@
 Name:           iqpuzzle
-Version:        1.2.10
+Version:        1.3.1
 Release:        1%{?dist}
 Summary:        A diverting I.Q. challenging pentomino puzzle
 Group:          Games/Puzzles
@@ -12,9 +12,9 @@ Packager:      TeLLie
 %endif 
 
 %if !0%{?os2_version}
-URL:           http://semiletov.org/tea/
+URL:            https://elth0r0.github.io/iqpuzzle/
 Source0:        https://github.com/ElTh0r0/iqpuzzle/archive/v%{version}/%{name}-%{version}.tar.gz
-%else
+%else 
 %scm_source github https://github.com/tellie/%{name}-os2 %{version}-os2
 %endif
 BuildRequires:  pkgconfig(Qt5Core)
@@ -105,6 +105,9 @@ fi
 %endif
 
 %changelog
+* Thu May 02 2024 Elbert Pol <elbert.pol@gmail.com> 1.3.1-1
+- Updated to latest version
+
 * Sun Mar 17 2024 Elbert Pol <elbert.pol@gmail.com> 1.2.10-1
 - Update source to build 14-03-2024
 - Make a WPS desktop map for iqpuzzle
