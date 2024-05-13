@@ -1,5 +1,5 @@
 Name:          tea
-Version:       62.4.0
+Version:       63.0.1
 Release:       1%{?dist}
 Summary:       A powerful and easy-to-use Qt4-based editor with many useful features for HTML, Docbook, and LaTeX editing
 Group:         Graphical Desktop/Applications/Development
@@ -37,21 +37,11 @@ It features a small footprint, a tabbed layout engine, support for multiple enco
 an "open at cursor" function for HTML files and images, miscellaneous HTML tools, preview in external browser, string manipulation functions,
 Morse-code tools, bookmarks, syntax highlighting, and more.
 
-%debug_package
-
 %prep
 %scm_setup
 
 %build
-%cmake . -DCMAKE_INSTALL_PREFIX:PATH=/@unixroot/usr \
-      -DCMAKE_PREFIX_PATH=/@unixroot/usr/lib/qt5 \
-      -DCMAKE_BUILD_TYPE=release \
-      -DUSE_ASPELL=ON \
-      -DUSE_PRINTER=ON \
-      -DUSE_PDF=ON \
-      -DUSE_DJVU=ON \
-      -Wno-dev
-
+%cmake -DUSE_ASPELL=ON -DUSE_PRINTER=ON -DUSE_PDF=ON -DUSE_DJVU=ON 
 %cmake_build
 
 %install
@@ -102,6 +92,12 @@ fi
 %endif
 
 %changelog
+* Mon May 13 2024 Elbert Pol ,elbert.pol@gmail.com> 63.0.1-1
+- Updated to latest version
+
+* Sat May 11 2024 Elbert Pol <elbert.pol@gmail.com> 63.0.0-1
+- Updated to latest version
+
 * Sun Mar 10 2024 Elbert Pol <elbert.pol@gmail.com> 62.4.0-1
 - U[dated to latest version
 
