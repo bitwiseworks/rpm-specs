@@ -97,7 +97,7 @@
 Name:			graphviz
 Summary:		Graph Visualization Tools
 Version:		11.0.0
-Release:		1%{?dist}
+Release:		2%{?dist}
 License:		epl-1.0 AND cpl-1.0 AND bsd-3-clause AND mit AND gpl-3.0-or-later WITH bison-exception-2.2 AND apache-1.1 AND lgpl-2.0-or-later WITH libtool-exception AND smlnj AND hpnd-uc
 URL:			http://www.graphviz.org/
 %if !0%{?os2_version}
@@ -105,7 +105,7 @@ URL:			http://www.graphviz.org/
 Source0:		https://gitlab.com/api/v4/projects/%{name}%2F%{name}/packages/generic/%{name}-releases/%{version}/%{name}-%{version}.tar.xz
 %else
 Vendor:			bww bitwise works GmbH
-%scm_source github https://github.com/bitwiseworks/%{name}-os2 %{version}-os2
+%scm_source github https://github.com/bitwiseworks/%{name}-os2 %{version}-1-os2
 %endif
 BuildRequires:		gcc-g++
 BuildRequires:		zlib-devel
@@ -802,5 +802,8 @@ php --no-php-ini \
 %endif
 
 %changelog
+* Mon May 27 2024 Silvan Scherrer <silvan.scherrer@aroa.ch> - 11.0.0-2
+- fix a /@unixroot issue, so plugings are found
+
 * Fri May 24 2024 Silvan Scherrer <silvan.scherrer@aroa.ch> - 11.0.0-1
 - first OS/2 rpm
