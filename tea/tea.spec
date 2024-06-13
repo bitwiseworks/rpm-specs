@@ -1,5 +1,5 @@
 Name:          tea
-Version:       63.0.1
+Version:       63.1.0
 Release:       1%{?dist}
 Summary:       A powerful and easy-to-use Qt4-based editor with many useful features for HTML, Docbook, and LaTeX editing
 Group:         Graphical Desktop/Applications/Development
@@ -92,7 +92,10 @@ fi
 %endif
 
 %changelog
-* Mon May 13 2024 Elbert Pol ,elbert.pol@gmail.com> 63.0.1-1
+* Thu Jun 13 2024 Elbert Pol <elbert.pol@gmail.com> 63.1.0-1
+- Updated to latest version
+
+* Mon May 13 2024 Elbert Pol <elbert.pol@gmail.com> 63.0.1-1
 - Updated to latest version
 
 * Sat May 11 2024 Elbert Pol <elbert.pol@gmail.com> 63.0.0-1
