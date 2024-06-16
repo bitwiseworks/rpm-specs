@@ -3,15 +3,27 @@ Version:        4.7.0
 Release:        1%{?dist}
 Summary:        GUI frontend to multiple CLI based downloading programs
 License:        GPL-2.0-or-later
+%if 0%{?os2_version}
+Vendor:        TeLLie OS2 forever
+Distribution:  OS/2
+Packager:      TeLLie
+%endif 
 URL:            https://github.com/mhogomchungu/media-downloader
+%if !0%{?os2_version}
 Source0:        %url/archive/refs/tags/%{version}.tar.gz#/%{name}-%{version}.tar.gz
-
+%else
+%scm_source github https://github.com/Tellie/media-downloader-os2 %{version}-os2
+%endif
 BuildRequires:  cmake
 BuildRequires:  gcc-c++
 BuildRequires:  qt5-qtbase-devel
+%if !0%{?os2_version}
 BuildRequires:  desktop-file-utils
-Requires: yt-dlp
 Requires: aria2
+Requires: yt-dlp
+%endif
+
+
 
 %description
 This project is a Qt/C++ based GUI frontend to CLI multiple CLI based tools that
@@ -38,74 +50,84 @@ Features offered:-
     Japanese, French and Italian.
 
 %prep
+%if !0%{?os2_version}
 %autosetup -p0 -n %{name}-%{version}
+%else
+%scm_setup
+%endif
 
 %build
+%if !0%{?os2_version}
 mkdir build && pushd build
-%cmake  -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=release ..
+%cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=release ..
+%else
+%cmake -DCMAKE_INSTALL_PREFIX=/@unixroot/usr -DCMAKE_BUILD_TYPE=release 
+%endif
+
 %cmake_build
+cd src
+wrc -bt=os2 -zm -r os2app.rc
+wrc -bt=os2 -zm os2app.res ../pc-os2-emx-build/media-downloader.exe
+%if !0%{?os2_version}
 popd
+%endif
 
 %install
+%if 0%{?os2_version}     
+mkdir -p %{buildroot}%{_datadir}/os2/icons/
+cp -a src/%{name}-os2.ico %{buildroot}%{_datadir}/os2/icons/%{name}.ico
+%endif
+%if !0%{?os2_version}
 pushd build
+%endif
 %cmake_install
+%if !0%{?os2_version}
 popd
+%endif
+
 %find_lang %{name} --all-name --with-qt
 
 %check
+%if !0%{?os2_version}
 desktop-file-validate %{buildroot}%{_datadir}/applications/%{name}.desktop
+%endif
 
 %files -f %{name}.lang
-%doc README.md
+%doc README.md changelog
 %license LICENSE
+%if !0%{?os2_version}
 %{_bindir}/%{name}
+%else
+%doc README-os2.txt
+%{_bindir}/%{name}.exe
+%{_datadir}/os2/icons/%{name}.ico
+%endif
 %dir %{_datadir}/%{name}/
 %dir %{_datadir}/%{name}/translations/
 %{_datadir}/applications/%{name}.desktop
 %{_datadir}/pixmaps/%{name}.png
 
+%if 0%{?os2_version}
+%global wps_folder_title Media-downloader
+
+%post -e
+if [ "$1" -ge 1 ]; then # (upon update)
+    %wps_object_delete_all
+fi
+%global wps_app_title Media-downloader
+%bww_folder -t %{wps_folder_title}
+%bww_app -f %{_bindir}/%{name}.exe -t %{wps_app_title} -i ${name}.ico
+%bww_app_shadow
+%bww_file changelog -f %_defaultdocdir/%{name}-%{version}/CHANGELOG
+%bww_file README-OS2.txt -f %_defaultdocdir/%{name}-%{version}/README-os2.txt
+%bww_file README.md -f %_defaultdocdir/%{name}-%{version}/README.md
+
+%postun
+if [ "$1" -eq 0 ]; then # (upon removal)
+    %wps_object_delete_all
+fi
+%endif
+
 %changelog
-* Mon Jun 10 2024 Martin Gansser <martinkg@fedoraproject.org> - 4.7.0-1
-- Update to 4.7.0
-
-* Tue Apr 09 2024 Martin Gansser <martinkg@fedoraproject.org> - 4.5.0-1
-- Update to 4.5.0
-
-* Tue Mar 12 2024 Martin Gansser <martinkg@fedoraproject.org> - 4.4.0-1
-- Update to 4.4.0
-
-* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 4.2.0-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sun Jan 21 2024 Fedora Release Engineering <releng@fedoraproject.org> - 4.2.0-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
-
-* Sat Jan 13 2024 Martin Gansser <martinkg@fedoraproject.org> - 4.2.0-2
-- Remove RR youtube-dl
-
-* Fri Jan 12 2024 Martin Gansser <martinkg@fedoraproject.org> - 4.2.0-1
-- Update to 4.2.0
-- Remove RR youtube-dl
-- Add RR yt-dlp
-
-* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.9.0-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
-
-* Sun Mar 05 2023 Martin Gansser <martinkg@fedoraproject.org> - 2.9.0-1
-- Update to 2.9.0
-
-* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.8.0-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
-
-* Wed Jan 04 2023 Martin Gansser <martinkg@fedoraproject.org> - 2.8.0-1
-- Update to 2.8.0
-
-* Fri Dec 02 2022 Martin Gansser <martinkg@fedoraproject.org> - 2.7.0-2
-- Remove unnecessary blank line above the first line
-- Use new SPDX license format 
-
-* Thu Nov 10 2022 Martin Gansser <martinkg@fedoraproject.org> - 2.7.0-1
-- Update to 2.7.0
-
-* Fri Oct 07 2022 Martin Gansser <martinkg@fedoraproject.org> - 2.6.0-1
-- Initial package
+* Sun Jun 16 2024 Elbert Pol <elbert.pol@gmail.com> - 4.7.0-1
+- First Rpm for os2
