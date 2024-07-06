@@ -1,5 +1,5 @@
 Name:           media-downloader
-Version:        4.7.0
+Version:        4.8.0
 Release:        1%{?dist}
 Summary:        GUI frontend to multiple CLI based downloading programs
 License:        GPL-2.0-or-later
@@ -129,5 +129,8 @@ fi
 %endif
 
 %changelog
+* Sat Jul 06 2024 Elbert Pol <elbert.pol@gmail.com> - 4.8.0-1
+- Update to latest version.
+
 * Sun Jun 16 2024 Elbert Pol <elbert.pol@gmail.com> - 4.7.0-1
 - First Rpm for os2
