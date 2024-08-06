@@ -1,43 +1,54 @@
+%global commit a302128d2e23984501ed0a77413594ad440eddde
+%global shortcommit %(c=%{commit}; echo ${c:0:7})
+
 Name:           sqlitebrowser
-Version:        3.12.2
+Version:        3.13.0
+%if !0%{?os2_version}
+Release:        0.8%{?commit:.git%{shortcommit}}%{?dist}
+%else
 Release:        1%{?dist}
+%endif
+%if 0%{?os2_version}
+Vendor:        TeLLie OS2 forever
+Distribution:  OS/2
+Packager:      TeLLie
+%endif 
 Summary:        Create, design, and edit SQLite database files
 
-License:        GPLv3+ or MPLv2.0
+License:        GPL-3.0-or-later OR MPL-2.0
 URL:            https://github.com/%{name}/%{name}
 %if !0%{?os2_version}
+%if 0%{?commit:1}
+Source0:        https://github.com/%{name}/%{name}/archive/%{commit}/%{name}-%{shortcommit}.tar.gz
+%else
 Source0:        https://github.com/%{name}/%{name}/archive/v%{version}/%{name}-%{version}.tar.gz
-%else 
-%scm_source github https://github.com/Tellie/%{name}-os2 %{version}-os2
 %endif
-# Unbundle bundled libraries
+%else
+%scm_source github https://github.com/Tellie/sqlitebrowser-os2 %{version}-os2
+%endif
+
 %if !0%{?os2_version}
+# Unbundle bundled libraries
 Patch0:         sqlitebrowser_unbundle.patch
 
-BuildRequires:  antlr-C++
-%endif
-BuildRequires:  cmake
-%if !0%{?os2_version}
 BuildRequires:  desktop-file-utils
-%endif
-BuildRequires:  gcc-c++
-%if !0%{?os2_version}
 BuildRequires:  libappstream-glib
-%endif
-BuildRequires:  make
-%if !0%{?os2_version}
+BuildRequires:  sqlcipher-devel
 BuildRequires:  qcustomplot-qt5-devel
 BuildRequires:  qhexedit2-qt5-devel
-%endif
-BuildRequires:  sqlite-devel
-%if !0%{?os2_version}
 BuildRequires:  qscintilla-qt5-devel
-%endif
+%else
+BuildRequires:  cmake
+BuildRequires:  gcc-c++
+BuildRequires:  make
 BuildRequires:  qt5-qtbase-devel
 BuildRequires:  qt5-qttools-devel
+%endif
+
 %if !0%{?os2_version}
 Requires:       hicolor-icon-theme
 %endif
+
 %description
 SQLite Database Browser is a high quality, visual, open source tool to create,
 design, and edit database files compatible with SQLite.
@@ -45,75 +56,107 @@ design, and edit database files compatible with SQLite.
 
 %prep
 %if !0%{?os2_version}
-%autosetup -p1
+%if 0%{?commit:1}
+%autosetup -p1 -n %{name}-%{commit}
+%else
+%autosetup -p1 -n %{name}-%{version}
+%endif
 %else
 %scm_setup
 %endif
+
 # Unbundle
+%if !0%{?os2_version}
 rm -rf libs/{qcustomplot-source,qhexedit,qscintilla}
-
-%build
-%if 0%{?os2_version}
-mkdir -p build
-cd build
-export LDFLAGS="-Zhigh-mem -Zomf -lcx -lpthread"
-export CFLAGS="-O2 -g -march=i686"
-export CXXFLAGS="-O2 -g -march=i686"
-export FFLAGS="-O2 -g -march=i686"
-export FCFLAGS="-O2 -g -march=i686"
-
-cmake -DCMAKE_INSTALL_PREFIX:PATH=/@unixroot/usr \
-       -DCMAKE_SKIP_RPATH:BOOL=YES \
-       -DCMAKE_BUILD_TYPE=Release \
-       -DOS2_USE_CXX_EMXEXP=ON \
-       -DBUILD_STABLE_VERSION=1  \
-       -DENABLE_TESTING=ON \
-       -Wno-dev .. 
+# add sqlcipher to include path
+sed -i 's@^\(\s*\)set(LIBSQLITE_NAME sqlcipher)@&\n\1include_directories(%{_prefix}/include/sqlcipher)@' CMakeLists.txt
 %endif
 
+%build
 %if !0%{?os2_version}
 %cmake \
-    -DUSE_QT5=1 \
+    -DBUILD_SHARED_LIBS=OFF \
     -DENABLE_TESTING=1 \
     -DFORCE_INTERNAL_QCUSTOMPLOT=OFF \
     -DFORCE_INTERNAL_QHEXEDIT=OFF \
-    -DQT_INCLUDE_DIR=%{_includedir}/qt5 \
-   ..
+    -DQSCINTILLA_INCLUDE_DIR=%{_qt5_includedir} \
+    -DQSCINTILLA_LIBRARY=%{_libdir}/libqscintilla2_qt5.so \
+    -Dsqlcipher=1
+%else
+%cmake \
+    -DBUILD_SHARED_LIBS=OFF \
+    -DENABLE_TESTING=1 \
+    -DFORCE_INTERNAL_QCUSTOMPLOT=ON \
+    -DFORCE_INTERNAL_QHEXEDIT=ON \
+    -DQSCINTILLA_INCLUDE_DIR=%{_qt5_includedir} \
+    -DQSCINTILLA_LIBRARY=%{_libdir}/qscintilla2.a \
+    -Dsqlcipher=0
 %endif
 
-%if !0%{?os2_version}
 %cmake_build
-%else
-make %{?_smp_mflags}
-%endif
+
+cd src
+wrc -bt=os2 -zm -r os2app.rc
+wrc -bt=os2 -zm os2app.res ../pc-os2-emx-build/sqlitebrowser.exe
 
 %install
-%if !0%{?os2_version}
 %cmake_install
-%{_bindir}/appstream-util validate-relax --nonet %{buildroot}%{_datadir}/metainfo/%{name}.desktop.appdata.xml
+%if 0%{?os2_version}     
+mkdir -p %{buildroot}%{_datadir}/os2/icons/
+mkdir -p %{buildroot}%{_datadir}/icons/hicolor/256x256/apps/
+cp -a src/%{name}.ico %{buildroot}%{_datadir}/os2/icons/%{name}.ico
+cp -a src/icons/%{name}.png %{buildroot}%{_datadir}/icons/hicolor/256x256/apps/%{name}.png
+%endif
+%if !0%{?os2_version}
+appstream-util validate-relax --nonet %{buildroot}%{_datadir}/metainfo/%{name}.desktop.appdata.xml
 desktop-file-validate %{buildroot}%{_datadir}/applications/%{name}.desktop
-%else
-make DESTDIR=$RPM_BUILD_ROOT -C build install
-install -Dm 0644 src/icons/%{name}.png %{buildroot}%{_datadir}/icons/hicolor/256x256/apps/sqlitebrowser.png
 %endif
 
 %check
-%if !0%{?os2_version}
-%ctest
-%endif
+%ctest -V
 
 %files
 %license LICENSE
-%doc README.md
+%doc README.md  
 %if !0%{?os2_version}
 %{_bindir}/%{name}
 %{_datadir}/metainfo/%{name}.desktop.appdata.xml
 %{_datadir}/applications/%{name}.desktop
+%{_datadir}/icons/hicolor/scalable/apps/%{name}.svg
 %else
+%doc CHANGELOG.md README-OS2.txt BUILDING.md
 %{_bindir}/%{name}.exe
+%{_datadir}/os2/icons/%{name}.ico
 %{_datadir}/icons/hicolor/256x256/apps/%{name}.png
 %endif
 
+%if 0%{?os2_version}
+%global wps_folder_title Sqlitebrowser
+
+%post -e
+if [ "$1" -ge 1 ]; then # (upon update)
+    %wps_object_delete_all
+fi
+%global wps_app_title Sqlitebrowser
+%bww_folder -t %{wps_folder_title}
+%bww_app -f %{_bindir}/%{name}.exe -t %{wps_app_title} -i ${name}.ico
+%bww_app_shadow
+%bww_file BUILDING.md -f %_defaultdocdir/%{name}-%{version}/BUILDING.md
+%bww_file CHANGELOG.md -f %_defaultdocdir/%{name}-%{version}/CHANGELOG.md
+%bww_file README-OS2.txt -f %_defaultdocdir/%{name}-%{version}/README-os2.txt
+%bww_file README.md -f %_defaultdocdir/%{name}-%{version}/README.md
+
+%postun
+if [ "$1" -eq 0 ]; then # (upon removal)
+    %wps_object_delete_all
+fi
+%endif
+
+
 %changelog
+* Tue Aug 06 2024 Elbert Pol <elbert.pol@gmail.com>
+- Updated to latest version
+- Add icon and a wps map
+
 * Sat May 15 2021 Elbert Pol <elbert.pol@gmail.com> - 3.12.2-1
 - First RPM for OS2 v3.12.2
