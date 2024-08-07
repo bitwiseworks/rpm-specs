@@ -6,7 +6,7 @@ Version:        3.13.0
 %if !0%{?os2_version}
 Release:        0.8%{?commit:.git%{shortcommit}}%{?dist}
 %else
-Release:        1%{?dist}
+Release:        2%{?dist}
 %endif
 %if 0%{?os2_version}
 Vendor:        TeLLie OS2 forever
@@ -24,7 +24,7 @@ Source0:        https://github.com/%{name}/%{name}/archive/%{commit}/%{name}-%{s
 Source0:        https://github.com/%{name}/%{name}/archive/v%{version}/%{name}-%{version}.tar.gz
 %endif
 %else
-%scm_source github https://github.com/Tellie/sqlitebrowser-os2 %{version}-os2
+%scm_source github https://github.com/Tellie/sqlitebrowser-os2 %{version}-os2-1
 %endif
 
 %if !0%{?os2_version}
@@ -95,10 +95,6 @@ sed -i 's@^\(\s*\)set(LIBSQLITE_NAME sqlcipher)@&\n\1include_directories(%{_pref
 
 %cmake_build
 
-cd src
-wrc -bt=os2 -zm -r os2app.rc
-wrc -bt=os2 -zm os2app.res ../pc-os2-emx-build/sqlitebrowser.exe
-
 %install
 %cmake_install
 %if 0%{?os2_version}     
@@ -154,7 +150,11 @@ fi
 
 
 %changelog
-* Tue Aug 06 2024 Elbert Pol <elbert.pol@gmail.com>
+* Wed Aug 07 2024 Elbert Pol <elbert.pol@gmail.com> -3.13.0-2
+- Update some changes that where not ok.
+- Remove wrc and do it the probper way in cmakelists
+
+* Tue Aug 06 2024 Elbert Pol <elbert.pol@gmail.com> -3.13.0-1
 - Updated to latest version
 - Add icon and a wps map
 
