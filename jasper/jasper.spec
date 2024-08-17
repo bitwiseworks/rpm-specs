@@ -1,12 +1,12 @@
-
 # NOTE: packages that can use jasper:
 # ImageMagick
 # netpbm
 
 Summary: Implementation of the JPEG-2000 standard, Part 1
 Name:    jasper
-Version: 4.1.1
+Version: 4.2.4
 Release: 1%{?dist}
+
 License: JasPer-2.0
 %if 0%{?os2_version}
 Vendor:         TeLLie OS2 forever
@@ -21,13 +21,10 @@ Source0: https://github.com/jasper-software/%{name}/archive/refs/tags/version-%{
 %endif
 
 %if !0%{?os2_version}
-# skip hard-coded prefix/lib rpath
-Patch1: jasper-4.1.0-rpath.patch
-
 # architecture related patches
 Patch100: jasper-2.0.2-test-ppc64-disable.patch
 Patch101: jasper-2.0.2-test-ppc64le-disable.patch
-patch102: jasper-4.1.0-test-i686-disable.patch
+Patch102: jasper-4.1.0-test-i686-disable.patch
 %endif
 
 # autoreconf
@@ -82,21 +79,21 @@ Requires: %{name}-libs%{?_isa} = %{version}-%{release}
 
 %if !0%{?os2_version}
 patch 1 -p1 -b .-rpath
-%endif
 
 # Need to disable one test to be able to build it on ppc64 arch
 # At ppc64 this test just stuck (nothing happend - no exception or error)
+
 %if "%{_arch}" == "ppc64"
 %patch 100 -p1 -b .test-ppc64-disable
 %endif
 
 # Need to disable two tests to be able to build it on ppc64le arch
 # At ppc64le this tests just stuck (nothing happend - no exception or error)
+
 %if "%{_arch}" == "ppc64le"
 %patch 101 -p1 -b .test-ppc64le-disable
 %endif
 
-%if !0%{?os2_version}
 %ifarch %ix86
 %patch102 -p1 -b .test-i686-disable
 %endif
@@ -112,7 +109,8 @@ export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 export LIBS="-lcx -lpthread"
 %endif
 %cmake \
-  -DJAS_ENABLE_DOC:BOOL=OFF 
+  -DJAS_ENABLE_DOC:BOOL=OFF \
+  -DALLOW_IN_SOURCE_BUILD:BOOL=ON \
 %if !0%{?os2_version}
   -B builder
 
@@ -120,9 +118,7 @@ export LIBS="-lcx -lpthread"
 
 %install
 make install/fast DESTDIR=%{buildroot} -C builder
-%endif
-
-%if 0%{?os2_version}
+%else
 %cmake_build
 
 %install
@@ -132,6 +128,7 @@ make install/fast DESTDIR=%{buildroot} -C builder
 # Unpackaged files
 rm -f doc/README
 rm -f %{buildroot}%{_libdir}/lib*.la
+
 
 %check
 %if !0%{?os2_version}
@@ -173,13 +170,17 @@ make test -C builder
 %{_libdir}/*.dll
 %endif
 
-%if !0%{?os2_version}
 %files utils
+%if !0%{?os2_version}
 %{_bindir}/jiv
 %{_mandir}/man1/jiv.1*
 %endif
 
 %changelog
+* Sat Aug 17 2024  Elbert Pol <elbert.pol@gmail.com> - 4.2.4-1
+- Updated to latest source
+- Add info to the lib fi;e
+
 * Tue Dec 26 2023 Elbert Pol <elbert.pol@gmail.com> - 4.1.1-1
 - Updated to latest version
 - Disable utils, as jiv required opengl and glut
