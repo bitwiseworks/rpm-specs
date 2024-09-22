@@ -2,7 +2,7 @@
 
 Summary: Library for reading RAW files obtained from digital photo cameras
 Name: libraw
-Version: 0.21.2
+Version: 0.21.3
 Release: 1%{?dist}
 License: BSD-3-Clause and (CDDL-1.0 or LGPL-2.1-only)
 URL: https://www.libraw.org
@@ -67,6 +67,10 @@ LibRaw sample programs
 %endif
 
 %build
+%if 0%{?os2_version}
+# Set BUILDLEVEL to be embedded to all DLLs built with Libtool.
+export LT_BUILDLEVEL="@#%{vendor}:%{version}-%{release}#@##1## `LANG=C date +'%%d %%b %%Y %%H:%%M:%%S'`     `uname -n`::::0::"
+%endif
 autoreconf -if
 %configure \
     --enable-examples=yes \
@@ -84,11 +88,7 @@ autoreconf -if
 sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
 sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
 
-%if !0%{?os2_version}
 %make_build
-%else
-make %{?_smp_mflags} 
-%endif
 
 %install
 cp -pr doc manual
@@ -145,7 +145,10 @@ rm -fv %{buildroot}%{_libdir}/lib*.la
 
 
 %changelog
-* Wed Dec 27 2023 Elbert Pol <elbert.pol@gmail,com> - 0.21.2-1
+* Fri Sep 20 2024 Elbert Pol <elbert.pol@gmail.com> - 0.21.3-1
+- Updated to latest version
+
+* Wed Dec 27 2023 Elbert Pol <elbert.pol@gmail.com> - 0.21.2-1
 - Updated to latest version
 - Updated to latest Fedora spec
 
