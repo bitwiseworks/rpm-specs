@@ -1,15 +1,11 @@
-%if !0%{?os2_version}
 %bcond_without tests
-%else
-%bcond_with tests
-%endif
 
 Name:    libzip
-Version: 1.10.1
+Version: 1.11.1
 Release: 1%{?dist}
 Summary: C library for reading, creating, and modifying zip archives
 
-License: BSD
+License: BSD-3-Clause
 URL:     https://libzip.org/
 %if !0%{?os2_version}
 Source0: https://libzip.org/download/libzip-%{version}.tar.xz
@@ -23,27 +19,14 @@ BuildRequires:  zlib-devel
 BuildRequires:  bzip2-devel
 BuildRequires:  openssl-devel
 BuildRequires:  xz-devel
-%if !0%{?os2_version}
 BuildRequires:  libzstd-devel >= 1.3.6
-%endif
-BuildRequires:  cmake >= 3.0.2
-# Needed to run the test suite
-# find regress/ -type f | /usr/lib/rpm/perl.req
-# find regress/ -type f | /usr/lib/rpm/perl.prov
+BuildRequires:  cmake >= 3.4
 %if !0%{?os2_version}
-BuildRequires:  perl-interpreter
+BuildRequires:  mandoc
+%if %{with tests}
+BuildRequires:  nihtest
 %endif
-BuildRequires:  perl(Cwd)
-BuildRequires:  perl(File::Copy)
-BuildRequires:  perl(File::Path)
-BuildRequires:  perl(Getopt::Long)
-BuildRequires:  perl(IPC::Open3)
-BuildRequires:  perl(Storable)
-BuildRequires:  perl(Symbol)
-BuildRequires:  perl(UNIVERSAL)
-BuildRequires:  perl(strict)
-BuildRequires:  perl(warnings)
-
+%endif
 
 %description
 libzip is a C library for reading, creating, and modifying zip archives. Files
@@ -88,7 +71,6 @@ sed -e '/clone-fs-/d' \
 
 
 %build
-%if !0%{?os2_version}
 %cmake \
   -DENABLE_COMMONCRYPTO:BOOL=OFF \
   -DENABLE_GNUTLS:BOOL=OFF \
@@ -104,35 +86,9 @@ sed -e '/clone-fs-/d' \
   -DBUILD_DOC:BOOL=ON
 
 %cmake_build
-%else
-mkdir builder
-cd builder
-export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp" 
-export LIBS="-lcx"
-
-%cmake .. \
-  -DENABLE_COMMONCRYPTO:BOOL=ON \
-  -DENABLE_GNUTLS:BOOL=OFF \
-  -DENABLE_MBEDTLS:BOOL=OFF \
-  -DENABLE_OPENSSL:BOOL=ON \
-  -DENABLE_WINDOWS_CRYPTO:BOOL=OFF \
-  -DENABLE_BZIP2:BOOL=ON \
-  -DENABLE_LZMA:BOOL=ON \
-  -DENABLE_ZSTD:BOOL=OFF \
-  -DBUILD_TOOLS:BOOL=ON \
-  -DBUILD_REGRESS:BOOL=ON \
-  -DBUILD_EXAMPLES:BOOL=OFF \
-  -DBUILD_DOC:BOOL=ON 
-  
-make %{?_smp_mflags}
-%endif
 
 %install
-%if !0%{?os2_version}
 %cmake_install
-%else
-%make_install INSTALL_ROOT=%{buildroot} -C builder
-%endif
 
 %check
 %if %{with tests}
@@ -181,7 +137,11 @@ make %{?_smp_mflags}
 %{_mandir}/man3/zip*
 %{_mandir}/man3/ZIP*
 
+
 %changelog
+* Sun Sep 22 2024 Elbert pol <elbert.pol@gmail.com> - 1.11.1-1 
+- Updated to latest version
+
 * Fri Aug 25 2023 Elbert pol <elbert.pol@gmail.com> - 1.10.1
 - Updated to latest version.
 
