@@ -2,11 +2,11 @@
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 
 Name:           sqlitebrowser
-Version:        3.13.0
+Version:        3.13.1
 %if !0%{?os2_version}
 Release:        0.8%{?commit:.git%{shortcommit}}%{?dist}
 %else
-Release:        2%{?dist}
+Release:        1%{?dist}
 %endif
 %if 0%{?os2_version}
 Vendor:        TeLLie OS2 forever
@@ -24,7 +24,7 @@ Source0:        https://github.com/%{name}/%{name}/archive/%{commit}/%{name}-%{s
 Source0:        https://github.com/%{name}/%{name}/archive/v%{version}/%{name}-%{version}.tar.gz
 %endif
 %else
-%scm_source github https://github.com/Tellie/sqlitebrowser-os2 %{version}-os2-1
+%scm_source github https://github.com/Tellie/sqlitebrowser-os2 %{version}-os2
 %endif
 
 %if !0%{?os2_version}
@@ -150,6 +150,9 @@ fi
 
 
 %changelog
+* Wed Oct 16 2024 Elbert Pol <elbert.pol@gmail.com> 3.13.1-1
+- Updated to latest version
+
 * Wed Aug 07 2024 Elbert Pol <elbert.pol@gmail.com> -3.13.0-2
 - Update some changes that where not ok.
 - Remove wrc and do it the probper way in cmakelists
