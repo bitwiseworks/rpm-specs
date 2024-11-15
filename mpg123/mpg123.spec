@@ -3,7 +3,7 @@
 %global syn syn123
 
 Name: mpg123
-Version: 1.32.6
+Version: 1.32.8
 Release: 1%{?dist}
 
 Summary: Real time MPEG 1.0/2.0/2.5 audio player/decoder for layers 1, 2 and 3
@@ -224,6 +224,9 @@ rm %{buildroot}%{_libdir}/*.la
 %{_libdir}/pkgconfig/lib%{syn}.pc
 
 %changelog
+* Tue Oct 29 2024 Elbert Pol <elbert.pol@gmail.com> - 1.32.8-1
+- Updated to latest version.
+
 * Fri Apr 04 2024 Elbert Pol <elbert.pol@gmail.com> - 1.32.6-1
 - Updated to latest version.
 - Add bldlevel to dll
