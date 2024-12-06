@@ -1,16 +1,20 @@
 Name:           yaz
-Version:        5.34.0
+Version:        5.34.2
 Release:        1%{?dist}
 Summary:        Z39.50/SRW/SRU toolkit
 # SPDX confirmed
 License:        BSD-3-Clause
 URL:            http://www.indexdata.com/yaz/
+%if 0%{?os2_version}
+Vendor:         TeLLie OS2 forever
+Distribution:   OS/2
+Packager:       TeLLeRBoP
+%endif
 %if !0%{?os2_version}
 Source0:        http://ftp.indexdata.com/pub/yaz/yaz-%{version}.tar.gz
 %else
 %scm_source github https://github.com/Tellie/%{name}-os2 %{version}-os2
 %endif
-
 BuildRequires:  gcc
 BuildRequires:  bison
 BuildRequires:  make
@@ -19,21 +23,18 @@ BuildRequires:  pkgconfig(libexslt)
 BuildRequires:  pkgconfig(gnutls)
 %if !0%{?os2_version}
 BuildRequires:  pkgconfig(hiredis)
-%endif
-BuildRequires:  pkgconfig(icu-i18n)
-%if !0%{?os2_version}
 BuildRequires:  pkgconfig(libmemcached)
 %endif
+BuildRequires:  pkgconfig(icu-i18n)
 BuildRequires:  pkgconfig(libxml-2.0)
 BuildRequires:  pkgconfig(libxslt)
 
 BuildRequires:  ncurses-devel
 BuildRequires:  readline-devel
 %if !0%{?os2_version}
-BuildRequires:  %{_bindir}/tclsh
-%else
-BuildRequires:  %{_bindir}/tclsh.exe
+BuildRequires:  /usr/bin/tclsh
 %endif
+
 Requires:       lib%{name}%{?_isa} = %{version}-%{release}
 
 %description
@@ -82,10 +83,14 @@ server and client.
 %endif
 
 %build
+%if 0%{?os2_version}
 export LDFLAGS=" -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 export LIBS="-lcx -ltinfo -lpthread"
 
-autoreconf -vif
+# Set BUILDLEVEL to be embedded to all DLLs built with Libtool.
+export LT_BUILDLEVEL="@#%{vendor}:%{version}-%{release}#@##1## `LANG=C date +'%%d %%b %%Y %%H:%%M:%%S'`     `uname -n`::::0::"
+%endif
+autoreconf -I M4 -fiv
 
 sed -i.rpath configure \
 	-e 's|hardcode_libdir_flag_spec=|hardcode_libdir_flag_spec_goodby=|' \
@@ -97,18 +102,17 @@ sed -i.rpath configure \
 %if !0%{?os2_version}
         --with-memcached \
         --with-redis \
+%else		
+        --without-memcached \
+        --without-redis \
 %endif
         --disable-static \
         %{nil}
 
-%if !0%{?os2_version}
 %make_build
-%else
-make %{?_smp_mflags}
-%endif
 
 %install
-%make_install INSTALL_ROOT=%{buildroot}
+%make_install
 
 # Remove cruft
 %if !0%{?os2_version}
@@ -126,9 +130,9 @@ make -k check
 %endif
 
 %if !0%{?os2_version}
-%post -n lib%{name} -p /sbin/ldconfig
+%ldconfig_scriptlets -n lib%{name}
 
-%postun -n lib%{name} -p /sbin/ldconfig
+%ldconfig_scriptlets -n lib%{name}
 %endif
 
 %files
@@ -206,6 +210,9 @@ make -k check
 %endif
 
 %changelog
+* Fri Dec 06 2024 Elbert Pol <elbert.pol@gmail.com> - 5.34.2-1
+- Updated to latest version
+
 * Fri Oct 06 2023 Elbert Pol <elbert.pol@gmail.com> - 5.34.0-1
 - Updated to latest version
 
