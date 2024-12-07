@@ -1,6 +1,6 @@
 Name:           yaz
 Version:        5.34.2
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Z39.50/SRW/SRU toolkit
 # SPDX confirmed
 License:        BSD-3-Clause
@@ -33,6 +33,8 @@ BuildRequires:  ncurses-devel
 BuildRequires:  readline-devel
 %if !0%{?os2_version}
 BuildRequires:  /usr/bin/tclsh
+%else
+BuildRequires:  /@unixroot/usr/bin/tclsh.exe
 %endif
 
 Requires:       lib%{name}%{?_isa} = %{version}-%{release}
@@ -188,7 +190,7 @@ make -k check
 
 %files -n lib%{name}-devel
 %doc NEWS README.md
-%{_bindir}/yaz-asncomp
+%exclude %{_bindir}/yaz-asncomp
 %{_bindir}/yaz-config
 %{_libdir}/pkgconfig/*
 %if !0%{?os2_version}
@@ -210,6 +212,9 @@ make -k check
 %endif
 
 %changelog
+* Sat Dec 07 2024 Elbert Pol <elbert.pol@gmail.com> - 5.34.2-2
+- Add tclsh.exe BuildRequires for os2
+ 
 * Fri Dec 06 2024 Elbert Pol <elbert.pol@gmail.com> - 5.34.2-1
 - Updated to latest version
 
@@ -220,7 +225,7 @@ make -k check
 - Updated to latest version
 
 * Thu Apr 07 2022 Elbert Pol <elbert.pol@gmail.com - 5.31.1-2
-_ Update spec file to right Fedora spec.
+- Update spec file to right Fedora spec.
 
 * Fri Mar 25 2022 Elbert Pol <elbert.pol@gmail.com> - 5.31.1-1
 - Updated to latest version
