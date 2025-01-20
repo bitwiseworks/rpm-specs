@@ -1,7 +1,7 @@
 %bcond_without tests
 
 Name:    libzip
-Version: 1.11.1
+Version: 1.11.3
 Release: 1%{?dist}
 Summary: C library for reading, creating, and modifying zip archives
 
@@ -20,7 +20,7 @@ BuildRequires:  bzip2-devel
 BuildRequires:  openssl-devel
 BuildRequires:  xz-devel
 BuildRequires:  libzstd-devel >= 1.3.6
-BuildRequires:  cmake >= 3.4
+BuildRequires:  cmake >= 3.10
 %if !0%{?os2_version}
 BuildRequires:  mandoc
 %if %{with tests}
@@ -87,8 +87,10 @@ sed -e '/clone-fs-/d' \
 
 %cmake_build
 
+
 %install
 %cmake_install
+
 
 %check
 %if %{with tests}
@@ -137,8 +139,10 @@ sed -e '/clone-fs-/d' \
 %{_mandir}/man3/zip*
 %{_mandir}/man3/ZIP*
 
-
 %changelog
+* Mon Jan 20 2025 Elbert Pol <elbert.pol@gmail.com> - 1.11.3-1
+- Updated to latest version
+
 * Sun Sep 22 2024 Elbert pol <elbert.pol@gmail.com> - 1.11.1-1 
 - Updated to latest version
 
