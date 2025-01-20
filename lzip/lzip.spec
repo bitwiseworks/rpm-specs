@@ -1,15 +1,16 @@
 Name:           lzip
-Version:        1.24.1
+Version:        1.25
 Release:        1%{?dist}
 Summary:        LZMA compressor with integrity checking
 
-License:        GPL-3.0-or-later
-URL:            http://www.nongnu.org/lzip/lzip.html
 %if 0%{?os2_version}
 Vendor:         TeLLie OS2 forever
 Distribution:   OS/2
 Packager:       TeLLeRBoP
 %endif
+
+License:        GPL-2.0-or-later
+URL:            http://www.nongnu.org/lzip/lzip.html
 %if !0%{?os2_version}
 Source0:        http://download.savannah.gnu.org/releases/lzip/lzip-%{version}.tar.gz
 Source1:        http://download.savannah.gnu.org/releases/lzip/lzip-%{version}.tar.gz.sig
@@ -38,10 +39,12 @@ cp -a COPYING COPYING.txt
 # convert CRLF to LF
 sed -i 's/\r//' COPYING.txt 
 
+
 %build
 export VENDOR="%{vendor}"
-%configure CXXFLAGS="%{build_cxxflags}" LDFLAGS="%{build_ldflags}"
+#%configure CXXFLAGS="%{build_cxxflags}" LDFLAGS="%{build_ldflags}"
 
+%configure LDFLAGS="-Zexe -Zomf -Zhigh-mem -Zargs-wild -Zargs-resp -lcx" 
 %make_build
 
 
@@ -50,6 +53,10 @@ export VENDOR="%{vendor}"
 
 # if install-info is present, this is created by upstream's makefile
 rm -Rf $RPM_BUILD_ROOT%{_infodir}/dir
+%if 0%{?os2_version}
+cp lzip.exe %{buildroot}%{_bindir}
+install -Dm 0755 lzip.exe %{buildroot}%{_bindir}
+%endif
 
 %check
 make check
@@ -65,9 +72,12 @@ make check
 %endif
 %{_infodir}/lzip.info*
 %{_mandir}/man1/lzip.1*
-
+%exclude %{_bindir}/lzip
 
 %changelog
+* Sun Jan 19 2025 Elbert pol <elbert.pol@gmail.com> - 1.25-1
+- Updated to latest version
+
 * Sat Mar 02 2024 Elbert Pol <elbert.pol@gmail.com> - 1.24.1-1
 - Updated to latest version
 
