@@ -1,5 +1,5 @@
 Name:           lziprecover
-Version:        1.24
+Version:        1.25
 Release:        1%{?dist}
 Summary:        Data recovery tool and decompressor for files in the lzip compressed format
 
@@ -102,6 +102,9 @@ fi
 %{_mandir}/man1/lziprecover.1*
 
 %changelog
+* Tue Feb 04 2025 Elbert Pol <elbert.pol@gmail.com> - 1.25-1
+- Updated to latest version
+
 * Fri Jan 26 2024 Elbert pol <elbert.pol@gmail.com> - 1.24-1
 - Update to latest version
 
