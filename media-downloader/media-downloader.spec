@@ -1,5 +1,5 @@
 Name:           media-downloader
-Version:        5.0.1
+Version:        5.2.2
 Release:        1%{?dist}
 Summary:        GUI frontend to multiple CLI based downloading programs
 License:        GPL-2.0-or-later
@@ -14,16 +14,15 @@ Source0:        %url/archive/refs/tags/%{version}.tar.gz#/%{name}-%{version}.tar
 %else
 %scm_source github https://github.com/Tellie/media-downloader-os2 %{version}-os2
 %endif
+
 BuildRequires:  cmake
 BuildRequires:  gcc-c++
 BuildRequires:  qt5-qtbase-devel
 %if !0%{?os2_version}
 BuildRequires:  desktop-file-utils
-Requires: aria2
 Requires: yt-dlp
+Requires: aria2
 %endif
-
-
 
 %description
 This project is a Qt/C++ based GUI frontend to CLI multiple CLI based tools that
@@ -59,32 +58,27 @@ Features offered:-
 %build
 %if !0%{?os2_version}
 mkdir build && pushd build
-%cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=release ..
+%cmake  -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=release ..
+popd
 %else
 %cmake -DCMAKE_INSTALL_PREFIX=/@unixroot/usr -DCMAKE_BUILD_TYPE=release 
 %endif
-
 %cmake_build
+
 cd src
 wrc -bt=os2 -zm -r os2app.rc
 wrc -bt=os2 -zm os2app.res ../pc-os2-emx-build/media-downloader.exe
-%if !0%{?os2_version}
-popd
-%endif
 
 %install
+%if !0%{?os2_version}
+pushd build
+popd
+%endif
 %if 0%{?os2_version}     
 mkdir -p %{buildroot}%{_datadir}/os2/icons/
 cp -a src/%{name}-os2.ico %{buildroot}%{_datadir}/os2/icons/%{name}.ico
 %endif
-%if !0%{?os2_version}
-pushd build
-%endif
 %cmake_install
-%if !0%{?os2_version}
-popd
-%endif
-
 %find_lang %{name} --all-name --with-qt
 
 %check
@@ -129,6 +123,9 @@ fi
 %endif
 
 %changelog
+* Sun Feb 09 2025 Elbert Pol <elbert.pol@gmail.com> - 5.2.2-1
+- Updated to latest version
+
 * Wed Aug 28 2024 Elbert Pol <elbert.pol@gmail.com> - 5.0.1-1
 - Updated to latest version
 
