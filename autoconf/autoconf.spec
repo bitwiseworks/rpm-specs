@@ -105,7 +105,11 @@ BuildArch:  noarch
 # m4 >= 1.4.6 is required, >= 1.4.14 is recommended:
 BuildRequires:      perl
 Requires:           perl(File::Compare)
+%if !0%{?os2_version}
 Requires:           perl-interpreter
+%else
+Requires:           perl
+%endif
 BuildRequires:      m4 >= 1.4.14
 Requires:           m4 >= 1.4.14
 %if %{with autoconf_enables_emacs}
