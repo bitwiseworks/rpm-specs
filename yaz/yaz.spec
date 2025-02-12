@@ -1,6 +1,6 @@
 Name:           yaz
-Version:        5.34.2
-Release:        2%{?dist}
+Version:        5.34.3
+Release:        1%{?dist}
 Summary:        Z39.50/SRW/SRU toolkit
 # SPDX confirmed
 License:        BSD-3-Clause
@@ -13,16 +13,28 @@ Packager:       TeLLeRBoP
 %if !0%{?os2_version}
 Source0:        http://ftp.indexdata.com/pub/yaz/yaz-%{version}.tar.gz
 %else
-%scm_source github https://github.com/Tellie/%{name}-os2 %{version}-os2
+%scm_source github https://github.com/Tellie/yaz-os2 %{version}-os2
 %endif
+%if !0%{?os2_version}
+# https://github.com/indexdata/yaz/issues/133
+# Avoid keyword bool usage on C23
+Patch0:		yaz-5.34.3-c23-keyword.patch
+%endif
+
 BuildRequires:  gcc
 BuildRequires:  bison
 BuildRequires:  make
 
+# When autoreconf is needed:
+%if 0
+BuildRequires:  autoconf
+BuildRequires:  automake
+%endif
+
 BuildRequires:  pkgconfig(libexslt)
-BuildRequires:  pkgconfig(gnutls)
 %if !0%{?os2_version}
-BuildRequires:  pkgconfig(hiredis)
+BuildRequires:  pkgconfig(gnutls)
+BuildRequires:  pkgconfig(hiredis)\
 BuildRequires:  pkgconfig(libmemcached)
 %endif
 BuildRequires:  pkgconfig(icu-i18n)
@@ -80,6 +92,7 @@ server and client.
 %prep
 %if !0%{?os2_version}
 %setup -q
+%patch -P0 -p1 -b .c23
 %else
 %scm_setup
 %endif
@@ -91,9 +104,8 @@ export LIBS="-lcx -ltinfo -lpthread"
 
 # Set BUILDLEVEL to be embedded to all DLLs built with Libtool.
 export LT_BUILDLEVEL="@#%{vendor}:%{version}-%{release}#@##1## `LANG=C date +'%%d %%b %%Y %%H:%%M:%%S'`     `uname -n`::::0::"
-%endif
 autoreconf -I M4 -fiv
-
+%endif
 sed -i.rpath configure \
 	-e 's|hardcode_libdir_flag_spec=|hardcode_libdir_flag_spec_goodby=|' \
 	-e '\@sys_lib_dlsearch_path_spec=@s|/lib /usr/lib|/lib /usr/lib %{_libdir} /%{_lib}|' \
@@ -136,6 +148,7 @@ make -k check
 
 %ldconfig_scriptlets -n lib%{name}
 %endif
+
 
 %files
 %doc NEWS
@@ -212,6 +225,10 @@ make -k check
 %endif
 
 %changelog
+* Tue Feb 12 2025 Elbert Pol <elbert.pol@gmail.com> - 5.34.3-1
+- Updated to latest version
+- Sync with latest Fedora spec
+
 * Sat Dec 07 2024 Elbert Pol <elbert.pol@gmail.com> - 5.34.2-2
 - Add tclsh.exe BuildRequires for os2
  
