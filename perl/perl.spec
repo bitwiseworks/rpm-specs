@@ -27,7 +27,7 @@
 Name:           perl
 Version:        %{perl_version}
 # release number must be even higher, because dual-lived modules will be broken otherwise
-Release:        9%{?dist}
+Release:        10%{?dist}
 Epoch:          %{perl_epoch}
 Summary:        Practical Extraction and Report Language
 Group:          Development/Languages
@@ -2521,6 +2521,9 @@ rm -rf $RPM_BUILD_ROOT
 # Nothing. Nada. Zilch. Zarro. Uh uh. Nope. Sorry.
 
 %changelog
+* Mon Feb 17 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 5.16.1-10
+- fix removing temp dirctories
+
 * Wed Jan 13 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 5.16.1-9
 - add libcx to the exe as well, so we get a nice trp on failures
 
