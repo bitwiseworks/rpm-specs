@@ -54,7 +54,7 @@ Source0:    https://ftp.gnu.org/gnu/autoconf/autoconf-%{version}.tar.xz
 Source1:    config.site
 Source2:    autoconf-init.el
 %else
-%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2-1
 Vendor:     bww bitwise works GmbH
 %endif
 URL:        https://www.gnu.org/software/autoconf/
@@ -263,6 +263,9 @@ install -p -m 755 enable.scl ${RPM_BUILD_ROOT}/%{_prefix}/enable
 
 
 %changelog
+* Mon Feb 17 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.72-2
+- fix some regressions
+
 * Tue Feb 11 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.72-1
 - update to version 2.72
 - merge with fedora spec
