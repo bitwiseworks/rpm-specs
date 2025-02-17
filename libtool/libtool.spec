@@ -12,7 +12,7 @@
 
 Summary: The GNU Portable Library Tool
 Name:    libtool
-Version: 2.4.7
+Version: 2.5.4
 Release: 1%{?dist}
 
 # To help future rebase, the following licenses were seen in the following files/folders:
@@ -55,41 +55,31 @@ Source:  http://ftp.gnu.org/gnu/libtool/libtool-%{version}.tar.xz
 
 # ~> downstream
 # ~> remove possibly once #1158915 gets fixed somehow
-Patch0:  libtool-2.4.5-rpath.patch
+Patch:  libtool-2.4.5-rpath.patch
 
 # See the rhbz#1289759 and rhbz#1214506.  We disable hardening namely because
 # that bakes the CFLAGS/LDFLAGS into installed /bin/libtool and ltmain.sh files.
 # At the same time we want to have libltdl.so hardened.  Downstream-only patch.
 %undefine _hardened_build
-Patch1: libtool-2.4.6-hardening.patch
-
-# The testsuite seems to not properly handle template instantiation and as
-# a result fails.  libtool itself appears to be OK from my by-hand testing. (by Jeff Law)
-# Disable LTO for link-order2 test (Related: #1988112)
-Patch2: libtool-2.4.6-disable-lto-link-order2.patch
+Patch: libtool-2.4.7-hardening.patch
 
 # non-PIC libraries are not supported on ARMv7
 # Since we removed "-fPIC" from global CFLAGS this test fails on this arch (as expected)
 # Please refer to the following ticket regarding PIC support on ARM:
 # https://bugs.launchpad.net/ubuntu/+source/gcc-4.4/+bug/503448
-Patch3: libtool-2.4.6-disable_non-pic_arm.patch
+Patch: libtool-2.4.6-disable_non-pic_arm.patch
 
-# rhbz#2047389, patch sent upstream
+# Discussion re-opened upstream:
+# https://lists.gnu.org/archive/html/bug-libtool/2025-01/msg00004.html
+# Patch was already sent in 2022:
 # https://lists.gnu.org/archive/html/libtool-patches/2022-02/msg00000.html
-Patch4: libtool-2.4.6-keep-compiler-deps.patch
-
-# Patch sent upstream
-# https://lists.gnu.org/archive/html/libtool-patches/2022-12/msg00004.html
-Patch5: 0001-tests-Fix-grep-warning-about-stray-before.patch
+Patch: libtool-2.4.6-keep-compiler-deps.patch
 
 %if ! 0%{?_module_build}
-Patch100: libtool-nodocs.patch
+Patch: libtool-nodocs.patch
 %endif
-
-Patch101: libtool-c99.patch
 %else
 Vendor:  bww bitwise works GmbH
-
 %scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
 %endif
 
@@ -260,6 +250,10 @@ rm -f %{buildroot}%{_libdir}/ltdl.a
 
 
 %changelog
+* Mon Feb 17 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.5.4-1
+- update to version 2.5.4
+- resync with latest Fedora spec
+
 * Fri Jan 26 2024 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.4.7-1
 - update to version 2.4.7
 - resync with latest Fedora spec
