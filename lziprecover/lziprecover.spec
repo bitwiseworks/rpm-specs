@@ -1,6 +1,6 @@
 Name:           lziprecover
 Version:        1.25
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Data recovery tool and decompressor for files in the lzip compressed format
 
 License:        GPLv3+
