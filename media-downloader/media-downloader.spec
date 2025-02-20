@@ -1,6 +1,6 @@
 Name:           media-downloader
 Version:        5.2.2
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        GUI frontend to multiple CLI based downloading programs
 License:        GPL-2.0-or-later
 %if 0%{?os2_version}
