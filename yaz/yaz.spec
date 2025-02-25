@@ -1,6 +1,6 @@
 Name:           yaz
 Version:        5.34.3
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Z39.50/SRW/SRU toolkit
 # SPDX confirmed
 License:        BSD-3-Clause
@@ -225,6 +225,9 @@ make -k check
 %endif
 
 %changelog
+* Tue Feb 12 2025 Elbert Pol <elbert.pol@gmail.com> - 5.34.3-2
+- Fix a macros.dist error
+
 * Tue Feb 12 2025 Elbert Pol <elbert.pol@gmail.com> - 5.34.3-1
 - Updated to latest version
 - Sync with latest Fedora spec
