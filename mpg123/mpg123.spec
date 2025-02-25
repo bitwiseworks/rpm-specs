@@ -4,7 +4,7 @@
 
 Name: mpg123
 Version: 1.32.10
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 Summary: Real time MPEG 1.0/2.0/2.5 audio player/decoder for layers 1, 2 and 3
 License: GPL-2.0-or-later
@@ -224,6 +224,9 @@ rm %{buildroot}%{_libdir}/*.la
 %{_libdir}/pkgconfig/lib%{syn}.pc
 
 %changelog
+* Tue Feb 25 2025 Elbert Pol <elbert.pol@gmail.com> - 1.32.10-2
+- Fix a macros.dist error
+
 * Mon Dec 16 2024 Elbert Pol <elbert.pol@gmail.com> - 1.32.10-1
 - Updated to latest version.
 
