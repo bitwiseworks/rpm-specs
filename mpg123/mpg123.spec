@@ -233,7 +233,7 @@ rm %{buildroot}%{_libdir}/*.la
 * Tue Oct 29 2024 Elbert Pol <elbert.pol@gmail.com> - 1.32.8-1
 - Updated to latest version.
 
-* Fri Apr 04 2024 Elbert Pol <elbert.pol@gmail.com> - 1.32.6-1
+* Fri Apr 05 2024 Elbert Pol <elbert.pol@gmail.com> - 1.32.6-1
 - Updated to latest version.
 - Add bldlevel to dll
 
