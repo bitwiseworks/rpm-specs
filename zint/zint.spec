@@ -221,3 +221,4 @@ fi
 * Tue Feb 25 2025 Elbert Pol <elbert.pol@gmail.com> - 2.15.0-1
 - First RPM for OS2
 - Updated to latest version
+- Add nice icons to exe files
