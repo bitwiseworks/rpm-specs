@@ -1,6 +1,6 @@
 Name:      zint
 Version:   2.15.0
-Release:   1%{?dist}
+Release:   2%{?dist}
 Summary:   Barcode generator library
 # Automatically converted from old format: GPLv3+ - review is highly recommended.
 License:   GPL-3.0-or-later
@@ -178,7 +178,6 @@ install -D -p -m 644 %{name}-qt.desktop %{buildroot}%{_datadir}/applications/%{n
 %{_datadir}/pixmaps/%{name}-qt.png
 %else
 %{_bindir}/%{name}-qt.exe
-%{_libdir}/*.dll
 %{_datadir}/os2/icons/qt%{name}.ico
 %endif
 
@@ -186,8 +185,6 @@ install -D -p -m 644 %{name}-qt.desktop %{buildroot}%{_datadir}/applications/%{n
 %{_includedir}/qzint.h
 %if !0%{os2_version}
 %{_libdir}/libQZint.so
-%else
-%{_libdir}/*_dll.a
 %endif
 
 %files static
@@ -218,6 +215,9 @@ fi
 %endif
 
 %changelog
+* Thu Feb 27 2025 Elbert Pol <elbert.pol@gmail.com> - 2.15.0-2
+- Fix some double dll and .a files in spec file
+
 * Tue Feb 25 2025 Elbert Pol <elbert.pol@gmail.com> - 2.15.0-1
 - First RPM for OS2
 - Updated to latest version
