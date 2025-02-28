@@ -13,7 +13,7 @@ URL: https://www.python.org/
 
 #  WARNING  When rebasing to a new Python version,
 #           remember to update the python3-docs package as well
-%global general_version %{pybasever}.17
+%global general_version %{pybasever}.21
 #global prerel ...
 %global upstream_version %{general_version}%{?prerel}
 Version: %{general_version}%{?prerel:~%{prerel}}
@@ -2094,6 +2094,11 @@ CheckPython optimized
 # ======================================================
 
 %changelog
+* Fri Feb 28 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.9.21-1
+- update to version 3.9.21
+- fix ticket #12
+- fix ticket #13
+
 * Tue Jul 04 2023 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.9.17-1
 - update to version 3.9.17
 
