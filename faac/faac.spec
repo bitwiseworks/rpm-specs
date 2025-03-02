@@ -1,7 +1,7 @@
-%global _version 1.30
+%global _version 1.31
 
 Name:           faac
-Version:        1.30
+Version:        1.31
 Release:        1%{?dist}
 Summary:        Encoder and encoding library for MPEG2/4 AAC
 
@@ -90,7 +90,7 @@ find %buildroot -name '*.la' | xargs rm -f
 %{_libdir}/*.so.*
 %else
 %{_bindir}/%{name}.exe
-%{_libdir}/%{name}0.dll
+%{_libdir}/%{name}*.dll
 %endif
 %{_mandir}/man1/%{name}*
 
@@ -100,9 +100,13 @@ find %buildroot -name '*.la' | xargs rm -f
 %else
 %{_libdir}/*_dll.a
 %endif
+%{_libdir}/pkgconfig/faac.pc
 %{_includedir}/*.h
 
 %changelog
+* Fri Feb 28 2025 Elbert Pol <elbert.pol@gmail.com> - 1.31-1
+- Updated to latest version
+
 * Fri Feb 09 2024 Elbert Pol <elbert.pol@gmail.com> - 1.30-1
 - Update to latest version
 - resync with latest fedora spec
