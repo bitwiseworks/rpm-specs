@@ -1,5 +1,5 @@
 Name:           iqpuzzle
-Version:        1.4.1
+Version:        1.4.2
 Release:        1%{?dist}
 Summary:        A diverting I.Q. challenging pentomino puzzle
 Group:          Games/Puzzles
@@ -105,6 +105,9 @@ fi
 %endif
 
 %changelog
+* Mon Mar 03 2025 Elbert Pol <elbert.pol@gmail.com> 1.4.2-1
+- Updated to latest version
+
 * Fri Nov 15 2024 Elbert Pol <elbert.pol@gmail.com> 1.4.1-1
 - Updated to latest version
 
