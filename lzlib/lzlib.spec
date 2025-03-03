@@ -1,5 +1,5 @@
 Name:           lzlib
-Version:        1.14
+Version:        1.15
 Release:	1%{?dist}
 Summary:        LZMA Compression and Decompression Library
 License:        GPL-2.0+
@@ -83,7 +83,10 @@ make -k check
 %doc %{_infodir}/lzlib.info*
 
 %changelog
-* Tue Jan 22 2024 Elbert Pol <elbert.pol@gmail.com> - 1.14-1
+* Mon Mar 03 2025 Elbert Pol <elbert.pol@gmail.com> - 1.15-1
+- Updated to latest version
+
+* Mon Jan 22 2024 Elbert Pol <elbert.pol@gmail.com> - 1.14-1
 - Updated to latest version
 
 * Wed Jan 06 2021 Elbert Pol <elbert.pol@gmail.com> - 1.12 - 1
