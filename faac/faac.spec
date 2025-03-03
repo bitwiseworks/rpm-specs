@@ -1,7 +1,7 @@
-%global _version 1.31
+%global _version 1.31.1
 
 Name:           faac
-Version:        1.31
+Version:        1.31.1
 Release:        1%{?dist}
 Summary:        Encoder and encoding library for MPEG2/4 AAC
 
@@ -15,7 +15,7 @@ Packager:       TeLLeRBoP
 %if !0%{?os2_version}
 Source0:        https://github.com/knik0/faac/archive/%{_version}/%{name}-%{_version}.tar.gz
 %else
-%scm_source github https://github.com/Tellie/%{name}-os2 %{_version}-os2
+%scm_source github https://github.com/Tellie/%{name}-os2 %{version}-os2
 %endif
 
 BuildRequires:  gcc
@@ -104,6 +104,9 @@ find %buildroot -name '*.la' | xargs rm -f
 %{_includedir}/*.h
 
 %changelog
+* Mon Mar 03 2025 Elbert Pol <elbert.pol@gmail.com> - 1.31.1-1
+- Updated to latest version
+
 * Fri Feb 28 2025 Elbert Pol <elbert.pol@gmail.com> - 1.31-1
 - Updated to latest version
 
