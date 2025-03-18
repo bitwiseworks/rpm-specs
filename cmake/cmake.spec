@@ -135,7 +135,7 @@ Source0:        http://www.cmake.org/files/v%{major_version}.%{minor_version}/%{
 Source1:        %{name}-init.el
 %else
 Vendor:         bww bitwise works GmbH
-%#scm_source github http://github.com/bitwiseworks/cmake-os2 %{version}-os2
+%scm_source github http://github.com/bitwiseworks/cmake-os2 %{version}-os2
 %endif
 Source2:        macros.%{name}.in
 # See https://bugzilla.redhat.com/show_bug.cgi?id=1202899
