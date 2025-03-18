@@ -29,7 +29,7 @@
 %bcond_with git_test
 %endif
 
-# Set to bcond_with or use --without gui to disable qt4 gui build
+# Set to bcond_with or use --without gui to disable qt gui build
 %bcond_without gui
 
 # Use ncurses for colorful output
@@ -51,10 +51,6 @@
 %bcond_with sphinx
 %endif
 
-%if 0%{?os2_version}
-%bcond_with bundled_jsoncpp
-%bcond_without bundled_rhash
-%else
 %if !0%{?rhel}
 %bcond_with bundled_jsoncpp
 %bcond_with bundled_rhash
@@ -62,6 +58,13 @@
 %bcond_without bundled_jsoncpp
 %bcond_without bundled_rhash
 %endif
+
+# cppdap is currently shipped as a static lib from upstream,
+# so we do not have it in the repos.
+%if !0%{?os2_version}
+%bcond_without bundled_cppdap
+%else
+%bcond_with bundled_cppdap
 %endif
 
 # Run tests
@@ -79,7 +82,10 @@
 %endif
 
 # Do not build non-lto objects to reduce build time significantly.
-%global optflags %(echo '%{optflags}' | sed -e 's!-ffat-lto-objects!-fno-fat-lto-objects!g')
+%global build_cflags   %(echo '%{build_cflags}'   | sed -e 's!-ffat-lto-objects!-fno-fat-lto-objects!g')
+%global build_cxxflags %(echo '%{build_cxxflags}' | sed -e 's!-ffat-lto-objects!-fno-fat-lto-objects!g')
+%global build_fflags   %(echo '%{build_fflags}' | sed -e 's!-ffat-lto-objects!-fno-fat-lto-objects!g')
+%global build_fcflags  %(echo '%{build_fflags}' | sed -e 's!-ffat-lto-objects!-fno-fat-lto-objects!g')
 
 # Place rpm-macros into proper location
 %global rpm_macros_dir %(d=%{_rpmconfigdir}/macros.d; [ -d $d ] || d=%{_sysconfdir}/rpm; echo $d)
@@ -88,25 +94,33 @@
 %{!?_pkgdocdir:%global _pkgdocdir %{_docdir}/%{name}-%{version}}
 
 # Setup _vpath_builddir if not defined already
-%{!?_vpath_builddir:%global _vpath_builddir %(echo '%{_target_platform}' | sed -e 's!/!!g')}
+%{!?_vpath_builddir:%global _vpath_builddir %{_target_platform}}
 
 %global major_version 3
-%global minor_version 25
-# Set to RC version if building RC, else %%{nil}
-#global rcsuf rc1
-%{?rcsuf:%global relsuf .%{rcsuf}}
-%{?rcsuf:%global versuf -%{rcsuf}}
+%global minor_version 31
+%global patch_version 6
 
 # For handling bump release by rpmdev-bumpspec and mass rebuild
 %global baserelease 1
+
+# Set to RC version if building RC, else comment out.
+#%%global rcsuf rc3
+
+%if 0%{?rcsuf:1}
+%global pkg_version %{major_version}.%{minor_version}.%{patch_version}~%{rcsuf}
+%global tar_version %{major_version}.%{minor_version}.%{patch_version}-%{rcsuf}
+%else
+%global pkg_version %{major_version}.%{minor_version}.%{patch_version}
+%global tar_version %{major_version}.%{minor_version}.%{patch_version}
+%endif
 
 # Uncomment if building for EPEL
 #global name_suffix %%{major_version}
 %global orig_name cmake
 
 Name:           %{orig_name}%{?name_suffix}
-Version:        %{major_version}.%{minor_version}.2
-Release:        %{baserelease}%{?relsuf}%{?dist}
+Version:        %{pkg_version}
+Release:        %{baserelease}%{?dist}
 Summary:        Cross-platform make system
 
 # most sources are BSD
@@ -114,16 +128,16 @@ Summary:        Cross-platform make system
 # Source/kwsys/MD5.c is zlib
 # some GPL-licensed bison-generated files, which all include an
 # exception granting redistribution under terms of your choice
-License:        BSD and MIT and zlib
+License:        BSD-3-Clause AND MIT-open-group AND Zlib%{?with_bundled_cppdap: AND Apache-2.0}
 URL:            http://www.cmake.org
 %if !0%{?os2_version}
-Source0:        http://www.cmake.org/files/v%{major_version}.%{minor_version}/%{orig_name}-%{version}%{?versuf}.tar.gz
+Source0:        http://www.cmake.org/files/v%{major_version}.%{minor_version}/%{orig_name}-%{tar_version}.tar.gz
 Source1:        %{name}-init.el
 %else
 Vendor:         bww bitwise works GmbH
-%scm_source github http://github.com/bitwiseworks/cmake-os2 %{version}-os2
+%#scm_source github http://github.com/bitwiseworks/cmake-os2 %{version}-os2
 %endif
-Source2:        macros.%{name}
+Source2:        macros.%{name}.in
 # See https://bugzilla.redhat.com/show_bug.cgi?id=1202899
 Source3:        %{name}.attr
 Source4:        %{name}.prov
@@ -138,11 +152,6 @@ Source5:        %{name}.req
 # http://public.kitware.com/Bug/view.php?id=12965
 # https://bugzilla.redhat.com/show_bug.cgi?id=822796
 Patch100:       %{name}-findruby.patch
-# Add dl to CMAKE_DL_LIBS on MINGW
-# https://gitlab.kitware.com/cmake/cmake/issues/17600
-%if 0%{?fedora} && 0%{?fedora} < 38
-Patch102:       %{name}-mingw-dl.patch
-%endif
 
 # Patch for renaming on EPEL
 %if 0%{?name_suffix:1}
@@ -177,6 +186,13 @@ BuildRequires:  %{_bindir}/sphinx-build
 %if %{without bootstrap} || 0%{?os2_version}
 BuildRequires:  bzip2-devel
 BuildRequires:  curl-devel
+%if !0%{?os2_version}
+%if %{with bundled_cppdap}
+Provides: bundled(cppdap)
+%else
+BuildRequires:  cppdap-devel
+%endif
+%endif
 BuildRequires:  expat-devel
 %if %{with bundled_jsoncpp}
 Provides: bundled(jsoncpp)
@@ -213,10 +229,14 @@ BuildRequires:  python2-devel
 %endif
 %endif
 %if %{with gui}
-%if 0%{?fedora} || 0%{?rhel} > 7 || 0%{?os2_version}
+%if 0%{?fedora} || 0%{?rhel} > 9
+BuildRequires: pkgconfig(Qt6Widgets)
+%else
+%if 0%{?rhel} > 7 || 0%{?os2_version}
 BuildRequires: pkgconfig(Qt5Widgets)
 %else
 BuildRequires: pkgconfig(QtGui)
+%endif
 %endif
 %if !0%{?os2_version}
 BuildRequires: desktop-file-utils
@@ -235,10 +255,11 @@ BuildRequires:  %{name}-rpm-macros
 BuildRequires: make
 
 Requires:       %{name}-data = %{version}-%{release}
-Requires:       %{name}-rpm-macros = %{version}-%{release}
 %if !0%{?os2_version}
+Requires:       (%{name}-rpm-macros = %{version}-%{release} if rpm-build)
 Requires:       %{name}-filesystem%{?_isa} = %{version}-%{release}
 %else
+Requires:       %{name}-rpm-macros = %{version}-%{release}
 Requires:       %{name}-filesystem = %{version}-%{release}
 %endif
 
@@ -268,7 +289,11 @@ generation, code generation, and template instantiation.
 Summary:        Common data-files for %{name}
 Requires:       %{name} = %{version}-%{release}
 Requires:       %{name}-filesystem = %{version}-%{release}
+%if !0%{?os2_version}
+Requires:       (%{name}-rpm-macros = %{version}-%{release} if rpm-build)
+%else
 Requires:       %{name}-rpm-macros = %{version}-%{release}
+%endif
 %if %{with emacs}
 %if 0%{?fedora} || 0%{?rhel} >= 7
 Requires:       emacs-filesystem%{?_emacs_version: >= %{_emacs_version}}
@@ -328,13 +353,24 @@ BuildArch:      noarch
 This package contains common RPM macros for %{name}.
 
 
+%package -n python3-cmake
+Summary:        Python metadata for packages depending on %{name}
+Requires:       %{name} = %{?epoch:%{epoch}:}%{version}-%{release}
+BuildArch:      noarch
+
+%description -n python3-cmake
+Package provides metadata for Python packages depending on cmake.
+This is to make automatic dependency resolution work. The package is NOT
+using anything from the PyPI package called cmake.
+
+
 %if 0%{?os2_version} && 0
 %debug_package
 %endif
 
 %prep
 %if !0%{?os2_version}
-%autosetup -n %{orig_name}-%{version}%{?versuf} -p 1
+%autosetup -n %{orig_name}-%{tar_version} -p 1
 %else
 %scm_setup
 %endif
@@ -353,27 +389,25 @@ tail -n +2 %{SOURCE5} >> %{name}.req
 
 
 %build
-%if !0%{?os2_version} && 0%{?set_build_flags:1}
+%if !0%{?os2_version}
 %{set_build_flags}
 %else
 CFLAGS="$(echo ${CFLAGS:-%optflags} | sed -re "s/(^|\s)-g(\s|\$)/ /g") -s" ; export CFLAGS
 CXXFLAGS="$(echo ${CFLAGS:-%optflags} | sed -re "s/(^|\s)-g(\s|\$)/ /g") -s" ; export CXXFLAGS
 FFLAGS="${FFLAGS:-%optflags%{?_fmoddir: -I%_fmoddir}}" ; export FFLAGS
 FCFLAGS="${FCFLAGS:-%optflags%{?_fmoddir: -I%_fmoddir}}" ; export FCFLAGS
-%if !0%{?os2_version}
-%{?__global_ldflags:LDFLAGS="${LDFLAGS:-%__global_ldflags}" ; export LDFLAGS ;}
-%else
 export LDFLAGS="-Zomf -Zhigh-mem -lcx %{?__global_ldflags}"
 export VENDOR="%{vendor}"
 %endif
-%endif
 %if !0%{?os2_version}
 SRCDIR="$(/usr/bin/pwd)"
-mkdir %{_vpath_builddir}
-pushd %{_vpath_builddir}
 %else
 SRCDIR="$(/@unixroot/usr/bin/pwd)"
+%endif
 mkdir %{_vpath_builddir}
+%if !0%{?os2_version}
+pushd %{_vpath_builddir}
+%else
 cd %{_vpath_builddir}
 %endif
 $SRCDIR/bootstrap --prefix=%{_prefix} \
@@ -388,6 +422,9 @@ $SRCDIR/bootstrap --prefix=%{_prefix} \
                   --no-system-nghttp2 \
 %endif
                   --parallel="$(echo %{?_smp_mflags} | sed -e 's|-j||g')" \
+%if %{with bundled_cppdap}
+                  --no-system-cppdap \
+%endif
 %if %{with bundled_rhash}
                   --no-system-librhash \
 %endif
@@ -401,22 +438,36 @@ $SRCDIR/bootstrap --prefix=%{_prefix} \
 %endif
                   --%{!?with_gui:no-}qt-gui \
                   -- \
-                  -DCMAKE_C_FLAGS_RELEASE:STRING="-DNDEBUG" \
-                  -DCMAKE_CXX_FLAGS_RELEASE:STRING="-DNDEBUG" \
-                  -DCMAKE_Fortran_FLAGS_RELEASE:STRING="-DNDEBUG" \
+                  -DCMAKE_C_FLAGS_RELEASE:STRING="-O2 -g -DNDEBUG" \
+                  -DCMAKE_CXX_FLAGS_RELEASE:STRING="-O2 -g -DNDEBUG" \
+                  -DCMAKE_Fortran_FLAGS_RELEASE:STRING="-O2 -g -DNDEBUG" \
                   -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
-                  -DCMAKE_INSTALL_DO_STRIP:BOOL=OFF
+                  -DCMAKE_INSTALL_DO_STRIP:BOOL=OFF \
+                  -DCMake_TEST_NO_NETWORK:BOOL=ON
 %if !0%{?os2_version}
 popd
-%make_build -C %{_vpath_builddir}
 %else
 cd ..
-make -C %{_vpath_builddir}
 %endif
+%make_build -C %{_vpath_builddir}
+
+# Provide Python metadata
+%global cmake_distinfo cmake-%{major_version}.%{minor_version}.%{patch_version}%{?rcsuf}.dist-info
+mkdir %{cmake_distinfo}
+cat > %{cmake_distinfo}/METADATA << EOF
+Metadata-Version: 2.1
+Name: cmake
+Version: %{major_version}.%{minor_version}.%{patch_version}%{?rcsuf}
+Summary: %{summary}
+Description-Content-Type: text/plain
+
+Metadata only package for automatic dependency resolution in the RPM
+ecosystem. This package is separate from the PyPI package called cmake.
+EOF
+echo rpm > %{cmake_distinfo}/INSTALLER
 
 
 %install
-rm -rf %{buildroot}
 mkdir -p %{buildroot}%{_pkgdocdir}
 %make_install -C %{_vpath_builddir} CMAKE_DOC_DIR=%{buildroot}%{_pkgdocdir}
 find %{buildroot}%{_datadir}/%{name}/Modules -type f | xargs chmod -x
@@ -462,6 +513,10 @@ do
   dname=$(basename $dir)
   cp -p $f ./${fname}_${dname}
 done
+%if %{with bundled_cppdap}
+cp -p Utilities/cmcppdap/LICENSE LICENSE.cppdap
+cp -p Utilities/cmcppdap/NOTICE NOTICE.cppdap
+%endif
 # Cleanup pre-installed documentation
 %if %{with sphinx}
 mv %{buildroot}%{_docdir}/%{name}/html .
@@ -540,6 +595,11 @@ find %{buildroot}%{_bindir} -type f -or -type l -or -xtype l | \
   sed -e '/.*-gui.exe$/d' -e '/^$/d' -e 's!^%{buildroot}!"!g' -e 's!$!"!g' >> lib_files.mf
 %endif
 
+# Install Python metadata
+mkdir -p %{buildroot}%{python3_sitelib}
+cp -a %{cmake_distinfo} %{buildroot}%{python3_sitelib}
+
+
 %if %{with test}
 %check
 %if !0%{?os2_version}
@@ -551,9 +611,21 @@ cd %{_vpath_builddir}
 NO_TEST="CTestTestUpload"
 # Likely failing for hardening flags from system.
 NO_TEST="$NO_TEST|CustomCommand|RunCMake.PositionIndependentCode"
+# Failing for rpm 4.19
+NO_TEST="$NO_TEST|CPackComponentsForAll-RPM-default"
+NO_TEST="$NO_TEST|CPackComponentsForAll-RPM-OnePackPerGroup"
+NO_TEST="$NO_TEST|CPackComponentsForAll-RPM-AllInOne"
 # curl test may fail during bootstrap
 %if %{with bootstrap}
 NO_TEST="$NO_TEST|curl"
+%endif
+%ifarch riscv64
+# These three tests timeout on riscv64, skip them.
+NO_TEST="$NO_TEST|Qt5Autogen.ManySources|Qt5Autogen.MocInclude|Qt5Autogen.MocIncludeSymlink|Qt6Autogen.MocIncludeSymlink"
+%endif
+%if 0%{?fedora} == 41
+# Test failing on Fedora 41, only.
+NO_TEST="$NO_TEST|RunCMake.Make|RunCMake.BuildDepends|Qt6Autogen.RerunMocBasic|Qt6Autogen.RerunRccDepends"
 %endif
 bin/ctest%{?name_suffix} %{?_smp_mflags} -V -E "$NO_TEST" --output-on-failure
 ## do this only periodically, not for every build -- besser82 20221102
@@ -567,14 +639,14 @@ cd ..
 %endif
 
 
-%clean
-rm -rf %{buildroot}
-
-
 %files -f lib_files.mf
 %doc %dir %{_pkgdocdir}
 %license Copyright.txt*
 %license COPYING*
+%if %{with bundled_cppdap}
+%license LICENSE.cppdap
+%license NOTICE.cppdap
+%endif
 %if %{with sphinx}
 %{_mandir}/man1/c%{name}.1.*
 %{_mandir}/man1/%{name}.1.*
@@ -605,6 +677,7 @@ rm -rf %{buildroot}
 %if 0%{?os2_version}
 %ghost %{_datadir}/%{name}/Modules/Platform/os2.cmake
 %endif
+
 
 %files doc
 # Pickup license-files from main-pkg's license-dir
@@ -646,7 +719,16 @@ rm -rf %{buildroot}
 %endif
 
 
+%files -n python3-cmake
+%{python3_sitelib}/%{cmake_distinfo}
+
+
 %changelog
+* Fri Mar 14 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.31.6-1
+- update to vendor version 3.31.6
+- add external rhash lib
+- resync spec file with fedora
+
 * Wed Nov 29 2023 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.25.2-1
 - update to vendor version 3.25.2
 

@@ -9,16 +9,17 @@
 %__ctest /@unixroot/usr/bin/ctest
 %__cmake_builddir %{!?__cmake_in_source_build:%{_vpath_builddir}}%{?__cmake_in_source_build:.}
 
+
 # - Set default compile flags
 # - CMAKE_*_FLAGS_RELEASE are added *after* the *FLAGS environment variables
-# and default to -O3 -DNDEBUG.  Strip the -O3 so we can override with *FLAGS
+#   and default to -O3 -DNDEBUG.  Strip the -O3 so we can override with *FLAGS
 # - Turn on verbose makefiles so we can see and verify compile flags
 # - Turn off stripping by default so RPM can do it separately
 # - Set default install prefixes and library install directories
 # - Turn on shared libraries by default
 %cmake \
 %if 0%{?set_build_flags:1} \
-  %set_build_flags \
+  %{set_build_flags} \
 %else \
   CFLAGS="${CFLAGS:-%optflags}" ; export CFLAGS ; \
   CXXFLAGS="${CXXFLAGS:-%optflags}" ; export CXXFLAGS ; \
@@ -35,6 +36,8 @@
         -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \\\
         -DCMAKE_INSTALL_DO_STRIP:BOOL=OFF \\\
         -DCMAKE_INSTALL_PREFIX:PATH=%{_prefix} \\\
+        -DCMAKE_INSTALL_FULL_SBINDIR:PATH=%{_sbindir} \\\
+        -DCMAKE_INSTALL_SBINDIR:PATH=%(s=%{_sbindir}; echo ${s##*/}) \\\
         -DINCLUDE_INSTALL_DIR:PATH=%{_includedir} \\\
         -DLIB_INSTALL_DIR:PATH=%{_libdir} \\\
         -DSYSCONF_INSTALL_DIR:PATH=%{_sysconfdir} \\\
@@ -51,7 +54,14 @@
   DESTDIR="%{buildroot}" %__cmake --install "%{__cmake_builddir}"
 
 %ctest(:-:h:j:u:v:A:C:D:E:F:H:I:L:M:N:O:Q:R:S:T:U:V:) \
-  %__ctest --test-dir "%{__cmake_builddir}" --output-on-failure --force-new-ctest-process %{?_smp_mflags} %{**}
+  %__ctest --test-dir "%{__cmake_builddir}" \\\
+           --output-on-failure \\\
+           --force-new-ctest-process \\\
+%ifarch riscv64 \
+           --timeout 6000 \\\
+%endif \
+            %{?_smp_mflags} \\\
+            %{lua:print((string.gsub(rpm.expand('%{**}'),"%-%-%s","")))}
 
 
 %cmake@@CMAKE_MAJOR_VERSION@@ %cmake
