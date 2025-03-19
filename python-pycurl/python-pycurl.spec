@@ -215,7 +215,7 @@ rm -fv tests/fake-curl/libcurl/*.so
 
 * Wed Nov 03 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 7.44.1-1
 - update to 7.44.1
-- reync spec with fedora version
+- resync spec with fedora version
 
 * Thu Jun 09 2016 yd <yd@os2power.com> 7.19.5.1-2
 - rebuild for ucs4, ticket#182.

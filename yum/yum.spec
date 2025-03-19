@@ -132,7 +132,7 @@ sed -i -e \
 
 %changelog
 * Fri Feb 18 2022 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.4.3-14
-- change yum.con to new rpm issue location in post section
+- change yum.conf to new rpm issue location in post section
 - moved source to github
 
 * Mon Jun 07 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.4.3-13

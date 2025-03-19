@@ -117,7 +117,7 @@ install -m 644 compileall2.py %{buildroot}%{_rpmconfigdir_os2}/
 - use new %%{_rpmluadir} macro instead of %%{_rpmconfigdir}/lua
 
 * Fri Apr 09 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.9-1
-- heavily reworked and adapted tp latest fedora version
+- heavily reworked and adapted to latest fedora version
 
 * Mon May 08 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> 1-3
 - remove .exe from python2 and python3 path, as this is insane

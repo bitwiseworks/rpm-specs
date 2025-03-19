@@ -267,7 +267,7 @@ export BEGINLIBPATH=%{_builddir}/%{buildsubdir}
 
 %changelog
 * Thu Dec 21 2023 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.0.1-1
-- update version to 2.1.4
+- update version to 3.0.1
 
 * Fri Jan 13 2023 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.1.4-1
 - update version to 2.1.4

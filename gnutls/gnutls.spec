@@ -609,7 +609,7 @@ cd ..
 
 %changelog
 * Tue Jan 23 2024 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.8.2-1
-- update to vewrsion 3.8.2
+- update to version 3.8.2
 - resync spec with fedora
 
 * Sat Apr 04 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.6.12-1
