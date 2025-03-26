@@ -27,7 +27,7 @@
 Name:           perl
 Version:        %{perl_version}
 # release number must be even higher, because dual-lived modules will be broken otherwise
-Release:        10%{?dist}
+Release:        11%{?dist}
 Epoch:          %{perl_epoch}
 Summary:        Practical Extraction and Report Language
 Group:          Development/Languages
@@ -41,7 +41,7 @@ License:        (GPL+ or Artistic) and (GPLv2+ or Artistic) and Copyright Only a
 Url:            http://www.perl.org/
 Vendor:         bww bitwise works GmbH
 
-%scm_source     github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2-9
+%scm_source     github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2-10
 Source3:        macros.perl
 
 # Update some of the bundled modules
@@ -2521,6 +2521,9 @@ rm -rf $RPM_BUILD_ROOT
 # Nothing. Nada. Zilch. Zarro. Uh uh. Nope. Sorry.
 
 %changelog
+* Wed Mar 26 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 5.16.1-11
+- use ther right tag to build
+
 * Mon Feb 17 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 5.16.1-10
 - fix removing temp dirctories
 
