@@ -53,7 +53,7 @@ Requires:       %{name}%{?_isa} = %{version}-%{release}
 Requires:       %{name}++%{?_isa} = %{version}-%{release}
 %else
 Requires:       %{name} = %{version}-%{release}
-Requires:       %{name} = %{version}-%{release}
+Requires:       %{name}++ = %{version}-%{release}
 %endif
 Summary:        Development headers for mpdecimal library
 
