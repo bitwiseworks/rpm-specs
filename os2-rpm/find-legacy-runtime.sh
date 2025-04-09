@@ -131,6 +131,10 @@ It is provided for compatibility with legacy applications.
     # Copy all listed files to RPM_BUILD_ROOT
     while read -r f ; do
       [ -f "$RPM_BUILD_ROOT$f" ] && die "File $RPM_BUILD_ROOT$f already exists."
+      dir="$(dirname $RPM_BUILD_ROOT$f)"
+      if [ ! -d "$dir" ] ; then
+        mkdir -p "$dir"
+      fi
       cp -p "$filesdir$f" "$RPM_BUILD_ROOT$f" || die "Copying $filesdir$f to $RPM_BUILD_ROOT$f failed."
     done < "$fileslist"
     # Now, if there are debug files, copy them too and append to debugfiles.list
@@ -139,6 +143,10 @@ It is provided for compatibility with legacy applications.
     if [ -f "$dbgfilelist" ] ; then
       while read -r f ; do
         [ -f "$RPM_BUILD_ROOT$f" ] && die "File $RPM_BUILD_ROOT$f already exists."
+        dir="$(dirname $RPM_BUILD_ROOT$f)"
+        if [ ! -d "$dir" ] ; then
+          mkdir -p "$dir"
+        fi
         cp -p "$filesdir$f" "$RPM_BUILD_ROOT$f" || die "Copying $filesdir$f to $RPM_BUILD_ROOT$f failed."
       done < "$dbgfilelist"
       cat "$dbgfilelist" >> "$RPM_BUILD_SUBDIR/debugfiles.list"
