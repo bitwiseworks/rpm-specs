@@ -98,8 +98,7 @@ Patch0052: 0052-FIPS-Fix-some-tests-due-to-our-versioning-change.patch
 Patch0053: 0053-Current-Rebase-status.patch
 %else
 Vendor: bww bitwise works GmbH
-#scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
-%scm_source git e:/trees/openssl/git master
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
 %endif
 
 License: Apache-2.0
