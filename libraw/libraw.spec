@@ -2,7 +2,7 @@
 
 Summary: Library for reading RAW files obtained from digital photo cameras
 Name: libraw
-Version: 0.21.3
+Version: 0.21.4
 Release: 1%{?dist}
 License: BSD-3-Clause and (CDDL-1.0 or LGPL-2.1-only)
 URL: https://www.libraw.org
@@ -70,6 +70,7 @@ LibRaw sample programs
 %if 0%{?os2_version}
 # Set BUILDLEVEL to be embedded to all DLLs built with Libtool.
 export LT_BUILDLEVEL="@#%{vendor}:%{version}-%{release}#@##1## `LANG=C date +'%%d %%b %%Y %%H:%%M:%%S'`     `uname -n`::::0::"
+export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp -lcx -lpthread -fstack-protector"
 %endif
 autoreconf -if
 %configure \
@@ -145,6 +146,9 @@ rm -fv %{buildroot}%{_libdir}/lib*.la
 
 
 %changelog
+* Sun Apr 13 2025 Elbert Pol <elbert.pol@gmail.com> - 0.21.4-1
+- Updated to latest version
+
 * Fri Sep 20 2024 Elbert Pol <elbert.pol@gmail.com> - 0.21.3-1
 - Updated to latest version
 
