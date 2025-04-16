@@ -114,7 +114,7 @@ LANG=C.utf-8 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=$(pwd) pytest-%{python2_versio
 
 
 %changelog
-* Tue Jan 18 2022 Silvan Scherrer <silvan.scherrer@aroa.ch> 41.2.0-1
+* Wed Apr 16 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 41.2.0-1
 - update to version 41.2.0
 - Split python2-setuptools from python-setuptools
 - resynced with fedora spec
