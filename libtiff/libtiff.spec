@@ -1,15 +1,14 @@
 Summary:       Library of functions for manipulating TIFF format image files
 Name:          libtiff
-Version:       4.6.0
+Version:       4.7.0
 Release:       1%{?dist}
 License:       libtiff
 URL:           http://www.simplesystems.org/libtiff/
 
 %if !0%{?os2_version}
 Source:        http://download.osgeo.org/libtiff/tiff-%{version}.tar.gz
-
-Patch0:        libtiff-am-version.patch
-Patch4:        libtiff-CVE-2023-0804.patch
+#from upstream, for <=4.7.0, fix s390x test failure, upstream issue #652
+Patch1:        libsndfile-1.2.2-fixdirectorytest.patch
 %else
 Vendor:        bww bitwise works GmbH
 %scm_source  github https://github.com/bitwiseworks/libtiff-os2 %{version}-os2
@@ -22,9 +21,10 @@ BuildRequires: zlib-devel libjpeg-devel jbigkit-devel libzstd-devel libwebp-deve
 BuildRequires: zlib-devel libjpeg-devel jbigkit-devel libzstd-devel libwebp-devel
 %endif
 BuildRequires: libtool automake autoconf pkgconfig
-
+%if 0%{?fedora} == 40
 # Add old libtiff to work with packages not built with new libtiff.so.6
 BuildRequires: libtiff
+%endif
 BuildRequires: make
 
 %description
@@ -93,9 +93,7 @@ image files using the libtiff library.
 %prep
 %if !0%{?os2_version}
 %autosetup -n tiff-%{version} -N
-
-%patch0 -p1 -b .backup
-%patch4 -p1 -b .backup
+%patch -P 1 -p1 -b .fixdirtest
 %else
 %scm_setup
 %endif
@@ -116,11 +114,7 @@ export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 %endif
 export CFLAGS="%{optflags} -fno-strict-aliasing"
 %configure --enable-ld-version-script
-%if !0%{?os2_version}
 %make_build
-%else
-make %{?_smp_mflags}
-%endif
 
 %install
 %make_install
@@ -143,8 +137,8 @@ rm -f $RPM_BUILD_ROOT%{_mandir}/man1/tiffsv.1
 %if !0%{?os2_version}
 # multilib header hack
 # we only apply this to known Red Hat multilib arches, per bug #233091
-case `uname -i` in
-  i386 | ppc | s390 | sparc )
+case `uname -m` in
+  i?86 | ppc | s390 | sparc )
     wordsize="32"
     ;;
   x86_64 | ppc64 | s390x | sparc64 )
@@ -179,21 +173,27 @@ EOF
 
 fi
 
+%if 0%{?fedora} == 40
 # Copy old soname %{_libdir}/libtiff.so.5
 # Copy old soname %{_libdir}/libtiffxx.so.5
 cp %{_libdir}/libtiff.so.5* $RPM_BUILD_ROOT%{_libdir}
 cp %{_libdir}/libtiffxx.so.5* $RPM_BUILD_ROOT%{_libdir}
+%endif
 
 %ldconfig_scriptlets
 %endif
 
 %check
 %if !0%{?os2_version}
-LD_LIBRARY_PATH=$PWD:$LD_LIBRARY_PATH make check
+export LD_LIBRARY_PATH=$PWD:$LD_LIBRARY_PATH
 %else
 export BEGINLIBPATH=%{_builddir}/%{buildsubdir}/libtiff/.libs
-make check
 %endif
+if ! make check
+then
+  cat test/test-suite.log
+  false
+fi
 
 %files
 %license LICENSE.md
@@ -233,6 +233,10 @@ make check
 %{_mandir}/man1/*
 
 %changelog
+* Wed Apr 16 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.7.0-1
+- update to version 4.7.0
+- resync spec with fedora
+
 * Mon Nov 27 2023 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.6.0-1
 - update to version 4.6.0
 - resync spec with fedora
