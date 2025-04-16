@@ -9,8 +9,8 @@
 %global python3_wheelname %python2_wheelname
 
 Name:           python-%{pypi_name}
-Version:        16.8
-Release:        3%{?dist}
+Version:        20.9
+Release:        1%{?dist}
 Summary:        Core utilities for Python packages
 
 License:        BSD or ASL 2.0
@@ -150,6 +150,9 @@ rm -rf html/_static/fonts/
 %license LICENSE LICENSE.APACHE LICENSE.BSD
 
 %changelog
+* Wed Apr 16 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 20.9-1
+- enabled python3
+
 * Tue Jan 11 2022 Silvan Scherrer <silvan.scherrer@aroa.ch> 16.8-3
 - enabled python3
 
