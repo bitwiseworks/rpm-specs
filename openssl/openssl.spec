@@ -211,8 +211,6 @@ package provides Perl scripts for converting certificates and keys
 from other formats to the formats used by the OpenSSL toolkit.
 
 %if 0%{?os2_version}
-%legacy_runtime_packages
-
 %debug_package
 %endif
 
@@ -619,6 +617,9 @@ ln -s /etc/crypto-policies/back-ends/openssl_fips.config $RPM_BUILD_ROOT%{_sysco
 %endif
 
 %changelog
+* Wed Apr 16 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 1:3.4.1-2
+- remove legacy package, as this does not work
+
 * Fri Apr 04 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 1:3.4.1-1
 - Update to version 3.4.1.
 - resync the spec with latest fedora
