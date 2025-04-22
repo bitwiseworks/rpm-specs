@@ -5,7 +5,7 @@
 
 Name:           python2-%{pypi_name}
 Version:        20.9
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Core utilities for Python packages
 
 License:        BSD or ASL 2.0
