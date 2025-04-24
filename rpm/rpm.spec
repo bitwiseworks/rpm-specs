@@ -1,5 +1,3 @@
-# Note: http://pkgs.fedoraproject.org/cgit/rpms/rpm.git/tree/rpm.spec?id=cef3bf822054a87f8f8ae53a31f4af9b3d88359b
-%define __python %__python2
 
 # build against xz?
 %bcond_without xz
@@ -12,7 +10,7 @@
 # build with sanitizers?
 %bcond_with sanitizer
 # build with libarchive? (needed for rpm2archive)
-%bcond_with libarchive
+%bcond_without libarchive
 # build with libimaevm.so
 %bcond_with libimaevm
 # build with new db format
@@ -33,11 +31,12 @@
 Summary: The RPM package management system
 Name: rpm
 Version: %{rpmver}
-Release: %{?snapver:0.%{snapver}.}20%{?dist}
+Release: %{?snapver:0.%{snapver}.}21%{?dist}
 Url: http://www.rpm.org/
 Vendor: bww bitwise works GmbH
 
-%scm_source github http://github.com/bitwiseworks/%{name}-os2 v%{version}-os2-1
+%scm_source git e:/trees/rpm-os2/git master-os2
+#scm_source github http://github.com/bitwiseworks/%{name}-os2new v%{version}-os2-1
 
 %if %{with int_bdb}
 Source1: db-%{bdbver}.tar.gz
@@ -118,7 +117,6 @@ the package like its version, a description, etc.
 
 %package libs
 Summary:  Libraries for manipulating RPM packages
-Group: Development/Libraries
 License: GPLv2+ and LGPLv2+ with exceptions
 Requires: %{name} = %{version}-%{release}
 
@@ -130,7 +128,6 @@ This package contains the RPM shared libraries.
 
 %package build-libs
 Summary:  Libraries for building and signing RPM packages
-Group: Development/Libraries
 License: GPLv2+ and LGPLv2+ with exceptions
 Requires: %{name}-libs = %{version}-%{release}
 #Requires: %{_bindir}/gpg2
@@ -141,7 +138,6 @@ packages.
 
 %package devel
 Summary:  Development files for manipulating RPM packages
-Group: Development/Libraries
 License: GPLv2+ and LGPLv2+ with exceptions
 Requires: %{name} = %{version}-%{release}
 Requires: %{name}-libs = %{version}-%{release}
@@ -162,7 +158,6 @@ will manipulate RPM packages and databases.
 
 %package build
 Summary: Scripts and executable programs used to build packages
-Group: Development/Tools
 Requires: rpm = %{version}-%{release}
 Requires: binutils
 Requires: findutils sed grep gawk diffutils file patch >= 2.5
@@ -176,7 +171,7 @@ Requires: pkgconfig >= 1:0.24
 # Techincally rpmbuild doesn't require python3 (and setuptools), but
 # pythondistdeps generator expects it.
 # See: https://bugzilla.redhat.com/show_bug.cgi?id=1410631
-#Requires: python3-setuptools
+Requires: python3-setuptools
 # TODO On OS/2 we don't provide a separate perl-generators RPM yet.
 %if 1
 Provides: perl-generators
@@ -188,7 +183,6 @@ that are used to build packages using the RPM Package Manager.
 
 %package sign
 Summary: Package signing support
-Group: System Environment/Base
 Requires: rpm-build-libs = %{version}-%{release}
 
 %description sign
@@ -196,7 +190,6 @@ This package contains support for digitally signing RPM packages.
 
 %package -n python2-%{name}
 Summary: Python 2 bindings for apps which will manipulate RPM packages
-Group: Development/Libraries
 BuildRequires: python2-devel
 %{?python_provide:%python_provide python2-%{name}}
 Requires: %{name}-libs = %{version}-%{release}
@@ -213,27 +206,24 @@ supplied by RPM Package Manager libraries.
 This package should be installed if you want to develop Python 2
 programs that will manipulate RPM packages and databases.
 
-#package -n python3-%{name}
-#Summary: Python 3 bindings for apps which will manipulate RPM packages
-#Group: Development/Libraries
-#BuildRequires: python3-devel
-#{?python_provide:%python_provide python3-%{name}}
-#{?system_python_abi}
-#Requires: %{name}-libs%{?_isa} = %{version}-%{release}
-#Provides: %{name}-python3 = %{version}-%{release}
-#Obsoletes: %{name}-python3 < %{version}-%{release}
+%package -n python3-%{name}
+Summary: Python 3 bindings for apps which will manipulate RPM packages
+BuildRequires: python3-devel
+%{?python_provide:%python_provide python3-%{name}}
+Requires: %{name}-libs = %{version}-%{release}
+Provides: %{name}-python3 = %{version}-%{release}
+Obsoletes: %{name}-python3 < %{version}-%{release}
 
-#description -n python3-%{name}
-#the python3-rpm package contains a module that permits applications
-#written in the Python programming language to use the interface
-#supplied by RPM Package Manager libraries.
-#
-#This package should be installed if you want to develop Python 3
-#programs that will manipulate RPM packages and databases.
+%description -n python3-%{name}
+the python3-rpm package contains a module that permits applications
+written in the Python programming language to use the interface
+supplied by RPM Package Manager libraries.
+
+This package should be installed if you want to develop Python 3
+programs that will manipulate RPM packages and databases.
 
 %package apidocs
 Summary: API documentation for RPM libraries
-Group: Documentation
 BuildArch: noarch
 
 %description apidocs
@@ -243,7 +233,6 @@ that will manipulate RPM packages and databases.
 %if %{with_cron}
 %package cron
 Summary: Create daily logs of installed packages.
-Group: System Environment/Base
 BuildArch: noarch
 Requires: crontabs logrotate rpm = %{version}-%{release}
 
@@ -258,16 +247,14 @@ packages on a system.
 
 %package plugin-syslog
 Summary: Rpm plugin for syslog functionality
-Group: System Environment/Base
-Requires: rpm-libs%{_isa} = %{version}-%{release}
+Requires: rpm-libs = %{version}-%{release}
 
 %description plugin-syslog
 %{summary}
 
 %package plugin-ima
 Summary: Rpm plugin ima file signatures
-Group: System Environment/Base
-Requires: rpm-libs%{_isa} = %{version}-%{release}
+Requires: rpm-libs = %{version}-%{release}
 
 %description plugin-ima
 %{summary}
@@ -315,10 +302,10 @@ export ac_cv_path___SSH=ssh
 
 make %{?_smp_mflags}
 
-#pushd python
-#{__python2} setup.py build
-#{__python3} setup.py build
-#popd
+cd python
+%py2_build
+%py3_build
+cd ..
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -327,13 +314,23 @@ make DESTDIR="$RPM_BUILD_ROOT" install
 
 # We need to build with --enable-python for the self-test suite, but we
 # actually package the bindings built with setup.py (#531543#c26)
-#pushd python
-#{__python2} setup.py install --skip-build --root $RPM_BUILD_ROOT
-#{__python3} setup.py install --skip-build --root $RPM_BUILD_ROOT
-#popd
+cd python
+%py2_install
+%py3_install
+cd ..
 
 # Remove OS/2 import libraries from plugins
 rm ${RPM_BUILD_ROOT}%{_libdir}/rpm-plugins/*_dll.a
+
+# Remove all dll and import libraries from python sitearch, as we
+# deliver the pyd anyway
+rm -f ${RPM_BUILD_ROOT}%{python2_sitearch}/%{name}/*_dll.a
+rm -f ${RPM_BUILD_ROOT}%{python2_sitearch}/%{name}/*.dll
+rm -f ${RPM_BUILD_ROOT}%{python3_sitearch}/%{name}/*_dll.a
+rm -f ${RPM_BUILD_ROOT}%{python3_sitearch}/%{name}/*.dll
+
+# Remove mkinstalldirs, as we dont install it for now
+rm -f ${RPM_BUILD_ROOT}%{rpmhome}/mkinstalldirs
 
 # Remove elf attr magic (makes no sense on OS/2)
 rm ${RPM_BUILD_ROOT}%{rpmhome}/fileattrs/elf.attr
@@ -416,7 +413,6 @@ make check
 
 %attr(0755, root, root) %dir %{_var}/lib/rpm
 %attr(0644, root, root) %verify(not md5 size mtime) %ghost %config(missingok,noreplace) %{_var}/lib/rpm/*
-%attr(0755, root, root) %dir %{rpmhome}
 
 %{_bindir}/rpm.exe
 %{?with_libarchive: %{_bindir}/rpm2archive.exe}
@@ -504,13 +500,12 @@ make check
 %{_mandir}/man8/rpmsign.8*
 
 %files -n python2-%{name}
-%{python_sitearch}/%{name}/
-%exclude %{python_sitearch}/%{name}/*.dbg
-#{python_sitearch}/%{name}_python-*.egg-info
+%{python2_sitearch}/%{name}/
+%{python2_sitearch}/%{name}_python-*.egg-info
 
-#files -n python3-%{name}
-#{python3_sitearch}/%{name}/
-#{python3_sitearch}/%{name}_python-*.egg-info
+%files -n python3-%{name}
+%{python3_sitearch}/%{name}/
+%{python3_sitearch}/%{name}_python-*.egg-info
 
 %files devel
 %{_mandir}/man8/rpmgraph.8*
@@ -530,6 +525,10 @@ make check
 %doc doc/librpm/html/*
 
 %changelog
+* Wed Apr 23 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.13.0-21
+- use a new branch for building. Should be equivalent
+- enable python3
+
 * Wed Sep 15 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.13.0-20
 - force proper sse2 alignment in optflags on x86 platforms
 - cherry pick some lua changes from upstream, fixes lua path handling
