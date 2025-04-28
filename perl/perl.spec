@@ -2522,10 +2522,10 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Wed Mar 26 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 5.16.1-11
-- use ther right tag to build
+- use the right tag to build
 
 * Mon Feb 17 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 5.16.1-10
-- fix removing temp dirctories
+- fix removing temp directories
 
 * Wed Jan 13 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 5.16.1-9
 - add libcx to the exe as well, so we get a nice trp on failures
