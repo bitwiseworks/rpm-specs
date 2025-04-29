@@ -34,13 +34,12 @@
 
 Summary:        Creates a common metadata repository
 Name:           createrepo_c
-Version:        1.0.2
+Version:        1.2.1
 Release:        1%{?dist}
 License:        GPL-2.0-or-later
 %if !0%{?os2_version}
 URL:            https://github.com/rpm-software-management/createrepo_c
 Source0:        %{url}/archive/%{version}/%{name}-%{version}.tar.gz
-Patch0:         0001-build-Restore-compatiblity-with-libxml2-2.12.0.patch
 %else
 Vendor:         bww bitwise works GmbH
 %scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
@@ -57,7 +56,7 @@ BuildRequires:  libcurl-devel
 BuildRequires:  libxml2-devel
 BuildRequires:  openssl-devel
 BuildRequires:  rpm-devel >= 4.8.0-28
-BuildRequires:  sqlite-devel
+BuildRequires:  sqlite-devel >= 3.6.18
 BuildRequires:  xz
 BuildRequires:  xz-devel
 BuildRequires:  zlib-devel
@@ -77,7 +76,11 @@ Requires:       libmodulemd%{?_isa} >= %{libmodulemd_version}
 %endif
 Requires:       %{name}-libs = %{epoch_dep}%{version}-%{release}
 %if !0%{?os2_version}
+%if 0%{?fedora} > 40 || 0%{?rhel} > 10
+BuildRequires:  bash-completion-devel
+%else
 BuildRequires:  bash-completion
+%endif
 %endif
 Requires: rpm >= 4.9.0
 %if %{with drpm}
@@ -112,7 +115,11 @@ for easy manipulation with a repodata.
 
 %package devel
 Summary:    Library for repodata manipulation
+%if !0%{?os2_version}
+Requires:   %{name}-libs%{?_isa} = %{epoch_dep}%{version}-%{release}
+%else
 Requires:   %{name}-libs = %{epoch_dep}%{version}-%{release}
+%endif
 
 %description devel
 This package contains the createrepo_c C library and header files.
@@ -145,6 +152,7 @@ rm -f tests/createrepo
 ln -s ../src/ tests/createrepo
 %endif
 
+%py3_shebang_fix examples/python
 mkdir build-py3
 
 %build
@@ -153,7 +161,7 @@ mkdir build-py3
 pushd build-py3
 %else
 cd build-py3
-# !!!!! remove -Zbin-files again when new rpm 4.17.0 is out !!!!
+# !!!!! remove -Zbin-files again when rpm 4.15.0 has removed it as well !!!!
 export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp -Zbin-files -lcx"
 export VENDOR="%{vendor}"
 %endif
@@ -162,6 +170,9 @@ export VENDOR="%{vendor}"
       -DWITH_LIBMODULEMD=%{?with_libmodulemd:ON}%{!?with_libmodulemd:OFF} \
       -DWITH_LEGACY_HASHES=%{?with_legacy_hashes:ON}%{!?with_legacy_hashes:OFF} \
       -DENABLE_DRPM=%{?with_drpm:ON}%{!?with_drpm:OFF} \
+%if 0%{?os2_version}
+      -DOS2_USE_C_EMXEXP=ON \
+%endif
       -DWITH_SANITIZERS=%{?with_sanitizers:ON}%{!?with_sanitizers:OFF}
   make %{?_smp_mflags} RPM_OPT_FLAGS="%{optflags}"
   # Build C documentation
@@ -271,10 +282,14 @@ ln -sr %{buildroot}%{_bindir}/modifyrepo_c.exe %{buildroot}%{_bindir}/modifyrepo
 %{_includedir}/%{name}/
 
 %files -n python3-%{name}
+%doc examples/python/*
 %{python3_sitearch}/%{name}/
 %{python3_sitearch}/%{name}-%{version}-py%{python3_version}.egg-info
 
 %changelog
+* Wed Apr 30 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.2.1-1
+- update to version 1.2.1
+
 * Fri Dec 15 2023 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.0.2-1
 - update to version 1.0.2
 - enable python3
