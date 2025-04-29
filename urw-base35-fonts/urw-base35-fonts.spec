@@ -291,7 +291,9 @@ which is part of Level 2 Core Font Set.                                        \
 
 %package common
 Summary:          Common files of the (URW)++ Level 2 Core Font Set
+%if !0%{?os2_version}
 Requires:         filesystem
+%endif
 Requires:         fontpackages-filesystem
 
 %description common
