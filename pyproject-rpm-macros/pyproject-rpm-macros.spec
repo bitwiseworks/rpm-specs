@@ -76,7 +76,9 @@ BuildRequires:  python3-rpm-macros
 Requires:       python-rpm-macros
 Requires:       python-srpm-macros
 Requires:       python3-rpm-macros
+%if !0%{?os2_version}
 Requires:       (pyproject-srpm-macros = %{?epoch:%{epoch}:}%{version}-%{release} if pyproject-srpm-macros)
+%endif
 
 # We use the following tools outside of coreutils
 %if !0%{?os2_version}
