@@ -98,7 +98,7 @@
 
 %global major_version 3
 %global minor_version 31
-%global patch_version 6
+%global patch_version 7
 
 # For handling bump release by rpmdev-bumpspec and mass rebuild
 %global baserelease 1
@@ -724,6 +724,10 @@ cd ..
 
 
 %changelog
+* Fri Mar 14 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.31.7-1
+- update to vendor version 3.31.7
+- fixed ticket #14
+
 * Fri Mar 14 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.31.6-1
 - update to vendor version 3.31.6
 - add external rhash lib
