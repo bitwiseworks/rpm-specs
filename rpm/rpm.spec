@@ -33,7 +33,7 @@
 
 %global rpmver 4.15.1
 #global snapver rc1
-%global rel 1
+%global rel 2
 
 %global srcver %{version}%{?snapver:-%{snapver}}
 %global srcdir %{?snapver:testing}%{!?snapver:%{name}-%(echo %{version} | cut -d'.' -f1-2).x}
@@ -71,8 +71,7 @@ Patch906: rpm-4.7.1-geode-i686.patch
 Patch907: rpm-4.15.x-ldflags.patch
 %else
 Vendor: bww bitwise works GmbH
-%scm_source git e:/trees/rpm-os2/git master-os2
-#scm_source github http://github.com/bitwiseworks/%{name}-os2new v%{version}-os2-1
+%scm_source github http://github.com/bitwiseworks/%{name}-os2new v%{version}-os2
 %endif
 
 # Partially GPL/LGPL dual-licensed and some bits with BSD
@@ -566,6 +565,8 @@ mkdir -p $RPM_BUILD_ROOT%{rpmhome}/macros.d
 %else
 export BEGINLIBPATH="%{_builddir}/%{buildsubdir}/rpmio/.libs;%{_builddir}/%{buildsubdir}/lib/.libs;$BEGINLIBPATH"
 ./rpmdb --dbpath=$RPM_BUILD_ROOT/%{_var}/lib/rpm --initdb
+rm -f $RPM_BUILD_ROOT/%{_var}/lib/rpm/.rpm.lock
+touch $RPM_BUILD_ROOT/%{_var}/.rpm.lock
 %endif
 
 # plant links to relevant db utils as rpmdb_foo for documention compatibility
@@ -611,7 +612,7 @@ make check || (cat tests/rpmtests.log; exit 0)
 %else
 %attr(0755, root, root) %dir %{_var}/lib/rpm
 %attr(0644, root, root) %ghost %config(missingok,noreplace) %{_var}/lib/rpm/*
-%attr(0644, root, root) %ghost %{_var}/lib/rpm/.*.lock
+%attr(0644, root, root) %ghost %{_var}/.*.lock
 %endif
 
 %if !0%{?os2_version}
@@ -804,6 +805,9 @@ make check || (cat tests/rpmtests.log; exit 0)
 %doc doc/librpm/html/*
 
 %changelog
+* Mon Apr 28 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.15.1-2
+- move .rpm.lock out of /var/lib/rpm, as else rebuilddb is not working
+
 * Fri Apr 25 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.15.1-1
 - update to version 4.15
 - resync spec with fedora version
