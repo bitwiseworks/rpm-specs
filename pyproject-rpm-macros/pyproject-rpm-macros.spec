@@ -1,3 +1,6 @@
+%dnl our yum is a pain in the ..., as it just way to old. we urgently need to work on dnf!!
+%dnl once we have dnf, remove most if not all %if !0%{?os2_version}
+
 Name:           pyproject-rpm-macros
 Summary:        RPM macros for PEP 517 Python packages
 # SPDX
@@ -93,7 +96,11 @@ Requires:       /@unixroot/usr/bin/sed
 # It has been introduced in RPM 4.15 (4.14.90 is the alpha of 4.15).
 # What we need is rpmlib(DynamicBuildRequires), but that is impossible to (Build)Require.
 # Also, we need to avoid 4.19.90..4.19.91-7 due to rhbz#2284187
+%if !0%{?os2_version}
 Requires:       ((rpm-build >= 4.14.90 with (rpm-build < 4.19.90 or rpm-build >= 4.19.91-8)) if rpm-build)
+%else
+Requires:       rpm-build >= 4.14.90
+%endif
 BuildRequires:  rpm-build >= 4.14.90
 
 %description
@@ -111,6 +118,7 @@ These macros replace %%py3_build and %%py3_install,
 which only work with setup.py.
 
 
+%if !0%{?os2_version}
 %package -n pyproject-srpm-macros
 Summary:        Minimal implementation of %%pyproject_buildrequires
 Requires:       (pyproject-rpm-macros = %{?epoch:%{epoch}:}%{version}-%{release} if pyproject-rpm-macros)
@@ -121,6 +129,7 @@ This package contains a minimal implementation of %%pyproject_buildrequires.
 When used in %%generate_buildrequires, it will generate BuildRequires
 for pyproject-rpm-macros. When both packages are installed, the full version
 takes precedence.
+%endif
 
 
 %prep
@@ -139,7 +148,9 @@ cp -p %{sources} .
 mkdir -p %{buildroot}%{_rpmmacrodir}
 mkdir -p %{buildroot}%{_rpmconfigdir}/redhat
 install -pm 644 macros.pyproject %{buildroot}%{_rpmmacrodir}/
+%if !0%{?os2_version}
 install -pm 644 macros.aaa-pyproject-srpm %{buildroot}%{_rpmmacrodir}/
+%endif
 install -pm 644 pyproject_buildrequires.py %{buildroot}%{_rpmconfigdir}/redhat/
 install -pm 644 pyproject_convert.py %{buildroot}%{_rpmconfigdir}/redhat/
 install -pm 644 pyproject_save_files.py  %{buildroot}%{_rpmconfigdir}/redhat/
@@ -172,10 +183,11 @@ export HOSTNAME="rpmbuild"  # to speedup tox in network-less mock, see rhbz#1856
 %doc README.md
 %license LICENSE
 
+%if !0%{?os2_version}
 %files -n pyproject-srpm-macros
 %{_rpmmacrodir}/macros.aaa-pyproject-srpm
 %license LICENSE
-
+%endif
 
 %changelog
 * Wed Apr 23 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.18.1-1
