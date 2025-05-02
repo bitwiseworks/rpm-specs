@@ -1,6 +1,6 @@
 # This is a backward-compatible suffix used in all pyproject-rpm-macros directories
 # For the main Python it's empty, for all others it's "-3.X"
-%dnl %_pyproject_files_pkgversion %{expr:"%{python3_pkgversion}" != "3" ? "-%{python3_pkgversion}" : ""}
+# %_pyproject_files_pkgversion %{expr:"%{python3_pkgversion}" != "3" ? "-%{python3_pkgversion}" : ""}
 # the above expression is not working on our rpm. so we use it just empty
 %_pyproject_files_pkgversion ""
 
