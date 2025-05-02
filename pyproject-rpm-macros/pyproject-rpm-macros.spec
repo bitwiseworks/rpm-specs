@@ -22,7 +22,7 @@ License:        MIT
 #   Increment Z when this is a bugfix or a cosmetic change
 # Dropping support for EOL Fedoras is *not* considered a breaking change
 Version:        1.18.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 
 # Macro files
 Source001:      macros.pyproject
@@ -190,5 +190,8 @@ export HOSTNAME="rpmbuild"  # to speedup tox in network-less mock, see rhbz#1856
 %endif
 
 %changelog
+* Fri May 02 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.18.1-2
+- fix a expression issue. most probably due to our older rpm
+
 * Wed Apr 23 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.18.1-1
 - first rpm version
