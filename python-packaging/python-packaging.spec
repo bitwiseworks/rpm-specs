@@ -1,155 +1,160 @@
 %global pypi_name packaging
 
-%global build_wheel 0
-%global with_python3 1
-%global with_sphinx 0
-%global with_test 0
+# Specify --with bootstrap to build in bootstrap mode
+# This mode is needed, because python3-rpm-generators need packaging
+%if !0%{?os2_version}
+%bcond_with bootstrap
+%else
+%bcond_without bootstrap
+%endif
 
-%global python2_wheelname %{pypi_name}-%{version}-py2.py3-none-any.whl
-%global python3_wheelname %python2_wheelname
+# When bootstrapping, the tests and docs are disabled because the dependencies are not yet available.
+# We don't want python-pretend in future RHEL, so we disable tests on RHEL as well.
+# No reason to ship the documentation in RHEL either, so it is also disabled by default.
+%if %{without bootstrap} && %{undefined rhel}
+# Specify --without docs to prevent the dependency loop on python-sphinx
+# Doc subpackage is disabled because it requires sphinx-toolbox since packaging 24.1
+# and that package is not available in Fedora yet.
+%bcond_with docs
+
+# Specify --without tests to prevent the dependency loop on python-pytest
+%bcond_without tests
+%else
+%bcond_with docs
+%bcond_with tests
+%endif
 
 Name:           python-%{pypi_name}
-Version:        20.9
+Version:        25.0
 Release:        1%{?dist}
 Summary:        Core utilities for Python packages
 
-License:        BSD or ASL 2.0
+License:        BSD-2-Clause OR Apache-2.0
 URL:            https://github.com/pypa/packaging
+%if !0%{?os2_version}
+Source0:        %{url}/archive/%{version}/%{pypi_name}-%{version}.tar.gz
+%else
 Vendor:         bww bitwise works GmbH
+%dnl %scm_source git e:/trees/python-packaging/git master-os2
 %scm_source github https://github.com/bitwiseworks/%{pypi_name}-os2 %{version}-os2
+%endif
 
 BuildArch:      noarch
- 
-BuildRequires:  python2-setuptools
-BuildRequires:  python2-devel
-%if 0%{?with_test}
-BuildRequires:  python2-pytest
-%endif
-#BuildRequires:  python-pretend
-BuildRequires:  python2-pyparsing
-BuildRequires:  python-six
- 
-%if 0%{?with_python3}
-#BuildRequires:  python3-setuptools
-BuildRequires:  python3-devel
-%if 0%{?with_test}
-BuildRequires:  python3-pytest
-%endif
-#BuildRequires:  python3-pretend
-BuildRequires:  python3-pyparsing
-#BuildRequires:  python3-six
-#BuildRequires:  python3-sphinx
+
+BuildRequires:  python%{python3_pkgversion}-devel
+BuildRequires:  pyproject-rpm-macros
+BuildRequires:  unzip
+
+%if %{with bootstrap}
+BuildRequires:  python%{python3_pkgversion}-flit-core
 %endif
 
-%if 0%{?build_wheel}
-BuildRequires:  python2-pip
-BuildRequires:  python-wheel
-BuildRequires:  python%{python3_pkgversion}-pip
-BuildRequires:  python%{python3_pkgversion}-wheel
+# Upstream uses nox for testing, we specify the test deps manually as well.
+%if %{with tests}
+BuildRequires:  python%{python3_pkgversion}-pytest
+BuildRequires:  python%{python3_pkgversion}-pretend
+%endif
+%if %{with docs}
+BuildRequires:  python%{python3_pkgversion}-sphinx
+BuildRequires:  python%{python3_pkgversion}-furo
 %endif
 
-%description
+
+%global _description %{expand:
 python-packaging provides core utilities for Python packages like utilities for
-dealing with versions, specifiers, markers etc.
+dealing with versions, specifiers, markers etc.}
 
-%package -n python2-%{pypi_name}
+%description %_description
+
+
+%package -n python%{python3_pkgversion}-%{pypi_name}
 Summary:        %{summary}
-%{?python_provide:%python_provide python2-%{pypi_name}}
- 
-Requires:       python2-pyparsing
-Requires:       python2-six
-%description -n python2-%{pypi_name}
-python2-packaging provides core utilities for Python packages like utilities for
-dealing with versions, specifiers, markers etc.
 
-
-%if 0%{?with_python3}
-%package -n python3-%{pypi_name}
-Summary:        %{summary}
-%{?python_provide:%python_provide python3-%{pypi_name}}
- 
-Requires:       python3-pyparsing
-Requires:       python3-six
-%description -n python3-%{pypi_name}
-python3-packaging provides core utilities for Python packages like utilities for
-dealing with versions, specifiers, markers etc.
+%if %{with bootstrap}
+Provides:       python%{python3_pkgversion}dist(packaging) = %{version}
+Provides:       python%{python3_version}dist(packaging) = %{version}
+Requires:       python(abi) = %{python3_version}
 %endif
 
+%description -n python%{python3_pkgversion}-%{pypi_name}  %_description
+
+
+%if %{with docs}
 %package -n python-%{pypi_name}-doc
 Summary:        python-packaging documentation
-Suggests:       python2-%{pypi_name} = %{version}-%{release}
+
 %description -n python-%{pypi_name}-doc
 Documentation for python-packaging
+%endif
+
 
 %prep
+%if !0%{?os2_version}
+%autosetup -p1 -n %{pypi_name}-%{version}
+%else
 %scm_setup
-# Remove bundled egg-info
-rm -rf %{pypi_name}.egg-info
+%endif
+
+
+%if %{without bootstrap}
+%generate_buildrequires
+%pyproject_buildrequires -r
+%endif
+
 
 %build
-%if 0%{?build_wheel}
-%py2_build_wheel
+%if %{with bootstrap}
+%{python3} -m flit_core.wheel
 %else
-%py2_build
+%pyproject_wheel
 %endif
-%if 0%{?with_python3}
-%if 0%{?build_wheel}
-%py3_build_wheel
-%else
-%py3_build
-%endif
-%endif
-# generate html docs 
-%if 0%{?with_sphinx}
+
+%if %{with docs}
+# generate html docs
 sphinx-build-3 docs html
-%endif
 # remove the sphinx-build leftovers
 rm -rf html/.{doctrees,buildinfo}
 # Do not bundle fonts
 rm -rf html/_static/fonts/
+%endif
+
 
 %install
-%if 0%{?build_wheel}
-%py2_install_wheel %{python2_wheelname}
+%if %{with bootstrap}
+mkdir -p %{buildroot}%{python3_sitelib}
+unzip dist/packaging-%{version}-py3-none-any.whl -d %{buildroot}%{python3_sitelib} -x packaging-%{version}.dist-info/RECORD
+echo '%{python3_sitelib}/packaging*' > %{pyproject_files}
 %else
-%py2_install
+%pyproject_install
+%pyproject_save_files %{pypi_name}
 %endif
-%if 0%{?with_python3}
-%if 0%{?build_wheel}
-%py3_install_wheel %{python3_wheelname}
-%else
-%py3_install
-%endif
-%endif
+
 
 %check
-%if 0%{?with_test}
-%%{__python2} -m pytest tests/
-%if 0%{?with_python3}
-%{__python3} -m pytest tests/
-%endif
+%{!?with_bootstrap:%pyproject_check_import}
+%if %{with tests}
+%pytest
 %endif
 
-%files -n python2-%{pypi_name}
+
+%files -n python%{python3_pkgversion}-%{pypi_name} -f %{pyproject_files}
 %license LICENSE LICENSE.APACHE LICENSE.BSD
 %doc README.rst CHANGELOG.rst CONTRIBUTING.rst
-%{python2_sitelib}/%{pypi_name}*
 
-%if 0%{?with_python3}
-%files -n python3-%{pypi_name}
-%license LICENSE LICENSE.APACHE LICENSE.BSD
-%doc README.rst CHANGELOG.rst CONTRIBUTING.rst
-%{python3_sitelib}/%{pypi_name}/
-%{python3_sitelib}/%{pypi_name}-*.egg-info
-%endif
 
+%if %{with docs}
 %files -n python-%{pypi_name}-doc
-%if 0%{?with_sphinx}
 %doc html
-%endif
 %license LICENSE LICENSE.APACHE LICENSE.BSD
+%endif
+
 
 %changelog
+* Wed Apr 23 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 25.0-1
+- update to version 25.0
+- resync spec with fedora version
+- remove python2 binding
+
 * Wed Apr 16 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 20.9-1
 - enabled python3
 
