@@ -1,5 +1,5 @@
 Name:       whois       
-Version:    5.5.23
+Version:    5.6.0
 Release:    1%{?dist}
 Summary:    Improved WHOIS client
 Group:      Applications/Internet
@@ -46,6 +46,7 @@ BuildRequires:  subversion zip
 
 %build
 export LDFLAGS=" -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+export LIBS="-lintl"
 %make_build CONFIG_FILE="%{_sysconfdir}/%{cfgfile}" HAVE_ICONV=1 \
     CFLAGS="$RPM_OPT_FLAGS" %{?_smp_mflags}
 
@@ -70,10 +71,13 @@ install -p -m644 -D %{cfgfile} $RPM_BUILD_ROOT%{_sysconfdir}/%{cfgfile}
 %{_mandir}/man5/%{cfgfile}.5.gz
 
 %changelog
+* Tue May 06 2025 Elbert Pol <elbert.pol@gmail.com> - 5.6.0-1
+- Updated to latest version
+
 * Mon May 13 2024 Elbert Pol <elbert.pol@gmail.com> - 5.5.23-1
 - Updated to latest version
 
-* Fri Apr 04 2024 Elbert Pol <elbert.pol@gmail.com> - 5.5.22-1
+* Thu Apr 04 2024 Elbert Pol <elbert.pol@gmail.com> - 5.5.22-1
 - Updated to latest version
 
 * Sun Feb 25 2024 Elbert Pol <elbert.pol@gmail.com> - 5.5.21-1
