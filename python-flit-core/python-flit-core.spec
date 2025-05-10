@@ -19,7 +19,7 @@ Version:        3.12.0
 %if !0%{?os2_version}
 Release:        %autorelease
 %else
-Release:        1%{?dist}
+Release:        2%{?dist}
 %endif
 Summary:        PEP 517 build backend for packages using Flit
 
@@ -129,5 +129,8 @@ rm %{buildroot}%{python3_sitelib}/flit_core-%{version}.dist-info/RECORD
 
 
 %changelog
+* Sat May 10 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.12.0-2
+- rebuilt with python 3.13
+
 * Wed Apr 30 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.12.0-1
 - first rpm version
