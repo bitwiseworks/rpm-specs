@@ -30,7 +30,7 @@
 
 Name:           python-setuptools
 # When updating, update the bundled libraries versions bellow!
-Version:        41.2.0
+Version:        74.1.3
 Release:        1%{?dist}
 Summary:        Easily build and distribute Python packages
 # setuptools is MIT
@@ -71,7 +71,8 @@ Patch:          Adjust-the-setup.py-install-deprecation-message.patch
 Patch:          Revert-Always-rewrite-a-Python-shebang-to-python.patch
 %else
 Vendor:         bww bitwise works GmbH
-%scm_source github  https://github.com/bitwiseworks/%{srcname}-os2 v%{version}-os2
+%scm_source git e:/trees/setuptools/git v7x-os2
+%dnl %scm_source github  https://github.com/bitwiseworks/%{srcname}-os2 v%{version}-os2
 %endif
 
 BuildArch:      noarch
@@ -87,6 +88,8 @@ BuildRequires:  gcc
 # The minimal version is for bundled provides verification script to accept multiple files as input
 %if !0%{?os2_version}
 BuildRequires:  python3-rpm-generators >= 12-8
+%else
+%dnl BuildRequires:  python3-rpm-generators
 %endif
 
 %if %{without bootstrap}
@@ -158,7 +161,6 @@ A Python wheel of setuptools to use with venv.
 %autosetup -p1 -n %{srcname}-%{version}
 %else
 %scm_setup
-%{__python3} bootstrap.py
 %endif
 %if %{without bootstrap}
 # If we don't have setuptools installed yet, we use the pre-generated .egg-info
@@ -194,24 +196,16 @@ rm -r docs/conf.py
 # The setup.py install command tries to import distutils
 # but the distutils-precedence.pth file is not yet respected
 # and Python 3.12+ no longer has distutils in the standard library.
-%if !0%{?os2_version}
 ln -s setuptools/_distutils distutils
 PYTHONPATH=$PWD %py3_install
 unlink distutils
-%else
-%py3_install
-%endif
 %else
 %pyproject_install
 %pyproject_save_files setuptools pkg_resources _distutils_hack
 %endif
 
 # https://github.com/pypa/setuptools/issues/2709
-%if !0%{?os2_version}
 find %{buildroot}%{python3_sitelib} -name tests -print0 | xargs -0 rm -r
-%else
-rm %{buildroot}%{_bindir}/easy_install
-%endif
 
 %if %{without bootstrap}
 sed -Ei '/\/tests\b/d' %{pyproject_files}
@@ -259,26 +253,18 @@ PYTHONPATH=$(pwd) %pytest \
  --ignore=setuptools/tests/config/test_apply_pyprojecttoml.py \
  --ignore=tools \
  -k "not test_pip_upgrade_from_source and not test_wheel_includes_cli_scripts and not test_equivalent_output"
-%endif # with tests
+%endif
 
 
 %files -n python%{python3_pkgversion}-setuptools %{?!with_bootstrap:-f %{pyproject_files}}
 %license LICENSE
-%doc docs/* CHANGES.rst README.rst
-%if !0%{?os2_version}
+%doc docs/* NEWS.rst README.rst
 %{python3_sitelib}/distutils-precedence.pth
-%endif
 %if %{with bootstrap}
 %{python3_sitelib}/setuptools-%{version}-py%{python3_version}.egg-info/
 %{python3_sitelib}/pkg_resources/
 %{python3_sitelib}/setuptools/
-%if !0%{?os2_version}
 %{python3_sitelib}/_distutils_hack/
-%else
-%{python3_sitelib}/easy_install*
-%{_bindir}/easy_install-3.*
-%{python3_sitelib}/__pycache__/*
-%endif
 %endif
 
 %if %{without bootstrap}
@@ -291,6 +277,9 @@ PYTHONPATH=$(pwd) %pytest \
 
 
 %changelog
+* Fri Apr 18 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 74.1.3-1
+- update to version 74.1.3
+
 * Wed Apr 16 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 41.2.0-1
 - update to version 41.2.0
 - Split python2-setuptools from python-setuptools
