@@ -5,7 +5,7 @@
 
 Name:           python-%{srcname}
 Version:        3.3.3
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Blessed package to manage your versions by SCM tags
 
 License:        MIT
@@ -91,6 +91,9 @@ PYTHONPATH=%{buildroot}%{python3_sitelib} py.test-%{python3_version} -v -k 'not 
 %endif
 
 %changelog
+* Sat May 10 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.3.3-3
+- rebuild with python 3.13
+
 * Wed Jan 12 2022 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.3.3-2
 - enabled python3
 
