@@ -22,7 +22,7 @@ case $1 in
     #    /PATH/OF/BUILDROOT/usr/lib64/pythonMAJOR.MINOR/
     # generating a line of the form:
     #    python(abi) = MAJOR.MINOR
-    sed -n -e "s|.*/usr/lib[^/]*/python\(.\..\)/.*|python(abi) = \1|p"
+    sed -n -e "s|.*/usr/lib[^/]*/pytho\(.\..\)/.*|python(abi) = \1|p"
     ;;
 esac
 
