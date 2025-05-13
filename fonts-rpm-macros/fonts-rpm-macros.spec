@@ -26,7 +26,7 @@ Version: 2.0.5
 BuildArch: noarch
 
 Name:      fonts-rpm-macros
-Release:   1%{?dist}
+Release:   2%{?dist}
 Summary:   Build-stage rpm automation for fonts packages
 
 License:   GPLv3+
@@ -172,5 +172,8 @@ install -m 0755 -vp   bin/* %{buildroot}%{_bindir}
 %doc %{ftcgtemplatedir}/*txt
 
 %changelog
+* Tue May 13 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1:2.0.5-2
+- rebuild with python 3.13
+
 * Thu Apr 28 2022 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1:2.0.5-1
 - first os/2 rpm
