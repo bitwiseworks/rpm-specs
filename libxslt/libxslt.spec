@@ -1,7 +1,7 @@
 Name:           libxslt
 Summary:        Library providing the Gnome XSLT engine
 Version:        1.1.39
-Release:        1%{?dist}
+Release:        2%{?dist}
 
 License:        MIT
 URL:            https://gitlab.gnome.org/GNOME/libxslt
@@ -122,7 +122,7 @@ gcc -Zomf -Zdll -nostdlib libxslt.def -l$RPM_BUILD_ROOT/%{_libdir}/xslt1.dll -le
 gcc -Zomf -Zdll -nostdlib libexslt.def -l$RPM_BUILD_ROOT/%{_libdir}/exslt0.dll -lend -o $RPM_BUILD_ROOT/%{_libdir}/exslt.dll
 
 # create a symlink for the python binding, as the dll itself is named xml2mod.dll
-ln -s %{python3_sitearch}/xsltmod.dll %{buildroot}%{python3_sitearch}/libxsltmod.pyd
+ln -s xsltmod.dll %{buildroot}%{python3_sitearch}/libxsltmod.pyd
 %endif
 
 %check
@@ -192,6 +192,10 @@ ln -s %{python3_sitearch}/xsltmod.dll %{buildroot}%{python3_sitearch}/libxsltmod
 %endif
 
 %changelog
+* Tue May 13 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.1.39-2
+- rebuild with python 3.12
+- don't create the symlink with absolute path
+
 * Fri Jan 26 2024 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.1.39-1
 - update to version 1.1.39
 - resync with fedora spec
