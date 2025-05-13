@@ -1,6 +1,6 @@
 Name:           libxml2
 Version:        2.12.4
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Library providing XML and HTML support
 
 # list.c, dict.c and few others use ISC-Veillard
@@ -156,7 +156,7 @@ gzip -9 -c doc/libxml2-api.xml > doc/libxml2-api.xml.gz
 gcc -Zomf -Zdll -nostdlib libxml2.def -l$RPM_BUILD_ROOT/%{_libdir}/xml22.dll -lend -o $RPM_BUILD_ROOT/%{_libdir}/libxml2.dll
 
 # create a symlink for the python binding, as the dll itself is named xml2mod.dll
-ln -s %{python3_sitearch}/xml2mod.dll $RPM_BUILD_ROOT%{python3_sitearch}/libxml2mod.pyd
+ln -s xml2mod.dll $RPM_BUILD_ROOT%{python3_sitearch}/libxml2mod.pyd
 %endif
 
 %check
@@ -248,6 +248,10 @@ popd
 %{python3_sitelib}/__pycache__/drv_libxml2.*
 
 %changelog
+* Tue May 13 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.12.4-2
+- rebuild with python 3.12
+- don't create the symlink with absolute path
+
 * Mon Jan 29 2024 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.12.4-1
 - update to version 2.12.4
 - remove python2 binding
