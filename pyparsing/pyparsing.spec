@@ -10,8 +10,8 @@
 
 Summary:        %{sum}
 Name:           pyparsing
-Version:        2.1.10
-Release:        3%{?dist}
+Version:        2.4.7
+Release:        1%{?dist}
 
 License:        MIT
 URL:            http://pyparsing.wikispaces.com/
@@ -24,7 +24,7 @@ BuildRequires:  python2-devel
 BuildRequires:  python2-setuptools
 %if 0%{?with_python3}
 BuildRequires:  python3-devel
-#BuildRequires:  python3-setuptools
+BuildRequires:  python3-setuptools
 %endif
 
 %if 0%{?build_wheel}
@@ -72,9 +72,7 @@ This is the Python 3 version.
 
 %prep
 %scm_setup
-#mv docs/pyparsingClassDiagram.PNG docs/pyparsingClassDiagram.png
-rm docs/pyparsingClassDiagram.JPG
-dos2unix -k CHANGES LICENSE README
+dos2unix -k CHANGES LICENSE
 
 %build
 %if 0%{?build_wheel}
@@ -104,17 +102,21 @@ dos2unix -k CHANGES LICENSE README
 %endif
 %endif
 
+%check
+%{__python3} unitTests.py
+%{__python3} simple_unit_tests.py
+
 %files
 
 %files -n python2-pyparsing
 %license LICENSE
-%doc CHANGES README
+%doc CHANGES README.rst
 %{python2_sitelib}/*
 
 %if 0%{?with_python3}
 %files -n python3-pyparsing
 %license LICENSE
-%doc CHANGES README LICENSE
+%doc CHANGES README.rst
 %{python3_sitelib}/pyparsing.py
 %{python3_sitelib}/__pycache__/*
 %{python3_sitelib}/pyparsing-*egg-info
@@ -122,9 +124,13 @@ dos2unix -k CHANGES LICENSE README
 
 %files doc
 %license LICENSE
-%doc CHANGES README HowToUsePyparsing.html docs examples htmldoc
+%doc CHANGES README.rst examples
 
 %changelog
+* Tue May 13 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.4.7-1
+- rebuild for python 3.13
+- update to version 2.4.7
+
 * Tue Jan 11 2022 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.1.10-3
 - enabled python3
 
