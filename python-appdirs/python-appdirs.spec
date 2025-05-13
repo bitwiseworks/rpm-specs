@@ -8,7 +8,7 @@
 
 Name:          python-%{modname}
 Version:       1.4.3
-Release:       2%{?dist}
+Release:       3%{?dist}
 Summary:       Python module for determining platform-specific directories
 
 License:       MIT
@@ -20,7 +20,7 @@ BuildRequires: python2-devel
 BuildRequires: python2-setuptools
 %if 0%{?with_python3}
 BuildRequires: python3-devel
-#BuildRequires: python3-setuptools
+BuildRequires: python3-setuptools
 %endif
 BuildArch:     noarch
 
@@ -112,6 +112,9 @@ sed -i -e '1{\@^#!/usr/bin/env python@d}' %{buildroot}%{python3_sitelib}/%{modna
 %endif
 
 %changelog
+* Tue Jan 11 2022 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.4.3-3
+- rebuild for python 3.13
+
 * Tue Jan 11 2022 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.4.3-2
 - enabled python3
 
