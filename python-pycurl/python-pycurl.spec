@@ -23,7 +23,7 @@
 
 Name:           python-%{modname}
 Version:        7.44.1
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        A Python interface to libcurl
 
 License:        LGPLv2+ or MIT
@@ -35,7 +35,7 @@ Source0:        https://files.pythonhosted.org/packages/47/f9/c41d6830f7bd4e70d5
 Patch2:         0002-python-pycurl-7.43.0-tls-backend.patch
 %else
 Vendor:         bww bitwise works GmbH
-%scm_source github http://github.com/bitwiseworks/pycurl-os2 REL_7_44_1-os2
+%scm_source github http://github.com/bitwiseworks/pycurl-os2 REL_7_44_1-os2-1
 %endif
 
 BuildRequires:  gcc
@@ -207,6 +207,9 @@ rm -fv tests/fake-curl/libcurl/*.so
 %endif
 
 %changelog
+* Wed May 14 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 7.44.1-4
+- rebuild with python 3.13
+
 * Wed Jan 12 2022 Silvan Scherrer <silvan.scherrer@aroa.ch> 7.44.1-3
 - enable python3
 
