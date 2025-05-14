@@ -5,7 +5,7 @@
 
 Summary:       Python bindings for CUPS
 Name:          python-cups
-Version:       2.0.1
+Version:       2.0.4
 Release:       1%{?dist}
 # older URL, but still with useful information about pycups
 #URL:           http://cyberelk.net/tim/software/pycups/
@@ -97,6 +97,10 @@ export PYTHONPATH=%{buildroot}%{python3_sitearch}
 %doc examples html
 
 %changelog
+* Wed May 14 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.0.4-1
+- rebuild with python 3.13
+- update to latest version
+
 * Wed Jan 24 2024 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.0.1-1
 - first OS/2 rpm
 
