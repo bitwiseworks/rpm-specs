@@ -1,13 +1,13 @@
 %global modname lxml
 
 Name:           python-%{modname}
-Version:        4.4.1
+Version:        5.0.2
 Release:        1%{?dist}
 Summary:        XML processing library combining libxml2/libxslt with the ElementTree API
 
 License:        BSD
 URL:            https://github.com/lxml/lxml
-Source0:        https://lxml.de/files/%{modname}-%{version}.tar
+Source0:        https://lxml.de/files/%{modname}-%{version}.tgz
 %if 0%{?os2_version}
 Vendor:         bww bitwise works GmbH
 %endif
@@ -80,18 +80,22 @@ env WITH_CYTHON=true %py3_build
 %endif
 
 %files -n python2-%{modname}
-%license doc/licenses/ZopePublicLicense.txt LICENSES.txt
+%license doc/licenses/BSD.txt doc/licenses/elementtree.txt
 %doc README.rst src/lxml/isoschematron/resources/xsl/iso-schematron-xslt1/readme.txt
 %{python2_sitearch}/%{modname}/
 %{python2_sitearch}/%{modname}-*.egg-info/
 
 %files -n python3-%{modname}
-%license doc/licenses/ZopePublicLicense.txt LICENSES.txt
+%license doc/licenses/BSD.txt doc/licenses/elementtree.txt
 %doc README.rst src/lxml/isoschematron/resources/xsl/iso-schematron-xslt1/readme.txt
 %{python3_sitearch}/%{modname}/
 %{python3_sitearch}/%{modname}-*.egg-info/
 
 %changelog
+* Tue May 13 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 5.0.2-1
+- update to version 5.0.2
+- rebuild with python 3.13
+
 * Tue Jan 18 2022 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.4.1-1
 - update to version 4.4.1
 - resync with fedora spec
