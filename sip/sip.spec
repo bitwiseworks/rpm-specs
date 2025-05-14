@@ -51,7 +51,7 @@
 Summary: SIP - Python/C++ Bindings Generator
 Name: sip
 Version: 4.19.25
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 # sipgen/parser.{c.h} is GPLv3+ with exceptions (bison)
 License: GPLv2 or GPLv3 and (GPLv3+ with exceptions)
@@ -60,7 +60,7 @@ Url: https://riverbankcomputing.com/software/sip/intro
 Source0: https://riverbankcomputing.com/static/Downloads/sip/%{version}/sip-%{version}%{?snap:.%{snap}}.tar.gz
 %else
 Vendor: bww bitwise works GmbH
-%scm_source github http://github.com/bitwiseworks/sip-os2 v%{version}-os2
+%scm_source github http://github.com/bitwiseworks/sip-os2 v%{version}-os2-1
 %endif
 
 Source10: sip-wrapper.sh
@@ -138,7 +138,7 @@ Provides: python2-sip-api(%{_sip_api_major})%{?_isa} = %{_sip_api}
 %package -n python2-sip-devel
 Summary: Files needed to generate Python bindings for any C++ class library
 Requires: sip = %{version}-%{release}
-#Requires: python2-sip%{?_isa} = %{version}-%{release}
+Requires: python2-sip = %{version}-%{release}
 BuildRequires: python2-devel
 Requires:      python2-devel
 # Remove before F30
@@ -187,7 +187,7 @@ This is the Python 3 build of SIP.
 %package -n python%{python3_pkgversion}-sip-devel
 Summary: Files needed to generate Python bindings for any C++ class library
 Requires: sip = %{version}-%{release}
-#Requires: python3-sip%{?_isa} = %{version}-%{release}
+Requires: python3-sip = %{version}-%{release}
 BuildRequires: python%{python3_pkgversion}-devel
 Requires:      python%{python3_pkgversion}-devel
 %description -n python%{python3_pkgversion}-sip-devel
@@ -265,11 +265,10 @@ cd python2
   -b %{_bindir} -d %{python2_sitearch} -e %{_includedir}/python%{python2_version} \
   CFLAGS+="%{optflags}" CXXFLAGS+="%{optflags}" LFLAGS+="%{?__global_ldflags}"
 
-%if !0%{?os2_version}
 %make_build
+%if !0%{?os2_version}
 popd
 %else
-make %{?_smp_mflags}
 cd ..
 %endif
 %endif
@@ -286,11 +285,10 @@ cd python2-pyqt4
   -b %{_bindir} -d %{python2_sitearch} -e %{_includedir}/python%{python2_version} \
   CFLAGS+="%{optflags}" CXXFLAGS+="%{optflags}" LFLAGS+="%{?__global_ldflags}"
 
-%if !0%{?os2_version}
 %make_build
+%if !0%{?os2_version}
 popd
 %else
-make %{?_smp_mflags}
 cd ..
 %endif
 
@@ -306,11 +304,10 @@ cd python2-pyqt5
   -b %{_bindir} -d %{python2_sitearch} -e %{_includedir}/python%{python2_version} \
   CFLAGS+="%{optflags}" CXXFLAGS+="%{optflags}" LFLAGS+="%{?__global_ldflags}"
 
-%if !0%{?os2_version}
 %make_build
+%if !0%{?os2_version}
 popd
 %else
-make %{?_smp_mflags}
 cd ..
 %endif
 
@@ -328,11 +325,10 @@ cd python2-wx
   -b %{_bindir} -d %{python2_sitearch} -e %{_includedir}/python%{python2_version} \
   CFLAGS+="%{optflags}" CXXFLAGS+="%{optflags}" LFLAGS+="%{?__global_ldflags}"
 
-%if !0%{?os2_version}
 %make_build
+%if !0%{?os2_version}
 popd
 %else
-make %{?_smp_mflags}
 cd ..
 %endif
 %endif
@@ -352,11 +348,10 @@ cd python3
   -b %{_bindir} -d %{python3_sitearch} -e %{PYINCLUDE} \
   CXXFLAGS+="%{optflags}" CFLAGS+="%{optflags}" LFLAGS+="%{?__global_ldflags}"
 
-%if !0%{?os2_version}
 %make_build
+%if !0%{?os2_version}
 popd
 %else
-make %{?_smp_mflags}
 cd ..
 %endif
 %endif
@@ -373,11 +368,10 @@ cd python3-pyqt4
   -b %{_bindir} -d %{python3_sitearch} -e %{PYINCLUDE} \
   CXXFLAGS+="%{optflags}" CFLAGS+="%{optflags}" LFLAGS+="%{?__global_ldflags}"
 
-%if !0%{?os2_version}
 %make_build
+%if !0%{?os2_version}
 popd
 %else
-make %{?_smp_mflags}
 cd ..
 %endif
 
@@ -394,11 +388,10 @@ cd python3-pyqt5
   -b %{_bindir} -d %{python3_sitearch} -e %{PYINCLUDE} \
   CXXFLAGS+="%{optflags}" CFLAGS+="%{optflags}" LFLAGS+="%{?__global_ldflags}"
 
-%if !0%{?os2_version}
 %make_build
+%if !0%{?os2_version}
 popd
 %else
-make %{?_smp_mflags}
 cd ..
 %endif
 %endif
@@ -417,11 +410,10 @@ cd python3-wx
   -b %{_bindir} -d %{python3_sitearch} -e %{PYINCLUDE} \
   CXXFLAGS+="%{optflags}" CFLAGS+="%{optflags}" LFLAGS+="%{?__global_ldflags}"
 
-%if !0%{?os2_version}
 %make_build
+%if !0%{?os2_version}
 popd
 %else
-make %{?_smp_mflags}
 cd ..
 %endif
 sed -i -e 's|target = siplib|target = sip|g' siplib/siplib.sbf
@@ -627,6 +619,9 @@ cd ..
 
 
 %changelog
+* Wed May 14 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> - 4.19.25-2
+- rebuild with python 3.13
+
 * Thu Jan 27 2022 Silvan Scherrer <silvan.scherrer@aroa.ch> - 4.19.25-1
 - update to version 4.19.25
 - resync with fedora spec
