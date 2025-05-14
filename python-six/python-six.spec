@@ -2,12 +2,12 @@
 
 Name:           python-%{modname}
 Version:        1.10.0
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Python 2 and 3 compatibility utilities
 
 License:        MIT
 URL:            https://pypi.python.org/pypi/six
-Vendor:		bww bitwise works GmbH
+Vendor:         bww bitwise works GmbH
 Source0:        https://files.pythonhosted.org/packages/source/%(n=%{modname}; echo ${n:0:1})/%{modname}/%{modname}-%{version}.tar.gz
 
 BuildArch:	noarch
@@ -37,7 +37,7 @@ Summary:        %{summary}
 %{?system_python_abi}
 %{?python_provide:%python_provide python3-%{modname}}
 BuildRequires:  python3-devel
-#BuildRequires:  python3-setuptools
+BuildRequires:  python3-setuptools
 # Testing
 #BuildRequires:  python3-pytest
 #BuildRequires:  python3-tkinter
@@ -77,6 +77,9 @@ Python 3 version.
 %{python3_sitelib}/__pycache__/%{modname}.*
 
 %changelog
+* Wed May 14 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.10.0-3
+- rebuild with python 3.13
+
 * Tue Jan 11 2022 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.10.0-2
 - clean up spec a bit
 - enable python3 version
