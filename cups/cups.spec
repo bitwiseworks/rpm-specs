@@ -17,7 +17,7 @@ Summary: CUPS printing system
 Name: cups
 Epoch: 1
 Version: 2.2.13
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 License: GPLv2+ and LGPLv2+ with exceptions and AML
 Url: http://www.cups.org
@@ -247,10 +247,13 @@ export LDFLAGS="$LDFLAGS $RPM_OPT_FLAGS"
 	--with-system_groups=admin \
 	--with-domainsocket=/socket/cups.sock \
 	--enable-debug-printfs \
+%if 0%{?os2_version}
+	--disable-dbus \
+%endif
 	localedir=%{_datadir}/locale
 
 # If we got this far, all prerequisite libraries must be here.
-make %{?_smp_mflags}
+make
 
 %install
 make BUILDROOT=%{buildroot} install
@@ -605,6 +608,9 @@ exit 0
 %{_mandir}/man5/ipptoolfile.5.gz
 
 %changelog
+* Wed May 14 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.2.13-2
+- rebuild with latest toolset
+
 * Tue Nov 03 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.2.13-1
 - enable gnutls
 - fix some build breaks due to latest tools
