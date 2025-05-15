@@ -10,12 +10,12 @@
 Summary: HP Linux Imaging and Printing Project
 Name: hplip
 Version: 3.19.12
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv2+ and MIT and BSD and IJG and Public Domain and GPLv2+ with exceptions and ISC
 
 Url: https://developers.hp.com/hp-linux-imaging-and-printing
 Vendor: bww bitwise works GmbH
-%scm_source github  https://github.com/bitwiseworks/%{name}-os2 %{version}-os2
+%scm_source github  https://github.com/bitwiseworks/%{name}-os2 %{version}-os2-1
 
 # @todo: decide if we need that to
 # if we do it as well, also remove the comment in the post section
@@ -151,7 +151,7 @@ sed -i 's|^AM_INIT_AUTOMAKE|AM_INIT_AUTOMAKE([foreign])|g' configure.in
 autoreconf --verbose --force --install
 
 export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
-export LIBS="-lcx"
+export LIBS="-lcx -lpython3.13"
 export VENDOR="%{vendor}"
 
 %configure \
@@ -415,6 +415,9 @@ ldconfig_scriptlets libs
 %config(noreplace) %{_sysconfdir}/sane.d/dll.d/hpaio
 
 %changelog
+* Wed May 14 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.19.12-2
+- rebuild with python 3.13
+
 * Fri Feb 02 2024 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.19.12-1
 - update to version 3.19.12
 
