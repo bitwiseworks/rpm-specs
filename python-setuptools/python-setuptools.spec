@@ -31,7 +31,7 @@
 Name:           python-setuptools
 # When updating, update the bundled libraries versions bellow!
 Version:        74.1.3
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Easily build and distribute Python packages
 # setuptools is MIT
 # autocommand is LGPL-3.0-only
@@ -71,8 +71,7 @@ Patch:          Adjust-the-setup.py-install-deprecation-message.patch
 Patch:          Revert-Always-rewrite-a-Python-shebang-to-python.patch
 %else
 Vendor:         bww bitwise works GmbH
-%scm_source git e:/trees/setuptools/git v7x-os2
-%dnl %scm_source github  https://github.com/bitwiseworks/%{srcname}-os2 v%{version}-os2
+%scm_source github  https://github.com/bitwiseworks/%{srcname}-os2 v%{version}-os2
 %endif
 
 BuildArch:      noarch
@@ -277,6 +276,9 @@ PYTHONPATH=$(pwd) %pytest \
 
 
 %changelog
+* Fri May 16 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 74.1.3-2
+- update to version 74.1.3
+
 * Fri Apr 18 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 74.1.3-1
 - update to version 74.1.3
 
