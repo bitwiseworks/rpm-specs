@@ -44,14 +44,14 @@
 
 ## f29+ no longer using separate sipdir for python3
 %global py3_sipdir %{_datadir}/sip/PyQt4
-#if 0%{?fedora} < 29
-#global py3_sipdir %{_datadir}/python3-sip/PyQt4
-#endif
+%dnl %if 0%{?fedora} < 29
+%dnl %global py3_sipdir %{_datadir}/python3-sip/PyQt4
+%dnl %endif
 
 Summary: Python bindings for Qt4
 Name: 	 PyQt4
 Version: 4.12.3
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 # GPLv2 exceptions(see GPL_EXCEPTIONS*.txt)
 License: (GPLv3 or GPLv2 with exceptions) and BSD
@@ -64,7 +64,7 @@ Source0:  http://sourceforge.net/projects/pyqt/files/PyQt4/PyQt-%{version}/PyQt4
 %endif
 %else
 Vendor: bww bitwise works GmbH
-%scm_source github http://github.com/bitwiseworks/%{name}-os2 v%{version}-os2
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 v%{version}-os2-1
 %endif
 
 Source2: pyuic4.sh
@@ -102,7 +102,7 @@ BuildRequires: pkgconfig(QtXml) pkgconfig(QtXmlPatterns)
 %else
 BuildRequires: libqt4-devel >= 4.7.3
 %endif
-%global sip_ver 4.19.12
+%global sip_ver 4.19.25
 
 %if 0%{?with_python3}
 %if !0%{?os2_version}
@@ -370,13 +370,14 @@ cd os2
   --verbose \
   CFLAGS="%{optflags}" CXXFLAGS="%{optflags}" LFLAGS="%{?__global_ldflags}"
 
-%if !0%{?os2_version}
-%make_build
-popd
-%else
+%if 0%{?os2_version}
 # fix our qt4 make issue
 sed -i -e "s|mkdir -p|\|\| mkdir -p|g" designer/Makefile
-make %{?_smp_mflags}
+%endif
+%make_build
+%if !0%{?os2_version}
+popd
+%else
 cd ..
 %endif
 %endif
@@ -403,13 +404,14 @@ cd os2-python3
   --verbose \
   CFLAGS="%{optflags}" CXXFLAGS="%{optflags}" LFLAGS="%{?__global_ldflags}"
 
-%if !0%{?os2_version}
-%make_build
-popd
-%else
+%if 0%{?os2_version}
 # fix our qt4 make issue
 sed -i -e "s|mkdir -p|\|\| mkdir -p|g" designer/Makefile
-make %{?_smp_mflags}
+%endif
+%make_build
+%if !0%{?os2_version}
+popd
+%else
 cd ..
 %endif
 %endif # with_python3
@@ -663,6 +665,9 @@ diff -u ./sip/QtGui/opengl_types.sip.orig \
 
 
 %changelog
+* Wed May 14 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> - 4.12.3-2
+- rebuild with python 3.13
+
 * Fri Feb 04 2022 Silvan Scherrer <silvan.scherrer@aroa.ch> - 4.12.3-1
 - update to latest PyQt4 version
 - rebuild with later sip
