@@ -33,7 +33,7 @@
 
 %global rpmver 4.15.1
 #global snapver rc1
-%global rel 3
+%global rel 4
 
 %global srcver %{version}%{?snapver:-%{snapver}}
 %global srcdir %{?snapver:testing}%{!?snapver:%{name}-%(echo %{version} | cut -d'.' -f1-2).x}
@@ -71,7 +71,7 @@ Patch906: rpm-4.7.1-geode-i686.patch
 Patch907: rpm-4.15.x-ldflags.patch
 %else
 Vendor: bww bitwise works GmbH
-%scm_source github http://github.com/bitwiseworks/%{name}-os2new v%{version}-os2-1
+%scm_source github http://github.com/bitwiseworks/%{name}-os2new v%{version}-os2-2
 %endif
 
 # Partially GPL/LGPL dual-licensed and some bits with BSD
@@ -805,6 +805,9 @@ make check || (cat tests/rpmtests.log; exit 0)
 %doc doc/librpm/html/*
 
 %changelog
+* Fri Mai 16 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.15.1-4
+- fix a brp-compression issue
+
 * Mon Mai 05 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.15.1-3
 - fix a annoying macro parameter bug
 - fix a forgotten change
