@@ -17,7 +17,7 @@ URL: https://www.python.org/
 #global prerel ...
 %global upstream_version %{general_version}%{?prerel}
 Version: %{general_version}%{?prerel:~%{prerel}}
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: Python-2.0.1
 
 
@@ -436,8 +436,7 @@ Patch251: 00251-change-user-install-location.patch
 #     https://github.com/fedora-python/cpython
 %else
 Vendor: bww bitwise works GmbH
-%dnl %scm_source github http://github.com/bitwiseworks/python-os2 v%{version}-os2
-%scm_source git e:/trees/python/git master
+%scm_source github http://github.com/bitwiseworks/python-os2 v%{version}-os2
 %endif
 
 
@@ -677,6 +676,7 @@ Requires: (python3-rpm-generators if rpm-build)
 Conflicts: %{pkgname} < %{version}-%{release}
 
 %if 0%{?os2_version} && %{with main_python}
+Requires:  python3-rpm-generators
 Provides:  python-devel = %{version}-%{release}
 Obsoletes: python-devel < %{pybasever}
 %endif
@@ -1301,11 +1301,7 @@ LD_LIBRARY_PATH=./build/optimized ./build/optimized/python \
 %else
 BEGINLIBPATH=./build/optimized ./build/optimized/python \
 %endif
-%if !0%{?os2_version}
   %{_rpmconfigdir}/redhat/pathfix.py \
-%else
-  %{_bindir}/pathfix.py \
-%endif
   -i "%{_bindir}/python%{pybasever}" -pn \
   %{buildroot} \
   %{buildroot}%{_bindir}/*%{pybasever}.py \
@@ -2081,6 +2077,9 @@ CheckPython freethreading
 # ======================================================
 
 %changelog
+* Fri May 16 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.13.2-2
+- fixed some issues 
+
 * Mon May 05 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.13.2-1
 - update to version 3.13.2
 
