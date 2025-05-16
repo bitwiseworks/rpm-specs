@@ -277,7 +277,7 @@ PYTHONPATH=$(pwd) %pytest \
 
 %changelog
 * Fri May 16 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 74.1.3-2
-- update to version 74.1.3
+- fixed some issues in the distutils part
 
 * Fri Apr 18 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 74.1.3-1
 - update to version 74.1.3
