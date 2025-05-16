@@ -1,22 +1,3 @@
-# Define the Python interpreter paths in the SRPM macros so that
-# - they can be used in Build/Requires
-# - they can be used in non-Python packages where requiring pythonX-devel would
-#   be an overkill
-
-# use the underscored macros to redefine the behavior of %%python3_version etc.
-%__python2 /@unixroot/usr/bin/python2
-%__python3 /@unixroot/usr/bin/python3
-
-# use the non-underscored macros to refer to Python in spec, etc.
-%python2 %__python2
-%python3 %__python3
-
-# See https://fedoraproject.org/wiki/Changes/PythonMacroError
-%__python %{error:attempt to use unversioned python, define %%__python to %{__python2} or %{__python3} explicitly}
-
-# Users can use %%python only if they redefined %%__python (e.g. to %%__python3)
-%python %__python
-
 # There are multiple Python 3 versions packaged, but only one can be the "main" version
 # That means that it owns the "python3" namespace:
 #     - python3 package name
@@ -36,22 +17,86 @@
 # There are two macros:
 #
 # This always contains the major.minor version (with dots), default for %%python3_version.
-%__default_python3_version 3.9
+%__default_python3_version 3.13
 #
 # The pkgname version that determines the alternative provide name (e.g. python3.9-foo),
 # set to the same as above, but historically hasn't included the dot.
 # This is left intentionally a separate macro, in case the naming convention ever changes.
 %__default_python3_pkgversion %__default_python3_version
 
-# python3_pkgversion specifies the version of Python 3 in the distro.  It can be
-# a specific version (e.g. 34 in Fedora EPEL7)
+# python3_pkgversion specifies the version of Python 3 in the distro.
+# For Fedora, this is usually just "3".
+# It can be a specific version distro-wide (e.g. "36" in EPEL7).
+# Alternatively, it can be overridden in spec (e.g. to "3.8") when building for alternate Python stacks.
 %python3_pkgversion 3
 
-# Set to /bin/true to avoid %ifdefs and %{? in specfiles
-%__python3_other /@unixroot/usr/bin/true
-%py3_other_build /@unixroot/usr/bin/true
-%py3_other_install /@unixroot/usr/bin/true
+# Define the Python interpreter paths in the SRPM macros so that
+# - they can be used in Build/Requires
+# - they can be used in non-Python packages where requiring pythonX-devel would
+#   be an overkill
 
+# use the underscored macros to redefine the behavior of %%python3_version etc.
+%__python2 /@unixroot/usr/bin/python2
+%__python3 /@unixroot/usr/bin/python%{python3_pkgversion}
+
+# use the non-underscored macros to refer to Python in spec, etc.
+%python2 %__python2
+%python3 %__python3
+
+# See https://fedoraproject.org/wiki/Changes/PythonMacroError
+%__python %{error:attempt to use unversioned python, define %%__python to %{__python2} or %{__python3} explicitly}
+
+# Users can use %%python only if they redefined %%__python (e.g. to %%__python3)
+%python %__python
+
+# Define where Python wheels will be stored and the prefix of -wheel packages
+# - In Fedora we want wheel subpackages named e.g. `python-pip-wheel` that
+#   install packages into `/usr/share/python-wheels`. Both names are not
+#   versioned, because they're used by all Python 3 stacks.
+# - In RHEL we want wheel packages named e.g. `python3-pip-wheel` and
+#   `python3.11-pip-wheel` that install packages into similarly versioned
+#   locations. We want each Python stack in RHEL to have their own wheels,
+#   because the main python3 wheels (which we can't upgrade) will likely be
+#   quite old by the time we're adding new alternate Python stacks.
+# - In ELN we want to follow Fedora, because builds for ELN and Fedora rawhide
+#   need to be interoperable.
+%python_wheel_pkg_prefix python%{?rhel:%{!?eln:%{python3_pkgversion}}}
+%python_wheel_dir %{_datadir}/%{python_wheel_pkg_prefix}-wheels
+
+
+### BRP scripts (and related macros)
+
+## Modifies installation method in .dist-info/INSTALLER file to rpm
+%python_rpm_in_distinfo 1
+## Automatically compile python files
+%py_auto_byte_compile 1
+## Should python bytecompilation errors terminate a build?
+%_python_bytecompile_errors_terminate_build 1
+## Should python bytecompilation compile outside python specific directories?
+## This always causes errors when enabled, see https://fedoraproject.org/wiki/Changes/No_more_automagic_Python_bytecompilation_phase_3
+%_python_bytecompile_extra 0
+## Helper macro to unset $SOURCE_DATE_EPOCH if %%clamp_mtime_to_source_date_epoch is not set
+## https://fedoraproject.org/wiki/Changes/ReproducibleBuildsClampMtimes#Python_bytecode
+%__env_unset_source_date_epoch_if_not_clamp_mtime %[0%{?clamp_mtime_to_source_date_epoch} == 0 ? "env -u SOURCE_DATE_EPOCH" : "env"]
+
+## The individual BRP scripts
+%__brp_python_rpm_in_distinfo %{_rpmconfigdir}/redhat/brp-python-rpm-in-distinfo
+%__brp_python_bytecompile %{__env_unset_source_date_epoch_if_not_clamp_mtime} %{_rpmconfigdir}/redhat/brp-python-bytecompile "" "%{?_python_bytecompile_errors_terminate_build}" "%{?_python_bytecompile_extra}" "%{?_smp_build_ncpus:-j%{_smp_build_ncpus}}"
+%__brp_fix_pyc_reproducibility %{_rpmconfigdir}/redhat/brp-fix-pyc-reproducibility
+%__brp_python_hardlink %{_rpmconfigdir}/redhat/brp-python-hardlink
+
+## This macro is included in redhat-rpm-config's %%__os_install_post
+# Note that the order matters:
+#  1. brp-python-rpm-in-distinfo modifies .dist-info/INSTALLER file
+#  2. brp-python-bytecompile can create (or replace) pyc files
+#  3. brp-fix-pyc-reproducibility can modify the pyc files from above
+#  4. brp-python-hardlink de-duplicates identical pyc files
+%__os_install_post_python \
+    %{?python_rpm_in_distinfo:%{?__brp_python_rpm_in_distinfo}} \
+    %{?py_auto_byte_compile:%{?__brp_python_bytecompile}} \
+    %{?py_reproducible_pyc_path:%{?__brp_fix_pyc_reproducibility} "%{py_reproducible_pyc_path}"} \
+    %{?__brp_python_hardlink} \
+%{nil}
 
 
 # === Macros for Build/Requires tags using Python dist tags ===
@@ -68,7 +113,7 @@
 
 # Creates Python 2 dist tag(s) after converting names to canonical format
 #   Needs to first put all arguments into a list, because invoking a different
-#   macro (%py_dist_name) overwrites them
+#   macro (%%py_dist_name) overwrites them
 %py2_dist() %{lua:\
         args = {}\
         arg = 1\
@@ -88,7 +133,7 @@
 
 # Creates Python 3 dist tag(s) after converting names to canonical format
 #   Needs to first put all arguments into a list, because invoking a different
-#   macro (%py_dist_name) overwrites them
+#   macro (%%py_dist_name) overwrites them
 %py3_dist() %{lua:\
         python3_pkgversion = rpm.expand("%python3_pkgversion");\
         args = {}\
@@ -110,12 +155,12 @@
 # Macro to replace overly complicated references to PyPI source files.
 # Expands to the pythonhosted URL for a package
 # Accepts zero to three arguments:
-# 1:  The PyPI project name, defaulting to %srcname if it is defined, then
-#     %pypi_name if it is defined, then just %name.
-# 2:  The PYPI version, defaulting to %version with tildes stripped.
+# 1:  The PyPI project name, defaulting to %%srcname if it is defined, then
+#     %%pypi_name if it is defined, then just %%name.
+# 2:  The PYPI version, defaulting to %%version with tildes stripped.
 # 3:  The file extension, defaulting to "tar.gz".  (A period will be added
 #     automatically.)
-# Requires %__pypi_url and %__pypi_default_extension to be defined.
+# Requires %%__pypi_url and %%__pypi_default_extension to be defined.
 %__pypi_url https://files.pythonhosted.org/packages/source/
 %__pypi_default_extension tar.gz
 
@@ -154,6 +199,7 @@
 
 %py_provides() %{lua:
     local python = require 'fedora.srpm.python'
+    local rhel = rpm.expand('%{?rhel}')
     local name = rpm.expand('%1')
     if name == '%1' then
         rpm.expand('%{error:%%py_provides requires at least 1 argument, the name to provide}')
@@ -167,17 +213,36 @@
     for i, provide in ipairs(provides) do
         print('Provides: ' .. provide .. '\\n')
     end
+    -- We only generate these Obsoletes on CentOS/RHEL to provide clean upgrade
+    -- path, e.g. python3-foo obsoletes python3.9-foo from previous RHEL.
+    -- In Fedora this is not needed as we don't ship ecosystem packages
+    -- for alternative Python interpreters.
+    if rhel ~= '' then
+        -- Create Obsoletes only if the name does not end in a parenthesis,
+        -- as Obsoletes can't include parentheses.
+        -- This most commonly happens when the name contains an isa.
+        if (string.sub(name, "-1") ~= ")") then
+            local obsoletes = python.python_altobsoletes(name, evr)
+            for i, obsolete in ipairs(obsoletes) do
+                print('Obsoletes: ' .. obsolete .. '\\n')
+            end
+        end
+    end
 }
 
-%python_extras_subpkg(n:i:f:F) %{expand:%{lua:
+%python_extras_subpkg(n:i:f:FaA) %{expand:%{lua:
     local option_n = '-n (name of the base package)'
     local option_i = '-i (buildroot path to metadata)'
     local option_f = '-f (builddir path to a filelist)'
     local option_F = '-F (skip %%files section)'
+    local option_a = '-a (insert BuildArch: noarch)'
+    local option_A = '-A (do not insert BuildArch: noarch (default))'
     local value_n = rpm.expand('%{-n*}')
     local value_i = rpm.expand('%{-i*}')
     local value_f = rpm.expand('%{-f*}')
     local value_F = rpm.expand('%{-F}')
+    local value_a = rpm.expand('%{-a}')
+    local value_A = rpm.expand('%{-A}')
     local args = rpm.expand('%{*}')
     if value_n == '' then
         rpm.expand('%{error:%%%0: missing option ' .. option_n .. '}')
@@ -193,6 +258,9 @@
     end
     if value_f ~= '' and value_F ~= '' then
         rpm.expand('%{error:%%%0: simultaneous ' .. option_f .. ' and ' .. option_F .. ' options are not possible}')
+    end
+    if value_a ~= '' and value_A ~= '' then
+        rpm.expand('%{error:%%%0: simultaneous ' .. option_a .. ' and ' .. option_A .. ' options are not possible}')
     end
     if args == '' then
         rpm.expand('%{error:%%%0 requires at least one argument with "extras" name}')
@@ -221,7 +289,11 @@
         elseif value_f ~= '' then
             files = '%files -n ' .. rpmname .. ' -f ' .. value_f
         end
-        for i, line in ipairs({pkgdef, summary, requires, description, files, ''}) do
+        local tags = summary .. '\\\n' .. requires
+        if value_a ~= '' then
+            tags = tags .. '\\\nBuildArch: noarch'
+        end
+        for i, line in ipairs({pkgdef, tags, description, files, ''}) do
             print(line .. '\\\n')
         end
     end
