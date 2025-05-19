@@ -35,7 +35,7 @@
 Summary:        Creates a common metadata repository
 Name:           createrepo_c
 Version:        1.2.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 License:        GPL-2.0-or-later
 %if !0%{?os2_version}
 URL:            https://github.com/rpm-software-management/createrepo_c
@@ -287,6 +287,9 @@ ln -sr %{buildroot}%{_bindir}/modifyrepo_c.exe %{buildroot}%{_bindir}/modifyrepo
 %{python3_sitearch}/%{name}-%{version}-py%{python3_version}.egg-info
 
 %changelog
+* Fri May 16 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.2.1-2
+- rebuild with python 3.13
+
 * Wed Apr 30 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.2.1-1
 - update to version 1.2.1
 
