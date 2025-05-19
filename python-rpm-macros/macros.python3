@@ -1,35 +1,35 @@
 # nb: $RPM_BUILD_ROOT is not set when the macros are expanded (at spec parse time)
 #     so we set it manually (to empty string), making our Python prefer the correct install scheme location
 # platbase/base is explicitly set to %%{_prefix} to support custom values, such as /app for flatpaks
-%__python3_sitelib %(RPM_BUILD_ROOT= %{__python3} -Esc "import sysconfig; print(sysconfig.get_path('purelib', vars={'platbase': '%{_prefix}', 'base': '%{_prefix}'}))")
-%python3_sitelib %{_python_memoize -n __python3_sitelib -k __python3}
+%python3_sitelib %(RPM_BUILD_ROOT= %{__python3} -Esc "import sysconfig; print(sysconfig.get_path('purelib', vars={'platbase': '%{_prefix}', 'base': '%{_prefix}'}))")
+# %%python3_sitelib %%{_python_memoize -n __python3_sitelib -k __python3}
 
-%__python3_sitearch %(RPM_BUILD_ROOT= %{__python3} -Esc "import sysconfig; print(sysconfig.get_path('platlib', vars={'platbase': '%{_prefix}', 'base': '%{_prefix}'}))")
-%python3_sitearch %{_python_memoize -n __python3_sitearch -k __python3}
+%python3_sitearch %(RPM_BUILD_ROOT= %{__python3} -Esc "import sysconfig; print(sysconfig.get_path('platlib', vars={'platbase': '%{_prefix}', 'base': '%{_prefix}'}))")
+# %%python3_sitearch %%{_python_memoize -n __python3_sitearch -k __python3}
 
-%__python3_version %(RPM_BUILD_ROOT= %{__python3} -Esc "import sys; sys.stdout.write('{0.major}.{0.minor}'.format(sys.version_info))")
-%python3_version %{_python_memoize -n __python3_version -k __python3}
+%python3_version %(RPM_BUILD_ROOT= %{__python3} -Esc "import sys; sys.stdout.write('{0.major}.{0.minor}'.format(sys.version_info))")
+# %%python3_version %%{_python_memoize -n __python3_version -k __python3}
 
-%__python3_version_nodots %(RPM_BUILD_ROOT= %{__python3} -Esc "import sys; sys.stdout.write('{0.major}{0.minor}'.format(sys.version_info))")
-%python3_version_nodots %{_python_memoize -n __python3_version_nodots -k __python3}
+%python3_version_nodots %(RPM_BUILD_ROOT= %{__python3} -Esc "import sys; sys.stdout.write('{0.major}{0.minor}'.format(sys.version_info))")
+# %%python3_version_nodots %%{_python_memoize -n __python3_version_nodots -k __python3}
 
-%__python3_platform %(RPM_BUILD_ROOT= %{__python3} -Esc "import sysconfig; print(sysconfig.get_platform())")
-%python3_platform %{_python_memoize -n __python3_platform -k __python3}
+%python3_platform %(RPM_BUILD_ROOT= %{__python3} -Esc "import sysconfig; print(sysconfig.get_platform())")
+# %%python3_platform %%{_python_memoize -n __python3_platform -k __python3}
 
-%__python3_platform_triplet %(RPM_BUILD_ROOT= %{__python3} -Esc "import sysconfig; print(sysconfig.get_config_var('MULTIARCH'))")
-%python3_platform_triplet %{_python_memoize -n __python3_platform_triplet -k __python3}
+%python3_platform_triplet %(RPM_BUILD_ROOT= %{__python3} -Esc "import sysconfig; print(sysconfig.get_config_var('MULTIARCH'))")
+# %%python3_platform_triplet %%{_python_memoize -n __python3_platform_triplet -k __python3}
 
-%__python3_ext_suffix %(RPM_BUILD_ROOT= %{__python3} -Esc "import sysconfig; print(sysconfig.get_config_var('EXT_SUFFIX'))")
-%python3_ext_suffix %{_python_memoize -n __python3_ext_suffix -k __python3}
+%python3_ext_suffix %(RPM_BUILD_ROOT= %{__python3} -Esc "import sysconfig; print(sysconfig.get_config_var('EXT_SUFFIX'))")
+# %%python3_ext_suffix %%{_python_memoize -n __python3_ext_suffix -k __python3}
 
-%__python3_cache_tag %(RPM_BUILD_ROOT= %{__python3} -Esc "import sys; print(sys.implementation.cache_tag)")
-%python3_cache_tag %{_python_memoize -n __python3_cache_tag -k __python3}
+%python3_cache_tag %(RPM_BUILD_ROOT= %{__python3} -Esc "import sys; print(sys.implementation.cache_tag)")
+# %%python3_cache_tag %%{_python_memoize -n __python3_cache_tag -k __python3}
 
 %py3dir %{_builddir}/python3-%{name}-%{version}-%{release}
 
 %_py3_shebang_s s
-%__py3_shebang_P %(RPM_BUILD_ROOT= %{__python3} -Ic "import sys; print('P' if hasattr(sys.flags, 'safe_path') else '')")
-%_py3_shebang_P %{_python_memoize -n __py3_shebang_P -k __python3}
+%_py3_shebang_P %(RPM_BUILD_ROOT= %{__python3} -Ic "import sys; print('P' if hasattr(sys.flags, 'safe_path') else '')")
+# %%_py3_shebang_P %%{_python_memoize -n __py3_shebang_P -k __python3}
 %py3_shbang_opts -%{?_py3_shebang_s}%{?_py3_shebang_P}
 %py3_shbang_opts_nodash %(opts=%{py3_shbang_opts}; echo ${opts#-})
 %py3_shebang_flags %(opts=%{py3_shbang_opts}; echo ${opts#-})

@@ -57,7 +57,7 @@ elseif posix.stat('macros.python-srpm') then
 end
 }
 Version:        %{__default_python3_version}
-Release:        1%{?dist}
+Release:        2%{?dist}
 
 BuildArch:      noarch
 
@@ -171,6 +171,9 @@ grep -E '^#[^%%]*%%[^%%]' %{buildroot}%{rpmmacrodir}/macros.* && exit 1 || true
 
 
 %changelog
+* Mon May 05 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.13-2
+- we can't use opt in lua scripts, as this was introduced in rpm >= 4.17
+
 * Mon May 05 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.13-1
 - update to latest version
 

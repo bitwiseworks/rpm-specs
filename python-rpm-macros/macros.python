@@ -28,34 +28,34 @@ print(_python_macro_cache[cache_key][name])
 # nb: $RPM_BUILD_ROOT is not set when the macros are expanded (at spec parse time)
 #     so we set it manually (to empty string), making our Python prefer the correct install scheme location
 # platbase/base is explicitly set to %%{_prefix} to support custom values, such as /app for flatpaks
-%__python_sitelib %(RPM_BUILD_ROOT= %{__python} -Esc "import sysconfig; print(sysconfig.get_path('purelib', vars={'platbase': '%{_prefix}', 'base': '%{_prefix}'}))")
-%python_sitelib %{_python_memoize -n __python_sitelib -k __python}
+%python_sitelib %(RPM_BUILD_ROOT= %{__python} -Esc "import sysconfig; print(sysconfig.get_path('purelib', vars={'platbase': '%{_prefix}', 'base': '%{_prefix}'}))")
+# %%python_sitelib %%{_python_memoize -n __python_sitelib -k __python}
 
-%__python_sitearch %(RPM_BUILD_ROOT= %{__python} -Esc "import sysconfig; print(sysconfig.get_path('platlib', vars={'platbase': '%{_prefix}', 'base': '%{_prefix}'}))")
-%python_sitearch %{_python_memoize -n __python_sitearch -k __python}
+%python_sitearch %(RPM_BUILD_ROOT= %{__python} -Esc "import sysconfig; print(sysconfig.get_path('platlib', vars={'platbase': '%{_prefix}', 'base': '%{_prefix}'}))")
+# %%python_sitearch %%{_python_memoize -n __python_sitearch -k __python}
 
-%__python_version %(RPM_BUILD_ROOT= %{__python} -Esc "import sys; sys.stdout.write('{0.major}.{0.minor}'.format(sys.version_info))")
-%python_version %{_python_memoize -n __python_version -k __python}
+%python_version %(RPM_BUILD_ROOT= %{__python} -Esc "import sys; sys.stdout.write('{0.major}.{0.minor}'.format(sys.version_info))")
+# %%python_version %%{_python_memoize -n __python_version -k __python}
 
-%__python_version_nodots %(RPM_BUILD_ROOT= %{__python} -Esc "import sys; sys.stdout.write('{0.major}{0.minor}'.format(sys.version_info))")
-%python_version_nodots %{_python_memoize -n __python_version_nodots -k __python}
+%python_version_nodots %(RPM_BUILD_ROOT= %{__python} -Esc "import sys; sys.stdout.write('{0.major}{0.minor}'.format(sys.version_info))")
+# %%python_version_nodots %%{_python_memoize -n __python_version_nodots -k __python}
 
-%__python_platform %(RPM_BUILD_ROOT= %{__python} -Esc "import sysconfig; print(sysconfig.get_platform())")
-%python_platform %{_python_memoize -n __python_platform -k __python}
+%python_platform %(RPM_BUILD_ROOT= %{__python} -Esc "import sysconfig; print(sysconfig.get_platform())")
+# %%python_platform %%{_python_memoize -n __python_platform -k __python}
 
-%__python_platform_triplet %(RPM_BUILD_ROOT= %{__python} -Esc "import sysconfig; print(sysconfig.get_config_var('MULTIARCH'))")
-%python_platform_triplet %{_python_memoize -n __python_platform_triplet -k __python}
+%python_platform_triplet %(RPM_BUILD_ROOT= %{__python} -Esc "import sysconfig; print(sysconfig.get_config_var('MULTIARCH'))")
+# %%python_platform_triplet %%{_python_memoize -n __python_platform_triplet -k __python}
 
-%__python_ext_suffix %(RPM_BUILD_ROOT= %{__python} -Esc "import sysconfig; print(sysconfig.get_config_var('EXT_SUFFIX'))")
-%python_ext_suffix %{_python_memoize -n __python_ext_suffix -k __python}
+%python_ext_suffix %(RPM_BUILD_ROOT= %{__python} -Esc "import sysconfig; print(sysconfig.get_config_var('EXT_SUFFIX'))")
+# %%python_ext_suffix %%{_python_memoize -n __python_ext_suffix -k __python}
 
-%__python_cache_tag %(RPM_BUILD_ROOT= %{__python} -Esc "import sys; print(sys.implementation.cache_tag)")
-%python_cache_tag %{_python_memoize -n __python_cache_tag -k __python}
+%python_cache_tag %(RPM_BUILD_ROOT= %{__python} -Esc "import sys; print(sys.implementation.cache_tag)")
+# %%python_cache_tag %%{_python_memoize -n __python_cache_tag -k __python}
 
 %py_setup setup.py
 %_py_shebang_s s
-%__py_shebang_P %(RPM_BUILD_ROOT= %{__python} -Esc "import sys; print('P' if hasattr(sys.flags, 'safe_path') else '')")
-%_py_shebang_P %{_python_memoize -n __py_shebang_P -k __python}
+%_py_shebang_P %(RPM_BUILD_ROOT= %{__python} -Esc "import sys; print('P' if hasattr(sys.flags, 'safe_path') else '')")
+# %%_py_shebang_P %%{_python_memoize -n __py_shebang_P -k __python}
 %py_shbang_opts -%{?_py_shebang_s}%{?_py_shebang_P}
 %py_shbang_opts_nodash %(opts=%{py_shbang_opts}; echo ${opts#-})
 %py_shebang_flags %(opts=%{py_shbang_opts}; echo ${opts#-})
