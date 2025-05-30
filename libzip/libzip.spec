@@ -1,8 +1,8 @@
 %bcond_without tests
 
 Name:    libzip
-Version: 1.11.3
-Release: 2%{?dist}
+Version: 1.11.4
+Release: 1%{?dist}
 Summary: C library for reading, creating, and modifying zip archives
 
 License: BSD-3-Clause
@@ -138,8 +138,14 @@ sed -e '/clone-fs-/d' \
 %{_mandir}/man3/libzip*
 %{_mandir}/man3/zip*
 %{_mandir}/man3/ZIP*
+%{_mandir}/man5/zip*
+
 
 %changelog
+* Thu May 29 2025 Elbert Pol <elbert.pol@gmail.com> - 1.11.4-1
+- Updated to latest version
+- Sync with latest fedora spec
+
 * Tue Feb 25 2025 Elbert Pol <elbert.pol@gmail.com> - 1.11.3-2
 - Fix a macros.dist error
 
