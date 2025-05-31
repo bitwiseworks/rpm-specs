@@ -1,8 +1,8 @@
-%global soversion 9
+%global soversion 10
 
 Name:           tinyxml2
-Version:        10.0.0
-Release:        2%{?dist}
+Version:        11.0.0
+Release:        1%{?dist}
 Summary:        Simple, small and efficient C++ XML parser
 
 License:        zlib
@@ -97,6 +97,9 @@ export BEGINLIBPATH=%{_builddir}/%{buildsubdir}/pc-os2-emx-build
 %{_libdir}/cmake/%{name}/
 
 %changelog
+* Sat May 31 2025 Elbert Pol <elbert.pol@gmail.com> - 11.0.0-1
+- Updated to latest version
+
 * Sat Feb 24 2024 Elbert Pol <elbert.pol@gmail.com> - 10.0.0-2
 - Build with the right version, and not with master
 - Add a defination for that we dont have dllimport
