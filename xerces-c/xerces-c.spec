@@ -14,7 +14,7 @@ recommendation and associated standards: XML 1.0 (Third Edition), XML 1.1
 Level 3.0 Load and Save, SAX 1.0 and SAX 2.0, Namespaces in XML, Namespaces in
 XML 1.1, XML Schema, XML Inclusions).}
 
-Name:		xerces-c
+Name:     xerces-c
 Version:	3.3.0
 Release:  1%{?dist}
 Summary:	Validating XML Parser
@@ -25,7 +25,7 @@ URL:		https://xerces.apache.org/xerces-c/
 Source0:	https://downloads.apache.org/xerces/c/3/sources/xerces-c-%{version}.tar.xz
 Source1:	https://downloads.apache.org/xerces/c/3/sources/xerces-c-%{version}.tar.xz.asc
 Source2:	https://downloads.apache.org/xerces/c/KEYS
-Patch1:		xerces-c_mingw.patch
+Patch1:   xerces-c_mingw.patch
 %else
 Vendor:   bww bitwise works GmbH
 %scm_source github http://github.com/bitwiseworks/%{name}-os2 v%{version}-os2
