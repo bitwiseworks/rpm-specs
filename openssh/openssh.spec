@@ -62,7 +62,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %global openssh_ver 8.4p1
-%global openssh_rel 4
+%global openssh_rel 5
 %global pam_ssh_agent_ver 0.10.4
 %global pam_ssh_agent_rel 1
 
@@ -217,7 +217,7 @@ Patch969: openssh-8.4p1-debian-compat.patch
 %else
 Vendor: bww bitwise works GmbH
 
-#scm_source github http://github.com/bitwiseworks/%{name}-os2 master-os2
+#scm_source github http://github.com/bitwiseworks/%{name}-portable V_8_4_P1-os2
 %scm_source git e:/Trees/%{name}/git master-os2
 %endif
 
@@ -241,7 +241,7 @@ BuildRequires: audit-libs-devel >= 2.0.5
 BuildRequires: util-linux, groff
 BuildRequires: pam-devel
 %else
-BuildRequires: autoconf, automake, perl, perl-generators, zlib-devel
+BuildRequires: autoconf, automake, perl, zlib-devel
 BuildRequires: groff
 %endif
 BuildRequires: openssl-devel >= 0.9.8j
@@ -458,7 +458,7 @@ popd
 
 autoreconf -fvi
 # we create a dummy ChangeLog here
-echo "please visit https://github.com/bitwiseworks/openssh-os2" > ChangeLog
+echo "please visit https://github.com/bitwiseworks/openssh-portable" > ChangeLog
 %endif
 
 %build
@@ -831,7 +831,10 @@ test -f %{sysconfig_anaconda} && \
 %endif
 
 %changelog
-* Mon Feb 01 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 8.4p1-1
+* Wed Aug 06 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 8.4p1-5
+- update to vendor version 8.4
+
+* Mon Feb 01 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 8.4p1-4
 - update to vendor version 8.4
 
 * Tue Nov 27 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> 7.7p1-4
