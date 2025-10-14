@@ -1,5 +1,5 @@
 Name:       whois       
-Version:    5.6.4
+Version:    5.6.5
 Release:    1%{?dist}
 Summary:    Improved WHOIS client
 Group:      Applications/Internet
@@ -71,6 +71,9 @@ install -p -m644 -D %{cfgfile} $RPM_BUILD_ROOT%{_sysconfdir}/%{cfgfile}
 %{_mandir}/man5/%{cfgfile}.5.gz
 
 %changelog
+* Thu Oct 14 2025 Elbert Pol <elbert.pol@gmail.com> - 5.6.5-1
+- Update to latest version
+
 * Sun Aug 03 2025 Elbert Pol <elbert.pol@gmail.com> - 5.6.4-1
 - Updated to latest version
 
