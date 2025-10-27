@@ -1,13 +1,31 @@
+%bcond_with bootstrap
+
+%global multilib_arches %{ix86} x86_64
+
 Name:		libffi
-Version:	3.0.11
+Version:	3.4.2
 Release:	1%{?dist}
 Summary:	A portable foreign function interface library
-
-Group:		System Environment/Libraries
-License:	BSD
+License:	MIT
 URL:		http://sourceware.org/libffi
-Source0:	http://sourceware.org/libffi/libffi-%{version}.tar.gz
-BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+
+%if !0%{?os2_version}
+Source0:	https://github.com/libffi/libffi/releases/download/v3.4.2/libffi-3.4.2.tar.gz
+Source1:	ffi-multilib.h
+Source2:	ffitarget-multilib.h
+%else
+Vendor:         bww bitwise works GmbH
+%scm_source	github http://github.com/bitwiseworks/%{name}-os2 v%{version}-os2
+%endif
+
+BuildRequires: make
+BuildRequires: gcc
+%if %{without bootstrap}
+BuildRequires: gcc-c++
+%if !0%{?os2_version}
+BuildRequires: dejagnu
+%endif
+%endif
 
 %description
 Compilers for high level languages generate code that follow certain
@@ -36,55 +54,101 @@ layer of a fully featured foreign function interface.  A layer must
 exist above `libffi' that handles type conversions for values passed
 between the two languages.  
 
-
 %package	devel
 Summary:	Development files for %{name}
-Group:		Development/Libraries
 Requires:	%{name} = %{version}-%{release}
-Requires:       pkgconfig
+Requires:	pkgconfig
 
 %description	devel
 The %{name}-devel package contains libraries and header files for
 developing applications that use %{name}.
 
+%if 0%{?os2_version}
+%debug_package
+%endif
 
 %prep
+%if !0%{?os2_version}
 %setup -q
-
+%else
+%scm_setup
+autoreconf -fvi
+%endif
 
 %build
-export CONFIG_SHELL="/@unixroot/usr/bin/sh.exe"
-export LDFLAGS="-Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
-export LIBS="-lurpo -lmmap"
-%configure \
-	--disable-static \
-        "--cache-file=%{_topdir}/cache/%{name}-%{_target_cpu}.cache"
-make %{?_smp_mflags}
+%if 0%{?os2_version}
+export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+export LIBS="-lcx"
+# Set BUILDLEVEL to be embedded to all DLLs built with Libtool.
+export LT_BUILDLEVEL="@#%{vendor}:%{version}-%{release}#@##1## `LANG=C date +'%%d %%b %%Y %%H:%%M:%%S'`     `uname -n`::::0::"
+%endif
+# For now we disable the static templates to avoid ghc and
+# gobject-introspection failures:
+# https://gitlab.haskell.org/ghc/ghc/-/issues/20051
+# https://gitlab.gnome.org/GNOME/gobject-introspection/-/merge_requests/283
+# We need to get these fixes into Fedora before we can reeanble them.
+%configure --disable-static --disable-exec-static-tramp
+%make_build
 
+%check
+%if %{without bootstrap}
+%make_build check
+%endif
 
 %install
-rm -rf $RPM_BUILD_ROOT
-make install DESTDIR=$RPM_BUILD_ROOT
+%make_install
+
 find $RPM_BUILD_ROOT -name '*.la' -exec rm -f {} ';'
 rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 
+%if !0%{?os2_version}
+# Determine generic arch target name for multilib wrapper
+basearch=%{_arch}
+%ifarch %{ix86}
+basearch=i386
+%endif
 
-%clean
-rm -rf $RPM_BUILD_ROOT
+mkdir -p $RPM_BUILD_ROOT%{_includedir}
+%ifarch %{multilib_arches}
+# Do header file switcheroo to avoid file conflicts on systems where you
+# can have both a 32- and 64-bit version of the library, and they each need
+# their own correct-but-different versions of the headers to be usable.
+for i in ffi ffitarget; do
+  mv $RPM_BUILD_ROOT%{_includedir}/$i.h $RPM_BUILD_ROOT%{_includedir}/$i-${basearch}.h
+done
+install -m644 %{SOURCE1} $RPM_BUILD_ROOT%{_includedir}/ffi.h
+install -m644 %{SOURCE2} $RPM_BUILD_ROOT%{_includedir}/ffitarget.h
+%endif
+%endif
+
+%if !0%{?os2_version}
+%ldconfig_scriptlets
+%endif
 
 %files
-%defattr(-,root,root,-)
-%doc LICENSE README
-#%{_libdir}/*.so.*
+%license LICENSE
+%doc README.md
+%if !0%{?os2_version}
+%{_libdir}/libffi.so.8
+%{_libdir}/libffi.so.8.1.0
+%else
+%{_libdir}/ffi*.dll
+%endif
 
 %files devel
-%defattr(-,root,root,-)
 %{_libdir}/pkgconfig/*.pc
-%{_libdir}/%{name}-%{version}
-%{_libdir}/*.a
-%{_mandir}/man3/*
-%{_infodir}/libffi.info
+%{_includedir}/ffi*.h
+%if !0%{?os2_version}
+%{_libdir}/*.so
+%else
+%{_libdir}/*_dll.a
+%endif
+%{_mandir}/man3/*.gz
+%{_infodir}/libffi.info.*
 
 %changelog
+* Mon Dec 27 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.4.2-1
+- update to version 3.4.2
+
 * Sat Oct 27 2012 yd
 - initial unixroot build.
