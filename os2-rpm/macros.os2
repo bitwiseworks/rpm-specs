@@ -1,6 +1,12 @@
 # OS/2 specific rpm configuration file.
 
 #------------------------------------------------------------------------------
+# Macros we override from default macros
+
+%_pkgdocdir %{_docdir}/%{name}
+%_docdir_fmt %%{NAME}
+
+#------------------------------------------------------------------------------
 # Macros needed at rpm runtime (package installation and such)
 
 # Path to OS/2 specific rpm configuration directory containing helper scripts

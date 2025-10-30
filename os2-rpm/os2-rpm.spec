@@ -1,7 +1,7 @@
 Summary: OS/2 specific RPM macros and scripts
 Name: os2-rpm
 Version: 1
-Release: 11%{?dist}
+Release: 12%{?dist}
 License: GPLv2+
 Group: Development/System
 Vendor: bww bitwise works GmbH
@@ -103,6 +103,10 @@ done
 %{_rpmconfigdir_macros_d}/macros.vpath
 
 %changelog
+* Thu Oct 30 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 1-12
+- add _docdir_fmt macro
+- removed the version part in the pgkdocdir macro
+
 * Fri Aug 25 2023 Silvan Scherrer <silvan.scherrer@aroa.ch> 1-11
 - add macros.vpath and enhance macros with some build flags
 
