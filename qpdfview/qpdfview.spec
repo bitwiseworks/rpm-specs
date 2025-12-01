@@ -1,9 +1,8 @@
-%global prerelease beta2
-%global title Tabbed PDF Viewer
+%global wps_folder_title Tabbed PDF Viewer
 
 Name:           qpdfview
-Version:        0.4.17
-Release:        6%{?prerelease}%{?dist}
+Version:        0.5.0
+Release:        1%{?dist}
 License:        GPLv2+
 Summary:        %{title}
 Url:            https://launchpad.net/qpdfview
@@ -12,18 +11,20 @@ Vendor:         bww bitwise works GmbH
 %scm_source github https://github.com/bitwiseworks/qpdfview-os2 master
 
 Requires:       bww-resources-rpm
-Requires:       libqt4
+Requires:       qt5-qtbase
+Requires:       qt5-qtbase-gui
 Requires:       cups
-Requires:       poppler-qt4
+Requires:       poppler-qt5
 Requires:       libspectre ghostscript
 Requires:       zlib
 Requires:       djvulibre
 Requires:       libjpeg libtiff libpng
 Requires:       %{name}-common = %{version}-%{release}
 
-BuildRequires:  libqt4-devel
+BuildRequires:  pkgconfig(Qt5Core)
+BuildRequires:  pkgconfig(Qt5Gui)
 BuildRequires:  cups-devel
-BuildRequires:  poppler-qt4-devel
+BuildRequires:  poppler-qt5-devel
 BuildRequires:  libspectre-devel ghostscript-devel
 BuildRequires:  zlib-devel
 BuildRequires:  djvulibre-devel
@@ -52,8 +53,8 @@ export QMAKE_SH=$SHELL
 export FAST_BUILD=1
 LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 
-/@unixroot/usr/lib/qt4/bin/lrelease qpdfview.pro
-qmake \
+lrelease-qt5 translations/*.ts
+qmake-qt5 \
     TARGET_INSTALL_PATH="%{_bindir}" \
     PLUGIN_INSTALL_PATH="%{_libdir}/%{name}" \
     DATA_INSTALL_PATH="%{_datadir}/%{name}" \
@@ -61,7 +62,7 @@ qmake \
     ICON_INSTALL_PATH="%{_datadir}/icons/hicolor/scalable/apps" \
     LAUNCHER_INSTALL_PATH="%{_datadir}/applications" \
     APPDATA_INSTALL_PATH="%{_datadir}/appdata" \
-    "CONFIG+=no_install_debuginfo" "CONFIG+=without_dbus" "CONFIG+=without_magic" \
+    "CONFIG+=without_magic" \
     qpdfview.pro
 make %{?_smp_mflags}
 
@@ -71,6 +72,10 @@ make INSTALL_ROOT=%{buildroot} install
 %find_lang %{name} --with-qt --without-mo
 # unknown language
 rm -f %{buildroot}/%{_datadir}/%{name}/%{name}_ast.qm
+rm -f %{buildroot}/%{_datadir}/%{name}/%{name}_nds.qm
+rm -f %{buildroot}/%{_datadir}/%{name}/%{name}_ber.qm
+rm -f %{buildroot}/%{_datadir}/%{name}/%{name}_rue.qm
+rm -f %{buildroot}/%{_datadir}/%{name}/%{name}_zgh.qm
 
 # remove not needed desktop files
 rm -rf %{buildroot}/%{_datadir}/appdata
@@ -86,10 +91,10 @@ if [ "$1" -ge 1 ]; then # (upon update)
     %wps_object_delete_all
 fi
 # for the definition of the parameters see macros.bww
-%bww_folder -t %{title}
-%bww_app -f %{_bindir}/%{name}.exe -t %{title} -a *.pdf,*.ps,*.eps,*.djvu,*.djv
+%bww_folder -t %{wps_folder_title}
+%bww_app -f %{_bindir}/%{name}.exe -t %{wps_folder_title} -a *.pdf,*.ps,*.eps,*.djvu,*.djv
 %bww_app_shadow
-%bww_readme -f %_defaultdocdir/%{name}-common-%{version}/README
+%bww_file README -f %_defaultdocdir/%{name}/README
 
 
 %postun
@@ -111,6 +116,9 @@ fi
 %{_mandir}/man?/*
 
 %changelog
+* Mon Nov 10 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.5.0-1
+- updated to latest vendor version
+
 * Thu Jul 12 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.4.17-6.beta2
 - updated to latest vendor version
 
