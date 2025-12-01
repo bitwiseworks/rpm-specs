@@ -2,7 +2,7 @@
 
 Name:           qpdfview
 Version:        0.5.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 License:        GPLv2+
 Summary:        %{title}
 Url:            https://launchpad.net/qpdfview
@@ -94,7 +94,7 @@ fi
 %bww_folder -t %{wps_folder_title}
 %bww_app -f %{_bindir}/%{name}.exe -t %{wps_folder_title} -a *.pdf,*.ps,*.eps,*.djvu,*.djv
 %bww_app_shadow
-%bww_file README -f %_defaultdocdir/%{name}/README
+%bww_file README -f %_defaultdocdir/%{name}-common/README
 
 
 %postun
@@ -116,6 +116,9 @@ fi
 %{_mandir}/man?/*
 
 %changelog
+* Mon Dec 01 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.5.0-2
+- fix a bug in wps ceation
+
 * Mon Nov 10 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.5.0-1
 - updated to latest vendor version
 
