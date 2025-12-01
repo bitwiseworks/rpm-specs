@@ -1,9 +1,26 @@
-%global test_sha 45f55f1e03b9bf3fbd334c31776b6f5e472889ec
-%global test_date 2018-12-18
+%global test_sha 03a4b9eb854a06a83c465e82de601796c458bbe9
+%global test_date 2021-01-11
+
+%if !0%{?os2_version}
+%bcond qt 1
+
+%if %{with qt}
+# Enable qt5 support (or not)
+# RHEL 10 drops support for Qt5, adds Qt6
+%if %{undefined rhel} || 0%{?rhel} < 10
+%global qt5 1
+%endif
+%if %{undefined rhel} || 0%{?rhel} >= 10
+%global qt6 1
+%endif
+%endif
+%else
+%global qt5 1
+%endif
 
 Summary: PDF rendering library
 Name:    poppler
-Version: 0.90.1
+Version: 23.11.0
 Release: 1%{?dist}
 License: (GPLv2 or GPLv3) and GPLv2+ and LGPLv2+ and MIT
 URL:     http://poppler.freedesktop.org/
@@ -12,24 +29,10 @@ Source0: http://poppler.freedesktop.org/poppler-%{version}.tar.xz
 # git archive --prefix test/
 Source1: %{name}-test-%{test_date}-%{test_sha}.tar.xz
 
-# https://bugzilla.redhat.com/show_bug.cgi?id=1185007
-Patch0:  poppler-0.30.0-rotated-words-selection.patch
-Patch1:  0001-Revert-Remove-the-Qt4-frontend.patch
+Patch1:  poppler-0.90.0-position-independent-code.patch
 
-Patch3:  poppler-0.67.0-qt4-const.patch
+Patch3:  poppler-21.01.0-glib-introspection.patch
 
-# https://bugzilla.redhat.com/show_bug.cgi?id=1696636
-Patch4:  poppler-0.73.0-PSOutputDev-buffer-read.patch
-
-Patch5:  poppler-0.84.0-MacroPushRequiredVars.patch
-
-# https://bugzilla.redhat.com/show_bug.cgi?id=1673727
-Patch6:  poppler-0.90.0-qt4-update.patch
-
-Patch7:  poppler-0.90.0-position-independent-code.patch
-
-# Bogus volatiles detected by gcc-11
-Patch8:  %{name}-gcc11.patch
 %else
 Vendor:  bww bitwise works GmbH
 %scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
@@ -53,7 +56,7 @@ BuildRequires: pkgconfig(freetype2)
 BuildRequires: pkgconfig(gdk-pixbuf-2.0)
 BuildRequires: pkgconfig(gio-2.0)
 BuildRequires: pkgconfig(gobject-2.0)
-BuildRequires: pkgconfig(gobject-introspection-1.0) 
+BuildRequires: pkgconfig(gobject-introspection-1.0)
 BuildRequires: pkgconfig(gtk+-3.0)
 BuildRequires: pkgconfig(gtk-doc)
 %endif
@@ -64,18 +67,22 @@ BuildRequires: pkgconfig(libpng)
 BuildRequires: pkgconfig(libtiff-4)
 BuildRequires: pkgconfig(nss)
 BuildRequires: pkgconfig(poppler-data)
+%if 0%{?qt5}
 BuildRequires: pkgconfig(Qt5Core)
 BuildRequires: pkgconfig(Qt5Gui)
 BuildRequires: pkgconfig(Qt5Test)
 BuildRequires: pkgconfig(Qt5Widgets)
 BuildRequires: pkgconfig(Qt5Xml)
+%endif
+%if 0%{?qt6}
+BuildRequires: cmake(Qt6Core)
+BuildRequires: cmake(Qt6Gui)
+BuildRequires: cmake(Qt6Test)
+BuildRequires: cmake(Qt6Widgets)
+BuildRequires: cmake(Qt6Xml)
+%endif
 %if !0%{?os2_version}
-BuildRequires: pkgconfig(QtCore)
-BuildRequires: pkgconfig(QtGui)
-BuildRequires: pkgconfig(QtTest)
-BuildRequires: pkgconfig(QtXml)
-%else
-BuildRequires:libqt4-devel
+BuildRequires: boost-devel
 %endif
 
 Requires: poppler-data
@@ -89,7 +96,11 @@ Obsoletes: poppler-glib-demos < 0.60.1-1
 
 %package devel
 Summary: Libraries and headers for poppler
+%if !0%{?os2_version}
+Requires: %{name}%{?_isa} = %{version}-%{release}
+%else
 Requires: %{name} = %{version}-%{release}
+%endif
 
 %description devel
 You should install the poppler-devel package if you would like to
@@ -98,15 +109,15 @@ compile applications based on poppler.
 %if !0%{?os2_version}
 %package glib
 Summary: Glib wrapper for poppler
-Requires: %{name} = %{version}-%{release}
+Requires: %{name}%{?_isa} = %{version}-%{release}
 
 %description glib
 %{summary}.
 
 %package glib-devel
 Summary: Development files for glib wrapper
-Requires: %{name}-glib = %{version}-%{release}
-Requires: %{name}-devel = %{version}-%{release}
+Requires: %{name}-glib%{?_isa} = %{version}-%{release}
+Requires: %{name}-devel%{?_isa} = %{version}-%{release}
 Suggests: %{name}-doc = %{version}-%{release}
 
 %description glib-devel
@@ -120,68 +131,89 @@ BuildArch: noarch
 %{summary}.
 %endif
 
-%package qt
-Summary: Qt4 wrapper for poppler
-Requires: %{name} = %{version}-%{release}
-%{?_qt4:Requires: qt4 >= %{_qt4_version}}
-Obsoletes: poppler-qt4 < 0.16.0-3
-Provides:  poppler-qt4 = %{version}-%{release}
-%description qt
-%{summary}.
-
-%package qt-devel
-Summary: Development files for Qt4 wrapper
-Requires: %{name}-qt = %{version}-%{release}
-Requires: %{name}-devel = %{version}-%{release}
-Obsoletes: poppler-qt4-devel < 0.16.0-3
-Provides:  poppler-qt4-devel = %{version}-%{release}
-%if !0%{?os2_version}
-Requires: qt4-devel
-%else
-Requires: qt4-devel-kit
-%endif
-%description qt-devel
-%{summary}.
-
+%if 0%{?qt5}
 %package qt5
 Summary: Qt5 wrapper for poppler
+%if !0%{?os2_version}
+Requires: %{name}%{?_isa} = %{version}-%{release}
+%else
 Requires: %{name} = %{version}-%{release}
+%endif
+Obsoletes: %{name}-qt < 0.90.0-9
 %description qt5
 %{summary}.
 
 %package qt5-devel
 Summary: Development files for Qt5 wrapper
+%if !0%{?os2_version}
+Requires: %{name}-qt5%{?_isa} = %{version}-%{release}
+Requires: %{name}-devel%{?_isa} = %{version}-%{release}
+%else
 Requires: %{name}-qt5 = %{version}-%{release}
 Requires: %{name}-devel = %{version}-%{release}
+%endif
 Requires: qt5-qtbase-devel
+Obsoletes: %{name}-qt-devel < 0.90.0-9
 %description qt5-devel
 %{summary}.
+%endif
+
+%if 0%{?qt6}
+%package qt6
+Summary: Qt6 wrapper for poppler
+Requires: %{name}%{?_isa} = %{version}-%{release}
+%description qt6
+%{summary}.
+
+%package qt6-devel
+Summary: Development files for Qt6 wrapper
+Requires: %{name}-qt6%{?_isa} = %{version}-%{release}
+Requires: %{name}-devel%{?_isa} = %{version}-%{release}
+Requires: qt6-qtbase-devel
+%description qt6-devel
+%{summary}.
+%endif
 
 %package cpp
 Summary: Pure C++ wrapper for poppler
+%if !0%{?os2_version}
+Requires: %{name}%{?_isa} = %{version}-%{release}
+%else
 Requires: %{name} = %{version}-%{release}
+%endif
 
 %description cpp
 %{summary}.
 
 %package cpp-devel
 Summary: Development files for C++ wrapper
+%if !0%{?os2_version}
+Requires: %{name}-cpp%{?_isa} = %{version}-%{release}
+Requires: %{name}-devel%{?_isa} = %{version}-%{release}
+%else
 Requires: %{name}-cpp = %{version}-%{release}
 Requires: %{name}-devel = %{version}-%{release}
+%endif
 
 %description cpp-devel
 %{summary}.
 
 %package utils
 Summary: Command line utilities for converting PDF files
+%if !0%{?os2_version}
+Requires: %{name}%{?_isa} = %{version}-%{release}
+%else
 Requires: %{name} = %{version}-%{release}
+%endif
 %description utils
 Command line tools for manipulating PDF files and converting them to
 other formats.
 
+%if 0%{?os2_version}
 %legacy_runtime_packages
 
 %debug_package
+%endif
 
 %prep
 %if !0%{?os2_version}
@@ -190,14 +222,16 @@ other formats.
 %scm_setup
 %endif
 
+chmod -x poppler/CairoFontEngine.cc
+
 %build
+%if 0%{?os2_version}
 export CFLAGS="%{optflags}"
 export CXXFLAGS="%{optflags}"
 export LDFLAGS="-Zomf -Zhigh-mem -lcx %{?__global_ldflags}"
 export VENDOR="%{vendor}"
+%endif
 
-mkdir build
-cd build
 %cmake \
   -DENABLE_CMS=lcms2 \
   -DENABLE_DCTDECODER=libjpeg \
@@ -205,22 +239,23 @@ cd build
   -DENABLE_GTK_DOC=ON \
 %endif
   -DENABLE_LIBOPENJPEG=openjpeg2 \
+%if ! 0%{?qt5}
+  -DENABLE_QT5=OFF \
+%endif
+%if ! 0%{?qt6}
+  -DENABLE_QT6=OFF \
+%endif
   -DENABLE_UNSTABLE_API_ABI_HEADERS=ON \
   -DENABLE_ZLIB=OFF \
-  ..
-
-%if !0%{?os2_version}
-%cmake_build
-%else
-%{__make} %{?_smp_mflags}
+%if 0%{?os2_version}
+  -DENABLE_GPGME=OFF \
+  -DENABLE_BOOST=OFF \
 %endif
+  ..
+%cmake_build
 
 %install
-%if !0%{?os2_version}
 %cmake_install
-%else
-%make_install -C build
-%endif
 
 %check
 %if !0%{?os2_version}
@@ -231,42 +266,42 @@ cd build
 %if !0%{?os2_version}
 export PKG_CONFIG_PATH=%{buildroot}%{_datadir}/pkgconfig:%{buildroot}%{_libdir}/pkgconfig
 test "$(pkg-config --modversion poppler)" = "%{version}"
-test "$(pkg-config --modversion poppler-cairo)" = "%{version}"
 test "$(pkg-config --modversion poppler-cpp)" = "%{version}"
 test "$(pkg-config --modversion poppler-glib)" = "%{version}"
-test "$(pkg-config --modversion poppler-qt4)" = "%{version}"
+%if 0%{?qt5}
 test "$(pkg-config --modversion poppler-qt5)" = "%{version}"
-test "$(pkg-config --modversion poppler-splash)" = "%{version}"
+%endif
+%if 0%{?qt6}
+test "$(pkg-config --modversion poppler-qt6)" = "%{version}"
+%endif
 %else
 export PKG_CONFIG_PATH="%{buildroot}%{_datadir}/pkgconfig;%{buildroot}%{_libdir}/pkgconfig"
 # !!!
 # we have to use main_version when available, as the legacy macro screws the version
 # !!!
 test "$(pkg-config --modversion poppler)" = "%{?main_version}%{!?main_version:%{version}}"
-test "$(pkg-config --modversion poppler-cairo)" = "%{?main_version}%{!?main_version:%{version}}"
 test "$(pkg-config --modversion poppler-cpp)" = "%{?main_version}%{!?main_version:%{version}}"
-test "$(pkg-config --modversion poppler-qt4)" = "%{?main_version}%{!?main_version:%{version}}"
+%if 0%{?qt5}
 test "$(pkg-config --modversion poppler-qt5)" = "%{?main_version}%{!?main_version:%{version}}"
-test "$(pkg-config --modversion poppler-splash)" = "%{?main_version}%{!?main_version:%{version}}"
+%endif
+%if 0%{?qt6}
+test "$(pkg-config --modversion poppler-qt6)" = "%{?main_version}%{!?main_version:%{version}}"
+%endif
 %endif
 
 %if !0%{?os2_version}
 %ldconfig_scriptlets
-%endif
 
-%if !0%{?os2_version}
 %ldconfig_scriptlets glib
-%endif
 
-%if !0%{?os2_version}
-%ldconfig_scriptlets qt
-%endif
-
-%if !0%{?os2_version}
+%if 0%{?qt5}
 %ldconfig_scriptlets qt5
 %endif
 
-%if !0%{?os2_version}
+%if 0%{?qt6}
+%ldconfig_scriptlets qt6
+%endif
+
 %ldconfig_scriptlets cpp
 %endif
 
@@ -274,14 +309,13 @@ test "$(pkg-config --modversion poppler-splash)" = "%{?main_version}%{!?main_ver
 %doc README.md
 %license COPYING
 %if !0%{?os2_version}
-%{_libdir}/libpoppler.so.101*
+%{_libdir}/libpoppler.so.133*
 %else
-%{_libdir}/poppl101.dll
+%{_libdir}/poppl133.dll
 %endif
 
 %files devel
 %{_libdir}/pkgconfig/poppler.pc
-%{_libdir}/pkgconfig/poppler-splash.pc
 %if !0%{?os2_version}
 %{_libdir}/libpoppler.so
 %else
@@ -293,9 +327,6 @@ test "$(pkg-config --modversion poppler-splash)" = "%{?main_version}%{!?main_ver
 %{_includedir}/poppler/fofi/
 %{_includedir}/poppler/goo/
 %{_includedir}/poppler/splash/
-%if 0%{?os2_version}
-%{_libdir}/pkgconfig/poppler-cairo.pc
-%endif
 
 %if !0%{?os2_version}
 %files glib
@@ -304,7 +335,6 @@ test "$(pkg-config --modversion poppler-splash)" = "%{?main_version}%{!?main_ver
 
 %files glib-devel
 %{_libdir}/pkgconfig/poppler-glib.pc
-%{_libdir}/pkgconfig/poppler-cairo.pc
 %{_libdir}/libpoppler-glib.so
 %{_datadir}/gir-1.0/Poppler-0.18.gir
 %{_includedir}/poppler/glib/
@@ -314,22 +344,7 @@ test "$(pkg-config --modversion poppler-splash)" = "%{?main_version}%{!?main_ver
 %{_datadir}/gtk-doc/
 %endif
 
-%files qt
-%if !0%{?os2_version}
-%{_libdir}/libpoppler-qt4.so.4*
-%else
-%{_libdir}/poppq4*.dll
-%endif
-
-%files qt-devel
-%if !0%{?os2_version}
-%{_libdir}/libpoppler-qt4.so
-%else
-%{_libdir}/poppler-qt4_dll.a
-%endif
-%{_libdir}/pkgconfig/poppler-qt4.pc
-%{_includedir}/poppler/qt4/
-
+%if 0%{?qt5}
 %files qt5
 %if !0%{?os2_version}
 %{_libdir}/libpoppler-qt5.so.1*
@@ -345,6 +360,17 @@ test "$(pkg-config --modversion poppler-splash)" = "%{?main_version}%{!?main_ver
 %endif
 %{_libdir}/pkgconfig/poppler-qt5.pc
 %{_includedir}/poppler/qt5/
+%endif
+
+%if 0%{?qt6}
+%files qt6
+%{_libdir}/libpoppler-qt6.so.3*
+
+%files qt6-devel
+%{_libdir}/libpoppler-qt6.so
+%{_libdir}/pkgconfig/poppler-qt6.pc
+%{_includedir}/poppler/qt6/
+%endif
 
 %files cpp
 %if !0%{?os2_version}
@@ -371,6 +397,11 @@ test "$(pkg-config --modversion poppler-splash)" = "%{?main_version}%{!?main_ver
 %{_mandir}/man1/*
 
 %changelog
+* Mon Nov 10 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> - 23.11.0-1
+- update to vendor version 23.11.0
+- removed qt4 backend
+- adapt the spec to latest fedora spec
+
 * Tue Nov 03 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.90.1-1
 - update to vendor version 0.90.1
 - adapt the spec to latest fedora spec
