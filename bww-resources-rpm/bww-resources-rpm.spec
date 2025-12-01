@@ -3,7 +3,7 @@
 
 Summary:       bitwise works icons and folders
 Name:          bww-resources-rpm
-Version:       1.1.4
+Version:       1.1.5
 Release:       1%{?dist}
 License:       Proprietory
 Group:         Applications/System
@@ -20,6 +20,7 @@ BuildArch:     noarch
 Obsoletes:     bwwres
 Provides:      bwwres = %{version}
 Requires:      os2-rpm >= 0-4
+Requires:      rpm >= 4.15.1
 
 BuildRequires: rexx_exe
 
@@ -96,6 +97,9 @@ bww-fix-docdir
 %{_libdir}/rpm/macros.d/macros.bww
 
 %changelog
+* Mon Dec 01 2025 Dmitriy Kuminov <coding@dmik.org> 1.1.5-1
+- Fix/adjust macros.bww ro rpm version >= 4.15.1
+
 * Thu Oct 17 2019 Dmitriy Kuminov <coding@dmik.org> 1.1.4-1
 - Add -s option to allow for shared folders/objects.
 - Make build sub-package depend on the main one.
