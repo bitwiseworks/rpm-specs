@@ -2,7 +2,7 @@
 
 Name:           qpdfview
 Version:        0.5.0
-Release:        2%{?dist}
+Release:        3%{?dist}
 License:        GPLv2+
 Summary:        %{title}
 Url:            https://launchpad.net/qpdfview
@@ -91,10 +91,10 @@ if [ "$1" -ge 1 ]; then # (upon update)
     %wps_object_delete_all
 fi
 # for the definition of the parameters see macros.bww
-%bww_folder -t %{wps_folder_title}
-%bww_app -f %{_bindir}/%{name}.exe -t %{wps_folder_title} -a *.pdf,*.ps,*.eps,*.djvu,*.djv
+%bww_folder -t %{quote:%{wps_folder_title}}
+%bww_app -f %{_bindir}/%{name}.exe -t %{quote:%{wps_folder_title}} -a *.pdf,*.ps,*.eps,*.djvu,*.djv
 %bww_app_shadow
-%bww_file README -f %_defaultdocdir/%{name}-common/README
+%bww_readme -f %_defaultdocdir/%{name}-common/README
 
 
 %postun
@@ -116,6 +116,9 @@ fi
 %{_mandir}/man?/*
 
 %changelog
+* Tue Dec 02 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.5.0-3
+- fix a bug quoting for wps_folder_title
+
 * Mon Dec 01 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.5.0-2
 - fix a bug in wps ceation
 
