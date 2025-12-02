@@ -143,8 +143,8 @@ exit 0
 
 # for the definition of the parameters see macros.bww
 %global app_title Quassel IRC core
-%bww_folder -t %{title} -s %{name}-apps
-%bww_app -f %{_bindir}/%{name}client.exe -t %{app_title}
+%bww_folder -t %{quote:%{title}} -s %{name}-apps
+%bww_app -f %{_bindir}/%{name}client.exe -t %{quote:%{app_title}}
 
 %preun core
 %if !0%{?no_systemd}
@@ -169,8 +169,8 @@ fi
 
 # for the definition of the parameters see macros.bww
 %global app_title Quassel IRC
-%bww_folder -t %{title} -s %{name}-apps
-%bww_app -f %{_bindir}/%{name}.exe -t %{app_title}
+%bww_folder -t %{quote:%{title}} -s %{name}-apps
+%bww_app -f %{_bindir}/%{name}.exe -t %{quote:%{app_title}}
 %bww_app_shadow
 %bww_readme -f %_defaultdocdir/%{name}-common-%{version}/README.md
 
@@ -188,8 +188,8 @@ fi
 
 # for the definition of the parameters see macros.bww
 %global app_title Quassel IRC client
-%bww_folder -t %{title} -s %{name}-apps
-%bww_app -f %{_bindir}/%{name}client.exe -t %{app_title}
+%bww_folder -t %{quote:%{title}} -s %{name}-apps
+%bww_app -f %{_bindir}/%{name}client.exe -t %{quote:%{app_title}}
 
 
 %postun client
