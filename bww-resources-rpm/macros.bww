@@ -57,7 +57,8 @@
 #
 # %bww_folder -t TITLE [-V] [-n PACKAGE] [-s SHAREDID]
 #  -t TITLE (Mandatory: Use TITLE as the folder title)
-#     (TITLE *must* be a %global macro if it contains spaces)
+#     (TITLE *must* be a %global macro if it contains spaces and must be
+#      quoted. Like the following: %bww_folder -t %{quote:%{TITLE}})
 #  -V (Optional: Do not add the version to the folder title)
 #  -n PACKAGE (Optional: Associate the folder with PACKAGE,
 #     otherwise with %{name})
@@ -87,7 +88,8 @@
 #  ID (Optional: This ID is added to the ObjectID)
 #  -f EXEFILE (Mandatory: Full path/to/app)
 #  -t TITLE (Mandatory: Use TITLE as the app title)
-#     (TITLE *must* be a %global macro if with spaces)
+#     (TITLE *must* be a %global macro if it contains spaces and must be
+#      quoted. Like the following: %bww_app -t %{quote:%{TITLE}})
 #  -n PACKAGE (Optional: Associate the object with PACKAGE,
 #     otherwise with %{name})
 #  -s SHAREDID (Optional: Use SHAREDID as part of ObjectID
