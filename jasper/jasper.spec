@@ -1,10 +1,11 @@
+
 # NOTE: packages that can use jasper:
 # ImageMagick
 # netpbm
 
 Summary: Implementation of the JPEG-2000 standard, Part 1
 Name:    jasper
-Version: 4.2.4
+Version: 4.2.8
 Release: 1%{?dist}
 
 License: JasPer-2.0
@@ -32,11 +33,12 @@ BuildRequires: cmake
 %if !0%{?os2_version}
 BuildRequires: freeglut-devel 
 BuildRequires: libGLU-devel
-BuildRequires: libXmu-devel libXi-devel
 BuildRequires: mesa-libGL-devel
+BuildRequires: libXmu-devel libXi-devel
 %endif
-BuildRequires: libjpeg-devel
 BuildRequires: pkgconfig doxygen
+BuildRequires: libjpeg-devel
+
 
 Requires: %{name}-libs%{?_isa} = %{version}-%{release}
 BuildRequires: gcc
@@ -99,11 +101,6 @@ patch 1 -p1 -b .-rpath
 %endif
 %endif
 
-%build
-%if !0%{?os2_version}
-mkdir builder
-%endif
-
 %if 0%{?os2_version}
 export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp" 
 export LIBS="-lcx -lpthread"
@@ -111,19 +108,12 @@ export LIBS="-lcx -lpthread"
 %cmake \
   -DJAS_ENABLE_DOC:BOOL=OFF \
   -DALLOW_IN_SOURCE_BUILD:BOOL=ON \
-%if !0%{?os2_version}
-  -B builder
 
-%make_build -C builder
+%cmake_build 
 
-%install
-make install/fast DESTDIR=%{buildroot} -C builder
-%else
-%cmake_build
 
 %install
 %cmake_install
-%endif
 
 # Unpackaged files
 rm -f doc/README
@@ -131,9 +121,9 @@ rm -f %{buildroot}%{_libdir}/lib*.la
 
 
 %check
-%if !0%{?os2_version}
-make test -C builder
+%ctest 
 
+%if !0%{?os2_version}
 %ldconfig_scriptlets libs
 %endif
 
@@ -177,9 +167,13 @@ make test -C builder
 %endif
 
 %changelog
+* Fri Dec 05 2025 Elbert Pol <elbert.pol@gmail.com> - 4.2.8-1
+- Updated to latest version
+- Sync with latest fedora spec file
+
 * Sat Aug 17 2024  Elbert Pol <elbert.pol@gmail.com> - 4.2.4-1
 - Updated to latest source
-- Add info to the lib fi;e
+- Add info to the lib file
 
 * Tue Dec 26 2023 Elbert Pol <elbert.pol@gmail.com> - 4.1.1-1
 - Updated to latest version
