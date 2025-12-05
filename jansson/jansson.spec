@@ -1,5 +1,5 @@
 Name:		jansson
-Version:	2.14
+Version:	2.14.1
 Release:	1%{?dist}
 Summary:	C library for encoding, decoding and manipulating JSON data
 
@@ -17,14 +17,16 @@ Source0:	http://www.digip.org/jansson/releases/jansson-%{version}.tar.bz2
 %scm_source github https://github.com/tellie/%{name}-os2 %{version}-os2
 %endif
 
-# Fix docs build failures with Sphinx 3
-# Resolved upstream: https://github.com/akheron/jansson/pull/543
+# Fix the tests.
+# Upstream commit 0677666f65b988b2dd44d02966a08fea490d5883
+Patch:          0001-Fix-the-check-exports-tests-for-versioned-symbols.patch
+
+BuildRequires:	gcc
 %if !0%{?os2_version}
-Patch0:     fix-docs-build-with-sphinx-3.patch
 BuildRequires:	python3-sphinx
 %endif
-BuildRequires:	gcc
-BuildRequires: make
+BuildRequires:  make
+BuildRequires:  autoconf, automake, libtool
 
 %description
 Small library for parsing and writing JSON documents.
@@ -49,7 +51,7 @@ Development documentation for jansson.
 
 %prep
 %if !0%{?os2_version}
-%autosetup -p1
+%forgeautosetup -p1
 %else
 %scm_setup
 %endif
@@ -63,7 +65,7 @@ Development documentation for jansson.
 # Set BUILDLEVEL to be embedded to all DLLs built with Libtool.
 export LT_BUILDLEVEL="@#%{vendor}:%{version}-%{release}#@##1## `LANG=C date +'%%d %%b %%Y %%H:%%M:%%S'`     `uname -n`::::0::"
 %endif
-autoreconf -I M4 -fiv
+autoreconf -f -i -v
 %configure --disable-static
 %make_build
 %if !0%{?os2_version}
@@ -71,16 +73,13 @@ make html
 %endif
 
 %check
-export BEGINLIBPATH=%{_builddir}/%{buildsubdir}/src/.libs
-make -k check
+%if !0%{?os2_version}
+make check
+%endif
 
 %install
 %make_install
 rm "$RPM_BUILD_ROOT%{_libdir}"/*.la
-
-%if !0%{?os2_version}
-%ldconfig_scriptlets
-%endif
 
 %files
 %license LICENSE
@@ -105,7 +104,11 @@ rm "$RPM_BUILD_ROOT%{_libdir}"/*.la
 %doc doc/_build/html/*
 %endif
 
+
 %changelog
+* Fri Dec 05 2025 Elbert Pol <elbert.pol@gmail.com> - 2.14.1-1
+- Updated to latest version
+
 * Thu Mar 07 2024 Elbert Pol <elbert.pol@gmail.com> -2.14-1
 - Updated to latest version
 - Add bldlevel for the dll
