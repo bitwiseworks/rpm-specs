@@ -1,6 +1,6 @@
 Name:           yaz
 Version:        5.35.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Z39.50/SRW/SRU toolkit
 # SPDX confirmed
 License:        BSD-3-Clause
@@ -28,10 +28,10 @@ BuildRequires:  automake
 
 BuildRequires:  pkgconfig(libexslt)
 %if !0%{?os2_version}
-BuildRequires:  pkgconfig(gnutls)
 BuildRequires:  pkgconfig(hiredis)
 BuildRequires:  pkgconfig(libmemcached)
 %endif
+BuildRequires:  pkgconfig(gnutls)
 BuildRequires:  pkgconfig(icu-i18n)
 BuildRequires:  pkgconfig(libxml-2.0)
 BuildRequires:  pkgconfig(libxslt)
@@ -219,6 +219,9 @@ make -k check
 %endif
 
 %changelog
+* Fri Dec 05 2025 Elbert Pol <elbert.pol@gmail.com> - 5.35.1-2
+- Reenable GnuTls as i had that disabled
+ 
 * Fri Dec 05 2025 Elbert Pol <elbert.pol@gmail.com> - 5.35.1-1
 - Updated to latest version
 
