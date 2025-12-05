@@ -1,15 +1,20 @@
 Summary: Text file format converters
 Name: dos2unix
-Version: 7.5.2
+Version: 7.5.3
 Release: 1%{?dist}
 License: BSD-3-Clause
+%if 0%{?os2_version}
+Vendor:         TeLLie OS2 forever
+Distribution:   OS/2
+Packager:       TeLLeRBoP
+%endif
 URL: https://waterlan.home.xs4all.nl/dos2unix.html
 %if !0%{?os2_version}
 Source: https://waterlan.home.xs4all.nl/dos2unix/%{name}-%{version}.tar.gz
 Source: https://waterlan.home.xs4all.nl/dos2unix/%{name}-%{version}.tar.gz.asc
 Source: https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x38C1F572B12725BE#./38C1F572B12725BE.asc
 %else
-%scm_source github https://github.com/TeLLie/%{name}-os2 master-os2
+%scm_source github https://github.com/TeLLie/%{name}-os2 %{version}-os2
 %endif
 
 BuildRequires: gcc
@@ -41,14 +46,10 @@ vice versa.
 %endif
 
 %build
-%if !0%{?os2_version}
-%make_build LDFLAGS="%{build_ldflags}"
-%else
-make %{?_smp_mflags}
-%endif
+%make_build LDFLAGS="%{build_ldflags}" prefix=%{_prefix}
 
 %install
-%make_install
+%make_install prefix=%{_prefix}
 
 # We add doc files manually to %%doc
 rm -rf %{buildroot}%{_docdir}
@@ -77,10 +78,10 @@ make test
 %endif
 %{_mandir}/man1/*.1*
 
-%clean
-rm -rf $RPM_BUILD_ROOT
-
 %changelog
+* Fri Dec 05 2025 Elbert Pol <elbert.pol@gmail.com> - 7.5.3-1
+- Updated to latest version
+
 * Wed Jan 24 2024 Elbert Pol <elbert.pol@gmail.com> - 7.5.2-1
 - Updated to latest version
 - Add debug package
