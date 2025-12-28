@@ -54,7 +54,7 @@ Summary:       Library and header files for %{name}
 %if !0%{os2_version}
 Requires:      %{name}%{?_isa} = %{version}-%{release}
 %else
-Requires:      %{name}-devel = %{version}-%{release}
+Requires:      %{name} = %{version}-%{release}
 %endif
 Requires:      cmake
 
@@ -204,7 +204,7 @@ fi
 %endif
 
 %changelog
-* Wed Dec 28 2025 Elbert Pol <elbert.pol@gmail.com> - 2.16.0-1
+* Sun Dec 28 2025 Elbert Pol <elbert.pol@gmail.com> - 2.16.0-1
 - Updated to latest version
 
 * Thu Feb 27 2025 Elbert Pol <elbert.pol@gmail.com> - 2.15.0-2
