@@ -1,6 +1,6 @@
 Name: libcx
 Summary: kLIBC Extension Library
-Version: 0.7.4
+Version: 0.7.5
 Release: 1%{?dist}
 License: LGPLv2.1+
 Group: System/Libraries
@@ -8,16 +8,15 @@ Vendor: bww bitwise works GmbH
 URL: https://github.com/bitwiseworks/libcx
 
 %scm_source github https://github.com/bitwiseworks/libcx %{version}
-#scm_source git file://D:/Coding/libcx/master %{version}
+#scm_source git file://D:/Coding/libcx/master #{version}
 
 BuildRequires: sed
 
 Obsoletes: libpoll
 Provides: libpoll
 
-# Due to __libc_LogInitEx and friends.
-Requires: libc >= 1:0.1.9
-BuildRequires: libc-devel >= 1:0.1.9
+Requires: libc >= 1:0.1.14
+BuildRequires: libc-devel >= 1:0.1.14
 
 %description
 The kLIBC Extension Library extends the functionality of the kLIBC library
@@ -90,6 +89,10 @@ rm -rf %{buildroot}
 %{_includedir}/libcx/handles.h
 
 %changelog
+* Sun Jan 11 2026 Dmitrii Kuminov <coding@dmik.org> 0.7.5-1
+- Release version 0.7.5
+  (https://github.com/bitwiseworks/libcx/blob/0.7.5/CHANGELOG.md).
+
 * Sat Aug 3 2024 Dmitriy Kuminov <coding@dmik.org> 0.7.4-1
 - Release version 0.7.4
   (https://github.com/bitwiseworks/libcx/blob/0.7.4/CHANGELOG.md).
