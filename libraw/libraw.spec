@@ -1,8 +1,8 @@
-%global somajor 23
+%global somajor 24
 
 Summary: Library for reading RAW files obtained from digital photo cameras
 Name: libraw
-Version: 0.21.5
+Version: 0.22.0
 Release: 1%{?dist}
 License: BSD-3-Clause and (CDDL-1.0 or LGPL-2.1-only)
 URL: https://www.libraw.org
@@ -58,6 +58,10 @@ Requires: %{name}%{?_isa} = %{version}-%{release}
 
 %description samples
 LibRaw sample programs
+
+%if 0%{?os2_version}
+%legacy_runtime_packages
+%endif
 
 %prep
 %if !0%{?os2_version}
@@ -133,9 +137,9 @@ rm -fv %{buildroot}%{_libdir}/lib*.la
 %{_libdir}/libraw_r.so
 %else
 %{_libdir}/raw_dll.a
-%{_libdir}/raw23_dll.a
+%{_libdir}/raw24_dll.a
 %{_libdir}/raw_r_dll.a
-%{_libdir}/raw_r23_dll.a
+%{_libdir}/raw_r24_dll.a
 %endif
 %{_libdir}/pkgconfig/libraw.pc
 %{_libdir}/pkgconfig/libraw_r.pc
@@ -146,6 +150,10 @@ rm -fv %{buildroot}%{_libdir}/lib*.la
 
 
 %changelog
+* Thu Jan 15 2026 Elbert Pol <elbert.pol@gmail.com> - 0.22.0-1
+- Updated to latest version
+- Add legacy for older dll's
+
 * Wed Dec 24 2025 Elbert Pol <elbert.pol@gmail.com> - 0.21.5-1
 - Updated to latest version
 
