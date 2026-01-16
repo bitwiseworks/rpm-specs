@@ -1,6 +1,6 @@
 Name:      zint
 Version:   2.16.0
-Release:   2%{?dist}
+Release:   1%{?dist}
 Summary:   Barcode generator library
 License:   BSD-3-Clause AND GPL-3.0-or-later
 URL:       http://www.zint.org.uk
@@ -120,7 +120,7 @@ mv %{buildroot}%{_datadir}/%{name} %{buildroot}%{_datadir}/cmake/%{name}
 mkdir -p %{buildroot}%{_datadir}/%{name}
 mkdir -p %{buildroot}%{_datadir}/cmake/%{name}
 mkdir -p %{buildroot}%{_datadir}/os2/icons/
-cp -a frontend_qt/res/qtzint-os2.ico %{buildroot}%{_datadir}/os2/icons/%{name}-qt.ico
+cp -a frontend_qt/res/qtzint-os2.ico %{buildroot}%{_datadir}/os2/icons/qt%{name}.ico
 cp -a frontend/zint-os2.ico %{buildroot}%{_datadir}/os2/icons/%{name}.ico
 %endif
 %if !0%{os2_version}
@@ -187,24 +187,15 @@ if [ "$1" -ge 1 ]; then # (upon update)
     %wps_object_delete_all
 fi
 %global wps_app_title Zint
-%bww_folder -t %{quote:%{wps_folder_title}}
-%bww_app -f %{_bindir}/%{name}.exe -t %{quote:%{wps_app_title}} -i %{name}.ico
+%bww_folder -t %{wps_folder_title}
+%bww_app -f %{_bindir}/%{name}-qt.exe -t %{wps_app_title} -i $qt%{name}.ico
+%bww_app -f %{_bindir}/%{name}.exe -t %{wps_app_title} -i $%{name}.ico
 %bww_app_shadow
-%bww_readme -f %_defaultdocdir/%{name}/README
-%bww_license -f %_defaultlicensedir/%{name}/LICENSE
-%bww_file README-OS2.txt -f %_defaultdocdir/%{name}/README-os2.txt
-%bww_file CHANGES-OS2.txt -f %_defaultdocdir/%{name}/CHANGES-os2.txt
+%bww_readme -f %_defaultdocdir/%{name}-%{version}/README
+%bww_license -f %_defaultlicensedir/%{name}-%{version}/LICENSE
+%bww_file README-OS2.txt -f %_defaultdocdir/%{name}-%{version}/README-os2.txt
+%bww_file CHANGES-OS2.txt -f %_defaultdocdir/%{name}-%{version}/CHANGES-os2.txt
 
-%global wps_folder_title Zint-qt
-
-%post qt -e
-if [ "$1" -ge 1 ]; then # (upon update)
-    %wps_object_delete_all
-fi
-
-%global wps_app_title Zint-qt
-%bww_folder -t %{quote:%{wps_folder_title}}
-%bww_app -f %{_bindir}/%{name}-qt.exe -t %{quote:%{wps_app_title}} -i %{name}-qt.ico
 
 %postun
 if [ "$1" -eq 0 ]; then # (upon removal)
@@ -213,9 +204,6 @@ fi
 %endif
 
 %changelog
-* Mon Dec 29 2025 Elbert Pol <elbert.pol@gmail.com> - 2.16.0-2
-- Fix error when copying readme's to directorie 
-
 * Sun Dec 28 2025 Elbert Pol <elbert.pol@gmail.com> - 2.16.0-1
 - Updated to latest version
 
