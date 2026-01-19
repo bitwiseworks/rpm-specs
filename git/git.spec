@@ -12,13 +12,6 @@
 
 %global gitexecdir          %{_libexecdir}/git-core
 
-# Settings for Fedora >= 34
-%if 0%{?fedora} >= 34 || 0%{?os2_version}
-%bcond_with                 emacs
-%else
-%bcond_without              emacs
-%endif
-
 # Settings for Fedora
 %if 0%{?fedora}
 # linkchecker is not available on EL
@@ -27,8 +20,16 @@
 %bcond_with                 linkcheck
 %endif
 
-# Settings for Fedora and EL >= 9
-%if 0%{?fedora} || 0%{?rhel} >= 9
+# Settings for Fedora >= 38 and EL >= 10
+%if 0%{?fedora} >= 38 || 0%{?rhel} >= 10 || 0%{?os2_version}
+%bcond_with                 perl_modcompat
+%else
+%bcond_without              perl_modcompat
+%endif
+
+# Settings for Fedora and EL == 9
+# In EL >= 10 docbook5-style-xsl, needed by asciidoctor, is unwanted package
+%if 0%{?fedora} || 0%{?rhel} == 9
 %bcond_without              asciidoctor
 %else
 %bcond_with                 asciidoctor
@@ -45,21 +46,16 @@
 %else
 %bcond_without              python2
 %bcond_with                 python3
+%global build_cflags        %{build_cflags} -fPIC -std=gnu99
 %global gitweb_httpd_conf   git.conf
 %global use_glibc_langpacks 0
 %global use_perl_generators 0
 %global use_perl_interpreter 0
 %endif
 
-# Settings for Fedora and EL >= 7
-%if 0%{?fedora} || 0%{?rhel} >= 7
-%global bashcompdir         %(pkg-config --variable=completionsdir bash-completion 2>/dev/null)
-%global bashcomproot        %(dirname %{bashcompdir} 2>/dev/null)
-%endif
-
 # Allow cvs subpackage to be toggled via --with/--without
 # Disable cvs subpackage by default on EL >= 8
-%if 0%{?rhel} >= 8 || 0%{?os2_version}
+%if 0%{?rhel} >= 8
 %bcond_with                 cvs
 %else
 %bcond_without              cvs
@@ -73,11 +69,11 @@
 %endif
 
 # Allow p4 subpackage to be toggled via --with/--without
-# Disable by default if we lack python2 or python3 support
-%if %{with python2} || %{with python3}
-%bcond_without              p4
-%else
+# Disable p4 package by default on EL >= 10
+%if 0%{?rhel} >= 10
 %bcond_with                 p4
+%else
+%bcond_without              p4
 %endif
 
 # Hardening flags for EL-7
@@ -85,19 +81,28 @@
 %global _hardened_build     1
 %endif
 
-# Define for release candidates
-#global rcrev   .rc0
+# Define %%bash_completions_dir for EL <= 9
+%{?!bash_completions_dir:%global bash_completions_dir %{_datadir}/bash-completion/completions}
+
+# Set path to the package-notes linker script
+%global _package_note_file  %{_builddir}/%{name}-%{real_version}/.package_note-%{name}-%{version}-%{release}.%{_arch}.ld
 
 Name:           git
-Version:        2.30.2
-Release:        2%{?rcrev}%{?dist}
+Version:        2.50.1
+Release:        1%{?dist}
 Summary:        Fast Version Control System
-License:        GPLv2
+License:        BSD-3-Clause AND GPL-2.0-only AND GPL-2.0-or-later AND LGPL-2.1-or-later AND MIT
 URL:            https://git-scm.com/
 
 %if !0%{?os2_version}
-Source0:        https://www.kernel.org/pub/software/scm/git/%{?rcrev:testing/}%{name}-%{version}%{?rcrev}.tar.xz
-Source1:        https://www.kernel.org/pub/software/scm/git/%{?rcrev:testing/}%{name}-%{version}%{?rcrev}.tar.sign
+# Note: real_version must be defined _after_ Version
+%global real_version %(echo %{version} | tr '~' '.')
+
+# Adjust Source URL path for release candidates
+%global rcpath  %(test "%{version}" = "%{real_version}" || echo testing/)
+
+Source0:        https://www.kernel.org/pub/software/scm/git/%{rcpath}%{name}-%{real_version}.tar.xz
+Source1:        https://www.kernel.org/pub/software/scm/git/%{rcpath}%{name}-%{real_version}.tar.sign
 
 # Junio C Hamano's key is used to sign git releases, it can be found in the
 # junio-gpg-pub tag within git.
@@ -124,15 +129,32 @@ Source99:       print-failed-test-output
 # https://bugzilla.redhat.com/490602
 Patch0:         git-cvsimport-Ignore-cvsps-2.2b1-Branches-output.patch
 
-# fix the broken link in git-bundle.html
-# https://lore.kernel.org/git/20211013032852.959985-1-tmz@pobox.com/
-Patch1:         0001-doc-add-bundle-format-to-TECH_DOCS.patch
+# https://bugzilla.redhat.com/2114531
+# tests: try harder to find open ports for apache, git, and svn
+#
+# https://github.com/tmzullinger/git/commit/aedeaaf788
+Patch1:         0001-t-lib-httpd-try-harder-to-find-a-port-for-apache.patch
+# https://github.com/tmzullinger/git/commit/16750d024c
+Patch2:         0002-t-lib-git-daemon-try-harder-to-find-a-port.patch
+# https://github.com/tmzullinger/git/commit/aa5105dc11
+Patch3:         0003-t-lib-git-svn-try-harder-to-find-a-port.patch
+
+# Configurates Apache test server to use `DavLockDBType sdbm`
+# Prevents t5540 failures on i686, s390x and ppc64le
+Patch5:         git-test-apache-davlockdbtype-config.patch
+
+# Adds the option to sanitize sideband channel messages
+# CVE-2024-52005 wasn't fixed by upstream. This patch adds the option to harden Git against it.
+# The default behaviour of Git remains unchanged.
+#
+# https://github.com/gitgitgadget/git/pull/1853
+Patch6:         git-2.49-sanitize-sideband-channel-messages.patch
 %else
 Vendor:         bww bitwise works GmbH
-#scm_source     github http://github.com/bitwiseworks %{name}-os2 %{version}-os2
-%scm_source git e:/trees/git/git master
-# Need newer kLIBC due to CLOEXEC fix
-Requires:       libc >= 0.6.6-38
+%scm_source     github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
+#scm_source     git e:/trees/git/git master
+Requires:       libc >= 0.1.14
+Requires:       libcx >= 0.7.5
 %endif
 
 %if %{with docs}
@@ -158,10 +180,6 @@ BuildRequires:  coreutils
 BuildRequires:  desktop-file-utils
 %endif
 BuildRequires:  diffutils
-%if %{with emacs}
-BuildRequires:  emacs-common
-%endif
-# endif emacs-common
 %if 0%{?rhel} && 0%{?rhel} < 9
 # Require epel-rpm-macros for the %%gpgverify macro on EL-7/EL-8, and
 # %%build_cflags & %%build_ldflags on EL-7.
@@ -172,8 +190,11 @@ BuildRequires:  expat-devel
 BuildRequires:  findutils
 BuildRequires:  gawk
 BuildRequires:  gcc
-BuildRequires:  gettext-devel
+BuildRequires:  gettext
+%if !0%{?os2_version}
+BuildRequires:  glibc-utils
 BuildRequires:  gnupg2
+%endif
 BuildRequires:  libcurl-devel
 BuildRequires:  make
 BuildRequires:  openssl-devel
@@ -195,9 +216,12 @@ BuildRequires:  perl
 BuildRequires:  pkgconfig(bash-completion)
 %endif
 BuildRequires:  sed
-# For macros
 %if !0%{?os2_version}
+%if 0%{?fedora} || 0%{?rhel} >= 8
+BuildRequires:  systemd-rpm-macros
+%else
 BuildRequires:  systemd
+%endif
 %endif
 BuildRequires:  tcl
 %if !0%{?os2_version}
@@ -209,11 +233,15 @@ BuildRequires:  zlib-devel >= 1.2
 %if %{with tests}
 # Test suite requirements
 BuildRequires:  acl
-%if 0%{?fedora} || 0%{?rhel} >= 8
-# Needed by t5540-http-push-webdav.sh
+%if (0%{?fedora} && 0%{?fedora} < 40) || (0%{?rhel} >= 8 && 0%{?rhel} < 10)
+# Needed by t5540-http-push-webdav.sh; recent httpd obviates this
 BuildRequires: apr-util-bdb
 %endif
-# endif fedora >= 27
+%if 0%{?fedora} || 0%{?rhel} >= 8
+# Needed by t5559-http-fetch-smart-http2.sh
+BuildRequires: mod_http2
+%endif
+# endif fedora or rhel >= 8
 BuildRequires:  bash
 %if %{with cvs}
 BuildRequires:  cvs
@@ -236,12 +264,18 @@ BuildRequires:  gnupg2-smime
 BuildRequires:  highlight
 %endif
 # endif fedora or el7+ (ppc64le/x86_64)
+%if 0%{?fedora} >= 37
+BuildRequires:  httpd-core
+%else
 BuildRequires:  httpd
+%endif
+# endif fedora >= 37
 %if 0%{?fedora} && ! ( 0%{?fedora} >= 35 || "%{_arch}" == "i386" || "%{_arch}" == "s390x" )
 BuildRequires:  jgit
 %endif
 # endif fedora (except i386 and s390x)
 BuildRequires:  mod_dav_svn
+BuildRequires:  openssh-clients
 BuildRequires:  perl(App::Prove)
 BuildRequires:  perl(CGI)
 BuildRequires:  perl(CGI::Carp)
@@ -277,8 +311,14 @@ BuildRequires:  subversion-perl
 BuildRequires:  tar
 BuildRequires:  time
 BuildRequires:  zip
+BuildRequires:  zstd
 %endif
 # endif with tests
+
+%if 0%{?os2_version}
+BuildRequires:  libc-devel >= 0.1.14
+BuildRequires:  libcx-devel >= 0.7.5
+%endif
 
 Requires:       git-core = %{version}-%{release}
 Requires:       git-core-doc = %{version}-%{release}
@@ -289,17 +329,6 @@ Requires:       perl(Term::ReadKey)
 %endif
 # endif ! defined perl_bootstrap
 Requires:       perl-Git = %{version}-%{release}
-
-%if %{with emacs} && %{defined _emacs_version}
-Requires:       emacs-filesystem >= %{_emacs_version}
-%endif
-# endif with emacs && defined _emacs_version
-
-# Obsolete emacs-git if it's disabled
-%if %{without emacs}
-Obsoletes:      emacs-git < %{?epoch:%{epoch}:}%{version}-%{release}
-%endif
-# endif without emacs
 
 # Obsolete git-cvs if it's disabled
 %if %{without cvs}
@@ -414,10 +443,7 @@ Requires:       perl(DBD::SQLite)
 Summary:        Git protocol daemon
 Requires:       git-core = %{version}-%{release}
 %if !0%{?os2_version}
-Requires:       systemd
-Requires(post): systemd
-Requires(preun):  systemd
-Requires(postun): systemd
+%{?systemd_requires}
 %endif
 %description daemon
 The git daemon for supporting git:// access to git repositories
@@ -428,7 +454,26 @@ Summary:        Git tools for sending patches via email
 BuildArch:      noarch
 Requires:       git = %{version}-%{release}
 Requires:       perl(Authen::SASL)
+Requires:       perl(Cwd)
+%if ! 0%{?rhel}
+# RHEL lacks perl-Email-Valid (rhbz#2166718)
+Requires:       perl(Email::Valid)
+%endif
+Requires:       perl(File::Spec)
+Requires:       perl(File::Spec::Functions)
+Requires:       perl(File::Temp)
+Requires:       perl(IO::Socket::SSL)
+Requires:       perl(Mail::Address)
+Requires:       perl(MIME::Base64)
+Requires:       perl(MIME::QuotedPrint)
+Requires:       perl(Net::Domain)
+Requires:       perl(Net::SMTP)
 Requires:       perl(Net::SMTP::SSL)
+Requires:       perl(POSIX)
+Requires:       perl(Sys::Hostname)
+Requires:       perl(Term::ANSIColor)
+Requires:       perl(Term::ReadLine)
+Requires:       perl(Text::ParseWords)
 %description email
 %{summary}.
 %endif
@@ -439,7 +484,9 @@ Summary:        Git repository browser
 BuildArch:      noarch
 Requires:       git = %{version}-%{release}
 Requires:       git-gui = %{version}-%{release}
-Requires:       tk >= 8.4
+# Keep gitk on tcl/tk 8.x until its ready for 9 (also see below in config.mk)
+# https://github.com/j6t/gitk/issues/5
+Requires:       tk8 >= 8.4
 %description -n gitk
 %{summary}.
 %endif
@@ -503,7 +550,9 @@ Requires:       git = %{version}-%{release}
 Summary:        Perl interface to Git
 BuildArch:      noarch
 Requires:       git = %{version}-%{release}
+%if %{with perl_modcompat}
 Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
+%endif
 %description -n perl-Git
 %{summary}.
 
@@ -511,12 +560,15 @@ Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $versi
 Summary:        Perl interface to Git::SVN
 BuildArch:      noarch
 Requires:       git = %{version}-%{release}
+%if %{with perl_modcompat}
 Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
+%endif
 %description -n perl-Git-SVN
 %{summary}.
 
 %package subtree
 Summary:        Git tools to merge and split repositories
+BuildArch:      noarch
 Requires:       git-core = %{version}-%{release}
 %description subtree
 Git subtrees allow subprojects to be included within a subdirectory
@@ -547,7 +599,7 @@ Requires:       subversion
 # Verify GPG signatures
 xz -dc '%{SOURCE0}' | %{gpgverify} --keyring='%{SOURCE2}' --signature='%{SOURCE1}' --data=-
 
-%autosetup -p1 -n %{name}-%{version}%{?rcrev}
+%autosetup -p1 -n %{name}-%{real_version}
 
 # Install print-failed-test-output script
 install -p -m 755 %{SOURCE99} print-failed-test-output
@@ -555,8 +607,10 @@ install -p -m 755 %{SOURCE99} print-failed-test-output
 %scm_setup
 %endif
 
-# Remove git-archimport from command list
+# Remove git-archimport
+sed -i '/^SCRIPT_PERL += git-archimport\.perl$/d' Makefile
 sed -i '/^git-archimport/d' command-list.txt
+rm git-archimport.perl Documentation/git-archimport.adoc
 
 %if %{without cvs}
 # Remove git-cvs* from command list
@@ -588,6 +642,9 @@ INSTALL_SYMLINKS = 1
 GITWEB_PROJECTROOT = %{_localstatedir}/lib/git
 GNU_ROFF = 1
 NO_PERL_CPAN_FALLBACKS = 1
+%if 0%{?rhel} && 0%{?rhel} < 8
+NO_UNCOMPRESS2 = 1
+%endif
 %if %{with python3}
 PYTHON_PATH = %{__python3}
 %else
@@ -602,6 +659,10 @@ USE_ASCIIDOCTOR = 1
 %endif
 htmldir = %{?_pkgdocdir}%{!?_pkgdocdir:%{_docdir}/%{name}-%{version}}
 prefix = %{_prefix}
+%if 0%{?os2_version}
+# TODO: %{perl_vendorlib} is missing, see https://github.com/bitwiseworks/rpm-specs/issues/17
+%global perl_vendorlib %{_prefix}/share/perl5/vendor_perl
+%endif
 perllibdir = %{perl_vendorlib}
 gitwebdir = %{_localstatedir}/www/git
 
@@ -609,6 +670,10 @@ gitwebdir = %{_localstatedir}/www/git
 DEFAULT_TEST_TARGET = prove
 GIT_PROVE_OPTS = --verbose --normalize %{?_smp_mflags} --formatter=TAP::Formatter::File
 GIT_TEST_OPTS = -x --verbose-log
+
+# Keep gitk on tcl/tk 8.x until its ready for 9 (see more above in gitk requires)
+TCLTK_PATH = wish8
+TCL_PATH = tclsh8
 EOF
 
 # Filter bogus perl requires
@@ -625,8 +690,7 @@ EOF
 %if !0%{?os2_version}
 rm -rf perl/Git/LoadCPAN{.pm,/}
 %else
-rm -rf perl/Git/LoadCPAN.pm
-rm -rf perl/Git/LoadCPAN
+rm -rf perl/Git/LoadCPAN.pm perl/Git/LoadCPAN/
 %endif
 grep -rlZ '^use Git::LoadCPAN::' | xargs -r0 sed -i 's/Git::LoadCPAN:://g'
 
@@ -637,10 +701,9 @@ sed -i 's@"++GITWEB_HOME_LINK_STR++"@$ENV{"SERVER_NAME"} ? "git://" . $ENV{"SERV
 # Move contrib/{contacts,subtree} docs to Documentation so they build with the
 # proper asciidoc/docbook/xmlto options
 %if !0%{?os2_version}
-mv contrib/{contacts,subtree}/git-*.txt Documentation/
+mv contrib/{contacts,subtree}/git-*.adoc Documentation/
 %else
-mv contrib/contacts/git-*.txt Documentation/
-mv contrib/subtree/git-*.txt Documentation/
+mv contrib/contacts/git-*.adoc contrib/subtree/git-*.adoc Documentation/
 %endif
 
 %build
@@ -692,35 +755,10 @@ rm -rf contrib/fast-import/import-zips.py
 %endif
 # endif with python2
 
-# Use python3 to avoid an unnecessary python2 dependency, if possible.
-%if %{with python3}
-%if !0%{?os2_version}
-sed -i -e '1s@#!\( */usr/bin/env python\|%{__python2}\)$@#!%{__python3}@' \
-    contrib/hg-to-git/hg-to-git.py
-%else
-sed -i -e '1s@#!\( */usr/bin/env python\|/\@unixroot/usr/bin/python2\)$@#!/\@unixroot/usr/bin/python3@' \
-    contrib/hg-to-git/hg-to-git.py
-%endif
-%endif
-# endif with python3
-
 %install
 %make_install %{?with_docs:install-doc}
 
 %make_install -C contrib/contacts
-
-%if %{with emacs}
-%global elispdir %{_emacs_sitelispdir}/git
-pushd contrib/emacs >/dev/null
-for el in *.el ; do
-    # Note: No byte-compiling is done.  These .el files are one-line stubs
-    # which only serve to point users to better alternatives.
-    install -Dpm 644 $el %{buildroot}%{elispdir}/$el
-    rm -f $el # clean up to avoid cruft in git-core-doc
-done
-popd >/dev/null
-%endif
-# endif with emacs
 
 %if %{with libsecret}
 install -pm 755 contrib/credential/libsecret/git-credential-libsecret \
@@ -733,10 +771,6 @@ install -pm 755 contrib/credential/netrc/git-credential-netrc \
 # deleted in the docs preparation, so the tests can be run in %%check
 mv contrib/credential/netrc .
 
-%if 0%{?os2_version}
-# having a file INSTALL in the contrib/subtree hurts really, so remove it
-rm -rf contrib/subtree/INSTALL
-%endif
 %make_install -C contrib/subtree
 
 %if !0%{?os2_version}
@@ -752,11 +786,15 @@ install -Dpm 0755 contrib/diff-highlight/diff-highlight \
 %if !0%{?os2_version}
 rm -rf contrib/diff-highlight/{Makefile,diff-highlight,*.perl,t}
 %else
-rm -rf contrib/diff-highlight/Makefile
-rm -rf contrib/diff-highlight/diff-highlight
-rm -rf contrib/diff-highlight/*.perl
-rm -rf contrib/diff-highlight/t
+rm -rf contrib/diff-highlight/Makefile contrib/diff-highlight/diff-highlight contrib/diff-highlight/*.perl contrib/diff-highlight/t
 %endif
+
+# Remove contrib/persistent-https; a) this code requires compilation; and b) it
+# is licensed differently than git
+rm -rf contrib/persistent-https
+
+# Remove contrib/scalar to avoid cruft in the git-core-doc docdir
+rm -rf contrib/scalar
 
 # Clean up contrib/subtree to avoid cruft in the git-core-doc docdir
 %if !0%{?os2_version}
@@ -767,9 +805,6 @@ rm -rf contrib/subtree/Makefile
 rm -rf contrib/subtree/git-subtree*
 rm -rf contrib/subtree/t
 %endif
-
-# git-archimport is not supported
-find %{buildroot} Documentation -type f -name 'git-archimport*' -exec rm -f {} ';'
 
 %if %{without cvs}
 # Remove git-cvs* and gitcvs*
@@ -786,26 +821,13 @@ rm -f %{buildroot}%{gitexecdir}/mergetools/p4merge
 # endif without p4
 
 # Remove unneeded git-remote-testsvn so git-svn can be noarch
+%if !0%{?os2_version}
 rm -f %{buildroot}%{gitexecdir}/git-remote-testsvn
-
-%if 0%{?os2_version}
-#remove non packed stuff
-rm -rf %{buildroot}%{gitcoredir}/git-remote-testsvn.exe
-rm -rf %{buildroot}%{gitexecdir}/git-svn
-rm -rf %{buildroot}%{gitexecdir}/git-instaweb
-rm -rf %{buildroot}%{_mandir}/man1/git-instaweb.1*
-rm -rf %{buildroot}%{_mandir}/man1/git-svn.1*
-rm -rf %{buildroot}%{_mandir}/man1/git-gui.1*
-rm -rf %{buildroot}%{_mandir}/man1/git-citool.1*
-rm -rf %{buildroot}%{_mandir}/man1/gitweb.1*
-rm -rf %{buildroot}%{_mandir}/man5/gitweb.conf.5*
-rm -rf %{buildroot}%{_mandir}/man1/*gitk*.1*
-rm -rf %{buildroot}%{gitexecdir}/*email*
-rm -rf %{buildroot}%{_mandir}/man1/*email*.1*
-rm -rf %{buildroot}%{_localstatedir}/www/git/
+%else
+rm -f %{buildroot}%{gitexecdir}/git-remote-testsvn.exe
 %endif
 
-exclude_re="archimport|email|git-(citool|credential-libsecret|cvs|daemon|gui|instaweb|p4|subtree|svn)|gitk|gitweb|p4merge"
+exclude_re="email|git-(citool|credential-libsecret|cvs|daemon|gui|instaweb|p4|subtree|svn)|gitk|gitweb|p4merge"
 %if !0%{?os2_version}
 (find %{buildroot}{%{_bindir},%{_libexecdir}} -type f -o -type l | grep -vE "$exclude_re" | sed -e s@^%{buildroot}@@) > bin-man-doc-files
 (find %{buildroot}{%{_bindir},%{_libexecdir}} -mindepth 1 -type d | grep -vE "$exclude_re" | sed -e 's@^%{buildroot}@%dir @') >> bin-man-doc-files
@@ -836,8 +858,8 @@ perl -p \
 
 # Setup bash completion
 %if !0%{?os2_version}
-install -Dpm 644 contrib/completion/git-completion.bash %{buildroot}%{bashcompdir}/git
-ln -s git %{buildroot}%{bashcompdir}/gitk
+install -Dpm 644 contrib/completion/git-completion.bash %{buildroot}%{bash_completions_dir}/git
+ln -s git %{buildroot}%{bash_completions_dir}/gitk
 %endif
 
 # Install tcsh completion
@@ -906,21 +928,16 @@ grep -E  "$not_core_re" bin-man-doc-files > bin-man-doc-git-files
 # contrib
 not_core_doc_re="(git-(cvs|gui|citool|daemon|instaweb|subtree))|p4|svn|email|gitk|gitweb"
 mkdir -p %{buildroot}%{_pkgdocdir}/
-cp -pr CODE_OF_CONDUCT.md README.md Documentation/*.txt Documentation/RelNotes contrib %{buildroot}%{_pkgdocdir}/
+cp -pr CODE_OF_CONDUCT.md README.md Documentation/*.adoc Documentation/RelNotes contrib %{buildroot}%{_pkgdocdir}/
 # Remove contrib/ files/dirs which have nothing useful for documentation
 %if !0%{?os2_version}
 rm -rf %{buildroot}%{_pkgdocdir}/contrib/{contacts,credential}/
+%else
+rm -rf %{buildroot}%{_pkgdocdir}/contrib/contacts/ %{buildroot}%{_pkgdocdir}/contrib/credential/
+%endif
+%if !0%{?os2_version}
 cp -p gitweb/INSTALL %{buildroot}%{_pkgdocdir}/INSTALL.gitweb
 cp -p gitweb/README %{buildroot}%{_pkgdocdir}/README.gitweb
-%else
-rm -rf %{buildroot}%{_pkgdocdir}/contrib/contacts/
-rm -rf %{buildroot}%{_pkgdocdir}/git-instaweb.txt
-rm -rf %{buildroot}%{_pkgdocdir}/git-citool.txt
-rm -rf %{buildroot}%{_pkgdocdir}/git-gui.txt
-rm -rf %{buildroot}%{_pkgdocdir}/git-svn.txt
-rm -rf %{buildroot}%{_pkgdocdir}/*gitk*.txt
-rm -rf %{buildroot}%{_pkgdocdir}/gitweb*.txt
-rm -rf %{buildroot}%{_pkgdocdir}/*email*.txt
 %endif
 
 %if %{with docs}
@@ -930,16 +947,7 @@ cp -pr Documentation/{howto,technical} %{buildroot}%{_pkgdocdir}/
 find %{buildroot}%{_pkgdocdir}/{howto,technical} -type f \
     |grep -o "%{_pkgdocdir}.*$" >> man-doc-files-core
 %else
-rm -rf %{buildroot}%{_pkgdocdir}/contrib/credential/
-rm -rf %{buildroot}%{_pkgdocdir}/git-instaweb.html
-rm -rf %{buildroot}%{_pkgdocdir}/git-citool.html
-rm -rf %{buildroot}%{_pkgdocdir}/git-gui.html
-rm -rf %{buildroot}%{_pkgdocdir}/git-svn.html
-rm -rf %{buildroot}%{_pkgdocdir}/*gitk*.html
-rm -rf %{buildroot}%{_pkgdocdir}/gitweb*.html
-rm -rf %{buildroot}%{_pkgdocdir}/*email*.html
-cp -pr Documentation/howto %{buildroot}%{_pkgdocdir}/
-cp -pr Documentation/technical %{buildroot}%{_pkgdocdir}/
+cp -pr Documentation/howto Documentation/technical %{buildroot}%{_pkgdocdir}/
 find %{buildroot}%{_pkgdocdir}/howto %{buildroot}%{_pkgdocdir}/technical -type f \
     |grep -o "%{_pkgdocdir}.*$" >> man-doc-files-core
 %endif
@@ -962,6 +970,37 @@ find %{buildroot}%{_pkgdocdir}/howto %{buildroot}%{_pkgdocdir}/technical -type f
 } >> man-doc-files-core
 ##### #DOC
 
+%if 0%{?os2_version}
+# Remove non-packed stuff
+rm -rf %{buildroot}%{gitexecdir}/git-svn
+rm -rf %{buildroot}%{gitexecdir}/git-instaweb
+rm -rf %{buildroot}%{gitexecdir}/git-send-email
+rm -rf %{buildroot}%{_mandir}/man1/git-instaweb.1*
+rm -rf %{buildroot}%{_mandir}/man1/git-svn.1*
+rm -rf %{buildroot}%{_mandir}/man1/git-gui.1*
+rm -rf %{buildroot}%{_mandir}/man1/git-citool.1*
+rm -rf %{buildroot}%{_mandir}/man1/gitweb.1*
+rm -rf %{buildroot}%{_mandir}/man5/gitweb.conf.5*
+rm -rf %{buildroot}%{_mandir}/man1/gitk.1*
+rm -rf %{buildroot}%{_mandir}/man1/git-send-email.1*
+rm -rf %{buildroot}%{_pkgdocdir}/git-gui.adoc
+rm -rf %{buildroot}%{_pkgdocdir}/git-gui.html
+rm -rf %{buildroot}%{_pkgdocdir}/git-citool.adoc
+rm -rf %{buildroot}%{_pkgdocdir}/git-citool.html
+rm -rf %{buildroot}%{_pkgdocdir}/git-instaweb.adoc
+rm -rf %{buildroot}%{_pkgdocdir}/git-instaweb.html
+rm -rf %{buildroot}%{_pkgdocdir}/git-send-email.adoc
+rm -rf %{buildroot}%{_pkgdocdir}/git-send-email.html
+rm -rf %{buildroot}%{_pkgdocdir}/git-svn.adoc
+rm -rf %{buildroot}%{_pkgdocdir}/git-svn.html
+rm -rf %{buildroot}%{_pkgdocdir}/gitk.adoc
+rm -rf %{buildroot}%{_pkgdocdir}/gitk.html
+rm -rf %{buildroot}%{_pkgdocdir}/gitweb*.adoc
+rm -rf %{buildroot}%{_pkgdocdir}/gitweb*.html
+rm -rf %{buildroot}%{_localstatedir}/www/git
+rm -rf %{buildroot}%{bash_completions_dir}/git
+%endif
+
 %check
 %if %{without tests}
 echo "*** Skipping tests"
@@ -976,30 +1015,69 @@ find %{buildroot}%{_pkgdocdir} -name "*.html" -print0 | xargs -r0 linkchecker
 # endif with docs && with linkcheck
 
 # Tests to skip on all releases and architectures
-GIT_SKIP_TESTS=""
+#
+# t5559-http-fetch-smart-http2 runs t5551-http-fetch-smart with
+# HTTP_PROTO=HTTP/2.  Unfortunately, it fails quite regularly.
+# https://lore.kernel.org/git/Y4fUntdlc1mqwad5@pobox.com/
+GIT_SKIP_TESTS="t5559"
+
+%if 0%{?rhel} && 0%{?rhel} < 8
+# Skip tests which require mod_http2 on el7
+GIT_SKIP_TESTS="$GIT_SKIP_TESTS t5559"
+%endif
+# endif rhel < 8
 
 %ifarch aarch64 %{arm} %{power64}
 # Skip tests which fail on aarch64, arm, and ppc
 #
 # The following 2 tests use run_with_limited_cmdline, which calls ulimit -s 128
 # to limit the maximum stack size.
-# t5541.35 'push 2000 tags over http'
+# t5541.36 'push 2000 tags over http'
 # t5551.25 'clone the 2,000 tag repo to check OS command line overflow'
-GIT_SKIP_TESTS="$GIT_SKIP_TESTS t5541.35 t5551.25"
+GIT_SKIP_TESTS="$GIT_SKIP_TESTS t5541.37 t5551.25"
 %endif
 # endif aarch64 %%{arm} %%{power64}
 
-%ifarch %{power64}
-# Skip tests which fail on ppc
+%if 0%{?rhel} == 8 && "%{_arch}" == "s390x"
+# Skip tests which fail on s390x on rhel-8
 #
-# t9115-git-svn-dcommit-funky-renames is disabled because it frequently fails.
-# The port it uses (9115) is already in use.  It is unclear if this is
-# due to an issue in the test suite or a conflict with some other process on
-# the build host.  It only appears to occur on ppc-arches.
-GIT_SKIP_TESTS="$GIT_SKIP_TESTS t9115"
+# The following tests fail on s390x & el8.  The cause should be investigated.
+# However, it's a lower priority since the same tests work consistently on
+# s390x with Fedora and RHEL-9.  The failures seem to originate in t5300.
+#
+# t5300.10 'unpack without delta'
+# t5300.12 'unpack with REF_DELTA'
+# t5300.13 'unpack with REF_DELTA'
+# t5300.14 'unpack with OFS_DELTA'
+# t5300.18 'compare delta flavors'
+# t5300.20 'use packed deltified (REF_DELTA) objects'
+# t5300.23 'verify pack'
+# t5300.24 'verify pack -v'
+# t5300.25 'verify-pack catches mismatched .idx and .pack files'
+# t5300.29 'verify-pack catches a corrupted sum of the index file itself'
+# t5300.30 'build pack index for an existing pack'
+# t5300.45 'make sure index-pack detects the SHA1 collision'
+# t5300.46 'make sure index-pack detects the SHA1 collision (large blobs)'
+# t5303.5  'create corruption in data of first object'
+# t5303.7  '... and loose copy of second object allows for partial recovery'
+# t5303.11 'create corruption in data of first delta'
+# t6300.35 'basic atom: head objectsize:disk'
+# t6300.91 'basic atom: tag objectsize:disk'
+# t6300.92 'basic atom: tag *objectsize:disk'
+GIT_SKIP_TESTS="$GIT_SKIP_TESTS t5300.1[02348] t5300.2[03459] t5300.30 t5300.4[56] t5303.[57] t5303.11 t6300.35 t6300.9[12]"
 %endif
-# endif %%{power64}
+# endif rhel == 8 && arch == s390x
 
+%if "%{_arch}" == "s390x"
+# Skip tests which fail on s390x
+#
+# The following tests are failing on s390x.
+# https://lore.kernel.org/git/Z8dIZmscTdi8dZAY@teonanacatl.net/
+#
+# t5620.4 'do partial clone 2, backfill min batch size'
+GIT_SKIP_TESTS="$GIT_SKIP_TESTS t5620.4"
+%endif
+# endif "%{_arch}" == "s390x"
 export GIT_SKIP_TESTS
 
 # Set LANG so various UTF-8 tests are run
@@ -1016,14 +1094,14 @@ export GIT_TEST_SVN_HTTPD=true
 
 # Create tmpdir for test output and update GIT_TEST_OPTS
 # Also update GIT-BUILD-OPTIONS to keep make from any needless rebuilding
-testdir=$(mktemp -d -p /tmp git-t.XXXX)
+export testdir=$(mktemp -d -p /tmp git-t.XXXX)
 sed -i "s@^GIT_TEST_OPTS = .*@& --root=$testdir@" config.mak
 touch -r GIT-BUILD-OPTIONS ts
 sed -i "s@\(GIT_TEST_OPTS='.*\)'@\1 --root=$testdir'@" GIT-BUILD-OPTIONS
 touch -r ts GIT-BUILD-OPTIONS
 
 # Run the tests
-%__make test || ./print-failed-test-output
+%__make -C t all || ./print-failed-test-output
 
 # Run contrib/credential/netrc tests
 mkdir -p contrib/credential
@@ -1050,10 +1128,6 @@ rmdir --ignore-fail-on-non-empty "$testdir"
 %endif
 
 %files -f bin-man-doc-git-files
-%if %{with emacs}
-%{elispdir}
-%endif
-# endif with emacs
 %{_datadir}/git-core/contrib/diff-highlight
 %{_datadir}/git-core/contrib/hooks/update-paranoid
 %{_datadir}/git-core/contrib/hooks/setgitperms.perl
@@ -1077,7 +1151,7 @@ rmdir --ignore-fail-on-non-empty "$testdir"
 %exclude %{_datadir}/git-core/templates/hooks/pre-rebase.sample
 %exclude %{_datadir}/git-core/templates/hooks/prepare-commit-msg.sample
 %if !0%{?os2_version}
-%{bashcomproot}
+%{bash_completions_dir}/git
 %endif
 %{_datadir}/git-core/
 
@@ -1097,7 +1171,7 @@ rmdir --ignore-fail-on-non-empty "$testdir"
 
 %if %{with cvs}
 %files cvs
-%{_pkgdocdir}/*git-cvs*.txt
+%{_pkgdocdir}/*git-cvs*.adoc
 %{_bindir}/git-cvsserver
 %{gitexecdir}/*cvs*
 %{?with_docs:%{_mandir}/man1/*cvs*.1*}
@@ -1106,10 +1180,10 @@ rmdir --ignore-fail-on-non-empty "$testdir"
 # endif with cvs
 
 %files daemon
-%{_pkgdocdir}/git-daemon*.txt
+%{_pkgdocdir}/git-daemon*.adoc
 %if !0%{?os2_version}
 %{_unitdir}/git.socket
-%{_unitdir}/git@.service
+%config(noreplace) %{_unitdir}/git@.service
 %{gitexecdir}/git-daemon
 %else
 %{gitexecdir}/git-daemon.exe
@@ -1120,7 +1194,7 @@ rmdir --ignore-fail-on-non-empty "$testdir"
 
 %if !0%{?os2_version}
 %files email
-%{_pkgdocdir}/*email*.txt
+%{_pkgdocdir}/*email*.adoc
 %{gitexecdir}/*email*
 %if 0%{?os2_version}
 %exclude %{gitexecdir}/*.dbg
@@ -1131,7 +1205,7 @@ rmdir --ignore-fail-on-non-empty "$testdir"
 
 %if !0%{?os2_version}
 %files -n gitk
-%{_pkgdocdir}/*gitk*.txt
+%{_pkgdocdir}/*gitk*.adoc
 %{_bindir}/*gitk*
 %{_datadir}/gitk
 %{?with_docs:%{_mandir}/man1/*gitk*.1*}
@@ -1141,7 +1215,7 @@ rmdir --ignore-fail-on-non-empty "$testdir"
 %if !0%{?os2_version}
 %files -n gitweb
 %{_pkgdocdir}/*.gitweb
-%{_pkgdocdir}/gitweb*.txt
+%{_pkgdocdir}/gitweb*.adoc
 %{?with_docs:%{_mandir}/man1/gitweb.1*}
 %{?with_docs:%{_mandir}/man5/gitweb.conf.5*}
 %{?with_docs:%{_pkgdocdir}/gitweb*.html}
@@ -1156,8 +1230,8 @@ rmdir --ignore-fail-on-non-empty "$testdir"
 %{gitexecdir}/git-citool
 %{_datadir}/applications/*git-gui.desktop
 %{_datadir}/git-gui/
-%{_pkgdocdir}/git-gui.txt
-%{_pkgdocdir}/git-citool.txt
+%{_pkgdocdir}/git-gui.adoc
+%{_pkgdocdir}/git-citool.adoc
 %{?with_docs:%{_mandir}/man1/git-gui.1*}
 %{?with_docs:%{_pkgdocdir}/git-gui.html}
 %{?with_docs:%{_mandir}/man1/git-citool.1*}
@@ -1167,7 +1241,7 @@ rmdir --ignore-fail-on-non-empty "$testdir"
 %if !0%{?os2_version}
 %files instaweb
 %{gitexecdir}/git-instaweb
-%{_pkgdocdir}/git-instaweb.txt
+%{_pkgdocdir}/git-instaweb.adoc
 %{?with_docs:%{_mandir}/man1/git-instaweb.1*}
 %{?with_docs:%{_pkgdocdir}/git-instaweb.html}
 %endif
@@ -1179,7 +1253,7 @@ rmdir --ignore-fail-on-non-empty "$testdir"
 %if !0%{?os2_version}
 %exclude %{gitexecdir}/*.dbg
 %endif
-%{_pkgdocdir}/*p4*.txt
+%{_pkgdocdir}/*p4*.adoc
 %{?with_docs:%{_mandir}/man1/*p4*.1*}
 %{?with_docs:%{_pkgdocdir}/*p4*.html}
 %endif
@@ -1192,19 +1266,25 @@ rmdir --ignore-fail-on-non-empty "$testdir"
 
 %files subtree
 %{gitexecdir}/git-subtree
-%{_pkgdocdir}/git-subtree.txt
+%{_pkgdocdir}/git-subtree.adoc
 %{?with_docs:%{_mandir}/man1/git-subtree.1*}
 %{?with_docs:%{_pkgdocdir}/git-subtree.html}
 
 %if !0%{?os2_version}
 %files svn
 %{gitexecdir}/git-svn
-%{_pkgdocdir}/git-svn.txt
+%{_pkgdocdir}/git-svn.adoc
 %{?with_docs:%{_mandir}/man1/git-svn.1*}
 %{?with_docs:%{_pkgdocdir}/git-svn.html}
 %endif
 
 %changelog
+* Sun Jan 11 2026 Dmitrii Kuminov <coding@dmik.org> 2.50.1-1
+- Update git to version 2.50.1.
+- Synchronize spec with Fedora for git 2.50.1.
+- Requilre LIBCn >= 0.1.14 due to arc4random_buf and new includes.
+- Requilre LIBCx >= 0.7.5 due to spawn2 fixes.
+
 * Wed Dec 01 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.30.2-2
 - disable email, as we lack still some perl stuff
 

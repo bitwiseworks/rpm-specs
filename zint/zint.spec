@@ -1,9 +1,8 @@
 Name:      zint
-Version:   2.15.0
+Version:   2.16.0
 Release:   2%{?dist}
 Summary:   Barcode generator library
-# Automatically converted from old format: GPLv3+ - review is highly recommended.
-License:   GPL-3.0-or-later
+License:   BSD-3-Clause AND GPL-3.0-or-later
 URL:       http://www.zint.org.uk
 %if 0%{os2_version}
 Vendor:         TeLLie OS2 forever
@@ -15,11 +14,10 @@ Source:    http://downloads.sourceforge.net/%{name}/%{name}-%{version}-src.tar.g
 %else
 %scm_source github https://github.com/Tellie/zint-os2 %{version}-os2
 %endif
+
 %if !0%{os2_version}
-# patch to disable creation of rpaths
-Patch0:    %{name}-rpath.patch
 # create shared libQZint instead of static one
-Patch1:    %{name}-shared.patch
+Patch0:    %{name}-shared.patch
 %endif
 
 BuildRequires: cmake
@@ -35,12 +33,6 @@ BuildRequires: qt5-qtbase-devel
 BuildRequires: qt5-qtsvg-devel
 BuildRequires: qt5-qttools-devel
 BuildRequires: qt5-qttools-static
-
-# for WPS macros
-%if 0%{os2_version}
-BuildRequires:  bww-resources-rpm-build
-Requires:       bww-resources-rpm
-%endif
 
 %description
 Zint is a C library for encoding data in several barcode variants. The
@@ -91,17 +83,10 @@ Requires:      %{name}-devel = %{version}-%{release}
 %description qt-devel 
 C library and header files needed to develop applications that use libQZint.
 
-%package static
-Summary: Libraries for applications using zint
-
-%description static
-Static libraries for applications using the zint compression format.
 
 %prep
 %if !0%{os2_version}
-%setup -q -n %{name}-%{version}-src
-%patch -P0 -p1
-%patch -P1 -p1
+%autosetup -p1 -n %{name}-%{version}-src
 %else
 %scm_setup
 %endif
@@ -127,25 +112,29 @@ find -type f -exec chmod 644 {} \;
 rm -rf %{buildroot}/%{_datadir}/apps
 install -D -p -m 644 docs/%{name}.1 %{buildroot}%{_mandir}/man1/%{name}.1
 install -D -p -m 644 cmake/modules/FindZint.cmake %{buildroot}%{_datadir}/cmake/Modules/FindZint.cmake
+%if !0%{os2_version}
+install -D -p -m 644 %{name}-qt.png %{buildroot}/usr/share/pixmaps/%{name}-qt.png
 mv %{buildroot}%{_datadir}/%{name} %{buildroot}%{_datadir}/cmake/%{name}
+%endif
 %if 0%{?os2_version}     
+mkdir -p %{buildroot}%{_datadir}/%{name}
+mkdir -p %{buildroot}%{_datadir}/cmake/%{name}
 mkdir -p %{buildroot}%{_datadir}/os2/icons/
-cp -a frontend_qt/res/qtzint-os2.ico %{buildroot}%{_datadir}/os2/icons/qt%{name}.ico
+cp -a frontend_qt/res/qtzint-os2.ico %{buildroot}%{_datadir}/os2/icons/%{name}-qt.ico
 cp -a frontend/zint-os2.ico %{buildroot}%{_datadir}/os2/icons/%{name}.ico
 %endif
 %if !0%{os2_version}
-desktop-file-validate %{buildroot}%{_datadir}/applications/%{name}-qt.desktop
-install -D -p -m 644 %{name}-qt.png %{buildroot}/usr/share/pixmaps/%{name}-qt.png
 install -D -p -m 644 %{name}-qt.desktop %{buildroot}%{_datadir}/applications/%{name}-qt.desktop
+desktop-file-validate %{buildroot}%{_datadir}/applications/%{name}-qt.desktop
+
 
 %ldconfig_scriptlets
 %ldconfig_scriptlets qt
 %endif
 
-
 %files
 %doc docs/manual.txt README TODO
-%license LICENSE
+%license LICENSE frontend/COPYING
 %if !0%{os2_version}
 %{_bindir}/%{name}
 %else
@@ -164,11 +153,12 @@ install -D -p -m 644 %{name}-qt.desktop %{buildroot}%{_datadir}/applications/%{n
 %{_includedir}/%{name}.h
 %if !0%{os2_version}
 %{_libdir}/libzint.so
+%{_datadir}/cmake/%{name}/
 %else
 %{_libdir}/*_dll.a
 %endif
-%{_datadir}/cmake/%{name}/
-%{_datadir}/cmake/Modules/*.cmake
+%{_datadir}/cmake/Modules/F*.cmake
+%{_libdir}/cmake/%{name}/%{name}-*.cmake
 
 %files qt
 %if !0%{os2_version}
@@ -178,17 +168,16 @@ install -D -p -m 644 %{name}-qt.desktop %{buildroot}%{_datadir}/applications/%{n
 %{_datadir}/pixmaps/%{name}-qt.png
 %else
 %{_bindir}/%{name}-qt.exe
-%{_datadir}/os2/icons/qt%{name}.ico
+%{_datadir}/os2/icons/%{name}-qt.ico
 %endif
 
 %files qt-devel
 %{_includedir}/qzint.h
 %if !0%{os2_version}
 %{_libdir}/libQZint.so
+%else
+%{_libdir}/QZint.a
 %endif
-
-%files static
-%{_libdir}/*.a
 
 %if 0%{?os2_version}
 %global wps_folder_title Zint
@@ -198,15 +187,24 @@ if [ "$1" -ge 1 ]; then # (upon update)
     %wps_object_delete_all
 fi
 %global wps_app_title Zint
-%bww_folder -t %{wps_folder_title}
-%bww_app -f %{_bindir}/%{name}-qt.exe -t %{wps_app_title} -i $qt%{name}.ico
-%bww_app -f %{_bindir}/%{name}.exe -t %{wps_app_title} -i $%{name}.ico
+%bww_folder -t %{quote:%{wps_folder_title}}
+%bww_app -f %{_bindir}/%{name}.exe -t %{quote:%{wps_app_title}} -i %{name}.ico
 %bww_app_shadow
-%bww_readme -f %_defaultdocdir/%{name}-%{version}/README
-%bww_license -f %_defaultlicensedir/%{name}-%{version}/LICENSE
-%bww_file README-OS2.txt -f %_defaultdocdir/%{name}-%{version}/README-os2.txt
-%bww_file CHANGES-OS2.txt -f %_defaultdocdir/%{name}-%{version}/CHANGES-os2.txt
+%bww_readme -f %_defaultdocdir/%{name}/README
+%bww_license -f %_defaultlicensedir/%{name}/LICENSE
+%bww_file README-OS2.txt -f %_defaultdocdir/%{name}/README-os2.txt
+%bww_file CHANGES-OS2.txt -f %_defaultdocdir/%{name}/CHANGES-os2.txt
 
+%global wps_folder_title Zint-qt
+
+%post qt -e
+if [ "$1" -ge 1 ]; then # (upon update)
+    %wps_object_delete_all
+fi
+
+%global wps_app_title Zint-qt
+%bww_folder -t %{quote:%{wps_folder_title}}
+%bww_app -f %{_bindir}/%{name}-qt.exe -t %{quote:%{wps_app_title}} -i %{name}-qt.ico
 
 %postun
 if [ "$1" -eq 0 ]; then # (upon removal)
@@ -215,6 +213,12 @@ fi
 %endif
 
 %changelog
+* Mon Dec 29 2025 Elbert Pol <elbert.pol@gmail.com> - 2.16.0-2
+- Fix error when copying readme's to directorie 
+
+* Sun Dec 28 2025 Elbert Pol <elbert.pol@gmail.com> - 2.16.0-1
+- Updated to latest version
+
 * Thu Feb 27 2025 Elbert Pol <elbert.pol@gmail.com> - 2.15.0-2
 - Fix some double dll and .a files in spec file
 

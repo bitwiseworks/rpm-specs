@@ -1,5 +1,5 @@
 Name:           yaz
-Version:        5.34.3
+Version:        5.35.1
 Release:        2%{?dist}
 Summary:        Z39.50/SRW/SRU toolkit
 # SPDX confirmed
@@ -15,11 +15,6 @@ Source0:        http://ftp.indexdata.com/pub/yaz/yaz-%{version}.tar.gz
 %else
 %scm_source github https://github.com/Tellie/yaz-os2 %{version}-os2
 %endif
-%if !0%{?os2_version}
-# https://github.com/indexdata/yaz/issues/133
-# Avoid keyword bool usage on C23
-Patch0:		yaz-5.34.3-c23-keyword.patch
-%endif
 
 BuildRequires:  gcc
 BuildRequires:  bison
@@ -33,10 +28,10 @@ BuildRequires:  automake
 
 BuildRequires:  pkgconfig(libexslt)
 %if !0%{?os2_version}
-BuildRequires:  pkgconfig(gnutls)
-BuildRequires:  pkgconfig(hiredis)\
+BuildRequires:  pkgconfig(hiredis)
 BuildRequires:  pkgconfig(libmemcached)
 %endif
+BuildRequires:  pkgconfig(gnutls)
 BuildRequires:  pkgconfig(icu-i18n)
 BuildRequires:  pkgconfig(libxml-2.0)
 BuildRequires:  pkgconfig(libxslt)
@@ -92,7 +87,6 @@ server and client.
 %prep
 %if !0%{?os2_version}
 %setup -q
-%patch -P0 -p1 -b .c23
 %else
 %scm_setup
 %endif
@@ -225,10 +219,16 @@ make -k check
 %endif
 
 %changelog
-* Tue Feb 12 2025 Elbert Pol <elbert.pol@gmail.com> - 5.34.3-2
+* Fri Dec 05 2025 Elbert Pol <elbert.pol@gmail.com> - 5.35.1-2
+- Reenable GnuTls as i had that disabled
+ 
+* Fri Dec 05 2025 Elbert Pol <elbert.pol@gmail.com> - 5.35.1-1
+- Updated to latest version
+
+* Wed Feb 12 2025 Elbert Pol <elbert.pol@gmail.com> - 5.34.3-2
 - Fix a macros.dist error
 
-* Tue Feb 12 2025 Elbert Pol <elbert.pol@gmail.com> - 5.34.3-1
+* Wed Feb 12 2025 Elbert Pol <elbert.pol@gmail.com> - 5.34.3-1
 - Updated to latest version
 - Sync with latest Fedora spec
 
