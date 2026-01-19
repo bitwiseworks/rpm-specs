@@ -1,3 +1,51 @@
+# ======================
+# Bootstrap conditionals
+# ======================
+
+# When bootstrapping python3, we need to build python3-packaging.
+# but packaging BR python3-devel and that brings in python3-rpm-generators;
+# python3-rpm-generators needs python3-packaging, so we cannot have it yet.
+#
+# We also use the previous build of Python in "make regen-all".
+#
+# Procedure: https://fedoraproject.org/wiki/SIGs/Python/UpgradingPython
+#
+# Bootstrap enabled:
+# - disables regen-all with the same Python version
+# - disables dependency on python3-rpm-generators if we build with main_python
+# - disables rpmwheels, optimizations and tests by default
+%if !0%{?os2_version}
+%bcond bootstrap 0
+%else
+%bcond_without bootstrap
+%endif
+
+# Whether to use RPM build wheels from the python-{pip,setuptools,wheel}-wheel packages
+# Uses upstream bundled prebuilt wheels otherwise
+%if !0%{?os2_version}
+%bcond rpmwheels %{without bootstrap}
+%else
+%bcond_with rpmwheels
+%endif
+
+# Expensive optimizations (mainly, profile-guided optimizations)
+# We don't have to switch it off for bootstrap, but it speeds up the first build,
+# so we opt to only run them during the "full" build
+%if !0%{?os2_version}
+%bcond optimizations %{without bootstrap}
+%else
+%bcond_with optimizations
+%endif
+
+# Run the test suite in %%check
+# Technically, we can run the tests even during the bootstrap build, but since
+# we build Python 2x, it's better to just run it once with the "full" build
+%if !0%{?os2_version}
+%bcond tests %{without bootstrap}
+%else
+%bcond_with tests
+%endif
+
 # ==================
 # Top-level metadata
 # ==================
@@ -13,11 +61,11 @@ URL: https://www.python.org/
 
 #  WARNING  When rebasing to a new Python version,
 #           remember to update the python3-docs package as well
-%global general_version %{pybasever}.2
+%global general_version %{pybasever}.11
 #global prerel ...
 %global upstream_version %{general_version}%{?prerel}
 Version: %{general_version}%{?prerel:~%{prerel}}
-Release: 2%{?dist}
+Release: 1%{?dist}
 License: Python-2.0.1
 
 
@@ -44,99 +92,6 @@ License: Python-2.0.1
 %bcond_with python_abi_provides_for_alt_pythons
 %endif
 
-# When bootstrapping python3, we need to build python3-packaging.
-# but packaging BR python3-devel and that brings in python3-rpm-generators;
-# python3-rpm-generators needs python3-packaging, so we cannot have it yet.
-#
-# We also use the previous build of Python in "make regen-all".
-#
-# Procedure: https://fedoraproject.org/wiki/SIGs/Python/UpgradingPython
-#
-#   IMPORTANT: When bootstrapping, it's very likely python-pip-wheel is
-#   not available. Turn off the rpmwheels bcond until
-#   python-pip is built with a wheel to get around the issue.
-%if !0%{?os2_version}
-%bcond bootstrap 0
-%else
-%bcond_without bootstrap
-%endif
-
-# Whether to use RPM build wheels from the python-{pip,setuptools,wheel}-wheel packages
-# Uses upstream bundled prebuilt wheels otherwise
-%if !0%{?os2_version}
-%bcond rpmwheels 1
-%else
-%bcond_with rpmwheels
-%endif
-
-# If the rpmwheels condition is disabled, we use the bundled wheel packages
-# from Python with the versions below.
-# This needs to be manually updated when we update Python.
-# Explore the sources tarball (you need the version before %%prep is executed):
-#  $ tar -tf Python-%%{upstream_version}.tar.xz | grep whl
-%global pip_version 24.3.1
-%global setuptools_version 67.6.1
-%global wheel_version 0.43.0
-# All of those also include a list of indirect bundled libs:
-# pip
-#  $ %%{_rpmconfigdir}/pythonbundles.py <(unzip -p Lib/ensurepip/_bundled/pip-*.whl pip/_vendor/vendor.txt)
-%global pip_bundled_provides %{expand:
-Provides: bundled(python3dist(cachecontrol)) = 0.14
-Provides: bundled(python3dist(certifi)) = 2024.8.30
-Provides: bundled(python3dist(distlib)) = 0.3.9
-Provides: bundled(python3dist(distro)) = 1.9
-Provides: bundled(python3dist(idna)) = 3.7
-Provides: bundled(python3dist(msgpack)) = 1.0.8
-Provides: bundled(python3dist(packaging)) = 24.1
-Provides: bundled(python3dist(platformdirs)) = 4.2.2
-Provides: bundled(python3dist(pygments)) = 2.18
-Provides: bundled(python3dist(pyproject-hooks)) = 1
-Provides: bundled(python3dist(requests)) = 2.32.3
-Provides: bundled(python3dist(resolvelib)) = 1.0.1
-Provides: bundled(python3dist(rich)) = 13.7.1
-Provides: bundled(python3dist(setuptools)) = 70.3
-Provides: bundled(python3dist(tomli)) = 2.0.1
-Provides: bundled(python3dist(truststore)) = 0.10
-Provides: bundled(python3dist(typing-extensions)) = 4.12.2
-Provides: bundled(python3dist(urllib3)) = 1.26.20
-}
-# setuptools
-# vendor.txt files not in .whl
-#  $ %%{_rpmconfigdir}/pythonbundles.py \
-#    <(curl -L https://github.com/pypa/setuptools/raw/v%%{setuptools_version}/setuptools/_vendor/vendored.txt) \
-#    <(curl -L https://github.com/pypa/setuptools/raw/v%%{setuptools_version}/pkg_resources/_vendor/vendored.txt)
-%global setuptools_bundled_provides %{expand:
-Provides: bundled(python3dist(importlib-metadata)) = 6
-Provides: bundled(python3dist(importlib-resources)) = 5.10.2
-Provides: bundled(python3dist(jaraco-text)) = 3.7
-Provides: bundled(python3dist(more-itertools)) = 8.8
-Provides: bundled(python3dist(ordered-set)) = 3.1.1
-Provides: bundled(python3dist(packaging)) = 23
-Provides: bundled(python3dist(platformdirs)) = 2.6.2
-Provides: bundled(python3dist(tomli)) = 2.0.1
-Provides: bundled(python3dist(typing-extensions)) = 4.0.1
-Provides: bundled(python3dist(typing-extensions)) = 4.4
-Provides: bundled(python3dist(zipp)) = 3.7
-}
-# wheel
-#  $ %%{_rpmconfigdir}/pythonbundles.py <(unzip -p Lib/test/wheeldata/wheel-*.whl wheel/vendored/vendor.txt)
-%global wheel_bundled_provides %{expand:
-Provides: bundled(python3dist(packaging)) = 24
-}
-
-# Expensive optimizations (mainly, profile-guided optimizations)
-%if !0%{?os2_version}
-%bcond optimizations 1
-%else
-%bcond_with optimizations
-%endif
-
-# Run the test suite in %%check
-%if !0%{?os2_version}
-%bcond tests 1
-%else
-%bcond_with tests
-%endif
 
 # Extra build for debugging the interpreter or C-API extensions
 # (the -debug subpackages)
@@ -160,7 +115,7 @@ Provides: bundled(python3dist(packaging)) = 24
 # And only on certain architectures: https://peps.python.org/pep-0744/#support
 # The freethreading build (when enabled) does not support JIT yet
 %if !0%{?os2_version}
-%bcond jit %[(0%{?fedora} >= 40 || 0%{?rhel} >= 10) && ("%{_arch}" == "x86_64" || "%{_arch}" == "aarch64")]
+%bcond jit %[(0%{?fedora} >= 40 || 0%{?epel} >= 10) && ("%{_arch}" == "x86_64" || "%{_arch}" == "aarch64")]
 %else
 %bcond_with jit
 %endif
@@ -179,13 +134,69 @@ Provides: bundled(python3dist(packaging)) = 24
 # =====================
 # General global macros
 # =====================
+
 %if %{with main_python}
 %global pkgname python3
 %global exename python3
+%global python3_pkgversion 3
 %else
 %global pkgname python%{pybasever}
 %global exename python%{pybasever}
+%global python3_pkgversion %{pybasever}
 %endif
+
+# If the rpmwheels condition is disabled, we use the bundled wheel packages
+# from Python with the versions below.
+# This needs to be manually updated when we update Python.
+# Explore the sources tarball (you need the version before %%prep is executed):
+#  $ tar -tf Python-%%{upstream_version}.tar.xz | grep whl
+%global pip_version 25.3
+%global setuptools_version 79.0.1
+# All of those also include a list of indirect bundled libs:
+# pip
+#  $ %%{_rpmconfigdir}/pythonbundles.py <(unzip -p Lib/ensurepip/_bundled/pip-*.whl pip/_vendor/vendor.txt)
+%global pip_bundled_provides %{expand:
+Provides: bundled(python3dist(cachecontrol)) = 0.14.3
+Provides: bundled(python3dist(certifi)) = 2025.10.5
+Provides: bundled(python3dist(dependency-groups)) = 1.3.1
+Provides: bundled(python3dist(distlib)) = 0.4
+Provides: bundled(python3dist(distro)) = 1.9
+Provides: bundled(python3dist(idna)) = 3.10
+Provides: bundled(python3dist(msgpack)) = 1.1.2
+Provides: bundled(python3dist(packaging)) = 25
+Provides: bundled(python3dist(platformdirs)) = 4.5
+Provides: bundled(python3dist(pygments)) = 2.19.2
+Provides: bundled(python3dist(pyproject-hooks)) = 1.2
+Provides: bundled(python3dist(requests)) = 2.32.5
+Provides: bundled(python3dist(resolvelib)) = 1.2.1
+Provides: bundled(python3dist(rich)) = 14.2
+Provides: bundled(python3dist(setuptools)) = 70.3
+Provides: bundled(python3dist(tomli)) = 2.3
+Provides: bundled(python3dist(tomli-w)) = 1.2
+Provides: bundled(python3dist(truststore)) = 0.10.4
+Provides: bundled(python3dist(urllib3)) = 1.26.20
+}
+# setuptools
+# vendor.txt not in .whl
+# %%{_rpmconfigdir}/pythonbundles.py <(unzip -l Lib/test/wheeldata/setuptools-*.whl | grep -E '_vendor/.+dist-info/RECORD' | sed -E 's@^.*/([^-]+)-([^-]+)\.dist-info/.*$@\1==\2@')
+%global setuptools_bundled_provides %{expand:
+Provides: bundled(python3dist(autocommand)) = 2.2.2
+Provides: bundled(python3dist(backports-tarfile)) = 1.2
+Provides: bundled(python3dist(importlib-metadata)) = 8
+Provides: bundled(python3dist(inflect)) = 7.3.1
+Provides: bundled(python3dist(jaraco-collections)) = 5.1
+Provides: bundled(python3dist(jaraco-context)) = 5.3
+Provides: bundled(python3dist(jaraco-functools)) = 4.0.1
+Provides: bundled(python3dist(jaraco-text)) = 3.12.1
+Provides: bundled(python3dist(more-itertools)) = 10.3
+Provides: bundled(python3dist(packaging)) = 24.2
+Provides: bundled(python3dist(platformdirs)) = 4.2.2
+Provides: bundled(python3dist(tomli)) = 2.0.1
+Provides: bundled(python3dist(typeguard)) = 4.3
+Provides: bundled(python3dist(typing-extensions)) = 4.12.2
+Provides: bundled(python3dist(wheel)) = 0.45.1
+Provides: bundled(python3dist(zipp)) = 3.19.2
+}
 
 # ABIFLAGS, LDVERSION and SOABI are in the upstream configure.ac
 # See PEP 3149 for some background: http://www.python.org/dev/peps/pep-3149/
@@ -291,8 +302,7 @@ BuildRequires: autoconf
 BuildRequires: bluez-libs-devel
 %endif
 BuildRequires: bzip2-devel
-# See the runtime requirement in the -libs subpackage
-BuildRequires: expat-devel >= 2.6
+BuildRequires: expat-devel
 BuildRequires: findutils
 BuildRequires: gcc
 %if !0%{?os2_version}
@@ -365,7 +375,7 @@ BuildRequires: libappstream-glib
 BuildRequires: %{python_wheel_pkg_prefix}-pip-wheel >= 23.1.2
 %if %{with tests}
 BuildRequires: %{python_wheel_pkg_prefix}-setuptools-wheel
-BuildRequires: %{python_wheel_pkg_prefix}-wheel-wheel
+BuildRequires: (%{python_wheel_pkg_prefix}-wheel-wheel if %{python_wheel_pkg_prefix}-setuptools-wheel < 71)
 %endif
 %endif
 
@@ -421,6 +431,32 @@ Source11: idle3.appdata.xml
 #
 # pypa/distutils integration: https://github.com/pypa/distutils/pull/70
 Patch251: 00251-change-user-install-location.patch
+
+# 00464 # 292acffec7a379cb6d1f3c47b9e5a2f170bbadb6
+# Enable PAC and BTI protections for aarch64
+#
+# Apply protection against ROP/JOP attacks for aarch64 on asm_trampoline.S
+#
+# The BTI flag must be applied in the assembler sources for this class
+# of attacks to be mitigated on newer aarch64 processors.
+#
+# Upstream PR: https://github.com/python/cpython/pull/130864/files
+#
+# The upstream patch is incomplete but only for the case where
+# frame pointers are not used on 3.13+.
+#
+# Since on Fedora we always compile with frame pointers the BTI/PAC
+# hardware protections can be enabled without losing Perf unwinding.
+Patch464: 00464-enable-pac-and-bti-protections-for-aarch64.patch
+
+# 00466 # e10760fb955ee33d2917f8a57bb4e24d71e5341c
+# Downstream only: Skip tests not working with older expat version
+#
+# We want to run these tests in Fedora and EPEL 10, but not in EPEL 9,
+# which has too old version of expat. We set the upper bound version
+# in the conditionalized skip to a release available in CentOS Stream 10,
+# which is tested as working.
+Patch466: 00466-downstream-only-skip-tests-not-working-with-older-expat-version.patch
 
 # (New patches go here ^^^)
 #
@@ -561,9 +597,37 @@ This package contains /usr/bin/python - the "python" command that runs Python 3.
 %package -n %{pkgname}-libs
 Summary:        Python runtime libraries
 
-# Bundled libb2 is CC0, covered by grandfathering exception
-# Bundled mimalloc is MIT
-%global libs_license Python-2.0.1 AND CC0-1.0 AND MIT
+# Python is generally licensed as Python-2.0.1 but also includes incorporated software
+# Combined manually from https://docs.python.org/3.13/license.html
+# Hash of Doc/license.rst which is compared in %%prep, generated with:
+# $ sha256sum Doc/license.rst | cut -f1 -d" "
+%global license_file_hash 62f2c9c2c75d511170eb464ad5f83b78cc1f37eb2eb49c2846c9aa6c4557ee99
+# Licenses of incorporated software:
+# Mersenne Twister in _random C extension contains code under BSD-3-Clause
+# socket.getaddrinfo() and socket.getnameinfo() are BSD-3-Clause
+# test.support.asynchat and test.support.asyncore are MIT-CMU
+# http.cookies is MIT-CMU
+# trace is HPND-SMC
+# uu is MIT-CMU
+# xmlrpc.client is MIT-CMU
+# test.test_epoll is MIT
+# select kqueue interface is BSD-2-Clause
+# SipHash algorithm in Python/pyhash.c is MIT
+# strtod and dtoa are dtoa
+# OpenSSL is not bundled
+# expat is not bundled
+# libffi is not bundled
+# zlib is not bundled
+# cfuhash used by tracemalloc is BSD-3-Clause
+# libmpdec is not bundled
+# C14N test suite in Lib/test/xmltestdata/c14n-20/ is BSD-3-Clause
+# mimalloc is MIT
+# parts of asyncio from uvloop are MIT
+# Python/qsbr.c is adapted from code under BSD-2-Clause
+# Bundled libb2 is not declared in the upstream document, but it's:
+# CC0-1.0, covered by grandfathering exception
+# We don't query upstream for changes, as 3.13 is the last Python version containing it.
+%global libs_license Python-2.0.1 AND CC0-1.0 AND MIT AND BSD-3-Clause AND MIT-CMU AND HPND-SMC AND BSD-2-Clause AND dtoa
 %if %{with rpmwheels}
 Requires: %{python_wheel_pkg_prefix}-pip-wheel >= 23.1.2
 License: %{libs_license}
@@ -571,7 +635,7 @@ License: %{libs_license}
 Provides: bundled(python3dist(pip)) = %{pip_version}
 %pip_bundled_provides
 # License combined from Python libs + pip
-License: %{libs_license} AND Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause AND ISC AND LGPL-2.1-only AND MPL-2.0 AND (Apache-2.0 OR BSD-2-Clause)
+License: %{libs_license} AND Apache-2.0 AND ISC AND LGPL-2.1-only AND MPL-2.0 AND (Apache-2.0 OR BSD-2-Clause)
 %endif
 
 %unversioned_obsoletes_of_python3_X_if_main libs
@@ -615,12 +679,26 @@ Obsoletes: python-libs < %{pybasever}
 %endif
 
 # The requirement on libexpat is generated, but we need to version it.
-# When built with expat >= 2.6, but installed with older expat, we get:
+# When built with a specific expat version, but installed with an older one,
+# we sometimes get:
 #   ImportError: /usr/lib64/python3.X/lib-dynload/pyexpat.cpython-....so:
-#   undefined symbol: XML_SetReparseDeferralEnabled
+#   undefined symbol: XML_...
+# The pyexpat module has build-time checks for expat version to only use the
+# available symbols. However, there is no runtime protection, so when the module
+# is later installed with an older expat, it may error due to undefined symbols.
 # This breaks many things, including python -m venv.
+# We avoid this problem by requiring at least the same version of expat that
+# was used during the build time.
 # Other subpackages (like -debug) also need this, but they all depend on -libs.
-Requires: expat >= 2.6
+%global expat_version %(LANG=C rpm -q --qf '%%{version}' expat.%{_target_cpu} | sed 's/.*not installed/0/')
+%if !0%{?os2_version}
+%global expat_version %(LANG=C rpm -q --qf '%%{version}' expat.%{_target_cpu} | sed 's/.*not installed/0/')
+Requires: expat%{?_isa} >= %{expat_version}
+%else
+%global expat_version %(LANG=C rpm -q --qf '%%{version}' expat | sed 's/.*not installed/0/')
+Requires: expat >= %{expat_version}
+%endif
+
 
 %description -n %{pkgname}-libs
 This package contains runtime libraries for use by Python:
@@ -631,6 +709,8 @@ This package contains runtime libraries for use by Python:
 
 %package -n %{pkgname}-devel
 Summary: Libraries and header files needed for Python development
+# Bundled mimalloc header files are MIT
+License: Python-2.0.1 AND MIT
 Requires: %{pkgname} = %{version}-%{release}
 %if !0%{?os2_version}
 Requires: %{pkgname}-libs%{?_isa} = %{version}-%{release}
@@ -753,12 +833,10 @@ Requires: %{pkgname}-libs = %{version}-%{release}
 
 %if %{with rpmwheels}
 Requires: %{python_wheel_pkg_prefix}-setuptools-wheel
-Requires: %{python_wheel_pkg_prefix}-wheel-wheel
+Requires: (%{python_wheel_pkg_prefix}-wheel-wheel if %{python_wheel_pkg_prefix}-setuptools-wheel < 71)
 %else
 Provides: bundled(python3dist(setuptools)) = %{setuptools_version}
 %setuptools_bundled_provides
-Provides: bundled(python3dist(wheel)) = %{wheel_version}
-%wheel_bundled_provides
 # License manually combined from Python + setuptools + wheel
 License: Python-2.0.1 AND MIT AND Apache-2.0 AND (Apache-2.0 OR BSD-2-Clause)
 %endif
@@ -817,6 +895,7 @@ The debug runtime additionally supports debug builds of C-API extensions
 (with the "d" ABI flag) for debugging issues in those extensions.
 %endif # with debug_build
 
+
 %if %{with freethreading_build}
 # This deliberately does not use the %%{pkgname}- prefix,
 # we want to call this python3.X-threading even when built as a main Python.
@@ -827,17 +906,15 @@ Summary: Free Threading (PEP 703) version of the Python runtime
 %if %{with rpmwheels}
 Requires: %{python_wheel_pkg_prefix}-pip-wheel >= 23.1.2
 Requires: %{python_wheel_pkg_prefix}-setuptools-wheel
-Requires: %{python_wheel_pkg_prefix}-wheel-wheel
+Requires: (%{python_wheel_pkg_prefix}-wheel-wheel if %{python_wheel_pkg_prefix}-setuptools-wheel < 71)
 License: %{libs_license}
 %else
 Provides: bundled(python3dist(pip)) = %{pip_version}
 %pip_bundled_provides
 Provides: bundled(python3dist(setuptools)) = %{setuptools_version}
 %setuptools_bundled_provides
-Provides: bundled(python3dist(wheel)) = %{wheel_version}
-%wheel_bundled_provides
-# License combined from Python libs + pip + setuptools + wheel
-License: %{libs_license} AND Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause AND ISC AND LGPL-2.1-only AND MPL-2.0 AND (Apache-2.0 OR BSD-2-Clause)
+# License combined from Python libs + pip + setuptools
+License: %{libs_license} AND Apache-2.0 AND ISC AND LGPL-2.1-only AND MPL-2.0 AND (Apache-2.0 OR BSD-2-Clause)
 %endif
 
 # This package doesn't depend on python3-libs, so we need to explicitly
@@ -846,7 +923,7 @@ License: %{libs_license} AND Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause AND IS
 Provides: bundled(libb2) = 0.98.1
 Provides: bundled(mimalloc) = 2.12
 Requires: tzdata
-Requires: expat >= 2.6
+Requires: expat >= %{expat_version}
 
 %description -n python%{pybasever}-freethreading
 The provisional Free Threading (PEP 703) build of Python.
@@ -907,15 +984,22 @@ extension modules.
 %if !0%{?os2_version}
 if [ -f %{_rpmconfigdir}/pythonbundles.py ]; then
   %{_rpmconfigdir}/pythonbundles.py <(unzip -p Lib/ensurepip/_bundled/pip-*.whl pip/_vendor/vendor.txt) --compare-with '%pip_bundled_provides'
-  %{_rpmconfigdir}/pythonbundles.py <(unzip -p Lib/test/wheeldata/wheel-*.whl wheel/vendored/vendor.txt) --compare-with '%wheel_bundled_provides'
+  %{_rpmconfigdir}/pythonbundles.py <(unzip -l Lib/test/wheeldata/setuptools-*.whl | grep -E '_vendor/.+dist-info/RECORD' | sed -E 's@^.*/([^-]+)-([^-]+)\.dist-info/.*$@\1==\2@') --compare-with '%setuptools_bundled_provides'
 fi
 %endif
 
 %if %{with rpmwheels}
 rm Lib/ensurepip/_bundled/pip-%{pip_version}-py3-none-any.whl
 rm Lib/test/wheeldata/setuptools-%{setuptools_version}-py3-none-any.whl
-rm Lib/test/wheeldata/wheel-%{wheel_version}-py3-none-any.whl
 %endif
+
+# check if there were any changes to Doc/license.rst
+# if so, a review of %%libs_license and %%license_file_hash is needed
+found_hash=$(sha256sum Doc/license.rst | cut -f1 -d" ")
+if [ "$found_hash" != %{license_file_hash} ]; then
+    echo "File hash mismatch: review Doc/license.rst for changes"
+    exit 1
+fi
 
 # Remove all exe files to ensure we are not shipping prebuilt binaries
 # note that those are only used to create Microsoft Windows installers
@@ -932,6 +1016,8 @@ rm -r Modules/_decimal/libmpdec
 rm configure pyconfig.h.in
 %endif
 
+# Lower the minimal required version of autoconf to enable build for EPEL 9
+sed -i "s/AC_PREREQ(\[2\.71\])/AC_PREREQ([2.69])/" configure.ac
 
 # ======================================================
 # Configuring and building the code:
@@ -1352,7 +1438,7 @@ BEGINLIBPATH="%{buildroot}%{dynload_dir}/;%{buildroot}%{_libdir}" \
 %endif
 %{buildroot}%{_bindir}/python%{pybasever} -s -B -m compileall \
 -f %{_smp_mflags} -o 0 -o 1 -o 2 -s %{buildroot} -p / %{buildroot} --hardlink-dupes --invalidation-mode=timestamp \
--x 'bad_coding|badsyntax|site-packages' || :
+-x 'bad_coding|badsyntax|site-packages'
 
 # Turn this BRP off, it is done by compileall2 --hardlink-dupes above
 %global __brp_python_hardlink %{nil}
@@ -1415,6 +1501,11 @@ for file in %{buildroot}%{pylibdir}/pydoc_data/topics.py $(grep --include='*.py'
     mv ${directory}/{__pycache__/${module}.cpython-%{pyshortver}.pyc,${module}.pyc}
     rm ${directory}/{__pycache__/${module}.cpython-%{pyshortver}.opt-?.pyc,${module}.py}
 done
+%endif
+
+%if %{without rpmwheels}
+# Inject SBOM into the installed wheels (if the macro is available)
+%{?python_wheel_inject_sbom:%python_wheel_inject_sbom %{buildroot}%{pylibdir}/ensurepip/_bundled/*.whl}
 %endif
 
 # ======================================================
@@ -2077,6 +2168,9 @@ CheckPython freethreading
 # ======================================================
 
 %changelog
+* Fri Jan 16 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.13.11-1
+- updated to vendor version 3.13.11
+
 * Fri May 16 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.13.2-2
 - fixed some issues 
 
