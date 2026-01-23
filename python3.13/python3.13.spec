@@ -1079,6 +1079,7 @@ export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp -lcx"
 export LIBS="-lssl -lcrypto -lintl -lcx"
 export VENDOR="%{vendor}"
 export BOOTSTRAP_TIME="`LANG=C date +'%%d %%b %%Y %%H:%%M:%%S'`"
+export LIBPATHSTRICT=T
 %endif
 
 # We can build several different configurations of Python: regular and debug.
@@ -1197,6 +1198,9 @@ BuildPython freethreading \
 # ======================================================
 
 %install
+%if 0%{?os2_version}
+export LIBPATHSTRICT=T
+%endif
 
 # As in %%build, remember the current directory
 topdir=$(pwd)
@@ -1438,7 +1442,7 @@ BEGINLIBPATH="%{buildroot}%{dynload_dir}/;%{buildroot}%{_libdir}" \
 %endif
 %{buildroot}%{_bindir}/python%{pybasever} -s -B -m compileall \
 -f %{_smp_mflags} -o 0 -o 1 -o 2 -s %{buildroot} -p / %{buildroot} --hardlink-dupes --invalidation-mode=timestamp \
--x 'bad_coding|badsyntax|site-packages'
+-x 'bad_coding|badsyntax|site-packages' || :
 
 # Turn this BRP off, it is done by compileall2 --hardlink-dupes above
 %global __brp_python_hardlink %{nil}
