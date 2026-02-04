@@ -1,6 +1,6 @@
 Summary: Text file format converters
 Name: dos2unix
-Version: 7.5.3
+Version: 7.5.4
 Release: 1%{?dist}
 License: BSD-3-Clause
 %if 0%{?os2_version}
@@ -79,6 +79,9 @@ make test
 %{_mandir}/man1/*.1*
 
 %changelog
+* Wed Feb 04 2026 Elbert Pol <elbert.pol@gmail.com> - 7.5.4-1
+- Updated to latest version
+
 * Fri Dec 05 2025 Elbert Pol <elbert.pol@gmail.com> - 7.5.3-1
 - Updated to latest version
 
