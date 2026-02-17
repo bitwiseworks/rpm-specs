@@ -2,7 +2,7 @@
 
 Name:           python-%{modname}
 Version:        2.8.1
-Release:        3%{?dist}
+Release:        4%{?dist}
 Epoch:          1
 Summary:        Powerful extensions to the standard datetime module
 
@@ -129,6 +129,9 @@ make -C docs html
 %endif
 
 %changelog
+* Tue Feb 17 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> 1:2.8.1-4
+- rebuild with python 3.13
+
 * Thu Jan 20 2022 Silvan Scherrer <silvan.scherrer@aroa.ch> 1:2.8.1-3
 - enable python3
 - resync spec with fedora
