@@ -19,7 +19,7 @@ Name:    qbittorrent
 Summary: A Bittorrent Client
 Epoch:   1
 Version: 4.6.7
-Release: 1%{?dist}
+Release: 2%{?dist}
 # Automatically converted from old format: GPLv2+ - review is highly recommended.
 License: GPL-2.0-or-later
 URL:     https://www.qbittorrent.org
@@ -235,5 +235,8 @@ fi
 %endif
 
 %changelog
+* Wed Feb 18 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1:4.6.7-2
+- fix a crash becuase we habe no /dev/urandom
+
 * Mon Feb 16 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1:4.6.7-1
 - first OS/2 rpm
