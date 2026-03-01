@@ -180,31 +180,24 @@ desktop-file-validate %{buildroot}%{_datadir}/applications/%{name}-qt.desktop
 %endif
 
 %if 0%{?os2_version}
-%global wps_folder_title Zint
+%global wps_folder_title Zint-Qt
+%endif
 
-%post -e
+
+%if 0%{?os2_version}
+%post
 if [ "$1" -ge 1 ]; then # (upon update)
     %wps_object_delete_all
 fi
-%global wps_app_title Zint
+# for the definition of the parameters see macros.bww
 %bww_folder -t %{quote:%{wps_folder_title}}
-%bww_app -f %{_bindir}/%{name}.exe -t %{quote:%{wps_app_title}} -i %{name}.ico
+%bww_app -f %{_bindir}/%{name}-qt.exe -t %{quote:%{wps_folder_title}}
 %bww_app_shadow
 %bww_readme -f %_defaultdocdir/%{name}/README
-%bww_license -f %_defaultlicensedir/%{name}/LICENSE
+%bww_license -f %_defaultlicensedir/%{name}/COPYING
 %bww_file README-OS2.txt -f %_defaultdocdir/%{name}/README-os2.txt
 %bww_file CHANGES-OS2.txt -f %_defaultdocdir/%{name}/CHANGES-os2.txt
 
-%global wps_folder_title Zint-qt
-
-%post qt -e
-if [ "$1" -ge 1 ]; then # (upon update)
-    %wps_object_delete_all
-fi
-
-%global wps_app_title Zint-qt
-%bww_folder -t %{quote:%{wps_folder_title}}
-%bww_app -f %{_bindir}/%{name}-qt.exe -t %{quote:%{wps_app_title}} -i %{name}-qt.ico
 
 %postun
 if [ "$1" -eq 0 ]; then # (upon removal)
