@@ -1,5 +1,5 @@
 Name:           iqpuzzle
-Version:        1.4.2
+Version:        1.5.0
 Release:        1%{?dist}
 Summary:        A diverting I.Q. challenging pentomino puzzle
 Group:          Games/Puzzles
@@ -83,19 +83,23 @@ cp man/man6/* %{buildroot}/%{_mandir}/man6/
 %{_mandir}/man6/*
 
 %if 0%{?os2_version}
-%global wps_folder_title iqpuzzle
+%global wps_folder_title IQpuzzle
+%endif
 
-%post -e
+
+%if 0%{?os2_version}
+%post
 if [ "$1" -ge 1 ]; then # (upon update)
     %wps_object_delete_all
 fi
-%global wps_app_title iqpuzzle
-%bww_folder -t %{wps_folder_title}
-%bww_app -f %{_bindir}/%{name}.exe -t %{wps_app_title} -i %{name}.ico
+# for the definition of the parameters see macros.bww
+%bww_folder -t %{quote:%{wps_folder_title}}
+%bww_app -f %{_bindir}/%{name}.exe -t %{quote:%{wps_folder_title}} 
 %bww_app_shadow
-%bww_license -f %_defaultlicensedir/%{name}-%{version}/COPYING
-%bww_file README-OS2.txt -f %_defaultdocdir/%{name}-%{version}/README-os2.txt
-%bww_file CHANGES-OS2.txt -f %_defaultdocdir/%{name}-%{version}/CHANGES-os2.txt
+%bww_readme -f %_defaultdocdir/%{name}/README.md
+%bww_license -f %_defaultlicensedir/%{name}/COPYING
+%bww_file README-OS2.txt -f %_defaultdocdir/%{name}/README-os2.txt
+%bww_file CHANGES-OS2.txt -f %_defaultdocdir/%{name}/CHANGES-os2.txt
 
 
 %postun
@@ -105,6 +109,9 @@ fi
 %endif
 
 %changelog
+* Sun Mar 01 2026 Elbert Pol <elbert.pol@gmail.com> 1.5.0-1
+- Updated to latest version
+
 * Mon Mar 03 2025 Elbert Pol <elbert.pol@gmail.com> 1.4.2-1
 - Updated to latest version
 
