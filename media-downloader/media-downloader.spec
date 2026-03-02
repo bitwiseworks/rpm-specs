@@ -1,6 +1,6 @@
 %global _smp_ncpus_max 1
 Name:           media-downloader
-Version:        5.4.0
+Version:        5.4.8
 Release:        1%{?dist}
 Summary:        GUI frontend to multiple CLI based downloading programs
 License:        GPL-2.0-or-later
@@ -23,6 +23,12 @@ BuildRequires:  qt5-qtbase-devel
 BuildRequires:  desktop-file-utils
 Requires: yt-dlp
 Requires: aria2
+%endif
+
+# for WPS macros
+%if 0%{os2_version}
+BuildRequires:  bww-resources-rpm-build
+Requires:       bww-resources-rpm
 %endif
 
 %description
@@ -66,10 +72,6 @@ popd
 %endif
 %cmake_build
 
-cd src
-wrc -bt=os2 -zm -r os2app.rc
-wrc -bt=os2 -zm os2app.res ../pc-os2-emx-build/media-downloader.exe
-
 %install
 %if !0%{?os2_version}
 pushd build
@@ -102,20 +104,24 @@ desktop-file-validate %{buildroot}%{_datadir}/applications/%{name}.desktop
 %{_datadir}/applications/%{name}.desktop
 %{_datadir}/pixmaps/%{name}.png
 
-%if 0%{?os2_version}
-%global wps_folder_title Media-downloader
 
-%post -e
+%if 0%{?os2_version}
+%global wps_folder_title Media-Downloader
+%endif
+
+
+%if 0%{?os2_version}
+%post
 if [ "$1" -ge 1 ]; then # (upon update)
     %wps_object_delete_all
 fi
-%global wps_app_title Media-downloader
-%bww_folder -t %{wps_folder_title}
-%bww_app -f %{_bindir}/%{name}.exe -t %{wps_app_title} -i ${name}.ico
+# for the definition of the parameters see macros.bww
+%bww_folder -t %{quote:%{wps_folder_title}}
+%bww_app -f %{_bindir}/%{name}.exe -t %{quote:%{wps_folder_title}} 
 %bww_app_shadow
-%bww_file changelog -f %_defaultdocdir/%{name}-%{version}/CHANGELOG
-%bww_file README-OS2.txt -f %_defaultdocdir/%{name}-%{version}/README-os2.txt
-%bww_file README.md -f %_defaultdocdir/%{name}-%{version}/README.md
+%bww_file changelog -f %_defaultdocdir/%{name}/CHANGELOG
+%bww_file README-OS2.txt -f %_defaultdocdir/%{name}/README-os2.txt
+%bww_file README.md -f %_defaultdocdir/%{name}/README.md
 
 %postun
 if [ "$1" -eq 0 ]; then # (upon removal)
@@ -124,6 +130,9 @@ fi
 %endif
 
 %changelog
+* Sun Mar 01 2026 Elbert Pol <elbert.pol@gmail.com> - 5.4.8-1
+- Updated to latest version
+
 * Tue Jun 03 2025 Elbert Pol <elbert.pol@gmail.com> - 5.4.0-1
 - Updated to latest version
 
