@@ -22,6 +22,11 @@
 #
 #    Therefore, from now on, I will refer to Artifex Software as to 'upstream'.
 #
+#    Note (2026): (URW)++ became URW Type Foundry and joined MyFonts under
+#    Monotype [https://www.myfonts.com/collections/urw-foundry/]. The situation
+#    is the same as before - open source fonts are presented by Artifex and
+#    since the old URL does not work anymore, I will use Artifex Github as URL.
+#
 # 2) Upstream has its own git repository for Core Font Set Level 2 sources:
 #    > https://github.com/ArtifexSoftware/urw-base35-fonts
 #
@@ -119,8 +124,6 @@
 %global fontname            urw-base35
 %global fontconfig_prio     61
 %global urw_fonts_vers      3:2.4-25
-%global tmpdir              %{_localstatedir}/lib/rpm-state/urw-base35-fonts
-%global tmpfile             %{tmpdir}/cache-update-needed
 %global legacydir           %{_datadir}/X11/fonts/urw-fonts
 
 
@@ -128,48 +131,6 @@
 # documentation or license files. Instead of them being located in
 # 'urw-base35-fonts-common', they are located in 'urw-base35-fonts' folder.
 %global _docdir_fmt         %{name}
-
-
-# This will create an auxiliary file if it does not exist, to indicate that X11
-# Logical Font Description database and fontconfig cache needs to be updated.
-%global post_scriptlet()    \
-(                           \
-  if ! [[ -x %{tmpfile} ]]; then \
-    rm -rf   %{tmpdir}      \
-    mkdir -p %{tmpdir}      \
-                            \
-    touch    %{tmpfile}     \
-    chmod +x %{tmpfile}     \
-  fi                        \
-)
-
-# NOTE: At the moment, there's no equivalent of 'posttrans' macro for
-#       uninstallation, meaning we can only use the 'posttrans'.
-#
-#       Because of it , we have to use 'postun' instead. That means this
-#       scriptlet will be called for every font family subpackage being
-#       uninstalled...
-%global postun_scriptlet()  \
-(                           \
-  if [[ $1 -eq 0 ]]; then   \
-    # mkfontscale %{_fontdir} &> /dev/null || : \
-    # mkfontdir   %{_fontdir} &> /dev/null || : \
-    true || :               \
-  fi                        \
-)
-
-
-# The content of this scriptlet is only run once during install/update.
-%global posttrans_scriptlet() \
-(                             \
-  if [[ -x %{tmpfile} ]]; then \
-    # mkfontscale %{_fontdir}   \
-    # mkfontdir   %{_fontdir}   \
-    #                          \
-    true || :                 \
-    rm -rf %{tmpdir}          \
-  fi                          \
-)
 
 
 %global common_desc \
@@ -182,19 +143,18 @@ by (URW)++ company, and are mainly utilized by applications using Ghostscript.
 Name:             %{fontname}-fonts
 Summary:          Core Font Set containing 35 freely distributable fonts from (URW)++
 Version:          20200910
-Release:          1%{?dist}
+Release:          2%{?dist}
 
 # NOTE: (URW)++ holds the copyright, but Artifex Software has obtained rights to
 #       release these fonts under GNU Affero General Public License (version 3).
 #       Also contains subpackage legacy with older version of the fonts (with GPLv2.0+ license) still needed by a few applications.
-License:          AGPLv3 and GPLv2+
+License:          AGPL-3.0-only AND GPL-2.0-or-later
 
-URL:              https://www.urwpp.de/en/
+URL:              https://github.com/ArtifexSoftware/urw-base35-fonts
 %if !0%{?os2_version}
 Source:           https://github.com/ArtifexSoftware/urw-base35-fonts/archive/%{version}.tar.gz#/%{name}-%{version}.tar.gz
 Source1:          urw-fonts-1.0.7pre44.tar.bz2
 %else
-#Source:           urw-base35-fonts-github-master-os2.zip
 %scm_source       github https://github.com/bitwiseworks/urw-base35-fonts-os2 master-os2
 %endif
 
@@ -202,6 +162,8 @@ BuildArch:        noarch
 
 %if !0%{?os2_version}
 Patch01:          urw-base35-fonts-20200910-dont-config-d050000l-as-fantasy-font.patch
+Patch02:          urw-base35-fonts-20200910-Nimbus-Mono-substitution.patch
+Patch03:          urw-base35-fonts-20200910-add-alias-to-Century.patch
 %endif
 
 BuildRequires:    fontpackages-devel
@@ -245,7 +207,7 @@ This meta-package will install all the 35 fonts from the %{name}.
 # USAGE: font_subpkg [-c] [-o old_subpackage_name]
 #  -c    Make this subpackage conflict with the previous versions of URW fonts.
 #  -o    Marks this supbackage to obsolete (& provide) other previous subpackage.
-%define fontfamily_subpkg(coa:)\
+%define fontfamily_subpkg(co:)                                                 \
                                                                                \
 %define ff_filename   %(echo %{*} | tr --delete " ")                           \
 %define subpkg_name   %(echo %{*} | tr "A-Z " "a-z-" | sed -e 's/urw-//')      \
@@ -254,8 +216,7 @@ This meta-package will install all the 35 fonts from the %{name}.
 Summary:          %{*} font family [part of Level 2 Core Font Set]             \
 Requires:         %{name}-common = %{version}-%{release}                       \
                                                                                \
-Requires(post):   fontconfig                                                   \
-Requires(postun): fontconfig                                                   \
+Requires(post):   coreutils                                                    \
                                                                                \
                                                                                \
 # The section below will be only added if the '-c' option was specified:       \
@@ -268,14 +229,23 @@ which is part of Level 2 Core Font Set.                                        \
                                                                                \
 %{common_desc}                                                                 \
                                                                                \
-%post -n %{fontname}-%{subpkg_name}-fonts                                      \
-%{post_scriptlet}                                                              \
-                                                                               \
+# Remove after C11S release and F43 EOL                                        \
 %postun -n %{fontname}-%{subpkg_name}-fonts                                    \
-%{postun_scriptlet}                                                            \
+%if !0%{?os2_version}                                                          \
+if [ $1 -gt 0 ]                                                                \
+then                                                                           \
+  rm -rf /var/lib/rpm-state/urw-base35-fonts || :                              \
+fi                                                                             \
+%endif                                                                         \
                                                                                \
+# Remove after C11S release and F43 EOL                                        \
 %posttrans -n %{fontname}-%{subpkg_name}-fonts                                 \
-%{posttrans_scriptlet}                                                         \
+%if !0%{?os2_version}                                                          \
+if [ $1 -gt 1 ]                                                                \
+then                                                                           \
+  rm -rf /var/lib/rpm-state/urw-base35-fonts || :                              \
+fi                                                                             \
+%endif                                                                         \
                                                                                \
 %files -n %{fontname}-%{subpkg_name}-fonts                                     \
 %{_fontdir}/%{ff_filename}*.t1                                                 \
@@ -284,17 +254,15 @@ which is part of Level 2 Core Font Set.                                        \
 %{_datadir}/appdata/de.urwpp.%{ff_filename}.metainfo.xml                       \
 %{_datadir}/fontconfig/conf.avail/%{fontconfig_prio}-urw-%{subpkg_name}.conf   \
 %{_sysconfdir}/fonts/conf.d/%{fontconfig_prio}-urw-%{subpkg_name}.conf         \
-# Temporary workaround for https://bugzilla.redhat.com/show_bug.cgi?id=1534206:\
-%exclude %{_fontdir}/StandardSymbolsPS.otf                                     \
 
 # =============================================================================
 
 %package common
 Summary:          Common files of the (URW)++ Level 2 Core Font Set
-%if !0%{?os2_version}
 Requires:         filesystem
-%endif
+%if !0%{?os2_version}
 Requires:         fontpackages-filesystem
+%endif
 
 %description common
 %{common_desc}
@@ -333,16 +301,18 @@ required by some of the software, like e.g. xfig, X11, etc.
 # NOTE: When making an update, make sure to check if any font families were
 #       added/removed. We always need to pack all the fonts into subpackages.
 # =============================================================================
+
 %fontfamily_subpkg C059
 %fontfamily_subpkg D050000L
-%fontfamily_subpkg Nimbus Mono PS -a -c
-%fontfamily_subpkg Nimbus Roman -a -c
-%fontfamily_subpkg Nimbus Sans -a -c
+%fontfamily_subpkg Nimbus Mono PS -c
+%fontfamily_subpkg Nimbus Roman -c
+%fontfamily_subpkg Nimbus Sans -c
 %fontfamily_subpkg P052
-%fontfamily_subpkg Standard Symbols PS -a -c
-%fontfamily_subpkg URW Bookman -a -c
-%fontfamily_subpkg URW Gothic -a -c
+%fontfamily_subpkg Standard Symbols PS -c
+%fontfamily_subpkg URW Bookman -c
+%fontfamily_subpkg URW Gothic -c
 %fontfamily_subpkg Z003
+
 # =============================================================================
 
 # We need to ship the legacy fonts for now as well (BZ #1551219):
@@ -440,10 +410,6 @@ mkfontscale %{legacydir}
 mkfontdir   %{legacydir}
 %endif
 
-# NOTE: There's no reason to run 'post' and 'postun' scriptlets for the main
-#       metapackage or the *-common subpackage. Everything necessary is handled
-#       by any of the actual font family subpackages.
-
 # =============================================================================
 
 %files
@@ -455,12 +421,8 @@ mkfontdir   %{legacydir}
 %license LICENSE COPYING
 
 %dir %{_fontdir}
-#%ghost %verify (not md5 size mtime) %{_fontdir}/fonts.dir
-#%ghost %verify (not md5 size mtime) %{_fontdir}/fonts.scale
-
 %{_datadir}/fontconfig/conf.avail/%{fontconfig_prio}-urw-fallback-backwards.conf
 %{_sysconfdir}/fonts/conf.d/%{fontconfig_prio}-urw-fallback-backwards.conf
-#%%{_sysconfdir}/X11/fontpath.d/%%{name}
 
 # ---------------
 
@@ -470,12 +432,14 @@ mkfontdir   %{legacydir}
 # ---------------
 
 %files legacy
+%dir %{_datadir}/licenses/urw-fonts
 %if !0%{?os2_version}
 %license %{_datadir}/licenses/urw-fonts/COPYING
 %endif
 %ghost %verify (not md5 size mtime) %{legacydir}/fonts.dir
 %ghost %verify (not md5 size mtime) %{legacydir}/fonts.scale
 %{_sysconfdir}/X11/fontpath.d/urw-fonts
+%dir %{legacydir}
 %if !0%{?os2_version}
 %{legacydir}/*.afm
 %{legacydir}/*.pfm
@@ -485,5 +449,8 @@ mkfontdir   %{legacydir}
 # =============================================================================
 
 %changelog
+* Tue Mar 03 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> - 20200910-2
+- resync with latest fedora spec
+
 * Mon Apr 25 2022 Silvan Scherrer <silvan.scherrer@aroa.ch> - 20200910-1
 - first os/2 version
