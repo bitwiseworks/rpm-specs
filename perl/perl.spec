@@ -27,7 +27,7 @@
 Name:           perl
 Version:        %{perl_version}
 # release number must be even higher, because dual-lived modules will be broken otherwise
-Release:        11%{?dist}
+Release:        12%{?dist}
 Epoch:          %{perl_epoch}
 Summary:        Practical Extraction and Report Language
 Group:          Development/Languages
@@ -2521,6 +2521,9 @@ rm -rf $RPM_BUILD_ROOT
 # Nothing. Nada. Zilch. Zarro. Uh uh. Nope. Sorry.
 
 %changelog
+* Tue Mar 03 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> 5.16.1-12
+- update macros.perl
+
 * Wed Mar 26 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 5.16.1-11
 - use the right tag to build
 

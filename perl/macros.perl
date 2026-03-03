@@ -23,6 +23,13 @@ export PERL_MM_USE_DEFAULT=1
 }
 
 #############################################################################
+# Perl specific macros, no longer part of rpm >= 4.15
+%perl_vendorarch %(eval "`%{__perl} -V:installvendorarch`"; echo $installvendorarch)
+%perl_vendorlib  %(eval "`%{__perl} -V:installvendorlib`"; echo $installvendorlib)
+%perl_archlib    %(eval "`%{__perl} -V:installarchlib`"; echo $installarchlib)
+%perl_privlib    %(eval "`%{__perl} -V:installprivlib`"; echo $installprivlib)
+
+#############################################################################
 # Filtering macro incantations
 
 # keep track of what "revision" of the filtering we're at.  Each time we
