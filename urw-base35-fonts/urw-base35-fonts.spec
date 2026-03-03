@@ -259,10 +259,10 @@ fi                                                                             \
 
 %package common
 Summary:          Common files of the (URW)++ Level 2 Core Font Set
-Requires:         filesystem
 %if !0%{?os2_version}
-Requires:         fontpackages-filesystem
+Requires:         filesystem
 %endif
+Requires:         fontpackages-filesystem
 
 %description common
 %{common_desc}
