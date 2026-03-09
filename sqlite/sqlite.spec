@@ -16,7 +16,7 @@
 Summary: Library that implements an embeddable SQL database engine
 Name: sqlite
 Version: %{rpmver}
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: blessing
 URL: http://www.sqlite.org/
 
@@ -24,7 +24,7 @@ URL: http://www.sqlite.org/
 Source0: http://www.sqlite.org/%{year}/sqlite-src-%{realver}.zip
 %else
 Vendor: bww bitwise works GmbH
-%scm_source github https://github.com/bitwiseworks/%{name}-os2 %{version}-os2
+%scm_source github https://github.com/bitwiseworks/%{name}-os2 %{version}-os2-1
 # DEF files to create forwarders for the legacy package
 Source10: sqlit3.def
 %endif
@@ -483,6 +483,9 @@ make test
 %endif
 
 %changelog
+* Mon Mar 09 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.47.2-2
+- fix issue #2 (c:\ vs c:/ issue)
+
 * Wed Feb 18 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> 3.47.2-1
 - update version to 3.47.2
 - add icu support
