@@ -1,5 +1,5 @@
 Name:           lcms2
-Version:        2.11
+Version:        2.18
 Release:        1%{?dist}
 Summary:        Color Management Engine
 License:        MIT
@@ -15,6 +15,7 @@ BuildRequires:  gcc
 BuildRequires:  libjpeg-devel
 BuildRequires:  libtiff-devel
 BuildRequires:  zlib-devel
+BuildRequires:  make
 
 %description
 LittleCMS intends to be a small-footprint, speed optimized color management
@@ -23,14 +24,22 @@ parallel installed with the original (deprecated) lcms.
 
 %package        utils
 Summary:        Utility applications for %{name}
+%if !0%{?os2_version}
+Requires:       %{name}%{?_isa} = %{version}-%{release}
+%else
 Requires:       %{name} = %{version}-%{release}
+%endif
 
 %description    utils
 The %{name}-utils package contains utility applications for %{name}.
 
 %package        devel
 Summary:        Development files for LittleCMS
+%if !0%{?os2_version}
+Requires:       %{name}%{?_isa} = %{version}-%{release}
+%else
 Requires:       %{name} = %{version}-%{release}
+%endif
 Provides:       littlecms-devel = %{version}-%{release}
 
 %description    devel
@@ -65,11 +74,7 @@ export VENDOR="%{vendor}"
 sed -i.rpath 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
 sed -i.rpath 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
 
-%if !0%{?os2_version}
 %make_build
-%else
-make %{?_smp_mflags}
-%endif
 
 
 %install
@@ -79,23 +84,21 @@ rm -fv %{buildroot}%{_libdir}/lib*.la
 
 # rename docs (for use with %%doc below)
 %if !0%{?os2_version}
-cp -alf doc/LittleCMS2.??\ API.odt api.odt
-cp -alf doc/LittleCMS2.??\ Plugin\ API.odt plugin-api.odt
-cp -alf doc/LittleCMS2.??\ tutorial.odt tutorial.odt
+cp -alf doc/LittleCMS2.??\ API.pdf api.pdf
+cp -alf doc/LittleCMS2.??\ Plugin\ API.pdf plugin-api.pdf
+cp -alf doc/LittleCMS2.??\ tutorial.pdf tutorial.pdf
 %else
-cp -af doc/LittleCMS2.??\ API.odt api.odt
-cp -af doc/LittleCMS2.??\ Plugin\ API.odt plugin-api.odt
-cp -af doc/LittleCMS2.??\ tutorial.odt tutorial.odt
+cp -af doc/LittleCMS2.??\ API.pdf api.pdf
+cp -af doc/LittleCMS2.??\ Plugin\ API.pdf plugin-api.pdf
+cp -af doc/LittleCMS2.??\ tutorial.pdf tutorial.pdf
 %endif
 
 
 %check
-%if !0%{?os2_version}
-%make_build check -k ||:
-%else
+%if 0%{?os2_version}
 export BEGINLIBPATH=%{_builddir}/%{buildsubdir}/src/.libs
-make check -k ||:
 %endif
+%make_build check -k ||:
 
 
 %if !0%{?os2_version}
@@ -104,7 +107,8 @@ make check -k ||:
 
 %files
 %doc AUTHORS
-%license COPYING
+%doc ChangeLog
+%doc README*
 %if !0%{?os2_version}
 %{_libdir}/liblcms2.so.2*
 %else
@@ -120,7 +124,7 @@ make check -k ||:
 %{_mandir}/man1/*
 
 %files devel
-%doc api.odt plugin-api.odt tutorial.odt
+%doc api.pdf plugin-api.pdf tutorial.pdf
 %{_includedir}/lcms2*.h
 %if !0%{?os2_version}
 %{_libdir}/liblcms2.so
@@ -131,6 +135,9 @@ make check -k ||:
 
 
 %changelog
+* Fri Mar 13 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.18-1
+- update to vendor version 2.18
+
 * Tue Dec 29 2020 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.11-1
 - update to vendor version 2.11
 - resynced with fedora spec
