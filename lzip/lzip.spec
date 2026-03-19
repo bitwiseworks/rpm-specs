@@ -1,6 +1,6 @@
 Name:           lzip
-Version:        1.25
-Release:        2%{?dist}
+Version:        1.26
+Release:        1%{?dist}
 Summary:        LZMA compressor with integrity checking
 
 %if 0%{?os2_version}
@@ -75,6 +75,9 @@ make check
 %exclude %{_bindir}/lzip
 
 %changelog
+* Thu Mar 19 2026 Elbert Pol <elbert.pol@gmail.com> - 1.26-1
+- Updated to latest version
+
 * Tue Feb 25 2025 Elbert Pol <elbert.pol@gmail.com> - 1.25-2
 - Fix a macros.dist error
 
