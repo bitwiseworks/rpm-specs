@@ -1,9 +1,9 @@
-%global somajor 24
+%global somajor 25
 
 Summary: Library for reading RAW files obtained from digital photo cameras
 Name: libraw
-Version: 0.22.0
-Release: 2%{?dist}
+Version: 0.22.1
+Release: 1%{?dist}
 License: BSD-3-Clause and (CDDL-1.0 or LGPL-2.1-only)
 URL: https://www.libraw.org
 %if 0%{?os2_version}
@@ -20,7 +20,6 @@ Patch0: LibRaw-pkgconfig.patch
 
 BuildRequires: gcc-c++
 BuildRequires: pkgconfig(lcms2)
-BuildRequires: pkgconfig(jasper)
 BuildRequires: pkgconfig(libjpeg)
 BuildRequires: pkgconfig(zlib)
 BuildRequires: autoconf automake libtool
@@ -79,7 +78,6 @@ export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp -lcx -lpthread -fstack-
 autoreconf -if
 %configure \
     --enable-examples=yes \
-    --enable-jasper \
     --enable-jpeg \
     --enable-lcms \
     --enable-zlib \
@@ -116,8 +114,8 @@ rm -fv %{buildroot}%{_libdir}/lib*.la
 %{_libdir}/libraw.so.%{somajor}{,.*}
 %{_libdir}/libraw_r.so.%{somajor}{,.*}
 %else
-%{_libdir}/raw24.dll
-%{_libdir}/raw_r24.dll
+%{_libdir}/raw_r25.dll
+%{_libdir}/raw25.dll
 %endif
 
 %files static
@@ -138,9 +136,9 @@ rm -fv %{buildroot}%{_libdir}/lib*.la
 %{_libdir}/libraw_r.so
 %else
 %{_libdir}/raw_dll.a
-%{_libdir}/raw24_dll.a
+%{_libdir}/raw*_dll.a
 %{_libdir}/raw_r_dll.a
-%{_libdir}/raw_r24_dll.a
+%{_libdir}/raw_r*_dll.a
 %endif
 %{_libdir}/pkgconfig/libraw.pc
 %{_libdir}/pkgconfig/libraw_r.pc
@@ -149,8 +147,10 @@ rm -fv %{buildroot}%{_libdir}/lib*.la
 %files samples
 %{_bindir}/*
 
-
 %changelog
+* Tue Apr 14 2026 Elbert Pol <elbert.pol@gmail.com> - 0.22.1-1
+- Updated to latest version
+
 * Tue Apr 14 2026 Elbert Pol <elbert.pol@gmail.com> - 0.22.0-2
 - Add right numbers to dlls
 
