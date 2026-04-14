@@ -3,7 +3,7 @@
 Summary: Library for reading RAW files obtained from digital photo cameras
 Name: libraw
 Version: 0.22.0
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: BSD-3-Clause and (CDDL-1.0 or LGPL-2.1-only)
 URL: https://www.libraw.org
 %if 0%{?os2_version}
@@ -116,7 +116,8 @@ rm -fv %{buildroot}%{_libdir}/lib*.la
 %{_libdir}/libraw.so.%{somajor}{,.*}
 %{_libdir}/libraw_r.so.%{somajor}{,.*}
 %else
-%{_libdir}/*.dll
+%{_libdir}/raw24.dll
+%{_libdir}/raw_r24.dll
 %endif
 
 %files static
@@ -150,6 +151,9 @@ rm -fv %{buildroot}%{_libdir}/lib*.la
 
 
 %changelog
+* Tue Apr 14 2026 Elbert Pol <elbert.pol@gmail.com> - 0.22.0-2
+- Add right numbers to dlls
+
 * Thu Jan 15 2026 Elbert Pol <elbert.pol@gmail.com> - 0.22.0-1
 - Updated to latest version
 - Add legacy for older dll's
