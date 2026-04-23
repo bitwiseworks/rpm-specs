@@ -1,6 +1,5 @@
-%global _smp_ncpus_max 1
 Name:           media-downloader
-Version:        5.5.1
+Version:        5.5.2
 Release:        1%{?dist}
 Summary:        GUI frontend to multiple CLI based downloading programs
 License:        GPL-2.0-or-later
@@ -130,6 +129,9 @@ fi
 %endif
 
 %changelog
+* Thu Apr 23 2026 Elbert Pol <elbert.pol@gmail.com> - 5.5.2-1
+- Updated to latest version
+
 * Tue Apr 14 2026 Elbert Pol <elbert.pol@gmail.com> - 5.5.1-1
 - Updated to latest version
  
