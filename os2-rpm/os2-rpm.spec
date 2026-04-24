@@ -1,7 +1,7 @@
 Summary: OS/2 specific RPM macros and scripts
 Name: os2-rpm
 Version: 1
-Release: 12%{?dist}
+Release: 13%{?dist}
 License: GPLv2+
 Group: Development/System
 Vendor: bww bitwise works GmbH
@@ -30,6 +30,7 @@ Source8: getbootdrive.cmd
 Source9: wpi4rpm.cmd
 Source10: macros.scm_pwd
 Source11: macros.vpath
+Source12: macros.perl-srpm
 
 # This is necessary due to a silly "Provides: os2-rpm" in os2-rpm-build-0-1
 Conflicts: os2-rpm-build <= 0-1
@@ -71,7 +72,7 @@ done
 
 %{__mkdir_p} %{buildroot}%{_rpmconfigdir_macros_d}
 %{__install} -p -m 644 -t %{buildroot}%{_rpmconfigdir_macros_d} \
-  macros.scm macros.cfg macros.wps macros.vpath
+  macros.scm macros.cfg macros.wps macros.vpath macros.perl-srpm
 %{__mkdir_p} %{buildroot}%{_sysconfdir}/rpm
 %{__install} -p -m 644 -t %{buildroot}%{_sysconfdir}/rpm macros.scm_pwd
 
@@ -101,8 +102,12 @@ done
 %{_rpmconfigdir_macros_d}/macros.scm
 %config(noreplace) %{_sysconfdir}/rpm/macros.scm_pwd
 %{_rpmconfigdir_macros_d}/macros.vpath
+%{_rpmconfigdir_macros_d}/macros.perl-srpm
 
 %changelog
+* Fri Apr 24 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> 1-13
+- add macros.perl-srpm, as those got eliminated with rpm >= 4.15
+
 * Thu Oct 30 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 1-12
 - add _docdir_fmt macro
 - removed the version part in the pgkdocdir macro
