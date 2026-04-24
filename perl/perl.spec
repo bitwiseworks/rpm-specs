@@ -137,7 +137,7 @@ License:        GPL-1.0-or-later OR Artistic-1.0-Perl
 Epoch:          %{perl_epoch}
 Version:        %{perl_version}
 # release number must be even higher, because dual-lived modules will be broken otherwise
-Release:        1%{?dist}
+Release:        14%{?dist}
 Summary:        Practical Extraction and Report Language
 Url:            https://www.perl.org/
 %if !0%{?os2_version}
@@ -2394,7 +2394,9 @@ License:        GPL-1.0-or-later OR Artistic-1.0-Perl
 # Epoch bump for clean upgrade over old standalone package
 Epoch:          2
 Version:        1.04
+%if !0%{?os2_version}
 Requires:       perl(ExtUtils::MM::Utils)
+%endif
 %if %{defined perl_bootstrap}
 Requires:       %perl_compat
 %gendep_perl_IPC_Cmd
@@ -8343,6 +8345,9 @@ ln -s /app/bin/perl %{buildroot}/usr/bin/perl
 %{_mandir}/man3/vmsish.*
 
 %changelog
+* Fri Apr 24 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> 5.42.2-14
+- never start with rel 1 on a new version, because of dual-lived modules
+
 * Mon Apr 20 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> 5.42.2-1
 - update to version 5.42.2
 - resync with fedora spec

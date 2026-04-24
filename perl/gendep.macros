@@ -1219,7 +1219,9 @@ Provides: perl(Math::Trig) = 1.63 \
 %global gendep_perl_Memoize \
 Requires: perl(Carp) \
 Requires: perl(Exporter) \
+%if %{with gdbm} \
 Requires: perl(NDBM_File) \
+%endif \
 Requires: perl(SDBM_File) >= 1.01 \
 Requires: perl(Scalar::Util) >= 1.11 \
 Requires: perl(Storable) >= 1.002 \
