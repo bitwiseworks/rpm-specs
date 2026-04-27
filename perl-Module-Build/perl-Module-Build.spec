@@ -1,3 +1,7 @@
+%if 0%{?os2_version}
+%define perl_bootstrap 1
+%endif
+
 %global cpan_version_major 0.42
 %global cpan_version_minor 34
 %global cpan_version %{cpan_version_major}%{?cpan_version_minor}
@@ -22,7 +26,7 @@ Source0:        https://cpan.metacpan.org/modules/by-module/Module/Module-Build-
 Patch1:         Module-Build-0.4231-Do-not-die-on-missing-ExtUtils-CBuilder-in-have_c_co.patch
 %else
 Vendor:         bww bitwise works GmbH
-%scm_source     github https://github.com/bitwiseworks/%{name}-os2 %{version}-os2
+%scm_source     github https://github.com/bitwiseworks/%{name}-os2 %{cpan_version}-os2
 %endif
 BuildArch:      noarch
 BuildRequires:  coreutils
