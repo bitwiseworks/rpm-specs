@@ -1,39 +1,41 @@
-# Based on http://pkgs.fedoraproject.org/cgit/rpms/perl-Error.git/tree/perl-Error.spec?id=7314bd991225612bc2db6cd4770568ea1ff3d283
-
 Name:           perl-Error
 Epoch:          1
-Version:        0.17024
+Version:        0.17030
 Release:        1%{?dist}
 Summary:        Error/exception handling in an OO-ish way
-License:        (GPL+ or Artistic) and MIT
-Group:          Development/Libraries
-URL:            http://search.cpan.org/dist/Error/
+License:        (GPL-1.0-or-later OR Artistic-1.0-Perl) AND X11
+URL:            https://metacpan.org/release/Error
+Source0:        https://cpan.metacpan.org/modules/by-module/Error/Error-%{version}.tar.gz
+%if 0%{?os2_version}
 Vendor:         bww bitwise works GmbH
-Source0:        http://www.cpan.org/authors/id/S/SH/SHLOMIF/Error-%{version}.tar.gz
-
+%endif
 BuildArch:      noarch
+# Build
+BuildRequires:  coreutils
+BuildRequires:  findutils
+BuildRequires:  make
+%if !0%{?os2_version}
 BuildRequires:  perl-generators
-BuildRequires:  perl(File::Spec)
-BuildRequires:  perl(lib)
-BuildRequires:  perl(Module::Build)
-# Run-requires:
+BuildRequires:  perl-interpreter
+%endif
+BuildRequires:  perl(ExtUtils::MakeMaker)
+# Runtime
 BuildRequires:  perl(Carp)
 BuildRequires:  perl(Exporter)
+BuildRequires:  perl(overload)
 BuildRequires:  perl(Scalar::Util)
 BuildRequires:  perl(strict)
+BuildRequires:  perl(vars)
 BuildRequires:  perl(warnings)
-# TODO No Test::Pod on OS/2 yet.
-%if 0
-# Tests:
+# Tests
 BuildRequires:  perl(base)
+BuildRequires:  perl(blib)
+BuildRequires:  perl(File::Spec)
+BuildRequires:  perl(IO::Handle)
+BuildRequires:  perl(IPC::Open3)
+BuildRequires:  perl(lib)
 BuildRequires:  perl(Test::More)
-# Optional tests:
-%if !%{defined perl_bootstrap}
-BuildRequires:  perl(Test::Pod) >= 1.14
-BuildRequires:  perl(Test::Pod::Coverage) >= 1.04
-%endif
-%endif
-Requires:       perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
+# Dependencies
 Requires:       perl(Carp)
 
 # Avoid provides/requires from examples
@@ -50,37 +52,40 @@ can simply be recorded.
 %setup -q -n Error-%{version}
 
 %build
-perl Build.PL --installdirs=vendor
-./Build
+perl Makefile.PL INSTALLDIRS=vendor
+make %{?_smp_mflags}
+%if 0%{?os2_version}
+make manifypods
+%endif
 
 %install
-rm -rf $RPM_BUILD_ROOT
-./Build install --destdir=$RPM_BUILD_ROOT --create_packlist=0
-%{_fixperms} $RPM_BUILD_ROOT
+make pure_install DESTDIR=%{buildroot}
+find %{buildroot} -type f -name .packlist -delete
+%{_fixperms} -c %{buildroot}
 
 %check
-# TODO No Test::Pod on OS/2 yet.
-%if 0
-./Build test
+%if !0%{?os2_version}
+make test
 %endif
-
-%clean
-rm -rf $RPM_BUILD_ROOT
 
 %files
-%if 0%{?_licensedir:1}
 %license LICENSE
-%else
-%doc LICENSE
-%endif
-# GPL+ or Artistic
-%doc ChangeLog README examples/
+# GPL-1.0-or-later OR Artistic-1.0-Perl
+%doc ChangeLog Changes README examples/
 %{perl_vendorlib}/Error.pm
 %{_mandir}/man3/Error.3*
-# MIT
+# X11
 %{perl_vendorlib}/Error/
+%if !0%{?os2_version}
+%{_mandir}/man3/Error::Simple.3*
+%else
 %{_mandir}/man3/Error.Simple.3*
+%endif
 
 %changelog
+* Mon Apr 27 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> 1:0.17030-1
+- update to 0.17030
+- resync with fedora spec
+
 * Thu Apr 6 2017 Dmitriy Kuminov <coding@dmik.org> 1:0.17024-1
 - Initial release.
