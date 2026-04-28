@@ -1082,13 +1082,14 @@ in CPAN::Meta::Spec.
 %package CPAN-Meta-Requirements
 Summary:        Set of version requirements for a CPAN dist
 Epoch:          0
-# Real version 2.140
-Version:        2.140
+# Real version 2.143
+Version:        2.143
 License:        GPL-1.0-or-later OR Artistic-1.0-Perl
 BuildArch:      noarch
 # CPAN-Meta-Requirements used to have six decimal places
 %global __provides_exclude %{?__provides_exclude:%__provides_exclude|}^perl\\(CPAN::Meta::Requirements\\)
 Provides:       perl(CPAN::Meta::Requirements) = %{version}000
+Provides:       perl(CPAN::Meta::Requirements::Range) = %{version}000
 %if %{defined perl_bootstrap}
 Requires:       %perl_compat
 %gendep_perl_CPAN_Meta_Requirements
@@ -5535,8 +5536,20 @@ ln -s /app/bin/perl %{buildroot}/usr/bin/perl
 %{archlib}/auto/File/Glob/GlobAJ.dll
 %endif
 %{archlib}/auto/PerlIO
+%if 0%{?os2_version}
+%exclude %{archlib}/auto/PerlIO/*.dbg
+%exclude %{archlib}/auto/PerlIO/encoding/*.dbg
+%exclude %{archlib}/auto/PerlIO/mmap/*.dbg
+%exclude %{archlib}/auto/PerlIO/via/*.dbg
+%endif
 %{archlib}/auto/re
+%if 0%{?os2_version}
+%exclude %{archlib}/auto/re/*.dbg
+%endif
 %{archlib}/auto/SDBM_File
+%if 0%{?os2_version}
+%exclude %{archlib}/auto/SDBM_File/*.dbg
+%endif
 %{archlib}/Config.*
 %{archlib}/Config_git.pl
 %{archlib}/Config_heavy.pl
@@ -5739,6 +5752,9 @@ ln -s /app/bin/perl %{buildroot}/usr/bin/perl
 
 %files B
 %{archlib}/auto/B
+%if 0%{?os2_version}
+%exclude %{archlib}/auto/B/*.dbg
+%endif
 %{archlib}/B
 %{archlib}/B.pm
 %{archlib}/O.pm
@@ -5802,6 +5818,9 @@ ln -s /app/bin/perl %{buildroot}/usr/bin/perl
 %dir %{archlib}/auto/Compress
 %dir %{archlib}/auto/Compress/Raw
 %{archlib}/auto/Compress/Raw/Bzip2
+%if 0%{?os2_version}
+%exclude %{archlib}/auto/Compress/Raw/Bzip2/*.dbg
+%endif
 %if !0%{?os2_version}
 %{_mandir}/man3/Compress::Raw::Bzip2*
 %else
@@ -5817,6 +5836,9 @@ ln -s /app/bin/perl %{buildroot}/usr/bin/perl
 %dir %{archlib}/auto/Compress
 %dir %{archlib}/auto/Compress/Raw
 %{archlib}/auto/Compress/Raw/Zlib
+%if 0%{?os2_version}
+%exclude %{archlib}/auto/Compress/Raw/Zlib/*.dbg
+%endif
 %if !0%{?os2_version}
 %{_mandir}/man3/Compress::Raw::Zlib*
 %else
@@ -5909,7 +5931,9 @@ ln -s /app/bin/perl %{buildroot}/usr/bin/perl
 %files CPAN-Meta-Requirements
 %dir %{privlib}/CPAN
 %dir %{privlib}/CPAN/Meta
+%dir %{privlib}/CPAN/Meta/Requirements
 %{privlib}/CPAN/Meta/Requirements.pm
+%{privlib}/CPAN/Meta/Requirements/Range.pm
 %if !0%{?os2_version}
 %{_mandir}/man3/CPAN::Meta::Requirements.3*
 %else
@@ -5988,6 +6012,9 @@ ln -s /app/bin/perl %{buildroot}/usr/bin/perl
 %{archlib}/Devel/Peek.pm
 %dir %{archlib}/auto/Devel
 %{archlib}/auto/Devel/Peek
+%if 0%{?os2_version}
+%exclude %{archlib}/auto/Devel/Peek/*.dbg
+%endif
 %if !0%{?os2_version}
 %{_mandir}/man3/Devel::Peek.*
 %else
@@ -6050,6 +6077,9 @@ ln -s /app/bin/perl %{buildroot}/usr/bin/perl
 %{archlib}/Digest/MD5.pm
 %dir %{archlib}/auto/Digest
 %{archlib}/auto/Digest/MD5
+%if 0%{?os2_version}
+%exclude %{archlib}/auto/Digest/MD5/*.dbg
+%endif
 %if !0%{?os2_version}
 %{_mandir}/man3/Digest::MD5.3*
 %else
@@ -6064,6 +6094,9 @@ ln -s /app/bin/perl %{buildroot}/usr/bin/perl
 %{archlib}/Digest/SHA.pm
 %dir %{archlib}/auto/Digest
 %{archlib}/auto/Digest/SHA
+%if 0%{?os2_version}
+%exclude %{archlib}/auto/Digest/SHA/*.dbg
+%endif
 %{_mandir}/man1/shasum.1*
 %if !0%{?os2_version}
 %{_mandir}/man3/Digest::SHA.3*
@@ -6463,6 +6496,17 @@ ln -s /app/bin/perl %{buildroot}/usr/bin/perl
 %{_bindir}/piconv
 %{archlib}/Encode*
 %{archlib}/auto/Encode*
+%if 0%{?os2_version}
+%exclude %{archlib}/auto/Encode/*.dbg
+%exclude %{archlib}/auto/Encode/Byte/*.dbg
+%exclude %{archlib}/auto/Encode/CN/*.dbg
+%exclude %{archlib}/auto/Encode/EBCDIC/*.dbg
+%exclude %{archlib}/auto/Encode/JP/*.dbg
+%exclude %{archlib}/auto/Encode/KR/*.dbg
+%exclude %{archlib}/auto/Encode/Symbol/*.dbg
+%exclude %{archlib}/auto/Encode/TW/*.dbg
+%exclude %{archlib}/auto/Encode/Unicode/*.dbg
+%endif
 %{privlib}/Encode
 %exclude %{privlib}/Encode/*.e2x
 %exclude %{privlib}/Encode/encode.h
@@ -6716,6 +6760,9 @@ ln -s /app/bin/perl %{buildroot}/usr/bin/perl
 %files Fcntl
 %{archlib}/Fcntl.pm
 %{archlib}/auto/Fcntl
+%if 0%{?os2_version}
+%exclude %{archlib}/auto/Fcntl/*.dbg
+%endif
 %{_mandir}/man3/Fcntl.3*
 
 %files fields
@@ -6754,6 +6801,9 @@ ln -s /app/bin/perl %{buildroot}/usr/bin/perl
 %{archlib}/File/DosGlob.pm
 %dir %{archlib}/auto/File
 %{archlib}/auto/File/DosGlob
+%if 0%{?os2_version}
+%exclude %{archlib}/auto/File/DosGlob/*.dbg
+%endif
 %if !0%{?os2_version}
 %{_mandir}/man3/File::DosGlob.3*
 %else
@@ -6827,6 +6877,9 @@ ln -s /app/bin/perl %{buildroot}/usr/bin/perl
 %files Filter
 %dir %{archlib}/auto/Filter
 %{archlib}/auto/Filter/Util
+%if 0%{?os2_version}
+%exclude %{archlib}/auto/Filter/Util/Call/*.dbg
+%endif
 %dir %{archlib}/Filter
 %{archlib}/Filter/Util
 %if !0%{?os2_version}
@@ -6908,6 +6961,9 @@ ln -s /app/bin/perl %{buildroot}/usr/bin/perl
 %dir %{archlib}/auto/Hash
 %dir %{archlib}/auto/Hash/Util
 %{archlib}/auto/Hash/Util/FieldHash
+%if 0%{?os2_version}
+%exclude %{archlib}/auto/Hash/Util/FieldHash/*.dbg
+%endif
 %dir %{archlib}/Hash
 %dir %{archlib}/Hash/Util
 %{archlib}/Hash/Util/FieldHash.pm
@@ -7116,6 +7172,9 @@ ln -s /app/bin/perl %{buildroot}/usr/bin/perl
 %if %{dual_life} || %{rebuild_from_scratch}
 %files IPC-SysV
 %{archlib}/auto/IPC
+%if 0%{?os2_version}
+%exclude %{archlib}/auto/IPC/SysV/*.dbg
+%endif
 %dir %{archlib}/IPC
 %{archlib}/IPC/Msg.pm
 %{archlib}/IPC/Semaphore.pm
@@ -7145,6 +7204,9 @@ ln -s /app/bin/perl %{buildroot}/usr/bin/perl
 
 %files I18N-Langinfo
 %{archlib}/auto/I18N
+%if 0%{?os2_version}
+%exclude %{archlib}/auto/I18N/Langinfo/*.dbg
+%endif
 %{archlib}/I18N
 %if !0%{?os2_version}
 %{_mandir}/man3/I18N::Langinfo.*
@@ -7296,6 +7358,9 @@ ln -s /app/bin/perl %{buildroot}/usr/bin/perl
 %files Math-BigInt-FastCalc
 %{archlib}/Math
 %{archlib}/auto/Math
+%if 0%{?os2_version}
+%exclude %{archlib}/auto/Math/BigInt/FastCalc/*.dbg
+%endif
 %if !0%{?os2_version}
 %{_mandir}/man3/Math::BigInt::FastCalc.*
 %else
@@ -7331,6 +7396,9 @@ ln -s /app/bin/perl %{buildroot}/usr/bin/perl
 %if %{dual_life} || %{rebuild_from_scratch}
 %files MIME-Base64
 %{archlib}/auto/MIME
+%if 0%{?os2_version}
+%exclude %{archlib}/auto/MIME/Base64/*.dbg
+%endif
 %{archlib}/MIME
 %if !0%{?os2_version}
 %{_mandir}/man3/MIME::*
@@ -7402,6 +7470,9 @@ ln -s /app/bin/perl %{buildroot}/usr/bin/perl
 
 %files mro
 %{archlib}/auto/mro
+%if 0%{?os2_version}
+%exclude %{archlib}/auto/mro/*.dbg
+%endif
 %{archlib}/mro.pm
 %{_mandir}/man3/mro.3*
 
@@ -7458,6 +7529,9 @@ ln -s /app/bin/perl %{buildroot}/usr/bin/perl
 
 %files Opcode
 %{archlib}/auto/Opcode
+%if 0%{?os2_version}
+%exclude %{archlib}/auto/Opcode/*.dbg
+%endif
 %{archlib}/Opcode.pm
 %{archlib}/ops.pm
 %{_mandir}/man3/Opcode.3*
@@ -7495,6 +7569,9 @@ ln -s /app/bin/perl %{buildroot}/usr/bin/perl
 %dir %{archlib}/File
 %{archlib}/File/Spec*
 %{archlib}/auto/Cwd
+%if 0%{?os2_version}
+%exclude %{archlib}/auto/Cwd/*.dbg
+%endif
 %{_mandir}/man3/Cwd*
 %if !0%{?os2_version}
 %{_mandir}/man3/File::Spec*
@@ -7676,6 +7753,9 @@ ln -s /app/bin/perl %{buildroot}/usr/bin/perl
 
 %files POSIX
 %{archlib}/auto/POSIX
+%if 0%{?os2_version}
+%exclude %{archlib}/auto/POSIX/*.dbg
+%endif
 %{archlib}/POSIX.*
 %{_mandir}/man3/POSIX.*
 
@@ -7689,6 +7769,9 @@ ln -s /app/bin/perl %{buildroot}/usr/bin/perl
 %{archlib}/Scalar
 %{archlib}/Sub
 %{archlib}/auto/List
+%if 0%{?os2_version}
+%exclude %{archlib}/auto/List/Util/*.dbg
+%endif
 %if !0%{?os2_version}
 %{_mandir}/man3/List::Util*
 %{_mandir}/man3/Scalar::List::Utils*
@@ -8210,6 +8293,9 @@ ln -s /app/bin/perl %{buildroot}/usr/bin/perl
 %{archlib}/Time/HiRes.pm
 %dir %{archlib}/auto/Time
 %{archlib}/auto/Time/HiRes
+%if 0%{?os2_version}
+%exclude %{archlib}/auto/Time/HiRes/*.dbg
+%endif
 %if !0%{?os2_version}
 %{_mandir}/man3/Time::HiRes.*
 %else
@@ -8234,6 +8320,9 @@ ln -s /app/bin/perl %{buildroot}/usr/bin/perl
 %{archlib}/Time/Seconds.pm
 %dir %{archlib}/auto/Time
 %{archlib}/auto/Time/Piece
+%if 0%{?os2_version}
+%exclude %{archlib}/auto/Time/Piece/*.dbg
+%endif
 %if !0%{?os2_version}
 %{_mandir}/man3/Time::Piece.3*
 %{_mandir}/man3/Time::Seconds.3*
@@ -8259,7 +8348,7 @@ ln -s /app/bin/perl %{buildroot}/usr/bin/perl
 %dir %{archlib}/auto/threads
 %{archlib}/auto/threads/shared*
 %if 0%{?os2_version}
-%{archlib}/auto/threads/shared/shared*.dbg
+%exclude %{archlib}/auto/threads/shared/*.dbg
 %endif
 %dir %{archlib}/threads
 %{archlib}/threads/shared*
@@ -8274,6 +8363,9 @@ ln -s /app/bin/perl %{buildroot}/usr/bin/perl
 %files Unicode-Collate
 %dir %{archlib}/auto/Unicode
 %{archlib}/auto/Unicode/Collate
+%if 0%{?os2_version}
+%exclude %{archlib}/auto/Unicode/Collate/*.dbg
+%endif
 %if 0%{?os2_version}
 %{archlib}/auto/Unicode/Collate/Collat*.dbg
 %endif
@@ -8295,7 +8387,7 @@ ln -s /app/bin/perl %{buildroot}/usr/bin/perl
 %dir %{archlib}/auto/Unicode
 %{archlib}/auto/Unicode/Normalize
 %if 0%{?os2_version}
-%{archlib}/auto/Unicode/Normalize/Normal*.dbg
+%exclude %{archlib}/auto/Unicode/Normalize/*.dbg
 %endif
 %dir %{archlib}/Unicode
 %{archlib}/Unicode/Normalize.pm

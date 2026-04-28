@@ -222,7 +222,8 @@ Requires: perl(CPAN::Meta::Requirements::Range) \
 Requires: perl(Carp) \
 Requires: perl(strict) \
 Requires: perl(warnings) \
-Provides: perl(CPAN::Meta::Requirements) = 2.140000 \
+Provides: perl(CPAN::Meta::Requirements) = 2.143000 \
+Provides: perl(CPAN::Meta::Requirements::Range) = 2.143000 \
 %{nil}
 %global gendep_perl_CPAN_Meta_YAML \
 Requires: perl(:VERSION) >= 5.8.1 \
