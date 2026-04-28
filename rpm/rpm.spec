@@ -33,7 +33,7 @@
 
 %global rpmver 4.15.1
 #global snapver rc1
-%global rel 4
+%global rel 5
 
 %global srcver %{version}%{?snapver:-%{snapver}}
 %global srcdir %{?snapver:testing}%{!?snapver:%{name}-%(echo %{version} | cut -d'.' -f1-2).x}
@@ -586,7 +586,10 @@ find $RPM_BUILD_ROOT -name "*.la"|xargs rm -f
 rm -f $RPM_BUILD_ROOT/%{rpmhome}/{perldeps.pl,perl.*,pythond*}
 rm -f $RPM_BUILD_ROOT/%{_fileattrsdir}/{perl*,python*}
 %else
+rm -f $RPM_BUILD_ROOT/%{rpmhome}/perldeps.pl
+rm -f $RPM_BUILD_ROOT/%{rpmhome}/perl.*
 rm -f $RPM_BUILD_ROOT/%{rpmhome}/pythond*
+rm -f $RPM_BUILD_ROOT/%{_fileattrsdir}/perl*
 rm -f $RPM_BUILD_ROOT/%{_fileattrsdir}/python*
 %endif
 
@@ -805,6 +808,9 @@ make check || (cat tests/rpmtests.log; exit 0)
 %doc doc/librpm/html/*
 
 %changelog
+* Wed Apr 29 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.15.1-5
+- rebuild with perl files removed as well
+
 * Fri Mai 16 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.15.1-4
 - fix a brp-compression issue
 
