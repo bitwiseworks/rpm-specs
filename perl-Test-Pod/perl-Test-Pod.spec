@@ -1,6 +1,6 @@
 Name:           perl-Test-Pod
 Version:        1.52
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Test POD files for correctness
 License:        GPL-1.0-or-later OR Artistic-1.0-Perl
 %if !0%{?os2_version}
@@ -11,11 +11,9 @@ Source0:        https://cpan.metacpan.org/authors/id/E/ET/ETHER/Test-Pod-%{versi
 BuildArch:      noarch
 BuildRequires:  findutils
 BuildRequires:  make
-%if !0%{?os2_version}
 BuildRequires:  perl-generators
 BuildRequires:  perl-interpreter
 BuildRequires:  perl(ExtUtils::MakeMaker) >= 6.76
-%endif
 BuildRequires:  perl(warnings)
 BuildRequires:  perl(strict)
 # Run-time
@@ -95,6 +93,9 @@ LC_ALL=C make test
 %{_libexecdir}/%{name}
 
 %changelog
+* Thu Apr 30 2026 Elbert Pol <elbert.pol@gmail.com> - 1.52-2
+- Enable more BuildRequires with newer Perl build
+
 * Thu Apr 30 2026 Elbert Pol <elbert.pol@gmail.com> - 1.52-1
 - Update to latest version
 - Make it work with latest perl
