@@ -137,7 +137,7 @@ License:        GPL-1.0-or-later OR Artistic-1.0-Perl
 Epoch:          %{perl_epoch}
 Version:        %{perl_version}
 # release number must be even higher, because dual-lived modules will be broken otherwise
-Release:        15%{?dist}
+Release:        16%{?dist}
 Summary:        Practical Extraction and Report Language
 Url:            https://www.perl.org/
 %if !0%{?os2_version}
@@ -8437,6 +8437,9 @@ ln -s /app/bin/perl %{buildroot}/usr/bin/perl
 %{_mandir}/man3/vmsish.*
 
 %changelog
+* Fri May 01 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> 5.42.2-16
+- fix another bug, which prevented syscopy from working correct
+
 * Thu Apr 30 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> 5.42.2-15
 - fix a bug, which prevented scripts to exec
 
