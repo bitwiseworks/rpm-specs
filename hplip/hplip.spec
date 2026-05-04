@@ -10,7 +10,7 @@
 Summary: HP Linux Imaging and Printing Project
 Name: hplip
 Version: 3.19.12
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv2+ and MIT and BSD and IJG and Public Domain and GPLv2+ with exceptions and ISC
 
 Url: https://developers.hp.com/hp-linux-imaging-and-printing
@@ -415,6 +415,9 @@ ldconfig_scriptlets libs
 %config(noreplace) %{_sysconfdir}/sane.d/dll.d/hpaio
 
 %changelog
+* Mon May 04 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.19.12-3
+- rebuild with latest net-snmp
+
 * Wed May 14 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.19.12-2
 - rebuild with python 3.13
 
