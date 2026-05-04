@@ -28,7 +28,7 @@
 Summary: Scanner access software
 Name: sane-backends
 Version: 1.3.1
-Release: 1%{?dist}
+Release: 2%{?dist}
 # backend/coolscan*, backend/epson2*, backend/epsonds*, backend/magicolor*, backend/kodakaio* -
 # GPL-2.0-only
 # backend/qcam* - MIT AND GPL-2.0-or-later WITH SANE-exception
@@ -563,8 +563,11 @@ exit 0
 %endif
 
 %changelog
-* Mon Dec 23 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.3.1-1
-- upate to version 1.3.1
+* Mon May 04 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.3.1-2
+- rebuild with latest net-snmp
+
+* Mon Feb 24 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.3.1-1
+- update to version 1.3.1
 - resync with fedora spec
 
 * Mon Dec 23 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.0.28-2
