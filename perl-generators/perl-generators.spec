@@ -1,10 +1,6 @@
-%if 0%{?os2_version}
-%define perl_bootstrap 1
-%endif
-
 Name:           perl-generators
 Version:        1.16
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        RPM Perl dependencies generators
 License:        GPL-1.0-or-later
 URL:            http://jplesnik.fedorapeople.org/generators
@@ -16,13 +12,9 @@ BuildRequires:  make
 # Break build cycle: reflexive dependency
 BuildRequires:  perl-generators
 %endif
-%if !0%{?os2_version}
 BuildRequires:  perl-interpreter >= 4:5.22.0-351
-%endif
 BuildRequires:  perl(Config)
-%if !0%{?os2_version}
 BuildRequires:  perl(ExtUtils::MakeMaker) >= 6.76
-%endif
 BuildRequires:  perl(File::Copy)
 BuildRequires:  perl(File::Find)
 BuildRequires:  perl(strict)
@@ -38,9 +30,7 @@ BuildRequires:  perl(lib)
 BuildRequires:  perl(Exporter)
 BuildRequires:  perl(Test::More)
 BuildRequires:  perl(Test::Simple)
-%if !0%{?os2_version}
 Requires:       perl-interpreter >= 4:5.22.0-351
-%endif
 # Per Perl packaging guidelines, build-requiring perl-generators should
 # deliver Perl macros
 Requires:       perl-macros
@@ -105,10 +95,6 @@ install -p -m 644 fileattrs/* '%{buildroot}%{_rpmconfigdir}/fileattrs'
 
 # Install tests
 mkdir -p %{buildroot}%{_libexecdir}/%{name}
-%if 0%{?os2_version}
-find %{buildroot} -type f -name .packlist -delete
-find %{buildroot} -type f -name perllocal.pod -delete
-%endif
 cp -a t %{buildroot}%{_libexecdir}/%{name}
 perl -i.bkp -pe "s{bin/perl}{%{_rpmconfigdir}/perl}" %{buildroot}%{_libexecdir}/%{name}/t/lib/PerlNS.pm
 cat > %{buildroot}%{_libexecdir}/%{name}/test << 'EOF'
@@ -134,6 +120,9 @@ make test
 %{_libexecdir}/%{name}
 
 %changelog
+* Tue May 05 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.16-2
+- rebuild with perl 5.42
+
 * Fri Apr 24 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.16-1
 - rpm > 4.11 removed this package, so break it out like fedora did
 - initial version
