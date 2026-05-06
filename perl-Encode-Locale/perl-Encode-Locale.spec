@@ -1,18 +1,19 @@
 Name:           perl-Encode-Locale
 Version:        1.05
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Determine the locale encoding
-Group:          Development/Libraries
-License:        GPL+ or Artistic
-URL:            http://search.cpan.org/dist/Encode-Locale/
+License:        GPL-1.0-or-later OR Artistic-1.0-Perl
+URL:            https://metacpan.org/release/Encode-Locale
+Source0:        https://cpan.metacpan.org/authors/id/G/GA/GAAS/Encode-Locale-%{version}.tar.gz
+%if 0%{?os2_version}
 Vendor:         bww bitwise works GmbH
-Source0:        http://www.cpan.org/authors/id/G/GA/GAAS/Encode-Locale-%{version}.tar.gz
+%endif
 BuildArch:      noarch
-BuildRequires:  findutils
+BuildRequires:  coreutils
 BuildRequires:  make
-BuildRequires:  perl
 BuildRequires:  perl-generators
-BuildRequires:  perl(ExtUtils::MakeMaker)
+BuildRequires:  perl-interpreter
+BuildRequires:  perl(ExtUtils::MakeMaker) >= 6.76
 # Run-time:
 BuildRequires:  perl(base)
 BuildRequires:  perl(Encode) >= 2
@@ -27,9 +28,8 @@ BuildRequires:  perl(warnings)
 # Recommended:
 BuildRequires:  perl(I18N::Langinfo)
 # Tests only:
-#BuildRequires:  perl(Test::More)
+BuildRequires:  perl(Test::More)
 BuildRequires:  perl(utf8)
-Requires:       perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
 Requires:       perl(Encode) >= 2
 # Encode::HanExtra not yet packaged
 # Recommended:
@@ -46,27 +46,63 @@ still byte based.  Programs therefore needs to decode byte strings
 that enter the program from the outside and encode them again on the
 way out.
 
+%package tests
+Summary:        Tests for %{name}
+Requires:       %{name} = %{?epoch:%{epoch}:}%{version}-%{release}
+Requires:       perl-Test-Harness
+
+%description tests
+Tests from %{name}. Execute them
+with "%{_libexecdir}/%{name}/test".
+
 %prep
 %setup -q -n Encode-Locale-%{version}
+# Help generators to recognize Perl scripts
+for F in t/*.t; do
+    perl -i -MConfig -ple 'print $Config{startperl} if $. == 1 && !s{\A#!\s*perl}{$Config{startperl}}' "$F"
+    chmod +x "$F"
+done
 
 %build
-perl Makefile.PL INSTALLDIRS=vendor
-make %{?_smp_mflags}
+perl Makefile.PL INSTALLDIRS=vendor NO_PACKLIST=1 NO_PERLLOCAL=1
+%{make_build}
+%if 0%{?os2_version}
 make manifypods
+%endif
 
 %install
-make pure_install DESTDIR=$RPM_BUILD_ROOT
-find $RPM_BUILD_ROOT -type f -name .packlist -exec rm -f {} \;
-%{_fixperms} $RPM_BUILD_ROOT/*
+%{make_install}
+# Install tests
+mkdir -p %{buildroot}%{_libexecdir}/%{name}
+cp -a t %{buildroot}%{_libexecdir}/%{name}
+cat > %{buildroot}%{_libexecdir}/%{name}/test << 'EOF'
+#!/bin/sh
+cd %{_libexecdir}/%{name} && exec prove -I . -j "$(getconf _NPROCESSORS_ONLN)"
+EOF
+chmod +x %{buildroot}%{_libexecdir}/%{name}/test
+%{_fixperms} %{buildroot}/*
 
 %check
-#make test
+%if !0%{?os2_version}
+make test
+%endif
 
 %files
 %doc Changes README
 %{perl_vendorlib}/Encode/
+%if !0%{?os2_version}
+%{_mandir}/man3/Encode::Locale.3*
+%else
 %{_mandir}/man3/Encode.Locale.3*
+%endif
+
+%files tests
+%{_libexecdir}/%{name}
 
 %changelog
+* Wed May 06 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.05-2
+- rebuild with latest perl
+- resync with fedora spec
+
 * Mon May 08 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.05-1
 - initial version
