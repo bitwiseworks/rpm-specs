@@ -7,11 +7,11 @@
 
 Name:           perl-Pod-Parser
 Version:        1.67
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Basic perl modules for handling Plain Old Documentation (POD)
 License:        GPL-1.0-or-later OR Artistic-1.0-Perl
 URL:            https://metacpan.org/release/Pod-Parser
-%if !0%{?os2_version}
+%if 0%{?os2_version}
 Vendor:         bww bitwise works GmbH
 %endif
 Source0:        https://cpan.metacpan.org/authors/id/M/MA/MAREKR/Pod-Parser-%{version}.tar.gz
@@ -19,12 +19,10 @@ BuildArch:      noarch
 BuildRequires:  coreutils
 BuildRequires:  findutils
 BuildRequires:  make
-%if !0%{?os2_version}
 BuildRequires:  perl-generators
 BuildRequires:  perl-interpreter
 BuildRequires:  perl(:VERSION) >= 5.5.0
 BuildRequires:  perl(ExtUtils::MakeMaker) >= 6.76
-%endif
 BuildRequires:  perl(File::Spec) >= 0.82
 # Run-time:
 BuildRequires:  perl(Carp)
@@ -75,10 +73,6 @@ make manifypods
 
 %install
 %{make_install}
-%if 0%{?os2_version}
-find %{buildroot} -type f -name .packlist -delete
-find %{buildroot} -type f -name perllocal.pod -delete
-%endif
 %{_fixperms} %{buildroot}/*
 
 %check
@@ -94,6 +88,9 @@ make test
 %{_mandir}/man3/*
 
 %changelog
+* Wed May 06 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.67-2
+- rebuild with perl 5.42
+
 * Fri Apr 24 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.67-1
 - perl > 5.16 removed this package, so break it out like fedora did
 - initial version
