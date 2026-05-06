@@ -6,8 +6,10 @@ Summary:        A Perl module for time and date manipulation
 Group:          Development/Libraries
 License:        GPL+ or Artistic
 URL:            http://search.cpan.org/dist/TimeDate/
-Vendor:         bww bitwise works GmbH
 Source0:        http://www.cpan.org/authors/id/G/GB/GBARR/TimeDate-%{version}.tar.gz
+%if 0%{?os2_version}
+Vendor:         bww bitwise works GmbH
+%endif
 BuildArch:      noarch
 BuildRequires:  perl-generators
 BuildRequires:  perl(base)
