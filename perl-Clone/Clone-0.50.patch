@@ -1,0 +1,11 @@
+--- a/Clone.xs	2026-03-28 06:57:50.000000000 +0100
++++ b/Clone.xs	2026-05-06 16:52:24.000000000 +0200
+@@ -20,7 +20,7 @@
+  * MAX_DEPTH=2000 on Windows/Cygwin -> ~1000 nesting levels -> ~450 KB.
+  * MAX_DEPTH=4000 elsewhere        -> ~2000 nesting levels -> ~900 KB.
+  * (GH #77: 32000 was too aggressive — caused SEGV on CPAN smokers.) */
+-#if defined(_WIN32) || defined(__CYGWIN__)
++#if defined(_WIN32) || defined(__CYGWIN__) || defined(__OS2__)
+ #define MAX_DEPTH 2000
+ #else
+ #define MAX_DEPTH 4000
