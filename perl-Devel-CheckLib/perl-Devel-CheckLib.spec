@@ -46,7 +46,11 @@ BuildRequires:  perl(Test::More) >= 0.88
 BuildRequires:  perl(Mock::Config)
 %endif
 # perl inherits the compiler flags it was built with, hence we need this on hardened systems
+%if !0%{?os2_version}
 Requires:       redhat-rpm-config
+%else	
+Requires:       os2-rpm >= 1-12
+%endif
 
 # Filter modules bundled for tests
 %global __provides_exclude_from %{?__provides_exclude_from:%__provides_exclude_from|}^%{_libexecdir}
