@@ -1,20 +1,26 @@
+%if ! (0%{?rhel} || 0%{?os2_version})
+%{bcond_without perl_Try_Tiny_enables_optional_test}
+%else
 %{bcond_with perl_Try_Tiny_enables_optional_test}
+%endif
 
 Name:		perl-Try-Tiny
 Summary:	Minimal try/catch with proper localization of $@
-Version:	0.30
+Version:	0.32
 Release:	1%{?dist}
 License:	MIT
-URL:		http://search.cpan.org/dist/Try-Tiny
+URL:		https://metacpan.org/release/Try-Tiny
+Source0:	https://cpan.metacpan.org/authors/id/E/ET/ETHER/Try-Tiny-%{version}.tar.gz
+%if 0%{?os2_version}
 Vendor:         bww bitwise works GmbH
-Source0:	http://search.cpan.org/CPAN/authors/id/E/ET/ETHER/Try-Tiny-%{version}.tar.gz
+%endif
 BuildArch:	noarch
 # Module Build
 BuildRequires:	coreutils
 BuildRequires:	findutils
 BuildRequires:	make
 BuildRequires:	perl-generators
-#BuildRequires:	perl-interpreter
+BuildRequires:	perl-interpreter
 BuildRequires:	perl(ExtUtils::MakeMaker)
 # Module
 BuildRequires:	perl(Carp)
@@ -33,8 +39,7 @@ BuildRequires:	perl(CPAN::Meta) >= 2.120900
 BuildRequires:	perl(CPAN::Meta::Check) >= 0.011
 BuildRequires:	perl(CPAN::Meta::Requirements)
 %endif
-# Runtime
-Requires:	perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
+# Dependencies
 Requires:	perl(Sub::Util)
 
 # Do not provide private modules from tests packaged as a documentation
@@ -57,7 +62,9 @@ which may not be desirable either.
 %build
 perl Makefile.PL INSTALLDIRS=vendor
 make %{?_smp_mflags}
+%if 0%{?os2_version}
 make manifypods
+%endif
 
 %install
 make pure_install DESTDIR=%{buildroot}
@@ -65,14 +72,24 @@ find %{buildroot} -type f -name .packlist -delete
 %{_fixperms} -c %{buildroot}
 
 %check
-#make test
+%if !0%{?os2_version}
+make test
+%endif
 
 %files
 %license LICENCE
 %doc Changes CONTRIBUTING README t/
 %{perl_vendorlib}/Try/
+%if !0%{?os2_version}
+%{_mandir}/man3/Try::Tiny.3*
+%else
 %{_mandir}/man3/Try.Tiny.3*
+%endif
 
 %changelog
+* Wed May 06 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.32-1
+- update to version 0.32
+- resync with fedora spec
+
 * Fri Feb 23 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.30-1
 - initial version
