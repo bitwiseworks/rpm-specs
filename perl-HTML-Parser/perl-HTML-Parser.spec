@@ -1,7 +1,7 @@
 Name:           perl-HTML-Parser
 Summary:        Perl module for parsing HTML
 Version:        3.83
-Release:        1%{?dist}
+Release:        2%{?dist}
 License:        GPL-1.0-or-later OR Artistic-1.0-Perl
 Source0:        https://cpan.metacpan.org/authors/id/O/OA/OALDERS/HTML-Parser-%{version}.tar.gz
 URL:            https://metacpan.org/release/HTML-Parser
@@ -17,17 +17,9 @@ BuildRequires:  glibc-common
 BuildRequires:  make
 BuildRequires:  perl-devel
 BuildRequires:  perl-generators
-%if !0%{?os2_version}
 BuildRequires:  perl-interpreter
-%else
-BuildRequires:  perl
-%endif
 BuildRequires:  perl(Config)
-%if !0%{?os2_version}
 BuildRequires:  perl(ExtUtils::MakeMaker) >= 6.76
-%else
-BuildRequires:  perl(ExtUtils::MakeMaker)
-%endif
 BuildRequires:  perl(strict)
 BuildRequires:  perl(warnings)
 # Run-time
@@ -71,7 +63,7 @@ chmod -c a-x eg/*
 
 # Help file to recognise the Perl scripts and normalize shebangs
 for F in t/*.t; do
-    perl -i.bkp -MConfig -ple 'print $Config{startperl} if $. == 1 && !s{\A#!.*perl\b}{$Config{startperl}}' "$F"
+    perl -i -MConfig -ple 'print $Config{startperl} if $. == 1 && !s{\A#!.*perl\b}{$Config{startperl}}' "$F"
     chmod +x "$F"
 done
 
@@ -95,10 +87,6 @@ iconv -f iso-8859-1 -t utf-8 <"$file" > "${file}_" && \
     mv -f "${file}_" "$file"
 %endif
 find %{buildroot} -type f -name '*.bs' -empty -delete
-%if 0%{?os2_version}
-find %{buildroot} -type f -name .packlist -delete
-find %{buildroot} -type f -name perllocal.pod -delete
-%endif
 %{_fixperms} %{buildroot}/*
 
 # Install tests
@@ -132,13 +120,16 @@ make test
 %if !0%{?os2_version}
 %{_mandir}/man3/HTML::*.3pm*
 %else
-%{_mandir}/man3/*.3pm*
+%{_mandir}/man3/HTML.*.3pm*
 %endif
 
 %files tests
 %{_libexecdir}/%{name}
 
 %changelog
+* Thu May 07 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.83-2
+- rebuild with perl 5.42.2
+
 * Mon Apr 07 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.83-1
 - update to version 3.83
 
