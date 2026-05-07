@@ -1,16 +1,20 @@
 Name:           perl-Pod-Coverage
 Version:        0.23
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Checks if the documentation of a module is comprehensive
-License:        GPL+ or Artistic
-Group:          Development/Libraries
-Vendor:         bww bitwise works GmbH 
-URL:            http://search.cpan.org/dist/Pod-Coverage/
-Source0:        http://www.cpan.org/authors/id/R/RC/RCLAMP/Pod-Coverage-%{version}.tar.gz
+License:        GPL-1.0-or-later OR Artistic-1.0-Perl
+%if 0%{?os2_version}
+Vendor:         bww bitwise works GmbH
+%endif
+URL:            https://metacpan.org/release/Pod-Coverage
+Source0:        https://cpan.metacpan.org/authors/id/R/RC/RCLAMP/Pod-Coverage-%{version}.tar.gz
 # Make pod_cover more secure, CPAN RT#85540
-#Patch0:         Pod-Coverage-0.23-Do-not-search-.-lib-by-pod_cover.patch
+%if !0%{?os2_version}
+Patch0:         Pod-Coverage-0.23-Do-not-search-.-lib-by-pod_cover.patch
+%endif
 BuildArch:      noarch
-#BuildRequires:  perl-interpreter
+BuildRequires: make
+BuildRequires:  perl-interpreter
 BuildRequires:  perl-generators
 BuildRequires:  perl(B)
 BuildRequires:  perl(base)
@@ -30,7 +34,6 @@ BuildRequires:  perl(warnings)
 Requires:       perl(Devel::Symdump) >= 2.01
 Requires:       perl(Pod::Find) >= 0.21
 Requires:       perl(Pod::Parser) >= 1.13
-Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 
 %{?perl_default_filter}
 %global __requires_exclude %{?__requires_exclude:__requires_exclude|}^perl\\(Devel::Symdump\\)$
@@ -47,12 +50,16 @@ module is comprehensive.
 
 %prep
 %setup -q -n Pod-Coverage-%{version}
-#%patch0 -p1
+%if !0%{?os2_version}
+%patch -P0 -p1
+%endif
 
 %build
 perl Makefile.PL INSTALLDIRS=vendor
 make %{?_smp_mflags}
+%if 0%{?os2_version}
 make manifypods
+%endif
 
 %install
 make pure_install DESTDIR=%{buildroot}
@@ -60,18 +67,27 @@ find %{buildroot} -type f -name .packlist -exec rm -f {} \;
 %{_fixperms} %{buildroot}/*
 
 %check
-#make test
+%if !0%{?os2_version}
+make test
+%endif
 
 %files
 %doc Changes examples
 %{_bindir}/pod_cover
 %{perl_vendorlib}/Pod/
-#%{_mandir}/man3/Pod::Coverage.3pm*
-#%{_mandir}/man3/Pod::Coverage::CountParents.3pm*
-#%{_mandir}/man3/Pod::Coverage::ExportOnly.3pm*
-#%{_mandir}/man3/Pod::Coverage::Overloader.3pm*
-%{_mandir}/man3/*.3pm*
+%if !0%{?os2_version}
+%{_mandir}/man3/Pod::Coverage.3pm*
+%{_mandir}/man3/Pod::Coverage::CountParents.3pm*
+%{_mandir}/man3/Pod::Coverage::ExportOnly.3pm*
+%{_mandir}/man3/Pod::Coverage::Overloader.3pm*
+%else
+%{_mandir}/man3/*.3*
+%endif
 
 %changelog
+* Thu May 07 2026 Elbert Pol <elbert.pol@gmail.com> -0.23-2
+- Sync with Fedora spec
+- Rebuild with latest perl
+
 * Wed Mar 07 2018 Elbert Pol <elbert.pol@gmail.com> - 0.23-1
 -  initial rpm for OS2
