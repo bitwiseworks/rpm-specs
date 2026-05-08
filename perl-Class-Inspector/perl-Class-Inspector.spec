@@ -54,5 +54,5 @@ find $RPM_BUILD_ROOT -type d -depth -exec rmdir {} 2>/dev/null ';'
 %{_mandir}/man3/*
 
 %changelog
-* Fri May 08 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.36-1
+* Fri May 08 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.36-2
 - initial rpm
