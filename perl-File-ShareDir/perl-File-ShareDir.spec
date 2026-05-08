@@ -98,4 +98,4 @@ make test AUTOMATED_TESTING=1
 
 %changelog
 * Fri May 08 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.118-1
-- initial rpm
+- initial rpm 
