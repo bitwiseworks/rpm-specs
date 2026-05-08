@@ -98,8 +98,8 @@ make test
 %{_libexecdir}/%{name}
 
 %changelog
-* Fri Feb 23 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> - 6.02-2
-- rebuilr with latest perl
+* Thu May 07 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> - 6.02-2
+- rebuild with latest perl
 - resync with fedora spec
 
 * Fri Feb 23 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> - 6.02-1
