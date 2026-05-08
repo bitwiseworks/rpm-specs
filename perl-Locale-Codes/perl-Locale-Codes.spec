@@ -1,6 +1,6 @@
 Name:           perl-Locale-Codes
 Version:        3.88
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Distribution of modules to handle locale codes
 License:        GPL-1.0-or-later OR Artistic-1.0-Perl
 URL:            https://metacpan.org/release/Locale-Codes
@@ -8,17 +8,13 @@ Source0:        https://cpan.metacpan.org/authors/id/S/SB/SBECK/Locale-Codes-%{v
 BuildArch:      noarch
 BuildRequires:  coreutils
 BuildRequires:  make
-%if !0%{?os2_version}
 BuildRequires:  perl-generators
 BuildRequires:  perl-interpreter
 BuildRequires:  perl(ExtUtils::MakeMaker) >= 6.76
-%endif
 BuildRequires:  perl(strict)
 BuildRequires:  perl(warnings)
 # Run-time:
-%if !0%{?os2_version}
 BuildRequires:  perl(:VERSION) >= 5.6
-%endif
 BuildRequires:  perl(Carp)
 BuildRequires:  perl(constant)
 BuildRequires:  perl(deprecate)
@@ -86,10 +82,6 @@ cat > %{buildroot}%{_libexecdir}/%{name}/test << 'EOF'
 cd %{_libexecdir}/%{name} && exec prove -j $(getconf _NPROCESSORS_ONLN)
 EOF
 chmod +x %{buildroot}%{_libexecdir}/%{name}/test
-%if 0%{?os2_version}
-find %{buildroot} -type f -name .packlist -delete
-find %{buildroot} -type f -name perllocal.pod -delete
-%endif
 
 %check
 %if !0%{?os2_version}
@@ -107,5 +99,8 @@ make test
 %{_libexecdir}/%{name}
 
 %changelog
+* Fri May 08 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.88-2
+- rebuild with perl 5.42
+
 * Mon Apr 27 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.88-1
 - initial version
