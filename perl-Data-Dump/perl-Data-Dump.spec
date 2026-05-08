@@ -1,18 +1,20 @@
 Name:           perl-Data-Dump
-Version:        1.23
+Version:        1.25
 Release:        1%{?dist}
 Summary:        Pretty printing of data structures
-License:        GPL+ or Artistic
-Group:          Development/Libraries
-URL:            http://search.cpan.org/dist/Data-Dump/
+License:        GPL-1.0-or-later OR Artistic-1.0-Perl
+URL:            https://metacpan.org/release/Data-Dump
+Source0:        https://cpan.metacpan.org/modules/by-module/Data/Data-Dump-%{version}.tar.gz
+%if 0%{?os2_version}
 Vendor:         bww bitwise works GmbH
-Source0:        http://search.cpan.org/CPAN/authors/id/G/GA/GAAS/Data-Dump-%{version}.tar.gz
+%endif
 BuildArch:      noarch
 # Build
+BuildRequires:  coreutils
 BuildRequires:  make
-#BuildRequires:  perl-interpreter
 BuildRequires:  perl-generators
-BuildRequires:  perl(ExtUtils::MakeMaker)
+BuildRequires:  perl-interpreter
+BuildRequires:  perl(ExtUtils::MakeMaker) >= 6.76
 # Runtime
 BuildRequires:  perl(base)
 BuildRequires:  perl(Carp)
@@ -21,7 +23,7 @@ BuildRequires:  perl(MIME::Base64)
 BuildRequires:  perl(overload)
 BuildRequires:  perl(strict)
 BuildRequires:  perl(subs)
-# XXX: BuildRequires:  perl(Term::ANSIColor)
+BuildRequires:  perl(Term::ANSIColor)
 BuildRequires:  perl(vars)
 BuildRequires:  perl(warnings)
 # Tests only
@@ -29,7 +31,6 @@ BuildRequires:  perl(IO::Socket::INET)
 BuildRequires:  perl(Symbol)
 BuildRequires:  perl(Test)
 BuildRequires:  perl(Test::More)
-Requires:       perl(:MODULE_COMPAT_%(eval "$(perl -V:version)"; echo $version))
 # Really optional
 Suggests:       perl(MIME::Base64)
 
@@ -43,23 +44,38 @@ arguments. The string is formatted for easy reading.
 %setup -q -n Data-Dump-%{version}
 
 %build
-perl Makefile.PL INSTALLDIRS=vendor NO_PACKLIST=1
-make %{?_smp_mflags}
+perl Makefile.PL INSTALLDIRS=vendor NO_PACKLIST=1 NO_PERLLOCAL=1
+%{make_build}
+%if 0%{?os2_version}
 make manifypods
+%endif
 
 %install
-make pure_install DESTDIR=%{buildroot}
-find $RPM_BUILD_ROOT -type f -name .packlist -exec rm -f {} ';'
-%{_fixperms} %{buildroot}/*
+%{make_install}
+%{_fixperms} -c %{buildroot}
 
 %check
-#make test
+%if !0%{?os2_version}
+make test
+%endif
 
 %files
-%doc Changes README
-%{perl_vendorlib}/*
-%{_mandir}/man3/*
+%doc Changes README.md
+%{perl_vendorlib}/Data/
+%if !0%{?os2_version}
+%{_mandir}/man3/Data::Dump.3*
+%{_mandir}/man3/Data::Dump::Filtered.3*
+%{_mandir}/man3/Data::Dump::Trace.3*
+%else
+%{_mandir}/man3/Data.Dump.3*
+%{_mandir}/man3/Data.Dump.Filtered.3*
+%{_mandir}/man3/Data.Dump.Trace.3*
+%endif
 
 %changelog
+* Fri May 08 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.25-1
+- update to version 1.25
+- resync with fedora spec
+
 * Fri Feb 23 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.23-1
 - initial version
