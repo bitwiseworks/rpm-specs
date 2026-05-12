@@ -90,6 +90,7 @@ make test
 %else
 %{_mandir}/man3/YAML.Tiny.3*
 %endif
+
 %changelog
 * Tue May 12 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.76-1
 - initial version
