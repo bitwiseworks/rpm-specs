@@ -419,18 +419,6 @@ sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
 # the package is not %%_smp_mflags safe
 %{__make}
 
-%if 0%{?os2_version}
-# we need to manify all subdir by hand
-cd perl
-make manifypods
-for i in default_store ASN OID agent SNMP TrapReceiver; do
-  cd $i
-  make manifypods
-  cd ..
-done
-cd ..
-%endif
-
 %if !0%{?os2_version}
 # remove rpath from compiled perl libs
 find perl/blib -type f -name "*.so" -print -exec chrpath --delete {} \;

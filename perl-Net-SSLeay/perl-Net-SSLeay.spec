@@ -109,9 +109,6 @@ PERL_MM_USE_DEFAULT=1 perl Makefile.PL \
 	NO_PERLLOCAL=1 \
 	OPTIMIZE="%{optflags}" < /dev/null
 %{make_build}
-%if 0%{?os2_version}
-make manifypods
-%endif
 
 %install
 %{make_install}

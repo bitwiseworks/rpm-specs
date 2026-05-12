@@ -1,7 +1,3 @@
-%if 0%{?os2_version}
-%define perl_bootstrap 1
-%endif
-
 Name:           perl-Fedora-VSP
 Version:        0.001
 Release:        1%{?dist}
@@ -62,9 +58,6 @@ find t/ -type f -name '*.bkp' -delete
 %build
 perl Makefile.PL INSTALLDIRS=vendor NO_PACKLIST=1 NO_PERLLOCAL=1
 %{make_build}
-%if 0%{?os2_version}
-make manifypods
-%endif
 
 %install
 %{make_install}

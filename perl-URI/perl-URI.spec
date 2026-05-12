@@ -116,9 +116,6 @@ done
 %build
 perl Makefile.PL INSTALLDIRS=perl NO_PACKLIST=true NO_PERLLOCAL=true
 %{make_build}
-%if 0%{?os2_version}
-make manifypods
-%endif
 
 %install
 %{make_install}

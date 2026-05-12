@@ -33,9 +33,6 @@ provide an easier, more friendly interface to this information.
 %build
 %{__perl} Makefile.PL INSTALLDIRS=vendor NO_PACKLIST=1 NO_PERLLOCAL=1
 %{make_build}
-%if 0%{?os2_version}
-make manifypods
-%endif
 
 %install
 %{make_install}

@@ -14,7 +14,7 @@ Version:	0.018
 Release:	1%{?dist}
 License:	GPL-1.0-or-later OR Artistic-1.0-Perl
 %if 0%{?os2_version}
-Vendor:         bww bitwise works GmbH
+Vendor:   bww bitwise works GmbH
 %endif
 URL:		https://metacpan.org/release/Test-Fatal
 Source0:	https://cpan.metacpan.org/modules/by-module/Test/Test-Fatal-%{version}.tar.gz
@@ -65,9 +65,6 @@ chmod -c -x examples/*
 %build
 perl Makefile.PL INSTALLDIRS=vendor NO_PACKLIST=1 NO_PERLLOCAL=1
 %{make_build}
-%if 0%{?os2_version}
-make manifypods
-%endif
 
 %install
 %{make_install}

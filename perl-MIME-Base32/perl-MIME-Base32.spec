@@ -30,9 +30,6 @@ Encodes and decodes data in a similar way like MIME::Base64 does.
 %build
 %{__perl} Makefile.PL INSTALLDIRS=vendor
 make %{?_smp_mflags}
-%if 0%{?os2_version}
-make manifypods
-%endif
 
 %install
 rm -rf $RPM_BUILD_ROOT

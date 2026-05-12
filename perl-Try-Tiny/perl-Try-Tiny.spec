@@ -62,9 +62,6 @@ which may not be desirable either.
 %build
 perl Makefile.PL INSTALLDIRS=vendor
 make %{?_smp_mflags}
-%if 0%{?os2_version}
-make manifypods
-%endif
 
 %install
 make pure_install DESTDIR=%{buildroot}
