@@ -3,14 +3,19 @@
 
 Name:           perl-gettext
 Version:        1.07
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Interface to gettext family of functions
 
-Group:          Development/Libraries
-License:        GPL+ or Artistic
-URL:            http://search.cpan.org/dist/gettext/
+License:        GPL-1.0-or-later OR Artistic-1.0-Perl
+URL:            https://metacpan.org/release/gettext
+Source0:        https://cpan.metacpan.org/authors/id/P/PV/PVANDRY/%{tarname}-%{version}.tar.gz
+%if 0%{?os2_version}
 Vendor:         bww bitwise works GmbH
-Source0:        http://search.cpan.org/CPAN/authors/id/P/PV/PVANDRY/%{tarname}-%{version}.tar.gz
+%endif
+
+BuildRequires:  gcc
+BuildRequires:  %{__make}
+BuildRequires:  %{__perl}
 
 BuildRequires:  perl-devel
 BuildRequires:  perl-generators
@@ -27,6 +32,12 @@ BuildRequires:  perl(Encode)
 # Tests:
 BuildRequires:  perl(Test)
 
+# Need to allow LANG=en_US.UTF-8
+# Testsuite fails w/ LANG=C.UTF-8 on fedora >= 40
+%if !0%{?os2_version}
+BuildRequires:  glibc-langpack-en
+%endif
+
 %description
 The gettext module permits access from perl to the gettext() family of
 functions for retrieving message strings from databases constructed to
@@ -35,13 +46,6 @@ internationalize software.
 
 %package -n perl-%{tarname}
 Summary:        %{summary}
-Requires:  perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
-
-Obsoletes: perl-gettext < %{version}-%{release}
-Obsoletes: perl-gettext%{?_isa} < %{version}-%{release}
-Provides: perl-gettext = %{version}-%{release}
-Provides: perl-gettext%{?_isa} = %{version}-%{release}
-
 
 %description -n perl-%{tarname}
 The gettext module permits access from perl to the gettext() family of
@@ -52,22 +56,23 @@ internationalize software.
 %setup -q -n %{tarname}-%{version}
 
 %build
-%{__perl} Makefile.PL INSTALLDIRS=vendor OPTIMIZE="$RPM_OPT_FLAGS"
-# not supported by perl < 5.22
-# NO_PACKLIST=1
-make %{?_smp_mflags}
+%{__perl} Makefile.PL INSTALLDIRS=vendor OPTIMIZE="$RPM_OPT_FLAGS" NO_PACKLIST=1 NO_PERLLOCAL=1
+%{make_build}
+%if 0%{?os2_version}
 make manifypods
+%endif
+
 
 %install
-make pure_install PERL_INSTALL_ROOT=$RPM_BUILD_ROOT
-find $RPM_BUILD_ROOT -type f -name .packlist -exec rm -f {} ';'
-find $RPM_BUILD_ROOT -type f -name '*.bs' -a -size 0 -exec rm -f {} ';'
-find $RPM_BUILD_ROOT -type d -depth -exec rmdir {} 2>/dev/null ';'
+%{make_install}
 %{_fixperms} $RPM_BUILD_ROOT/*
 
 
 %check
-#make test
+# Testsuite fails w/ LANG=C.UTF-8 on fedora >= 40
+%if !0%{?os2_version}
+LANG=en_US.UTF-8 %{__make} test
+%endif
 
 
 %files -n perl-%{tarname}
@@ -78,5 +83,8 @@ find $RPM_BUILD_ROOT -type d -depth -exec rmdir {} 2>/dev/null ';'
 
 
 %changelog
+* Tue May 12 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.07-2
+- rebuild with perl 5.42.2
+
 * Tue Apr 25 2017 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.07-1
 - initial version
