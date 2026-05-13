@@ -137,14 +137,14 @@ License:        GPL-1.0-or-later OR Artistic-1.0-Perl
 Epoch:          %{perl_epoch}
 Version:        %{perl_version}
 # release number must be even higher, because dual-lived modules will be broken otherwise
-Release:        16%{?dist}
+Release:        17%{?dist}
 Summary:        Practical Extraction and Report Language
 Url:            https://www.perl.org/
 %if !0%{?os2_version}
 Source0:        https://www.cpan.org/src/5.0/perl-%{perl_version}.tar.xz
 %else
 Vendor:         bww bitwise works GmbH
-%scm_source     github https://github.com/bitwiseworks/%{name}-os2 %{perl_version}-os2
+%scm_source     github https://github.com/bitwiseworks/%{name}-os2 %{perl_version}-os2-1
 %global main_version %{perl_version}
 %endif
 Source3:        macros.perl
@@ -8437,6 +8437,10 @@ ln -s /app/bin/perl %{buildroot}/usr/bin/perl
 %{_mandir}/man3/vmsish.*
 
 %changelog
+* Wed May 13 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> 5.42.2-17
+- finally follow the way to manifypods like on unix, so no need to do
+  it manually anymore
+
 * Fri May 01 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> 5.42.2-16
 - fix another bug, which prevented syscopy from working correct
 
