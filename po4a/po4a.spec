@@ -115,9 +115,11 @@ Requires: texlive-kpathsea-bin
 Requires: perl(Locale::gettext) >= 1.01
 # Optional run-time:
 Requires: perl(I18N::Langinfo)
+%if !0%{?os2_version}
 Requires: perl(Term::ReadKey)
 Requires: perl(Text::WrapI18N)
 Requires: perl(Unicode::GCString)
+%endif
 
 %description
 The po4a (po for anything) project goal is to ease translations (and
