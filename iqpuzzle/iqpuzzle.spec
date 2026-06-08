@@ -1,5 +1,5 @@
 Name:           iqpuzzle
-Version:        1.5.0
+Version:        1.5.1
 Release:        1%{?dist}
 Summary:        A diverting I.Q. challenging pentomino puzzle
 Group:          Games/Puzzles
@@ -17,6 +17,7 @@ Source0:        https://github.com/ElTh0r0/iqpuzzle/archive/v%{version}/%{name}-
 %else 
 %scm_source github https://github.com/tellie/%{name}-os2 %{version}-os2
 %endif
+
 BuildRequires:  pkgconfig(Qt5Core)
 BuildRequires:  pkgconfig(Qt5Gui)
 BuildRequires:  pkgconfig(Qt5Widgets)
@@ -109,6 +110,9 @@ fi
 %endif
 
 %changelog
+* Mon Jun 08 2026 Elbert Pol <elbert.pol@gmail.com> 1.5.1-1
+- Updated to latest version
+
 * Sun Mar 01 2026 Elbert Pol <elbert.pol@gmail.com> 1.5.0-1
 - Updated to latest version
 
