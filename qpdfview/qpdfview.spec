@@ -1,14 +1,15 @@
 %global wps_folder_title Tabbed PDF Viewer
+%define _strip_no_compress 1
 
 Name:           qpdfview
 Version:        0.5.0
-Release:        3%{?dist}
+Release:        4%{?dist}
 License:        GPLv2+
 Summary:        %{title}
 Url:            https://launchpad.net/qpdfview
 
 Vendor:         bww bitwise works GmbH
-%scm_source github https://github.com/bitwiseworks/qpdfview-os2 master
+%scm_source github https://github.com/bitwiseworks/qpdfview-os2 %{version}-os2-1
 
 Requires:       bww-resources-rpm
 Requires:       qt5-qtbase
@@ -45,7 +46,6 @@ This package provides common files for %{name}.
 
 %prep
 %scm_setup
-
 
 %build
 export QMAKE_SH=$SHELL
@@ -116,6 +116,9 @@ fi
 %{_mandir}/man?/*
 
 %changelog
+* Tue Jul 07 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.5.0-4
+- don't compress dll with lxlite
+
 * Tue Dec 02 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.5.0-3
 - fix a bug quoting for wps_folder_title
 
