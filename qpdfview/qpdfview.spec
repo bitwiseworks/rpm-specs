@@ -5,7 +5,7 @@ Name:           qpdfview
 Version:        0.5.0
 Release:        4%{?dist}
 License:        GPLv2+
-Summary:        %{title}
+Summary:        %{wps_folder_title}
 Url:            https://launchpad.net/qpdfview
 
 Vendor:         bww bitwise works GmbH
@@ -123,7 +123,7 @@ fi
 - fix a bug quoting for wps_folder_title
 
 * Mon Dec 01 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.5.0-2
-- fix a bug in wps ceation
+- fix a bug in wps creation
 
 * Mon Nov 10 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> - 0.5.0-1
 - updated to latest vendor version
