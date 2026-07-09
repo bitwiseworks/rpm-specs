@@ -30,8 +30,8 @@ print(string.sub(hash, 0, 16))
 
 Summary: Utilities from the general purpose cryptography library with TLS implementation
 Name: openssl
-Version: 3.4.1
-Release: 2%{?dist}
+Version: 3.4.6
+Release: 1%{?dist}
 Epoch: 1
 %if !0%{?os2_version}
 Source: openssl-%{version}-beta1.tar.gz
@@ -98,7 +98,7 @@ Patch0052: 0052-FIPS-Fix-some-tests-due-to-our-versioning-change.patch
 Patch0053: 0053-Current-Rebase-status.patch
 %else
 Vendor: bww bitwise works GmbH
-%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2-1
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
 %endif
 
 License: Apache-2.0
@@ -617,6 +617,9 @@ ln -s /etc/crypto-policies/back-ends/openssl_fips.config $RPM_BUILD_ROOT%{_sysco
 %endif
 
 %changelog
+* Wed Jul 08 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> 1:3.4.6-1
+- Update to version 3.4.6.
+
 * Wed Apr 16 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 1:3.4.1-2
 - remove legacy package, as this does not work
 - rename ssl3.dll to Ossl3.dll, as else we get in trouble with the nss package
