@@ -138,6 +138,7 @@ BuildRequires: gcc
 
 %if %{without bootstrap}
 BuildRequires: gettext, flex, zlib-devel
+BuildRequires: gettext-common-devel # Needed by autogen.sh in intl/
 %endif
 
 %if %{with docs}
@@ -454,7 +455,7 @@ fi
 #----------------------------------------------------------------------------
 
 %install
-%if %{with docs}  
+%if %{with docs}
 make install DESTDIR=%{buildroot}
 %else
 make install DESTDIR=%{buildroot} MAKEINFO=true
