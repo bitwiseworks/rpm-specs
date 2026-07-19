@@ -2,7 +2,7 @@
 
 Summary: Library for reading RAW files obtained from digital photo cameras
 Name: libraw
-Version: 0.22.1
+Version: 0.22.2
 Release: 1%{?dist}
 License: BSD-3-Clause and (CDDL-1.0 or LGPL-2.1-only)
 URL: https://www.libraw.org
@@ -148,6 +148,9 @@ rm -fv %{buildroot}%{_libdir}/lib*.la
 %{_bindir}/*
 
 %changelog
+* Sun Jul 19 2026 Elbert Pol <elbert.pol@gmail.com> - 0.22.2-1
+- Updated to latest version
+
 * Tue Apr 14 2026 Elbert Pol <elbert.pol@gmail.com> - 0.22.1-1
 - Updated to latest version
 
