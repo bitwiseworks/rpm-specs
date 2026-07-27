@@ -10,7 +10,7 @@
 # `/opt/{namespace}/{versioned name}`.
 Name:       autoconf
 Version:    2.72
-Release:    3%{?dist}
+Release:    4%{?dist}
 
 # To help future rebase, the following licenses were seen in the following files/folders:
 # '*' is anything that was not explicitly listed earlier in the folder
@@ -54,7 +54,7 @@ Source0:    https://ftp.gnu.org/gnu/autoconf/autoconf-%{version}.tar.xz
 Source1:    config.site
 Source2:    autoconf-init.el
 %else
-%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2-1
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2-2
 Vendor:     bww bitwise works GmbH
 %endif
 URL:        https://www.gnu.org/software/autoconf/
@@ -263,7 +263,10 @@ install -p -m 755 enable.scl ${RPM_BUILD_ROOT}/%{_prefix}/enable
 
 
 %changelog
-* Sun Jul 28 2026 Dmitrii Kuminov <coding@dmik.org> 2.72-3
+* Sun Jul 26 2026 Dmitrii Kuminov <coding@dmik.org> 2.72-4
+- Rebuild using proper git tag.
+
+* Sun Jul 26 2026 Dmitrii Kuminov <coding@dmik.org> 2.72-3
 - Add automake and texinfo to build requirements.
 - Use /@unixroot/usr/bin/sh as [CONFIG_]SHELL by default if UNIXROOT is defined.
 
