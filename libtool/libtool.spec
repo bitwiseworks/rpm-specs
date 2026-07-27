@@ -13,7 +13,7 @@
 Summary: The GNU Portable Library Tool
 Name:    libtool
 Version: 2.5.4
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 # To help future rebase, the following licenses were seen in the following files/folders:
 # '*' is anything that was not explicitly listed earlier in the folder
@@ -80,7 +80,7 @@ Patch: libtool-nodocs.patch
 %endif
 %else
 Vendor:  bww bitwise works GmbH
-%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2-1
 %endif
 
 # /usr/bin/libtool includes paths within gcc's versioned directories
@@ -250,6 +250,9 @@ rm -f %{buildroot}%{_libdir}/ltdl.a
 
 
 %changelog
+* Sun Jul 26 2026 Dmitrii Kuminov <coding@dmik.org> 2.5.4-2
+- Use /@unixroot/usr/bin/sh as [CONFIG_]SHELL by default if UNIXROOT is defined.
+
 * Mon Feb 17 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.5.4-1
 - update to version 2.5.4
 - resync with latest Fedora spec
@@ -293,7 +296,7 @@ rm -f %{buildroot}%{_libdir}/ltdl.a
 - Fix setting BEGINLIBPATH in execute mode on OS/2.
 - Support -version-number on OS/2.
 
-* Tue Oct 3 2014 Dmitriy Kuminov <coding@dmik.org> 2.4.2-6
+* Fri Oct 3 2014 Dmitriy Kuminov <coding@dmik.org> 2.4.2-6
 - Generate proper DLL version suffix (CURRNENT - AGE).
 
 * Tue Sep 30 2014 Dmitriy Kuminov <coding@dmik.org> 2.4.2-5
