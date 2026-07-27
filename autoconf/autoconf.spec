@@ -10,7 +10,7 @@
 # `/opt/{namespace}/{versioned name}`.
 Name:       autoconf
 Version:    2.72
-Release:    2%{?dist}
+Release:    3%{?dist}
 
 # To help future rebase, the following licenses were seen in the following files/folders:
 # '*' is anything that was not explicitly listed earlier in the folder
@@ -140,8 +140,8 @@ BuildRequires:      erlang
 %endif
 
 %if 0%{?os2_version}
-# for autoreconf
-BuildRequires: autoconf
+# for autoreconf & docs
+BuildRequires: autoconf, automake, texinfo
 %endif
 
 # filter out bogus perl(Autom4te*) dependencies
@@ -263,6 +263,10 @@ install -p -m 755 enable.scl ${RPM_BUILD_ROOT}/%{_prefix}/enable
 
 
 %changelog
+* Sun Jul 28 2026 Dmitrii Kuminov <coding@dmik.org> 2.72-3
+- Add automake and texinfo to build requirements.
+- Use /@unixroot/usr/bin/sh as [CONFIG_]SHELL by default if UNIXROOT is defined.
+
 * Mon Feb 17 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.72-2
 - fix some regressions
 
