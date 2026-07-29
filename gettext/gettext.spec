@@ -8,7 +8,7 @@
 Summary: GNU tools and libraries for localized translated messages
 Name: gettext
 Version: 1.0
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 # The following are licensed under LGPLv2+:
 # - libintl and its headers
@@ -593,6 +593,9 @@ make check LIBUNISTRING=-lunistring
 %{_mandir}/man1/msghack.1*
 
 %changelog
+* Wed Jul 29 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.0-2
+- fix a ABI break
+
 * Wed Jul 29 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> 1.0-1
 - update to vendor version 1.0
 - remove the legacy part
