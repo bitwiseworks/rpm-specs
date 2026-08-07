@@ -12,9 +12,9 @@ Requires: rpm >= 4.13.0-16
 Requires: cube
 
 Provides: system-rpm-config = %{version}-%{release}
-# as we integrated the wpi4rpm rpm here, obsolete the old package 
+# as we integrated the wpi4rpm rpm here, obsolete the old package
 Obsoletes: wpi4rpm <= 0.9.7
-Provides:  wpi4rpm 
+Provides:  wpi4rpm
 
 BuildRequires: rexx_exe
 
@@ -105,6 +105,8 @@ done
 %{_rpmconfigdir_macros_d}/macros.perl-srpm
 
 %changelog
+- Add _vendor_optflags to /usr/lib/rpm/pc/macros with needed GCC extensions.
+
 * Fri Apr 24 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> 1-13
 - add macros.perl-srpm, as those got eliminated with rpm >= 4.15
 
@@ -147,7 +149,7 @@ done
 
 * Tue Feb 20 2018 Herwig Bauernfeind <herwig.bauernfeind@bitwiseworks.com> 1-1
 - Unify format of error messages from wps-object, warpin-conflicts and wpi4rpm
-- Integrate wpi4rpm into os2-rpm (as we don't want to add a 
+- Integrate wpi4rpm into os2-rpm (as we don't want to add a
   Provides wpi4rpm=version, we changed the spec version to 1)
 
 * Wed Oct 4 2017 Dmitriy Kuminov <coding@dmik.org> 0-5

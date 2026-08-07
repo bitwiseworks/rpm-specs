@@ -1,10 +1,22 @@
 # OS/2 specific rpm configuration file.
 
 #------------------------------------------------------------------------------
-# Macros we override from default macros
+# Overrides for default macros
 
 %_pkgdocdir %{_docdir}/%{name}
 %_docdir_fmt %%{NAME}
+
+#------------------------------------------------------------------------------
+# Extensions for default macros
+
+# Need -mstackrealign -fno-common to get proper SSE2 alignment and disable AVX on pentium4
+# until https://github.com/bitwiseworks/gcc-os2/issues/11 is fixed.
+# Note that -mstackrealign is only needed for GCC < 8 and -fno-common only for GCC < 10
+# as in those versions they are default.
+# TODO: If they are still needed for a newer GCC RPM, they should go to macros.gcc
+# abelonging to the GCC package, as _vendor_gcc_optflags.
+# -ffile-prefix-map redacts build paths in debug info files also reducing their size.
+%_vendor_optflags -ffile-prefix-map=%{_builddir}=. -mstackrealign -fno-common %{?_vendor_gcc_optflags}
 
 #------------------------------------------------------------------------------
 # Macros needed at rpm runtime (package installation and such)
