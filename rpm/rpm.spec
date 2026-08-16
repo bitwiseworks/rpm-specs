@@ -476,6 +476,27 @@ done;
     %{?with_lmdb: --enable-lmdb} \
     --enable-python \
     --with-crypto=openssl
+
+# Remove configure dir duplicates from platform macros to make them relocatable
+# via changing _prefix (useful for alternative versions of packages etc, and
+# also meets some Fedora spec expectations, e.g. newer autoconf.spec)
+awk -v BINMODE=3 '
+  ARGIND == 1 {
+    if (/^# ---- configure macros\./)
+      in_configure_macros = 1
+    else if (in_configure_macros && /^#=+$/)
+      in_configure_macros = 0
+    else if (in_configure_macros && match($0, /^%%(\S+)\s/, m))
+      remove[m[1]] = 1
+    next
+  }
+  match($0, /^%%(\S+)\s/, m) && (m[1] in remove) { next }
+  { print }
+' macros.in platform.in >platform.in.new &&
+! diff -u platform.in platform.in.new &&
+mv platform.in.new platform.in ||
+{ echo 'ERROR: Nothing to remove in platform.in, check configure dir macros' && ! : ; }
+
 %endif
 
 %make_build
@@ -808,6 +829,8 @@ make check || (cat tests/rpmtests.log; exit 0)
 %doc doc/librpm/html/*
 
 %changelog
+- Remove duplicate configure dir macros (hardcoded dirs) from platform macros
+
 * Wed Apr 29 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.15.1-5
 - rebuild with perl files removed as well
 
