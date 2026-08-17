@@ -15,7 +15,7 @@
 Summary: Utility for determining file types
 Name: file
 Version: 5.48
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 # Main license is BSD-2-Clause-Darwin
 # Shipped exceptions:
@@ -50,7 +50,7 @@ Patch3: file-5.45-readelf-limit-revert.patch
 Patch4: file-5.46-fix-tests-rpm-magic.patch
 %else
 Vendor:  bww bitwise works GmbH
-%scm_source github  https://github.com/bitwiseworks/%{name}-os2 %{version}-os2
+%scm_source github  https://github.com/bitwiseworks/%{name}-os2 %{version}-os2-1
 %endif
 
 URL: https://www.darwinsys.com/file/
@@ -296,6 +296,9 @@ make -C tests check
 %endif
 
 %changelog
+* Mon Aug 17 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> 5.48-2
+- make sure option -Z (HAVE_FORK) is defined fixes issue #1
+
 * Mon Aug 10 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> 5.48-1
 - updated to vendor version 5.48
 - resync with fedora spec
