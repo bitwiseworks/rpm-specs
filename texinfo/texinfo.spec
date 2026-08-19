@@ -192,6 +192,8 @@ mv %{buildroot}%{_bindir}/install-info.exe %{buildroot}%{_sbindir}
 %{_mandir}/man1/pdftexi2dvi.1*
 
 %changelog
+- macros.info: Use _sys_sbindir instead of _sbindir when defined
+
 * Fri Jul 31 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> 7.3-1
 - update to version 7.3
 - resync wit fedora spec

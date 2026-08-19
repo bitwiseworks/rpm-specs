@@ -19,6 +19,76 @@
 %_vendor_optflags -ffile-prefix-map=%{_builddir}=. -mstackrealign -fno-common %{?_vendor_gcc_optflags}
 
 #------------------------------------------------------------------------------
+# Support for the alternate install tree
+
+# Root directory for alternate package installs (e.g. versioned packages)
+%_alt_prefix %{_prefix}/alt
+
+# Sets up alternate install paths for a package, arguments:
+# 1 - package name (must include the pinned version info to make it unique)
+# NOTE: Saves all known _prefix-based paths with the _sys_ prefix for reference
+# NOTE: Must be used only ONCE per .spec
+# NOTE: Defines _alt_prefix_activate macro with the activation script path
+%_setup_alt_prefix()\
+%global _sys_prefix %{_prefix}\
+%global _sys_exec_prefix %{_exec_prefix}\
+%global _sys_bindir %{_bindir}\
+%global _sys_sbindir %{_sbindir}\
+%global _sys_libexecdir %{_libexecdir}\
+%global _sys_datadir %{_datadir}\
+%global _sys_sharedstatedir %{_sharedstatedir}\
+%global _sys_libdir %{_libdir}\
+%global _sys_includedir %{_includedir}\
+%global _sys_infodir %{_infodir}\
+%global _sys_mandir %{_mandir}\
+%global _sys_datarootdir %{_datarootdir}\
+%global _prefix %{_alt_prefix}/%1\
+%global _alt_prefix_activate %{_prefix}/activate\
+%{nil}
+
+# Generates and installs the _alt_prefix_activate script, arguments:
+# 1 - comma-separated list of standard path vars to set (e.g. "PATH,INFOPATH")
+# 2 - optional arbitrary text to append to the activation script
+%_install_alt_prefix_activate()\
+%{!?_alt_prefix_activate:%{error:%0: Missing _setup_alt_prefix specification}}\
+%{!?1:%{error:%0: Missing path-variable list}}\
+%{__cat} >%{?buildroot}%{_alt_prefix_activate} <<'EOF'\
+%{lua:
+  local name = rpm.expand("%0")
+  local sep = rpm.expand("%{_pathsep}")
+  local paths = {
+    PATH = rpm.expand("%{_bindir}"),
+    INFOPATH = rpm.expand("%{_infodir}"),
+    MANPATH = rpm.expand("%{_mandir}"),
+    CPATH = rpm.expand("%{_includedir}"),
+    C_INCLUDE_PATH = rpm.expand("%{_includedir}"),
+    CPLUS_INCLUDE_PATH = rpm.expand("%{_includedir}"),
+    LIBRARY_PATH = rpm.expand("%{_libdir}"),
+    BEGINLIBPATH = rpm.expand("%{_libdir}"),
+    PKG_CONFIG_PATH = rpm.expand("%{_libdir}/pkgconfig%{_pathsep}%{_datadir}/pkgconfig"),
+    ACLOCAL_PATH = rpm.expand("%{_datadir}/aclocal"),
+    CMAKE_PREFIX_PATH = rpm.expand("%{_prefix}"),
+  }
+  print(rpm.expand("#!%{___build_shell}\\n"))
+  local list = rpm.expand("%1")
+  for item in string.gmatch(list, "[^,]+") do
+    item = string.match(item, "^%s*(.-)%s*$")
+    local path = paths[item]
+    if not path then
+      error(name .. ": unknown path variable " .. item)
+    end
+    print(string.format('export %s="%s${%s:+%s$%s}"\\n', item, path, item, sep, item))
+    if (item == "BEGINLIBPATH") then
+      print("export LIBPATHSTRICT=T\\n")
+    end
+  end
+}\
+%{?2}\
+EOF\
+%{__chmod} 755 %{?buildroot}%{_alt_prefix_activate}\
+%{nil}
+
+#------------------------------------------------------------------------------
 # Macros needed at rpm runtime (package installation and such)
 
 # Path to OS/2 specific rpm configuration directory containing helper scripts
@@ -45,7 +115,7 @@
 # os2_expand_unixroot and os2_backslashes). Several paths separated by ';' may
 # be given to handle them at once (useful for PATH-like env.vars).
 %os2_dos_path() %{lua:
-  function conv_path(path)
+  local function conv_path(path)
     if (string.sub(path, 1, 10) == "/@unixroot" and
         (string.len(path) == 10 or string.sub(path, 11, 11) == '/')) then
       path = "%UNIXROOT%" .. string.sub(path, 11)
@@ -53,8 +123,8 @@
     path = string.gsub(path, "/", "\\\\")
     return path
   end
-  path = rpm.expand("%{?**}")
-  seen_first = false
+  local path = rpm.expand("%{?**}")
+  local seen_first = false
   for p in string.gmatch(path, "[^;]*") do
     print((seen_first and ';' or '') .. conv_path(p))
     seen_first = seen_first or true
@@ -68,7 +138,7 @@
 # given to handle them at once (useful for PATH-like env.vars).
 # NOTE: Don't use in install-time scriptlets unless with -e and as %%{...}.
 %os2_expand_unixroot() %{lua:
-  function conv_path(path)
+  local function conv_path(path)
     if (string.sub(path, 1, 10) == "/@unixroot" and
         (string.len(path) == 10 or string.sub(path, 11, 11) == '/')) then
       path = os.getenv("UNIXROOT") .. string.sub(path, 11)
@@ -76,8 +146,8 @@
     path = string.gsub(path, "\\\\", "/")
     return path
   end
-  path = rpm.expand("%{?**}")
-  seen_first = false
+  local path = rpm.expand("%{?**}")
+  local seen_first = false
   for p in string.gmatch(path, "[^;]*") do
     print((seen_first and ';' or '') .. conv_path(p))
     seen_first = seen_first or true
@@ -87,7 +157,7 @@
 # Expands DOS-like environment variables (%VAR%) to their current values.
 # NOTE: Don't use in install-time scriptlets unless with -e and as %%{...}.
 %os2_expand_dos_vars() %{lua:
-  str = rpm.expand("%{?**}")
+  local str = rpm.expand("%{?**}")
   str = string.gsub(str, "%%(%a+)%%", os.getenv)
   print(str)
 }

@@ -6,9 +6,12 @@ License: GPLv2+
 Group: Development/System
 Vendor: bww bitwise works GmbH
 
+# Required rpm version
+%global rpm_ver 4.15.1-6
+
 BuildArch: noarch
 
-Requires: rpm >= 4.13.0-16
+Requires: rpm >= %{rpm_ver}
 Requires: cube
 
 Provides: system-rpm-config = %{version}-%{release}
@@ -36,16 +39,16 @@ Source12: macros.perl-srpm
 Conflicts: os2-rpm-build <= 0-1
 
 %description
-OS/2 specific RPM macros and scripts neecessary to install RPM packages on
+OS/2 specific RPM macros and scripts necessary to install RPM packages on
 the OS/2 operating system.
 
 %package build
 Summary: OS/2 specific RPM macros and scripts to build RPM packages
 Requires: %{name} = %{version}-%{release}
-Requires: rpm-build >= 4.13.0-15
+Requires: rpm-build >= %{rpm_ver}
 
 %description build
-OS/2 specific RPM macros and scripts neecessary to build RPM packages for
+OS/2 specific RPM macros and scripts necessary to build RPM packages for
 the OS/2 operating system.
 
 %global _rpmconfigdir_os2 %{_rpmconfigdir}/%{_vendor}
@@ -105,7 +108,9 @@ done
 %{_rpmconfigdir_macros_d}/macros.perl-srpm
 
 %changelog
-- Add _vendor_optflags to /usr/lib/rpm/pc/macros with needed GCC extensions.
+- Add rpm_ver and set it to 4.15.1-6 (minimum required RPM version)
+- Add _vendor_optflags to /usr/lib/rpm/pc/macros with needed GCC extensions
+- Provide alternative install tree with pinned package versions
 
 * Fri Apr 24 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> 1-13
 - add macros.perl-srpm, as those got eliminated with rpm >= 4.15
