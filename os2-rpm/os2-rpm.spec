@@ -111,6 +111,7 @@ done
 - Add rpm_ver and set it to 4.15.1-6 (minimum required RPM version)
 - Add _vendor_optflags to /usr/lib/rpm/pc/macros with needed GCC extensions
 - Provide alternative install tree with pinned package versions
+- Properly extend build flags using vendor macros
 
 * Fri Apr 24 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> 1-13
 - add macros.perl-srpm, as those got eliminated with rpm >= 4.15
