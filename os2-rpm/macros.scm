@@ -61,7 +61,7 @@ rm -f "%SOURCE0"\
 
 %__scm_source_github\
 Source: %{?main_name}%{!?main_name:%{name}}-github%{?__source_rev:-%{__source_rev}}.zip\
-BuildRequires: wget zip unzip\
+BuildRequires: curl zip unzip\
 %{nil}
 
 %__scm_setup_github\
@@ -74,10 +74,11 @@ BuildRequires: wget zip unzip\
 %else\
 %setup -n "%__source_dir_github" -Tc\
 rm -f "%SOURCE0"\
-%global __github_user %{?github_user:--user=%{github_user}}%{?!github_user:}\
-%global __github_password %{?github_password:--password=%{github_password}}%{?!github_password:}\
-%global __github_token %{?github_token:--header="Authorization: token %{github_token}"}%{?!github_token:}\
-wget -nv %__github_user %__github_password %__github_token "%{__source_url}/archive/%{__source_rev}.zip" -O "%SOURCE0"\
+(set +x\
+printf '%b' '%{?github_user:user = "%{github_user}:%{?github_password:%{github_password}}"\\n}'\
+printf '%b' '%{?github_token:header = "Authorization: token %{github_token}"\\n}'\
+printf 'write-out = "%s"\n' 'curl: Downloaded \%{size_download} B / \%{time_total} s [\%{response_code}]\\n') |\
+curl -K - -fsSL "%{__source_url}/archive/%{__source_rev}.zip" -o "%SOURCE0"\
 (cd .. && unzip -qq "%SOURCE0" "%__source_dir_github"/RPMBUILD_SOURCE 2>/dev/null) || :\
 %__scm_pre_pack\
 (cd .. && zip -mX "%SOURCE0" "%__source_dir_github"/RPMBUILD_SOURCE*)\

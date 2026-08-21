@@ -112,6 +112,7 @@ done
 - Add _vendor_optflags to /usr/lib/rpm/pc/macros with needed GCC extensions
 - Provide alternative install tree with pinned package versions
 - Properly extend build flags using vendor macros
+- Use Curl for scm_source to hide macros.scm_pwd credentials from logs
 
 * Fri Apr 24 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> 1-13
 - add macros.perl-srpm, as those got eliminated with rpm >= 4.15
