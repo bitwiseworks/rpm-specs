@@ -14,9 +14,10 @@
 # Note that -mstackrealign is only needed for GCC < 8 and -fno-common only for GCC < 10
 # as in those versions they are default.
 # TODO: If they are still needed for a newer GCC RPM, they should go to macros.gcc
-# abelonging to the GCC package, as _vendor_gcc_optflags.
+# belonging to the GCC package, as _vendor_optflags_gcc.
 # -ffile-prefix-map redacts build paths in debug info files also reducing their size.
-%_vendor_optflags -ffile-prefix-map=%{_builddir}=. -mstackrealign -fno-common %{?_vendor_gcc_optflags}
+%_vendor_optflags_pentium4 -mno-avx
+%_vendor_optflags -ffile-prefix-map=%{_builddir}=. %{expand:%%{?_vendor_optflags_%{_target_cpu}}} -mstackrealign -fno-common %{?_vendor_optflags_gcc}
 
 # Always add LIBCx DLL
 %_vendor_build_ldflags -Zomf -Zhigh-mem -lcx
