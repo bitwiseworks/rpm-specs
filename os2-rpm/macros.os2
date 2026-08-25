@@ -38,7 +38,7 @@
 # NOTE: Saves all known _prefix-based paths with the _sys_ prefix for reference
 # NOTE: Must be used only ONCE per .spec
 # NOTE: Defines _alt_prefix_activate macro with the activation script path
-%_setup_alt_prefix()\
+%setup_alt_prefix()\
 %global _sys_prefix %{_prefix}\
 %global _sys_exec_prefix %{_exec_prefix}\
 %global _sys_bindir %{_bindir}\
@@ -58,8 +58,8 @@
 # Generates and installs the _alt_prefix_activate script, arguments:
 # 1 - comma-separated list of standard path vars to set (e.g. "PATH,INFOPATH")
 # 2 - optional arbitrary text to append to the activation script
-%_install_alt_prefix_activate()\
-%{!?_alt_prefix_activate:%{error:%0: Missing _setup_alt_prefix specification}}\
+%install_alt_prefix_activate()\
+%{!?_alt_prefix_activate:%{error:%0: Missing setup_alt_prefix specification}}\
 %{!?1:%{error:%0: Missing path-variable list}}\
 %{__cat} >%{?buildroot}%{_alt_prefix_activate} <<'EOF'\
 %{lua:
@@ -83,9 +83,7 @@
   for item in string.gmatch(list, "[^,]+") do
     item = string.match(item, "^%s*(.-)%s*$")
     local path = paths[item]
-    if not path then
-      error(name .. ": unknown path variable " .. item)
-    end
+    assert(path, name .. ": unknown path variable " .. item)
     print(string.format('export %s="%s${%s:+%s$%s}"\\n', item, path, item, sep, item))
     if (item == "BEGINLIBPATH") then
       print("export LIBPATHSTRICT=T\\n")
