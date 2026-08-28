@@ -3,7 +3,7 @@
 Summary: Tools needed to create Texinfo format documentation files
 Name: texinfo
 Version: 7.3
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPL-3.0-or-later
 Url: http://www.gnu.org/software/texinfo/
 %if !0%{?os2_version}
@@ -11,7 +11,7 @@ Source0: ftp://ftp.gnu.org/gnu/texinfo/texinfo-%{version}.tar.xz
 Source1: ftp://ftp.gnu.org/gnu/texinfo/texinfo-%{version}.tar.xz.sig
 %else
 Vendor: bww bitwise works GmbH
-%scm_source github https://github.com/bitwiseworks/%{name}-os2 %{version}-os2
+%scm_source github https://github.com/bitwiseworks/%{name}-os2 %{version}-os2-1
 %endif
 Source2: fix-info-dir
 # Patch0: we need to fix template fix-info-dir generates
@@ -33,11 +33,7 @@ BuildRequires: make
 BuildRequires: gcc
 BuildRequires: perl-generators
 BuildRequires: ncurses-devel, help2man, perl(Data::Dumper)
-%if !0%{?os2_version}
 BuildRequires: perl(Locale::Messages), perl(Unicode::EastAsianWidth), perl(Text::Unidecode)
-%else
-BuildRequires: perl(Unicode::EastAsianWidth), perl(Text::Unidecode)
-%endif
 BuildRequires: perl(Storable), perl(Unicode::Normalize)
 
 # Texinfo perl packages are not installed in default perl library dirs
@@ -192,7 +188,8 @@ mv %{buildroot}%{_bindir}/install-info.exe %{buildroot}%{_sbindir}
 %{_mandir}/man1/pdftexi2dvi.1*
 
 %changelog
-- macros.info: Use _sys_sbindir instead of _sbindir when defined
+* Fri Aug 28 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> 7.3-2
+- fixed a chmod vs fchmod and remove bug
 
 * Fri Jul 31 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> 7.3-1
 - update to version 7.3
