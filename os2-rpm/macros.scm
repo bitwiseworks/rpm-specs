@@ -94,7 +94,7 @@ if ! test -f '%SOURCE0' ; then\
   curl -K - -fsSL '%{__source_url}/archive/'"${__source_rev_id}.zip" -o '%SOURCE0' <<'EOF'\
 %{?github_user:user = "%{github_user}:%{?github_password:%{github_password}}"}\
 %{?github_token:header = "Authorization: token %{github_token}"}\
-write-out = "curl: Downloaded \%{size_download} B / \%{time_total} s [\%{response_code}]"\
+write-out = "curl: Downloaded \%{size_download} B / \%{time_total} s [\%{response_code}]\\n"\
 EOF\
 fi\
 unzip -oqq '%SOURCE0'\
@@ -111,9 +111,9 @@ unzip -oqq '%SOURCE0'\
 %{!?__scm_defined:\
 %global __scm_defined 1\
 %{?SOURCE0:%{error:%0: Source tag is already set to '%SOURCE0'}%{quit}}\
-%{?1:%global __source_scm %1}\
-%{?2:%global __source_url %2}\
-%{?3:%global __source_rev %3}\
+%{!?__source_scm:%{?1:%global __source_scm %1}}\
+%{!?__source_url:%{?2:%global __source_url %2}}\
+%{!?__source_rev:%{?3:%global __source_rev %3}}\
 %{!?__source_url:%{error:%0: Missing URL}%{quit}}\
 %{expand:%%{!?__scm_source_%1:%%{error:%0: Invalid SCM type: '%{?1}'}%{quit}}}\
 %{expand:%%{!?__scm_setup_%1:%%{error:%0: Missing %%__scm_setup_%1 macro}%{quit}}}\

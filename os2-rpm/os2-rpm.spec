@@ -112,7 +112,8 @@ done
 - Add _vendor_optflags to /usr/lib/rpm/pc/macros with needed GCC extensions
 - Provide alternative install tree with pinned package versions
 - Properly extend build flags using vendor macros
-- Use Curl for scm_source to hide macros.scm_pwd credentials from logs
+- scm_source: Use Curl to hide macros.scm_pwd credentials from logs
+- scm_source: Allow to override __source_[scm|url|rev] from rpmbuild command line
 - scm_setup: Auto-clean package downloads and source trees from previous builds
 
 * Fri Apr 24 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> 1-13
