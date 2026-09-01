@@ -5,7 +5,7 @@
 Summary:        C library for parsing command line parameters
 Name:           popt
 Version:        %{ver}%{?snap:~%{snap}}
-Release:        2%{?dist}
+Release:        3%{?dist}
 License:        MIT
 URL:            https://github.com/rpm-software-management/popt/
 %if !0%{?os2_version}
@@ -14,7 +14,7 @@ Patch0:		popt-1.18-ltname.patch
 %else
 Epoch:          1
 Vendor:         bww bitwise works GmbH
-%scm_source     github http://github.com/bitwiseworks/%{name}-os2 %{name}-%{version}-release-os2
+%scm_source     github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
 # DEF files to create forwarders for the legacy package
 Source10:       popt.def
 Source11:       iconv.m4
@@ -154,6 +154,10 @@ make check || (cat tests/*.log; exit 1)
 %endif
 
 %changelog
+* Tue Sep 1 Dmitrii Kuminov <coding@dmik.org> 1.18-3
+- Switch repo to master/vendor scheme instead of direct fork
+- fix CRLF processing in popt files
+
 * Mon Sep 20 2021 Silvan Scherrer <silvan.scerrer@aroa.ch> 1.18-2
 - obsolete and provide -libs and -data
 - use epoch 1, as old spec had it
