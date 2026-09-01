@@ -6,6 +6,9 @@
 %_pkgdocdir %{_docdir}/%{name}
 %_docdir_fmt %%{NAME}
 
+# Order: TMPDIR, TMP (where /tmp is rewritten to), TEMP, /var/tmp
+%_tmppath %os2_fwdslashes %{lua:print(os.getenv("TMPDIR") or os.getenv("TMP") or os.getenv("TEMP") or rpm.expand("%{_var}/tmp"))}
+
 #------------------------------------------------------------------------------
 # Extensions for default macros
 

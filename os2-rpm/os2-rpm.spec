@@ -6,12 +6,8 @@ License: GPLv2+
 Group: Development/System
 Vendor: bww bitwise works GmbH
 
-# Required rpm version
-%global rpm_ver 4.15.1-6
-
 BuildArch: noarch
 
-Requires: rpm >= %{rpm_ver}
 Requires: cube
 
 Provides: system-rpm-config = %{version}-%{release}
@@ -45,7 +41,6 @@ the OS/2 operating system.
 %package build
 Summary: OS/2 specific RPM macros and scripts to build RPM packages
 Requires: %{name} = %{version}-%{release}
-Requires: rpm-build >= %{rpm_ver}
 
 %description build
 OS/2 specific RPM macros and scripts necessary to build RPM packages for
@@ -108,13 +103,13 @@ done
 %{_rpmconfigdir_macros_d}/macros.perl-srpm
 
 %changelog
-- Add rpm_ver and set it to 4.15.1-6 (minimum required RPM version)
 - Add _vendor_optflags to /usr/lib/rpm/pc/macros with needed GCC extensions
 - Provide alternative install tree with pinned package versions
 - Properly extend build flags using vendor macros
 - scm_source: Use Curl to hide macros.scm_pwd credentials from logs
 - scm_source: Allow to override __source_[scm|url|rev] from rpmbuild command line
 - scm_setup: Auto-clean package downloads and source trees from previous builds
+- Set _tmppath to TMPDIR or TMP or TEMP or /@unixroot/var/tmp as fallback
 
 * Fri Apr 24 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> 1-13
 - add macros.perl-srpm, as those got eliminated with rpm >= 4.15
