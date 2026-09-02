@@ -1,12 +1,16 @@
 Summary: OS/2 specific RPM macros and scripts
 Name: os2-rpm
-Version: 1
-Release: 13%{?dist}
+Version: 2
+Release: 1%{?dist}
 License: GPLv2+
 Group: Development/System
 Vendor: bww bitwise works GmbH
 
 BuildArch: noarch
+
+# Minimum required rpm version
+%global rpmver_min 4.15.1-6
+Requires: rpm >= %{rpmver_min}
 
 Requires: cube
 
@@ -41,6 +45,7 @@ the OS/2 operating system.
 %package build
 Summary: OS/2 specific RPM macros and scripts to build RPM packages
 Requires: %{name} = %{version}-%{release}
+Requires: rpm-build >= %{rpmver_min}
 
 %description build
 OS/2 specific RPM macros and scripts necessary to build RPM packages for
@@ -48,6 +53,13 @@ the OS/2 operating system.
 
 %global _rpmconfigdir_os2 %{_rpmconfigdir}/%{_vendor}
 %global _rpmconfigdir_macros_d %{_rpmconfigdir}/macros.d
+
+# Add rpm_macro provides from macros.os2 except standard macro overrides
+# TODO: Move genuine macros to a separate file under macros.d and leave only
+# standard macro overrides in macros.os2, then adding macros.os2 here (and the
+# filtering expression) can be safely dropped
+%global __rpm_macro_path %{__rpm_macro_path}|^%{_rpmconfigdir_os2}/macros$
+%global __provides_exclude %{?__provides_exclude:%{__provides_exclude}|}^rpm_macro\\((_pkgdocdir|_docdir_fmt|_tmppath|_vendor.*)\\)$
 
 %prep
 # Move all sources to build subdir to reference them by name instead of SOURCEx
@@ -103,6 +115,7 @@ done
 %{_rpmconfigdir_macros_d}/macros.perl-srpm
 
 %changelog
+* Mon Sep 1 2026 Dmitrii Kuminov <coding@dmik.org> 2-1
 - Add _vendor_optflags to /usr/lib/rpm/pc/macros with needed GCC extensions
 - Provide alternative install tree with pinned package versions
 - Properly extend build flags using vendor macros
@@ -110,6 +123,8 @@ done
 - scm_source: Allow to override __source_[scm|url|rev] from rpmbuild command line
 - scm_setup: Auto-clean package downloads and source trees from previous builds
 - Set _tmppath to TMPDIR or TMP or TEMP or /@unixroot/var/tmp as fallback
+- Generate rpm_macro provides from macros.os2 (in addition to macros.d macros)
+- Require minimum RPM version 4.15.1-6
 
 * Fri Apr 24 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> 1-13
 - add macros.perl-srpm, as those got eliminated with rpm >= 4.15
