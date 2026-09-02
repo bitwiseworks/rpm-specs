@@ -33,7 +33,14 @@
 
 %global rpmver 4.15.1
 #global snapver rc1
-%global rel 5
+%global rel 6
+
+%if 0%{?os2_version}
+# rpmlib(RpmVersion) capability provided by this RPM version and required by
+# packages it builds (bumped only on incompatible changes that require a newer
+# RPM to install newer packages!)
+%global rpmver_min 4.15.1-6
+%endif
 
 %global srcver %{version}%{?snapver:-%{snapver}}
 %global srcdir %{?snapver:testing}%{!?snapver:%{name}-%(echo %{version} | cut -d'.' -f1-2).x}
@@ -71,7 +78,12 @@ Patch906: rpm-4.7.1-geode-i686.patch
 Patch907: rpm-4.15.x-ldflags.patch
 %else
 Vendor: bww bitwise works GmbH
-%scm_source github http://github.com/bitwiseworks/%{name}-os2new v%{version}-os2-2
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 v%{version}-os2
+
+# We build docs from sources
+BuildRequires: doxygen
+# For platform.in patch checks
+BuildRequires: diffutils
 %endif
 
 # Partially GPL/LGPL dual-licensed and some bits with BSD
@@ -90,7 +102,8 @@ Requires: %{_bindir}/db_stat.exe
 %if !0%{?os2_version}
 Requires: popt%{_isa} >= 1.10.2.1
 %else
-Requires: popt >= 1.10.2.1
+# for fixed CRLF support in popt files
+Requires: popt >= 1.18-3
 %endif
 Requires: curl
 
@@ -119,8 +132,12 @@ BuildRequires: elfutils-libelf-devel
 %endif
 BuildRequires: readline-devel zlib-devel
 BuildRequires: openssl-devel
+%if !0%{?os2_version}
 # The popt version here just documents an older known-good version
-BuildRequires: popt-devel >= 1.10.2
+%else
+# for fixed CRLF support in popt files
+BuildRequires: popt-devel >= 1.18-3
+%endif
 BuildRequires: file-devel
 BuildRequires: gettext-devel
 BuildRequires: ncurses-devel
@@ -416,18 +433,8 @@ ln -s db-%{bdbver} db
 %set_build_flags
 
 %if 0%{?os2_version}
-# Make default paths to tools start with /@unixroot on OS/2
-sed -i \
-  -e '/AC_PATH_PROGS\?(/ {
-    s#, \?/usr/#, /@unixroot/usr/# ;
-    s#, \?/bin/#, /@unixroot/usr/bin/# ;
-    s#, \?/sbin/#, /@unixroot/usr/sbin/# ;
-  }' \
-  configure.ac
-
-CPPFLAGS="`pkg-config --cflags nss` -DLUA_COMPAT_APIINTCASTS"
 CFLAGS="$RPM_OPT_FLAGS %{?sanitizer_flags} -DLUA_COMPAT_APIINTCASTS"
-LDFLAGS="%{?__global_ldflags} -Zbin-files -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+LDFLAGS="%{?__global_ldflags} -Zbin-files -Zargs-wild -Zargs-resp"
 LIBS="-lintl -lcx"
 export CPPFLAGS CFLAGS LDFLAGS LIBS
 export VENDOR="%{vendor}"
@@ -475,7 +482,8 @@ done;
     %{?with_zstd: --enable-zstd} \
     %{?with_lmdb: --enable-lmdb} \
     --enable-python \
-    --with-crypto=openssl
+    --with-crypto=openssl \
+    --with-min-rpm-version=%{rpmver_min}
 
 # Remove configure dir duplicates from platform macros to make them relocatable
 # via changing _prefix (useful for alternative versions of packages etc, and
@@ -586,8 +594,6 @@ mkdir -p $RPM_BUILD_ROOT%{rpmhome}/macros.d
 %else
 export BEGINLIBPATH="%{_builddir}/%{buildsubdir}/rpmio/.libs;%{_builddir}/%{buildsubdir}/lib/.libs;$BEGINLIBPATH"
 ./rpmdb --dbpath=$RPM_BUILD_ROOT/%{_var}/lib/rpm --initdb
-rm -f $RPM_BUILD_ROOT/%{_var}/lib/rpm/.rpm.lock
-touch $RPM_BUILD_ROOT/%{_var}/.rpm.lock
 %endif
 
 # plant links to relevant db utils as rpmdb_foo for documention compatibility
@@ -602,8 +608,8 @@ done
 
 find $RPM_BUILD_ROOT -name "*.la"|xargs rm -f
 
-%if !0%{?os2_version}
 # These live in perl-generators and python-rpm-generators now
+%if !0%{?os2_version}
 rm -f $RPM_BUILD_ROOT/%{rpmhome}/{perldeps.pl,perl.*,pythond*}
 rm -f $RPM_BUILD_ROOT/%{_fileattrsdir}/{perl*,python*}
 %else
@@ -636,7 +642,7 @@ make check || (cat tests/rpmtests.log; exit 0)
 %else
 %attr(0755, root, root) %dir %{_var}/lib/rpm
 %attr(0644, root, root) %ghost %config(missingok,noreplace) %{_var}/lib/rpm/*
-%attr(0644, root, root) %ghost %{_var}/.*.lock
+%attr(0644, root, root) %ghost %{_var}/lib/rpm.lock
 %endif
 
 %if !0%{?os2_version}
@@ -828,16 +834,31 @@ make check || (cat tests/rpmtests.log; exit 0)
 %license COPYING
 %doc doc/librpm/html/*
 
+%if 0%{?os2_version}
+%posttrans
+# Try to remove outdated lock files softly (hide failures as they may be locked)
+rm -f %{_var}/lib/rpm/.rpm.lock 2>/dev/null || :
+rm -f %{_var}/.rpm.lock 2>/dev/null || :
+%endif
+
 %changelog
+* Mon Sep 1 2026 Dmitrii Kuminov <coding@dmik.org> 4.15.1-6
+- Restore old source repo (updated to 4.15.1)
+- Build from tag v4.15.1-os2 (changes RPMTAG_OS from "os/2" to "os2-emx")
+- Require doxygen at build time (we build docs from sources)
+- Remove patching configure.ac with /@unixroot (already patched in the repo)
+- Remove NSS/NSPR leftovers (OpenSSL is used now)
 - Remove duplicate configure dir macros (hardcoded dirs) from platform macros
+- Remove outdated RPMDB lock files after installing.
+- Remove -Zhigh-mem -Zomf that come from default flags.
 
 * Wed Apr 29 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.15.1-5
 - rebuild with perl files removed as well
 
-* Fri Mai 16 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.15.1-4
+* Fri May 16 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.15.1-4
 - fix a brp-compression issue
 
-* Mon Mai 05 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.15.1-3
+* Mon May 05 2025 Silvan Scherrer <silvan.scherrer@aroa.ch> 4.15.1-3
 - fix a annoying macro parameter bug
 - fix a forgotten change
 
