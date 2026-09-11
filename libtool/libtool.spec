@@ -13,7 +13,7 @@
 Summary: The GNU Portable Library Tool
 Name:    libtool
 Version: 2.5.4
-Release: 2%{?dist}
+Release: 3%{?dist}
 
 # To help future rebase, the following licenses were seen in the following files/folders:
 # '*' is anything that was not explicitly listed earlier in the folder
@@ -80,7 +80,7 @@ Patch: libtool-nodocs.patch
 %endif
 %else
 Vendor:  bww bitwise works GmbH
-%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2-1
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2-2
 %endif
 
 # /usr/bin/libtool includes paths within gcc's versioned directories
@@ -250,6 +250,9 @@ rm -f %{buildroot}%{_libdir}/ltdl.a
 
 
 %changelog
+* Thu Sep 10 2026 Dmitrii Kuminov <coding@dmik.org> 2.5.4-3
+- Use /@unixroot/usr/bin/sh in more places.
+
 * Sun Jul 26 2026 Dmitrii Kuminov <coding@dmik.org> 2.5.4-2
 - Use /@unixroot/usr/bin/sh as [CONFIG_]SHELL by default if UNIXROOT is defined.
 
