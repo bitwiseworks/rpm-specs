@@ -2,7 +2,7 @@
 Summary: A GNU collection of binary utilities
 Name: %{?cross}binutils%{?_with_debug:-debug}
 Version: 2.33.1
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 URL: https://sourceware.org/binutils
 
@@ -59,8 +59,12 @@ URL: https://sourceware.org/binutils
 
 # Note - in the future the gold linker may become deprecated.
 %ifnarch riscv64
+%if 0%{?os2_version}
 # no gold for us
 %bcond_with gold
+%else
+%bcond_without gold
+%endif
 %else
 # RISC-V does not have ld.gold thus disable by default.
 %bcond_with gold
@@ -85,9 +89,12 @@ URL: https://sourceware.org/binutils
 %endif
 
 %if 0%{!?binutils_target:1}
-# we always use _build, as target_platform isn't recognised by configure
-# define binutils_target %{_target_platform}
-%define binutils_target %{_build}
+%if !0%{?os2_version}
+%define binutils_target %{_target_platform}
+%else
+# On OS/2, BFD currently only supports i386 targets
+%define binutils_target i386-%{_vendor}-%{_target_os}
+%endif
 %define isnative 1
 %define enable_shared 1
 %else
@@ -104,10 +111,12 @@ URL: https://sourceware.org/binutils
 
 #----------------------------------------------------------------------------
 
-%global with_alternatives 0
-
+%if !0%{?os2_version}
+Source: https://ftp.gnu.org/gnu/binutils/binutils-%{version}.tar.xz
+%else
 Vendor: bww bitwise works GmbH
-%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2-1
+%endif
 
 Provides: bundled(libiberty)
 
@@ -138,13 +147,22 @@ BuildRequires: gcc
 
 %if %{without bootstrap}
 BuildRequires: gettext, flex, zlib-devel
-BuildRequires: gettext-common-devel # Needed by autogen.sh in intl/
+%if 0%{?os2_version}
+# for autogen.sh
+BuildRequires: autoconf269, automake, libtool
+# Needed by autogen.sh in intl
+BuildRequires: gettext-common-devel
+%endif
 %endif
 
 %if %{with docs}
 BuildRequires: texinfo >= 4.0
 # BZ 920545: We need pod2man in order to build the manual pages.
-BuildRequires: /@unixroot/usr/bin/pod2man
+%if !0%{?os2_version}
+BuildRequires: /usr/bin/pod2man
+%else
+BuildRequires: %{_bindir}/pod2man
+%endif
 %else
 BuildRequires: findutils
 %endif
@@ -156,7 +174,7 @@ BuildRequires: findutils
 BuildRequires: dejagnu, zlib-static, glibc-static, sharutils, bc
 %endif
 
-%if %{with_alternatives}
+%if !0%{?os2_version}
 Requires(post): %{_sbindir}/alternatives
 Requires(preun): %{_sbindir}/alternatives
 %endif
@@ -249,11 +267,13 @@ Conflicts: gcc-c++ < 4.0.0
 %debug_package
 
 %prep
+%if !0%{?os2_version}
+%setup -q -n binutils-%{version}
+%else
 %scm_setup
+%endif
 
-autogen.sh
-
-%if 0
+%if !0%{?os2_version}
 # We cannot run autotools as there is an exact requirement of autoconf-2.59.
 # FIXME - this is no longer true.  Maybe try reinstating autotool use ?
 
@@ -281,7 +301,6 @@ do
 done
 touch */configure
 %endif
-
 # Touch the .info files so that they are newer then the .texi files and
 # hence do not need to be rebuilt.  This eliminates the need for makeinfo.
 # The -print is there just to confirm that the command is working.
@@ -297,6 +316,13 @@ touch */configure
 
 %build
 echo target is %{binutils_target}
+
+%if 0%{?os2_version}
+# Use the pinned autoconf version
+# TODO: Use altenv when released
+. %{_alt_prefix}/autoconf269/activate
+autogen.sh
+%endif
 
 %if %{build_using_clang}
 # Clang does not support the -fstack-clash-protection option.
@@ -336,11 +362,14 @@ case %{binutils_target} in ppc64le*)
     ;;
 esac
 
+%if 0%{?os2_version}
 # we are not elf
-#case %{binutils_target} in x86_64*|i?86*|arm*|aarch64*)
-#  CARGS="$CARGS --enable-targets=x86_64-pep"
-#  ;;
-#esac
+%else
+case %{binutils_target} in x86_64*|i?86*|arm*|aarch64*)
+  CARGS="$CARGS --enable-targets=x86_64-pep"
+  ;;
+esac
+%endif
 
 %if %{default_relro}
   CARGS="$CARGS --enable-relro=yes"
@@ -359,15 +388,16 @@ export VENDOR="%{vendor}"
 
 # We could optimize the cross builds size by --enable-shared but the produced
 # binaries may be less convenient in the embedded environment.
-# the below configure switchs we don't use
-#  --build=%{_target_platform} --host=%{_target_platform} \
+# NOTE: On OS/2, BFD currently only supports i386 targets, omit --build/--host
 %configure \
 %if %{build_using_clang}
    CC=clang \
    CXX=clang++ \
 %endif
   --quiet \
-  --with-system-zlib \
+%if !0%{?os2_version}
+  --build=%{_target_platform} --host=%{_target_platform} \
+%endif
   --target=%{binutils_target} \
 %if %{with gold}
   --enable-gold=default \
@@ -409,8 +439,14 @@ export VENDOR="%{vendor}"
   --enable-threads=no \
 %endif
   $CARGS \
+%if !0%{?os2_version}
+  --enable-plugins \
+  --with-bugurl=http://bugzilla.redhat.com/bugzilla/
+%else
+  --with-system-zlib \
   --enable-plugins=no \
   --with-bugurl=http://github.com/bitwiseworks/binutils-os2
+%endif
 
 %if %{with docs}
 make %{_smp_mflags} tooldir=%{_prefix} all
@@ -466,7 +502,7 @@ make install DESTDIR=%{buildroot} MAKEINFO=true
 make prefix=%{buildroot}%{_prefix} infodir=%{buildroot}%{_infodir} install-info
 %endif
 
-%if 0
+%if !0%{?os2_version}
 # Rebuild libiberty.a with -fPIC.
 # Future: Remove it together with its header file, projects should bundle it.
 %make_build -C libiberty clean
@@ -481,9 +517,13 @@ make prefix=%{buildroot}%{_prefix} infodir=%{buildroot}%{_infodir} install-info
 # Rebuild libopcodes.a with -fPIC.
 %make_build -C opcodes clean
 %make_build CFLAGS="-g -fPIC $RPM_OPT_FLAGS" -C opcodes
-%endif
 
-# Install libiberty stuff as we provide it
+install -m 644 bfd/libbfd.a %{buildroot}%{_libdir}
+install -m 644 libiberty/libiberty.a %{buildroot}%{_libdir}
+install -m 644 include/libiberty.h %{buildroot}%{_prefix}/include
+install -m 644 opcodes/libopcodes.a %{buildroot}%{_libdir}
+%else
+# Install more libiberty stuff as we provide it
 install -m 644 libiberty/libiberty.a %{buildroot}%{_libdir}
 install -m 644 include/libiberty.h %{buildroot}%{_prefix}/include
 install -m 644 include/demangle.h %{buildroot}%{_prefix}/include
@@ -495,46 +535,48 @@ install -m 644 include/objalloc.h %{buildroot}%{_prefix}/include
 install -m 644 include/partition.h %{buildroot}%{_prefix}/include
 install -m 644 include/sort.h %{buildroot}%{_prefix}/include
 install -m 644 include/splay-tree.h %{buildroot}%{_prefix}/include
-#install -m 644 bfd/libbfd.a %{buildroot}%{_libdir}
-#install -m 644 opcodes/libopcodes.a %{buildroot}%{_libdir}
-
+%endif
 # Remove Windows/Novell only man pages
-rm -f %{buildroot}%{_mandir}/man1/dlltool*
-rm -f %{buildroot}%{_mandir}/man1/nlmconv*
-rm -f %{buildroot}%{_mandir}/man1/windres*
-rm -f %{buildroot}%{_mandir}/man1/windmc*
-
+%if !0%{?os2_version}
+rm -f %{buildroot}%{_mandir}/man1/{dlltool,nlmconv,windres,windmc}*
+%else
+for f in dlltool nlmconv windres windmc; do
+  rm -f %{buildroot}%{_mandir}/man1/$f*
+done
+%endif
 %if %{without docs}
-rm -f %{buildroot}%{_mandir}/man1/addr2line*
-rm -f %{buildroot}%{_mandir}/man1/ar*
-rm -f %{buildroot}%{_mandir}/man1/as*
-rm -f %{buildroot}%{_mandir}/man1/c++filt*
-rm -f %{buildroot}%{_mandir}/man1/elfedit*
-rm -f %{buildroot}%{_mandir}/man1/gprof*
-rm -f %{buildroot}%{_mandir}/man1/ld*
-rm -f %{buildroot}%{_mandir}/man1/nm*
-rm -f %{buildroot}%{_mandir}/man1/objcopy*
-rm -f %{buildroot}%{_mandir}/man1/objdump*
-rm -f %{buildroot}%{_mandir}/man1/ranlib*
-rm -f %{buildroot}%{_mandir}/man1/readelf*
-rm -f %{buildroot}%{_mandir}/man1/size*
-rm -f %{buildroot}%{_mandir}/man1/strings*
-rm -f %{buildroot}%{_mandir}/man1/strip*
-rm -f %{buildroot}%{_infodir}/as*
-rm -f %{buildroot}%{_infodir}/bfd*
-rm -f %{buildroot}%{_infodir}/binutils*
-rm -f %{buildroot}%{_infodir}/gprof*
-rm -f %{buildroot}%{_infodir}/ld*
+%if !0%{?os2_version}
+rm -f %{buildroot}%{_mandir}/man1/{addr2line,ar,as,c++filt,elfedit,gprof,ld,nm,objcopy,objdump,ranlib,readelf,size,strings,strip}*
+rm -f %{buildroot}%{_infodir}/{as,bfd,binutils,gprof,ld}*
+%else
+for f in addr2line ar as c++filt elfedit gprof ld nm objcopy objdump ranlib readelf size strings strip; do
+  rm -f %{buildroot}%{_mandir}/man1/$f*
+done
+for f in as bfd binutils gprof ld; do
+  rm -f %{buildroot}%{_infodir}/man1/$f*
+done
+%endif
 %endif
 
 %if %{enable_shared}
-chmod +x %{buildroot}%{_libdir}/*.dll
+%if !0%{?os2_version}
+chmod +x %{buildroot}%{_libdir}/lib*.so*
+%endif
 %endif
 
+%if !0%{?os2_version}
+# Prevent programs from linking against libbfd and libopcodes
+# dynamically, as they are changed far too often.
+rm -f %{buildroot}%{_libdir}/lib{bfd,opcodes}.so
+
+# Remove libtool files, which reference the .so libs
+rm -f %{buildroot}%{_libdir}/lib{bfd,opcodes}.la
+%else
 # Remove libtool files, which reference the .dll libs
 rm -f %{buildroot}%{_libdir}/*.la
+%endif
 
-%if 0
+%if !0%{?os2_version}
 # Sanity check --enable-64-bit-bfd really works.
 grep '^#define BFD_ARCH_SIZE 64$' %{buildroot}%{_prefix}/include/bfd.h
 # Fix multilib conflicts of generated values by __WORDSIZE-based expressions.
@@ -591,7 +633,7 @@ rm -rf %{buildroot}%{_libdir}/libiberty.a
 
 # This one comes from gcc
 rm -f %{buildroot}%{_infodir}/dir
-#rm -rf %{buildroot}%{_prefix}/%{binutils_target}
+rm -rf %{buildroot}%{_prefix}/%{binutils_target}
 
 %find_lang %{?cross}binutils
 %find_lang %{?cross}opcodes
@@ -616,7 +658,7 @@ fi
 
 %post
 %__rm -f %{_bindir}/%{?cross}ld
-%if %{with_alternatives}
+%if !0%{?os2_version}
 %{_sbindir}/alternatives --install %{_bindir}/%{?cross}ld %{?cross}ld \
   %{_bindir}/%{?cross}ld.bfd %{ld_bfd_priority}
 
@@ -629,8 +671,10 @@ fi
 # however the user previously had it set.  See BZ 1592069 for more details.
 %endif
 
+%if !0%{?os2_version}
 %if %{isnative}
-#ldconfig_post
+%ldconfig_post
+%endif
 %endif
 
 exit 0
@@ -638,7 +682,7 @@ exit 0
 #----------------------------------------------------------------------------
 
 %preun
-%if %{with_alternatives}
+%if !0%{?os2_version}
 if [ $1 = 0 ]; then
   %{_sbindir}/alternatives --remove %{?cross}ld %{_bindir}/%{?cross}ld.bfd
 fi
@@ -653,9 +697,11 @@ exit 0
 
 #----------------------------------------------------------------------------
 
+%if !0%{?os2_version}
 %if %{isnative}
 %postun
-#ldconfig_postun
+%ldconfig_postun
+%endif
 %endif
 
 #----------------------------------------------------------------------------
@@ -663,18 +709,20 @@ exit 0
 %files -f %{?cross}binutils.lang
 %license COPYING COPYING3 COPYING3.LIB COPYING.LIB
 %doc README
-%{_bindir}/%{?cross}[!l]*.exe
-%{_prefix}/%{binutils_target}/bin/%{?cross}[!l]*.exe
-# %%verify(symlink) does not work for some reason, so using "owner" instead.
-#verify(owner) %{_bindir}/%{?cross}ld
-#{_bindir}/%{?cross}ld.bfd
+%{_bindir}/%{?cross}[!l]*%{_exeext}
+%if !0%{?os2_version}
+%{_bindir}/%{?cross}ld
+%{_bindir}/%{?cross}ld.bfd
+%endif
 
 %if %{with docs}
 %{_mandir}/man1/*
 %{_infodir}/as.info.*
 %{_infodir}/binutils.info.*
 %{_infodir}/gprof.info.*
-#{_infodir}/ld.info.*
+%if !0%{?os2_version}
+%{_infodir}/ld.info.*
+%endif
 %{_infodir}/bfd.info.*
 %endif
 
@@ -697,8 +745,27 @@ exit 0
 
 # %%ghost %%{_bindir}/%%{?cross}ld
 
+%if 0%{?os2_version}
+# We never owned /@unixroot/usr/i386-pc-os2-emx/bin but installed there, remove if empty
+%posttrans -p <lua>
+local path = "%{_prefix}/i386-pc-os2-emx/bin"
+while path and path ~= "" and path ~= "%{_prefix}" do
+  if not os.remove(path) then
+    break
+  end
+  path = path:match("^(.-)/+[^/]+/*$")
+end
+%end
+%endif
+
 #----------------------------------------------------------------------------
 %changelog
+* Fri Sep 11 2026 Dmitrii Kuminov <coding@dmik.org> 2.33.1-2
+- Require autoconf269, automake and libtool at build time
+- Guard OS/2 and non-OS/2 bits with `if` instead of commenting out
+- Remove /@unixroot/usr/i386-pc-os2-emx/bin with tool copies (not used)
+- Use /@unixroot/usr/bin/sh as [CONFIG_]SHELL by default if UNIXROOT is defined
+
 * Fri Dec 20 2019 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.33.1-1
 - update to version 2.33.1
 
