@@ -33,13 +33,22 @@
 
 %global rpmver 4.15.1
 #global snapver rc1
-%global rel 6
+%global rel 7
 
 %if 0%{?os2_version}
 # rpmlib(RpmVersion) capability provided by this RPM version and required by
 # packages it builds (bumped only on incompatible changes that require a newer
 # RPM to install newer packages!)
 %global rpmver_min 4.15.1-6
+
+# Make sure RPM itself is always built with the old RPMTAG_OS = "os/2" value
+# instead of the new "os2-emx" one and that it doesn't require the RpmVersion
+# capability, to ensure it's always installable by old RPM versions
+%global _disable_rpm_version_dependency 1
+%global _saved_target_platform %{_target_platform}
+%global _target_os os/2
+%global _target_platform %{_saved_target_platform}
+%undefine _saved_target_platform
 %endif
 
 %global srcver %{version}%{?snapver:-%{snapver}}
@@ -78,7 +87,7 @@ Patch906: rpm-4.7.1-geode-i686.patch
 Patch907: rpm-4.15.x-ldflags.patch
 %else
 Vendor: bww bitwise works GmbH
-%scm_source github http://github.com/bitwiseworks/%{name}-os2 v%{version}-os2
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 v%{version}-os2-1
 
 # We build docs from sources
 BuildRequires: doxygen
@@ -93,11 +102,7 @@ License: GPLv2+
 Requires: coreutils
 %if %{without int_bdb}
 # db recovery tools, rpmdb_util symlinks
-%if !0%{?os2_version}
-Requires: %{_bindir}/db_stat
-%else
-Requires: %{_bindir}/db_stat.exe
-%endif
+Requires: %{_bindir}/db_stat%{_exeext}
 %endif
 %if !0%{?os2_version}
 Requires: popt%{_isa} >= 1.10.2.1
@@ -600,7 +605,7 @@ export BEGINLIBPATH="%{_builddir}/%{buildsubdir}/rpmio/.libs;%{_builddir}/%{buil
 %if %{without int_bdb}
 for dbutil in dump load recover stat upgrade verify
 do
-    ln -s %{_bindir}/db_${dbutil}.exe $RPM_BUILD_ROOT/%{rpmhome}/rpmdb_${dbutil}
+    ln -s %{_bindir}/db_${dbutil}%{_exeext} $RPM_BUILD_ROOT/%{rpmhome}/rpmdb_${dbutil}
 done
 %endif
 
@@ -645,19 +650,11 @@ make check || (cat tests/rpmtests.log; exit 0)
 %attr(0644, root, root) %ghost %{_var}/lib/rpm.lock
 %endif
 
-%if !0%{?os2_version}
-%{_bindir}/rpm
-%{_bindir}/rpm2archive
-%{_bindir}/rpm2cpio
-%{_bindir}/rpmdb
-%{_bindir}/rpmkeys
-%else
-%{_bindir}/rpm.exe
-%{_bindir}/rpm2archive.exe
-%{_bindir}/rpm2cpio.exe
-%{_bindir}/rpmdb.exe
-%{_bindir}/rpmkeys.exe
-%endif
+%{_bindir}/rpm%{_exeext}
+%{_bindir}/rpm2archive%{_exeext}
+%{_bindir}/rpm2cpio%{_exeext}
+%{_bindir}/rpmdb%{_exeext}
+%{_bindir}/rpmkeys%{_exeext}
 %{_bindir}/rpmquery
 %{_bindir}/rpmverify
 
@@ -757,17 +754,9 @@ make check || (cat tests/rpmtests.log; exit 0)
 %endif
 
 %files build
-%if !0%{?os2_version}
-%{_bindir}/rpmbuild
-%else
-%{_bindir}/rpmbuild.exe
-%endif
+%{_bindir}/rpmbuild%{_exeext}
 %{_bindir}/gendiff
-%if !0%{?os2_version}
-%{_bindir}/rpmspec
-%else
-%{_bindir}/rpmspec.exe
-%endif
+%{_bindir}/rpmspec%{_exeext}
 
 %{_mandir}/man1/gendiff.1*
 %{_mandir}/man8/rpmbuild.8*
@@ -797,11 +786,7 @@ make check || (cat tests/rpmtests.log; exit 0)
 %endif
 
 %files sign
-%if !0%{?os2_version}
-%{_bindir}/rpmsign
-%else
-%{_bindir}/rpmsign.exe
-%endif
+%{_bindir}/rpmsign%{_exeext}
 %{_mandir}/man8/rpmsign.8*
 
 %files -n python2-%{name}
@@ -814,11 +799,10 @@ make check || (cat tests/rpmtests.log; exit 0)
 
 %files devel
 %{_mandir}/man8/rpmgraph.8*
+%{_bindir}/rpmgraph%{_exeext}
 %if !0%{?os2_version}
-%{_bindir}/rpmgraph
 %{_libdir}/librp*[a-z].so
 %else
-%{_bindir}/rpmgraph.exe
 %{_libdir}/rp*_dll.a
 %endif
 %{_libdir}/pkgconfig/%{name}.pc
@@ -842,7 +826,12 @@ rm -f %{_var}/.rpm.lock 2>/dev/null || :
 %endif
 
 %changelog
-* Mon Sep 1 2026 Dmitrii Kuminov <coding@dmik.org> 4.15.1-6
+* Fri Sep 11 2026 Dmitrii Kuminov <coding@dmik.org> 4.15.1-7
+- bcond: Adjust for missing %[ support
+- Force RPMTAG_OS = "os/2" and no rpmlib(RpmVersion) dependency for RPM itself
+- Use _exeext instead of OS/2 conditionals
+
+* Tue Sep 1 2026 Dmitrii Kuminov <coding@dmik.org> 4.15.1-6
 - Restore old source repo (updated to 4.15.1)
 - Build from tag v4.15.1-os2 (changes RPMTAG_OS from "os/2" to "os2-emx")
 - Require doxygen at build time (we build docs from sources)
