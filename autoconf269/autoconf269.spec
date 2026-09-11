@@ -1,30 +1,43 @@
 Summary:    A GNU tool for automatically configuring source code
-Name:       autoconf
+Name:       autoconf269
 Version:    2.69
-Release:    6%{?dist}
+Release:    7%{?dist}
 License:    GPLv2+ and GFDL
 Group:      Development/Tools
 URL:        http://www.gnu.org/software/autoconf/
 BuildArch:  noarch
 Vendor:     bww bitwise works GmbH
 
-%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2-1
+%if !0%{?os2_version}
+Source:     http://ftpmirror.gnu.org/autoconf/autoconf-%{version}.tar.xz
+%else
+%scm_source github http://github.com/bitwiseworks/autoconf-os2 %{version}-os2-2
+Patch0: autoconf269-1-texinfo-7.patch
+%endif
+
+# Define a private versioned prefix for this pinned downstream build
+BuildRequires: rpm_macro(setup_alt_prefix)
+%setup_alt_prefix %{name}
+
+# Set Provides to satisfy autoconf = version-release dependencies
+Provides:   autoconf = %{version}-%{release}
 
 # m4 >= 1.4.6 is required, >= 1.4.13 is recommended:
 BuildRequires:      m4 >= 1.4.13
 Requires:           m4 >= 1.4.13
-#BuildRequires:      emacs
+%if !0%{?os2_version}
+BuildRequires:      emacs
+%endif
 
-%info_requires
+%if 0%{?os2_version}
+# for autoreconf & docs
+BuildRequires: autoconf automake texinfo
+%endif
 
-# for autoreconf
-Requires: autoconf
-
-# for docs (makeinfo etc)
-BuildRequires:      texinfo help2man
-
+%if !0%{?os2_version}
 # for check only:
-#BuildRequires: automake libtool gcc-gfortran
+BuildRequires: automake libtool gcc-gfortran
+%endif
 
 %description
 GNU's Autoconf is a tool for configuring source code and Makefiles.
@@ -43,24 +56,30 @@ Autoconf is only required for the generation of the scripts, not
 their use.
 
 %prep
+%if !0%{?os2_version}
+%setup -q
+%else
 %scm_setup
+%patch0 -p1
+%endif
 
 %build
-
+%if 0%{?os2_version}
 # make sure configure is updated to properly support OS/2
 autoreconf -fvi
-
+%endif
 %configure
-
 # not parallel safe
 make
 
-#%check
+%if !0%{?os2_version}
+%check
 # The following test is failing.
 # 188: autotest.at:1195   parallel autotest and signal handling
 # In test/autotest.at, under comment "Test PIPE", the exit code written
 # to file "status" is 0.  Report mailed to bug-autoconf.
-#make check TESTSUITEFLAGS='-187 189-'
+make check TESTSUITEFLAGS='-187 189-'
+%endif
 
 %install
 rm -rf ${RPM_BUILD_ROOT}
@@ -68,14 +87,13 @@ make install DESTDIR=$RPM_BUILD_ROOT
 
 rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 
+# Alternate autoconf needs PATH & INFOPATH overrides
+%install_alt_prefix_activate PATH,INFOPATH
+# Create _docdir since we need to own it because of doc entries in files
+mkdir -p $RPM_BUILD_ROOT%{_docdir}
+
 %clean
 rm -rf ${RPM_BUILD_ROOT}
-
-%post
-%info_post autoconf.info
-
-%preun
-%info_preun autoconf.info
 
 %files
 %defattr(-,root,root,-)
@@ -84,12 +102,28 @@ rm -rf ${RPM_BUILD_ROOT}
 # don't include standards.info, because it comes from binutils...
 %exclude %{_infodir}/standards*
 %{_datadir}/autoconf/
-#%dir %{_datadir}/emacs/
-#%{_datadir}/emacs/site-lisp/
+%if !0%{?os2_version}
+%dir %{_datadir}/emacs/
+%{_datadir}/emacs/site-lisp/
+%endif
 %{_mandir}/man1/*
 %doc AUTHORS COPYING ChangeLog NEWS README THANKS TODO
+# Alternate package activation script and ownership of used dirs (incl. _prefix)
+%{_alt_prefix_activate}
+%dir %{_prefix}
+%dir %{_bindir}
+%dir %{_infodir}
+%dir %{_datadir}
+%dir %{_mandir}
+%dir %{_mandir}/man1
+%dir %{_docdir}
 
 %changelog
+* Fri Sep 11 2026 Dmitrii Kuminov <coding@dmik.org> 2.69-7
+- Provide pinned versioned package (/usr/alt/autoconf269) for compatibility.
+- Add automake and texinfo to build requirements.
+- Use /@unixroot/usr/bin/sh as [CONFIG_]SHELL by default if UNIXROOT is defined.
+
 * Wed Mar 24 2021 Silvan Scherrer <silvan.scherrer@aroa.ch> 2.69-6
 - fix an annoying crash in print.com
 
