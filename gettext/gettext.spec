@@ -8,7 +8,7 @@
 Summary: GNU tools and libraries for localized translated messages
 Name: gettext
 Version: 1.0
-Release: 3%{?dist}
+Release: 4%{?dist}
 
 # The following are licensed under LGPLv2+:
 # - libintl and its headers
@@ -266,7 +266,9 @@ export CPPFLAGS="-I%{_includedir}/libxml2"
 export LIBS="-lxml2"
 export CFLAGS="$CFLAGS -Wformat"
 %else
-export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+# Disable MMAP (see #23)
+export CPPFLAGS="$CPPFLAGS -DDISALLOW_MMAP=1"
+export LDFLAGS="$LDFLAGS -Zargs-wild -Zargs-resp"
 export LIBS="-lcx -lxml2 -ltinfo"
 export BEGINLIBPATH="%{_builddir}/%{buildsubdir}/gettext-tools/gnulib-lib/.libs;%{_builddir}/%{buildsubdir}/gettext-tools/src/.libs;%{_builddir}/%{buildsubdir}/gio/.libs;%{_builddir}/%{buildsubdir}/gthread/.libs;%{_builddir}/%{buildsubdir}/libtextstyle\lib/.libs"
 # Set BUILDLEVEL to be embedded to all DLLs built with Libtool.
@@ -556,6 +558,9 @@ make check LIBUNISTRING=-lunistring
 %{_mandir}/man1/msghack.1*
 
 %changelog
+* Thu Sep 24 2026 Dmitrii Kuminov <coding@dmik.org> 1.0-4
+- Rebuild with MMAP support disabled (see #23)
+
 * Thu Sep 10 2026 Dmitrii Kuminov <coding@dmik.org> 1.0-3
 - Use /@unixroot/usr/bin/sh as [CONFIG_]SHELL by default if UNIXROOT is defined
 - Depend on json-c-devel to build C version of spit instead of Python
