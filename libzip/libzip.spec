@@ -1,7 +1,7 @@
 %bcond_without tests
 
 Name:    libzip
-Version: 1.11.4
+Version: 1.12
 Release: 1%{?dist}
 Summary: C library for reading, creating, and modifying zip archives
 
@@ -69,8 +69,12 @@ rm INSTALL.md
 sed -e '/clone-fs-/d' \
     -i regress/CMakeLists.txt
 
-
 %build
+%if 0%{?os2_version}
+export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp -lcx -lpthread -fstack-protector"
+export LIBS="-lcx -lpthread"
+%endif
+
 %cmake \
   -DENABLE_COMMONCRYPTO:BOOL=OFF \
   -DENABLE_GNUTLS:BOOL=OFF \
@@ -82,7 +86,7 @@ sed -e '/clone-fs-/d' \
   -DENABLE_ZSTD:BOOL=ON \
   -DBUILD_TOOLS:BOOL=ON \
   -DBUILD_REGRESS:BOOL=ON \
-  -DBUILD_EXAMPLES:BOOL=OFF \
+  -DBUILD_EXAMPLES:BOOL=ON \
   -DBUILD_DOC:BOOL=ON
 
 %cmake_build
@@ -93,6 +97,10 @@ sed -e '/clone-fs-/d' \
 
 
 %check
+%if 0%{?os2_version}
+export BEGINLIBPATH=%{_builddir}/%{buildsubdir}/pc-os2-emx-build/lib
+export LIBPATHSTRICT=T
+%endif
 %if %{with tests}
 %ctest
 %else
@@ -141,7 +149,10 @@ sed -e '/clone-fs-/d' \
 %{_mandir}/man5/zip*
 
 
-%changelog
+%changelog 
+* Wed Oct 07 2026 Elbert Pol <elbert.pol@gmail.com> - 1.12-1
+- Updated to latest version
+
 * Thu May 29 2025 Elbert Pol <elbert.pol@gmail.com> - 1.11.4-1
 - Updated to latest version
 - Sync with latest fedora spec
