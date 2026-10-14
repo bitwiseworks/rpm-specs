@@ -1,7 +1,7 @@
 %bcond_without tests
 
 Name:    libzip
-Version: 1.12
+Version: 1.12.1
 Release: 1%{?dist}
 Summary: C library for reading, creating, and modifying zip archives
 
@@ -148,8 +148,10 @@ export LIBPATHSTRICT=T
 %{_mandir}/man3/ZIP*
 %{_mandir}/man5/zip*
 
-
 %changelog 
+* Wed Oct 14 2026 Elbert Pol <elbert.pol@gmail.com> - 1.12.1-1
+- Updated to latest version
+
 * Wed Oct 07 2026 Elbert Pol <elbert.pol@gmail.com> - 1.12-1
 - Updated to latest version
 
