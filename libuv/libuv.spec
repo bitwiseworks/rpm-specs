@@ -11,7 +11,7 @@ Version:        1.44.3
 %if !0%{?os2_version}
 Release:        %autorelease
 %else
-Release:        3%{?dist}
+Release:        4%{?dist}
 %endif
 Summary:        Platform layer for node.js
 
@@ -24,7 +24,7 @@ Source2:        %{name}.pc.in
 Source3:        libuv.abignore
 %else
 Vendor:         bww bitwise works GmbH
-%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2-1
 %endif
 %if !0%{?os2_version}
 BuildRequires:  autoconf automake libtool
@@ -148,6 +148,9 @@ install -Dm0644 -t %{buildroot}%{_libdir}/libuv/ %{SOURCE3}
 %if !0%{?os2_version}
 %autochangelog
 %else
+* Mon Oct 19 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.44.3-4
+- fix a possible SYS3170 (Thanks Elbert for the patch)
+
 * Fri Feb 24 2023 Silvan Scherrer <silvan.scherrer@aroa.ch> - 1.44.3-3
 - fix a possible race
 
