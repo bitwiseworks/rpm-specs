@@ -65,7 +65,7 @@ URL: https://www.python.org/
 #global prerel ...
 %global upstream_version %{general_version}%{?prerel}
 Version: %{general_version}%{?prerel:~%{prerel}}
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: Python-2.0.1
 
 
@@ -298,6 +298,9 @@ Obsoletes: python%{pybasever}%{?1:-%{1}}\
 # (keep this list alphabetized within the %%if blocks)
 
 BuildRequires: autoconf
+%if 0%{?os2_version}
+BuildRequires: autoconf-archive
+%endif
 %if !0%{?os2_version}
 BuildRequires: bluez-libs-devel
 %endif
@@ -472,7 +475,7 @@ Patch466: 00466-downstream-only-skip-tests-not-working-with-older-expat-version.
 #     https://github.com/fedora-python/cpython
 %else
 Vendor: bww bitwise works GmbH
-%scm_source github http://github.com/bitwiseworks/python-os2 v%{version}-os2
+%scm_source github http://github.com/bitwiseworks/python-os2 v%{version}-os2-1
 %endif
 
 
@@ -1075,7 +1078,7 @@ export CFLAGS="$CFLAGS $(pkg-config --cflags openssl)"
 export LDFLAGS="%{extension_ldflags} $(pkg-config --libs-only-L openssl)"
 export LDFLAGS_NODIST="%{build_ldflags} -g $(pkg-config --libs-only-L openssl)"
 %else
-export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp -lcx"
+export LDFLAGS="%{build_ldflags} -Zargs-wild -Zargs-resp -lcx"
 export LIBS="-lssl -lcrypto -lintl -lcx"
 export VENDOR="%{vendor}"
 export BOOTSTRAP_TIME="`LANG=C date +'%%d %%b %%Y %%H:%%M:%%S'`"
@@ -1490,6 +1493,9 @@ ln -s ./python3-debug %{buildroot}%{_bindir}/python-debug
 %endif
 %if 0%{?os2_version}
 cp -p %{buildroot}%{_bindir}/python%{pybasever}.exe %{buildroot}%{_bindir}/python.exe
+# Install python3.exe and change python3 to point to it instead of pybasever exe
+cp -p %{buildroot}%{_bindir}/python%{pybasever}.exe %{buildroot}%{_bindir}/python3.exe
+ln -s -Tf ./python3.exe %{buildroot}%{_bindir}/python3
 %endif
 %endif
 
@@ -1627,6 +1633,9 @@ CheckPython freethreading
 %if %{with main_python}
 %{_bindir}/pydoc*
 %{_bindir}/python3
+%if 0%{?os2_version}
+%{_bindir}/python3.exe
+%endif
 %else
 %{_bindir}/pydoc%{pybasever}
 %endif
@@ -2172,6 +2181,11 @@ CheckPython freethreading
 # ======================================================
 
 %changelog
+* Wed Oct 21 2026 Dmitrii Kuminov <coding@dmik.org> - 3.13.11-2
+- Build from v3.13.11-os2-1 tag
+- Add autoconf-archive to build deps as autoreconf needs it for Python
+- Install python3.exe when python3 is installed, make python3 -> python3.exe
+
 * Fri Jan 16 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> - 3.13.11-1
 - updated to vendor version 3.13.11
 
