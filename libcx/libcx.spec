@@ -1,6 +1,6 @@
 Name: libcx
 Summary: kLIBC Extension Library
-Version: 0.7.5
+Version: 0.7.6
 Release: 1%{?dist}
 License: LGPLv2.1+
 Group: System/Libraries
@@ -8,15 +8,14 @@ Vendor: bww bitwise works GmbH
 URL: https://github.com/bitwiseworks/libcx
 
 %scm_source github https://github.com/bitwiseworks/libcx %{version}
-#scm_source git file://D:/Coding/libcx/master #{version}
 
 BuildRequires: sed
 
 Obsoletes: libpoll
 Provides: libpoll
 
-Requires: libc >= 1:0.1.14
-BuildRequires: libc-devel >= 1:0.1.14
+Requires: libc >= 1:0.1.15
+BuildRequires: libc-devel >= 1:0.1.15
 
 %description
 The kLIBC Extension Library extends the functionality of the kLIBC library
@@ -69,13 +68,12 @@ kmk  %{kmk_flags} test
 rm -rf %{buildroot}
 
 %files
-%defattr(-,root,root)
-%doc LICENSE README.md CHANGELOG.md
+%doc README.md CHANGES.md
+%license LICENSE
 %{_libdir}/libcx*.dll
 %{_libdir}/libcx-spawn2.wrp
 
 %files devel
-%defattr(-,root,root)
 %{_libdir}/libcx*.a
 %{_bindir}/libcx-stats.exe
 %{_includedir}/poll.h
@@ -89,6 +87,11 @@ rm -rf %{buildroot}
 %{_includedir}/libcx/handles.h
 
 %changelog
+* Sun Oct 25 2026 Dmitrii Kuminov <coding@dmik.org> 0.7.6-1
+- Release version 0.7.6
+  (https://github.com/bitwiseworks/libcx/blob/0.7.6/CHANGES.md).
+- Install LICENSE with license tag
+
 * Sun Jan 11 2026 Dmitrii Kuminov <coding@dmik.org> 0.7.5-1
 - Release version 0.7.5
   (https://github.com/bitwiseworks/libcx/blob/0.7.5/CHANGELOG.md).
