@@ -1,9 +1,22 @@
 # Defines the major version (used in the DLL name)
-%define ver_maj 0
+%global ver_maj 0
 
-# Disable .dbg creation for forwaders and compression for the main DLL
-# (will be done manually with special compression options)
-%define _strip_opts --debuginfo -x "libc*.dll" --compress -x "libcn%{ver_maj}.dll"
+# Script launcher tool (without .exe)
+%global script_launcher %{_bindir}/libc-script-launcher
+
+# RPM integration helper (stable interface for package scriptlets).
+%global script_launchers %{_rpmconfigdir}/libc-script-launchers.sh
+
+# Location of persistent per-package script launcher lists.
+%global script_launcher_dir %{_localstatedir}/lib/rpm-libc/launchers
+
+# Bump this only when this version updates the launcher stub in a way that
+# requires regeneration of all registered launchers
+%global script_launcher_stub_version 1
+
+# Disable .dbg creation for forwarders and the script launcher, and compression
+# for the main DLL (will be done manually with special compression options)
+%global _strip_opts --debuginfo -x "libc*.dll" -x "libc-script-launcher.exe" --compress -x "libcn%{ver_maj}.dll"
 
 # New Epoch to signify rebranding from kLIBC to LIBC Next with its own versioning
 Epoch:          1
@@ -12,13 +25,15 @@ Name:           libc
 License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Standard Shared Libraries
 Group:          System/Libraries
-Version:        %{ver_maj}.1.14
+Version:        %{ver_maj}.1.15
 Release:        1%{?dist}
 Vendor:         bww bitwise works GmbH
 Url:            https://github.com/bitwiseworks/libc
 
 %scm_source github https://github.com/bitwiseworks/libc %{version}
-#scm_source git file://D:/Coding/libc/master #{version}
+
+Source1:        macros.libc
+Source2:        libc-script-launchers.sh
 
 BuildRequires:  os2-rpm-build
 BuildRequires:  rexx_exe kbuild
@@ -35,6 +50,10 @@ BuildRequires:  binutils-devel >= 2.33.1
 # TODO remove this dependency once master.passwd init is moved from klusrmgr here.
 # Also, move pwd_mkdb.exe to a separate subpackage (libc-tools?) and depend klusrmgr on it.
 Requires:       klusrmgr >= 1.2.2
+
+# For script launchers
+Requires:       coreutils
+Requires(posttrans): coreutils
 
 %description
 kLIBC is a C runtime library in which the coder is exploring The Single Unix
@@ -88,7 +107,7 @@ library (gettext headers).
 
 %scm_setup
 
-# Check that package version matches the version from the sources
+# Check that the package version matches the version from the sources
 test "`grep -P -o '(?<=(VH|VM|VL) = )([0-9]+)' < src/emx/version.smak | tr -d \\\r | tr \\\n .`" = "%{version}."
 
 
@@ -98,10 +117,10 @@ test "`grep -P -o '(?<=(VH|VM|VL) = )([0-9]+)' < src/emx/version.smak | tr -d \\
 
 %define kmk_flags \\\
   NO_STRIP=1 \\\
-  INS="%{buildroot}/@unixroot/usr/" \\\
+  INS="%{buildroot}%{_prefix}/" \\\
   OUT=out/ \\\
   ASM="%{_builddir}/%{?buildsubdir}/bin/ml.exe -c" \\\
-  SHELL=/@unixroot/usr/bin/sh.exe \\\
+  SHELL=%{_prefix}/bin/sh.exe \\\
   BUILD_ID="%{lua: print(string.sub(rpm.expand('%{__source_rev}'), 1, 7))}-git" \\\
   OPTIMIZE_FLAGS="%{lua: print((string.gsub(rpm.expand('%{optflags}'), '-O2', '-O3')))}" \\\
   OFFICIAL_VERSION=1
@@ -147,7 +166,7 @@ emxomfstrip -D %{buildroot}%{_libdir}/libcn%{ver_maj}.dbg %{buildroot}%{_libdir}
 lxlite /F+ /AP:4096 /MRN /MLN /MF1 %{buildroot}%{_libdir}/libcn%{ver_maj}.dll
 
 # don't need this (not used)
-%{__rm} -rf %{buildroot}/@unixroot/usr/i386-pc-os2-emx
+%{__rm} -rf %{buildroot}%{_prefix}/i386-pc-os2-emx
 
 # don't need this (some Innotek helper DLL)
 %{__rm} -f %{buildroot}%{_libdir}/innidm.dll
@@ -181,17 +200,42 @@ rexx2vio src/misc/dllar.cmd %{buildroot}%{_bindir}/dllar.exe
 # build omf libraries
 src/misc/MakeOmfLibs.cmd %{buildroot}%{_libdir}
 
+# script launcher bookkeeping
+mkdir -p "%{buildroot}%{script_launcher_dir}"
+mkdir -p "%{buildroot}%{_rpmconfigdir}/macros.d"
+sed -e 's|@SCRIPT_LAUNCHERS@|%{script_launchers}|g' \
+    "%{SOURCE1}" > "%{buildroot}%{_rpmconfigdir}/macros.d/macros.libc"
+chmod 644 "%{buildroot}%{_rpmconfigdir}/macros.d/macros.libc"
+sed -e 's|@SCRIPT_LAUNCHER@|%{script_launcher}|g' \
+    -e 's|@SCRIPT_LAUNCHER_DIR@|%{script_launcher_dir}|g' \
+    -e 's|@SCRIPT_LAUNCHER_STUB_VERSION@|%{script_launcher_stub_version}|g' \
+    "%{SOURCE2}" > "%{buildroot}%{script_launchers}"
+chmod 755 "%{buildroot}%{script_launchers}"
+
 
 %clean
 
 rm -rf "%{buildroot}"
 
 
+%posttrans
+"%{script_launchers}" --update || :
+
+
 %files
-%doc README.md CHANGELOG.md
-%doc doc/COPYING.* doc/*.os2
+%doc README.md CHANGES.md doc/*.os2
+%license doc/COPYING.*
 %{_libdir}/libc*.dll
 %{_bindir}/pwd_mkdb.exe
+%{_bindir}/realpath2.exe
+%{_bindir}/libc-stats.exe
+%{script_launcher}
+%{script_launcher}.exe
+%dir %{dirname:%{script_launcher_dir}}
+%dir %{script_launcher_dir}
+%ghost %{script_launcher_dir}/.stub-version
+%{_rpmconfigdir}/macros.d/macros.libc
+%{script_launchers}
 
 
 %files devel -f %{debug_package_exclude_files}
@@ -203,6 +247,11 @@ rm -rf "%{buildroot}"
 %{_libdir}
 %exclude %{_libdir}/libc*.dll
 %exclude %{_bindir}/pwd_mkdb.exe
+%exclude %{_bindir}/realpath2.exe
+%exclude %{_bindir}/libc-stats.exe
+%exclude %{script_launcher}
+%exclude %{script_launcher}.exe
+%exclude %{_rpmconfigdir}
 
 
 %files db1-devel
@@ -215,6 +264,12 @@ rm -rf "%{buildroot}"
 
 
 %changelog
+* Sun Oct 25 2026 Dmitrii Kuminov <coding@dmik.org> 1:0.1.15-1
+- Release LIBC Next version 0.1.15
+  (https://github.com/bitwiseworks/libc/blob/0.1.15/CHANGES.md).
+- Add libc_script_launcher_package RPM macro and helper script
+- Install COPYING files with license tag
+
 * Sun Jan 11 2026 Dmitrii Kuminov <coding@dmik.org> 1:0.1.14-1
 - Release LIBC Next version 0.1.14
   (https://github.com/bitwiseworks/libc/blob/0.1.14/CHANGELOG.md).

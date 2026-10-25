@@ -1,0 +1,106 @@
+# LIBCn macros.
+
+#------------------------------------------------------------------------------
+# Support for script launchers
+
+%__libc_script_launchers @SCRIPT_LAUNCHERS@
+
+#
+# Declare an -exe noarch subpackage for script launchers, arguments:
+#
+#   [SUBPACKAGE] [-v VERSION] SCRIPT [SCRIPT]...
+#   -n PACKAGE [-v VERSION] SCRIPT [SCRIPT]...
+#
+# SUBPACKAGE (or PACKAGE) is the base package with scripts (required by the -exe
+# subpackage). Omit SUBPACKAGE for the main package. All SCRIPT files must be
+# under %{_prefix}/ and must not end in .exe (case insensitive). Each script is
+# required by the -exe package.
+#
+# VERSION is [epoch:]version-release and overrides both the required base
+# package EVR and the -exe subpackage's version tags (note: the latter redefines
+# lowercase EVR macros following normal %package processing).
+#
+# NOTE: The -exe subpackage contains no files - it registers launchers with LIBC
+# that creates them on install, and deletes the launchers after deregistration
+# via ghost entries after deregistration on uninstall.
+#
+%libc_script_launcher_package(n:v:)\
+%{lua:
+  local macro = rpm.expand("%0")
+  local prefix = rpm.expand("%{_prefix}"):gsub("/+$", "") .. "/"
+  local count = tonumber(rpm.expand("%#"))
+  local first = 1
+  local base = rpm.expand("%{-n:%{-n*}}")
+  local function is_script(path)
+    return path:sub(1, #prefix) == prefix and #path > #prefix
+  end
+  local function check_package(name)
+    assert(name:match("^[a-zA-Z0-9_+][a-zA-Z0-9_+%.%-]*$"), macro .. ": invalid package name: '" .. name .. "'")
+  end
+  if rpm.expand("%{-n:1}") == "" then
+    base = rpm.expand("%{name}")
+    if count > 0 then
+      local arg = rpm.expand("%{1}")
+      if not is_script(arg) then
+        if arg ~= "" then
+          check_package(arg)
+          base = base .. "-" .. arg
+        end
+        first = 2
+      end
+    end
+  end
+  check_package(base)
+  assert(first <= count, macro .. ": at least one script is required")
+  local evr = rpm.expand("%{!-v:%{?EPOCH:%{EPOCH}:}%{VERSION}-%{RELEASE}}%{-v:%{-v*}}")
+  local epoch, vr = evr:match("^([0-9]+):(.+)$")
+  if not epoch then
+    epoch = "0"
+    vr = evr
+  end
+  local version, release = vr:match("^([^:%s-]+)%-([^:%s-]+)$")
+  assert(version, macro .. ": expected [epoch:]version-release, got: '" .. evr .. "'")
+  local scripts = {}
+  local files = {}
+  for i = first, count do
+    local script = rpm.expand("%{" .. i .. "}")
+    assert(is_script(script), macro .. ": script must be under " .. prefix .. ": '" .. script .. "'")
+    assert(script:sub(-4):lower() ~= ".exe", macro .. ": script must not have an .exe extension: '" .. script .. "'")
+    scripts[#scripts + 1] = script
+    files[#files + 1] = "%ghost " .. script .. ".exe"
+  end
+  rpm.define("__libc_script_launcher_package_base " .. base)
+  rpm.define("__libc_script_launcher_package_name " .. base .. "-exe")
+  rpm.define("__libc_script_launcher_package_evr " .. evr)
+  rpm.define("__libc_script_launcher_package_epoch " .. epoch)
+  rpm.define("__libc_script_launcher_package_version " .. version)
+  rpm.define("__libc_script_launcher_package_release " .. release)
+  rpm.define("__libc_script_launcher_package_scripts " .. table.concat(scripts, " "))
+  rpm.define("__libc_script_launcher_package_files {" .. table.concat(files, "\n") .. "}")
+}\
+%package -n %{__libc_script_launcher_package_name}\
+Summary: Executable script launchers for package %{__libc_script_launcher_package_base}\
+%{-v:Epoch: %{__libc_script_launcher_package_epoch}\
+Version: %{__libc_script_launcher_package_version}\
+Release: %{__libc_script_launcher_package_release}}\
+BuildArch: noarch\
+Requires: %{__libc_script_launcher_package_base} = %{__libc_script_launcher_package_evr}\
+Requires: %{__libc_script_launcher_package_scripts}\
+Requires(post): %{__libc_script_launcher_package_scripts}\
+Requires(post): %{__libc_script_launchers}\
+Requires(preun): %{__libc_script_launchers}\
+AutoProv: 0\
+%description -n %{__libc_script_launcher_package_name}\
+This package provides executable script launchers for package %{__libc_script_launcher_package_base}.\
+These launchers are OS/2 executable files useful to launch package scripts from\
+the native command line and tools.\
+%post -n %{__libc_script_launcher_package_name}\
+"%{__libc_script_launchers}" --install "%{__libc_script_launcher_package_base}" %{__libc_script_launcher_package_scripts} || :\
+%preun -n %{__libc_script_launcher_package_name}\
+if [ "$1" -eq 0 ]; then\
+  "%{__libc_script_launchers}" --remove "%{__libc_script_launcher_package_base}" || :\
+fi\
+:\
+%files -n %{__libc_script_launcher_package_name}\
+%{__libc_script_launcher_package_files}\
+%{nil}
