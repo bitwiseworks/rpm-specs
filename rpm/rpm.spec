@@ -33,7 +33,7 @@
 
 %global rpmver 4.15.1
 #global snapver rc1
-%global rel 7
+%global rel 8
 
 %if 0%{?os2_version}
 # rpmlib(RpmVersion) capability provided by this RPM version and required by
@@ -87,7 +87,7 @@ Patch906: rpm-4.7.1-geode-i686.patch
 Patch907: rpm-4.15.x-ldflags.patch
 %else
 Vendor: bww bitwise works GmbH
-%scm_source github http://github.com/bitwiseworks/%{name}-os2 v%{version}-os2-1
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 v%{version}-os2-2
 
 # We build docs from sources
 BuildRequires: doxygen
@@ -109,6 +109,8 @@ Requires: popt%{_isa} >= 1.10.2.1
 %else
 # for fixed CRLF support in popt files
 Requires: popt >= 1.18-3
+# for chroot fixes
+Requires: libc >= 0.1.15
 %endif
 Requires: curl
 
@@ -826,7 +828,11 @@ rm -f %{_var}/.rpm.lock 2>/dev/null || :
 %endif
 
 %changelog
+* Mon Oct 26 2026 Dmitrii Kuminov <coding@dmik.org> 4.15.1-8
+- Build from tag v4.15.1-os2-2 (fix --root support)
+
 * Fri Sep 11 2026 Dmitrii Kuminov <coding@dmik.org> 4.15.1-7
+- Build from tag v4.15.1-os2-1
 - bcond: Adjust for missing %[ support
 - Force RPMTAG_OS = "os/2" and no rpmlib(RpmVersion) dependency for RPM itself
 - Use _exeext instead of OS/2 conditionals
