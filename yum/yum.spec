@@ -21,7 +21,7 @@
 Summary: RPM package installer/updater/manager
 Name: yum
 Version: 3.4.3
-Release: 15%{?dist}
+Release: 16%{?dist}
 License: GPLv2+
 Group: System Environment/Base
 Vendor: bww bitwise works GmbH
@@ -29,17 +29,12 @@ Vendor: bww bitwise works GmbH
 %if !0%{?os2_version}
 Source0: http://yum.baseurl.org/download/3.4/%{name}-%{version}.tar.gz
 %else
-%scm_source github https://github.com/bitwiseworks/%{name}-os2 v%{version}-os2-1
-Source1: exec-py.c
+%scm_source github https://github.com/bitwiseworks/%{name}-os2 v%{version}-os2-2
 %endif
 
 URL: http://yum.baseurl.org/
 
-%if !0%{?os2_version}
 BuildArch: noarch
-%else
-# On OS/2, we provide an .exe wrapper
-%endif
 BuildRequires: python
 BuildRequires: gettext
 BuildRequires: intltool
@@ -58,11 +53,19 @@ Conflicts: pirut < 1.1.4
 Requires: python >= 2.4, rpm-python, rpm >= 0:4.4.2
 %if !0%{?os2_version}
 Requires: python-iniparse
+%else
+# For fixed --root support for --installroot
+Requires: rpm >= 0:4.15.1-8
 %endif
 Requires: urlgrabber >= 3.1.0-0
 Requires: yum-metadata-parser >= 1.1.0
 %if !0%{?os2_version}
 Requires: pygpgme
+%endif
+
+%if 0%{?os2_version}
+# Always install the launcher with the main package
+Requires: yum-exe = %{version}-%{release}
 %endif
 
 Conflicts: rpm >= 5-0
@@ -85,17 +88,18 @@ Obsoletes: yum-plugin-download-order <= 0.2-2
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 %endif
 
-%if 0%{?os2_version}
-# for exe wrapper
-BuildRequires: gcc
-%endif
-
 %description
 Yum is a utility that can check for and automatically download and
 install updated RPM packages. Dependencies are obtained and downloaded
 automatically, prompting the user for permission as necessary.
 
 %debug_package
+
+%if 0%{?os2_version}
+# Create yum-exe that installs the launcher
+BuildRequires: rpm_macro(libc_script_launcher_package)
+%libc_script_launcher_package %{_bindir}/yum
+%endif
 
 %if !0%{?os2_version}
 %package updatesd
@@ -156,12 +160,6 @@ Install this package if you want auto yum updates nightly via cron.
 %endif
 make %{make_vars}
 
-%if 0%{?os2_version}
-# build exe wrapper
-%{__cp} %SOURCE1 .
-gcc -g -Zomf %optflags -DPYTHON_EXE=\"python%{python_version}.exe\" -o %{name}.exe exec-py.c
-%endif
-
 %install
 rm -rf $RPM_BUILD_ROOT
 make %{make_vars} DESTDIR=$RPM_BUILD_ROOT install
@@ -173,11 +171,6 @@ mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/yum/pluginconf.d $RPM_BUILD_ROOT/%{yum_p
 mkdir -p $RPM_BUILD_ROOT/%{yum_pluginsshare}
 %else
 # TODO: plugin dirs are provided by yum-utils.spec now but should belong here
-%endif
-
-%if 0%{?os2_version}
-# install exe wrapper
-%{__install} -m 755 %{name}.exe $RPM_BUILD_ROOT/%{_bindir}
 %endif
 
 %if !0%{?os2_version}
@@ -225,10 +218,14 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %if 0%{?os2_version}
-# Update the bug-report URL for existing installs (yum.conf is not replaced)
+# Update the bug-report URL and prepend configured prefixes to paths for
+# existing installs in yum.conf (it is not replaced by install)
 %post
 sed -i -e \
      "s|http://trac.netlabs.org/rpm/|https://github.com/bitwiseworks/rpm-issues|g" \
+     -e "s|\([^[:alnum:]/]\)/usr|\1%{_prefix}|g" \
+     -e "s|\([^[:alnum:]/]\)/etc|\1%{_sysconfdir}|g" \
+     -e "s|\([^[:alnum:]/]\)/var|\1%{_localstatedir}|g" \
      %{_sysconfdir}/yum/yum.conf
 
 %posttrans
@@ -298,9 +295,6 @@ exit 0
 %dir %{_datadir}/yum-cli
 %{_datadir}/yum-cli/*
 %{_bindir}/yum
-%if 0%{?os2_version}
-%{_bindir}/yum.exe
-%endif
 %{python_sitelib}/yum
 %{python_sitelib}/rpmUtils
 %dir %{_var}/cache/yum
@@ -332,6 +326,12 @@ exit 0
 %endif
 
 %changelog
+* Mon Oct 26 2026 Dmitrii Kuminov <coding@dmik.org> 3.4.3-16
+- Build from v3.4.3-os2-2 tag (--installroot, --allow-short-circuit)
+- Add /@unixroot prefixes to paths in yum.conf (needed for --installroot)
+- Add yum-exe package with LIBC-manaed yum launcher
+- Restore BuildArch to noarch (yum.exe is provded by LIBC now)
+
 * Wed Sep 16 2026 Dmitrii Kuminov <coding@dmik.org> 3.4.3-15
 - Build from v3.4.3-os2-1 tag
 - Synchronize with Fedora spec (commit 45dfa35)
