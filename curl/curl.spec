@@ -1,7 +1,7 @@
 Summary: A utility for getting files from remote servers (FTP, HTTP, and others)
 Name: curl
 Version: 7.75.0
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: MIT
 %if !0%{?os2_version}
 Source: https://curl.se/download/%{name}-%{version}.tar.xz
@@ -278,10 +278,9 @@ sed -e 's/^35$/35,52/' -i tests/data/test323
 %if 0%{?os2_version}
 # curl m4 extensions override the nice autoconf PATH_SEPARATOR check with a very
 # stupid method designed to always fail on Windows and OS/2
-export PATH_SEPARATOR=';'
+export PATH_SEPARATOR='%{_pathsep}'
 
-export CFLAGS="-Zomf $RPM_OPT_FLAGS"
-export LDFLAGS="-Zomf -Zhigh-mem -Zargs-wild -Zargs-resp"
+export LDFLAGS="$LDFLAGS -Zargs-wild -Zargs-resp"
 export LIBS="-lcx"
 export VENDOR="%{vendor}"
 # Set BUILDLEVEL to be embedded to all DLLs built with Libtool.
@@ -390,7 +389,7 @@ done
 %if !0%{?os2_version}
 mv -v ${RPM_BUILD_ROOT}%{_bindir}/curl{,.minimal}
 %else
-mv -v ${RPM_BUILD_ROOT}%{_bindir}/curl.exe ${RPM_BUILD_ROOT}%{_bindir}/curl.exe.minimal
+mv -v ${RPM_BUILD_ROOT}%{_bindir}/curl%{_exeext} ${RPM_BUILD_ROOT}%{_bindir}/curl%{_exeext}.minimal
 %endif
 
 # install libcurl.m4
@@ -430,11 +429,7 @@ rm -f ${RPM_BUILD_ROOT}%{_libdir}/libcurl.la
 %doc docs/FEATURES.md
 %doc docs/TODO
 %doc docs/TheArtOfHttpScripting.md
-%if !0%{?os2_version}
-%{_bindir}/curl
-%else
-%{_bindir}/curl.exe
-%endif
+%{_bindir}/curl%{_exeext}
 %{_mandir}/man1/curl.1*
 %{_datadir}/zsh
 
@@ -463,11 +458,7 @@ rm -f ${RPM_BUILD_ROOT}%{_libdir}/libcurl.la
 %{_datadir}/aclocal/libcurl.m4
 
 %files -n curl-minimal
-%if !0%{?os2_version}
-%{_bindir}/curl.minimal
-%else
-%{_bindir}/curl.exe.minimal
-%endif
+%{_bindir}/curl%{_exeext}.minimal
 %{_mandir}/man1/curl.1*
 
 %files -n libcurl-minimal
@@ -480,6 +471,10 @@ rm -f ${RPM_BUILD_ROOT}%{_libdir}/libcurl.la
 %endif
 
 %changelog
+* Mon Oct 26 2026 Dmitrii Kuminov <coding@dmik.org> 7.75.0-4
+- Build against new RPM os2deps to fix libcurl-minimal provides
+- Build against OpenSSL v3
+
 * Fri Feb 02 2024 Silvan Scherrer <silvan.scherrer@aroa.ch> 7.75.0-3
 - enable sftp with libssh2
 
