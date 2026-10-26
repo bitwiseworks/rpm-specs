@@ -2,7 +2,7 @@
 %global gcc_version %{gcc_major}.2.0
 # Note, gcc_release must be integer, if you want to add suffixes to
 # %%{release}, append them after %%{gcc_release} on Release: line.
-%global gcc_release 5
+%global gcc_release 6
 
 %global build_ada 0
 %global build_objc 0
@@ -33,23 +33,20 @@ Release: %{gcc_release}%{?dist}
 # libgcc, libgfortran, libgomp, libstdc++ and crtstuff have
 # GCC Runtime Exception.
 License: GPLv3+ and GPLv3+ with exceptions and GPLv2+ with exceptions and LGPLv2+ and BSD
-
-# OS/2 uses its own Git repo
-## The source for this package was pulled from upstream's vcs.  Use the
-## following commands to generate the tarball:
-## svn export svn://gcc.gnu.org/svn/gcc/branches/redhat/gcc-9-branch@%%{SVNREV} gcc-%%{version}-%%{DATE}
-## tar cf - gcc-%%{version}-%%{DATE} | xz -9e > gcc-%%{version}-%%{DATE}.tar.xz
-#Source0: gcc-%{version}-%{DATE}.tar.xz
-
+%if !0%{?os2_version}
+# The source for this package was pulled from upstream's vcs.  Use the
+# following commands to generate the tarball:
+# svn export svn://gcc.gnu.org/svn/gcc/branches/redhat/gcc-9-branch@%%{SVNREV} gcc-%%{version}-%%{DATE}
+# tar cf - gcc-%%{version}-%%{DATE} | xz -9e > gcc-%%{version}-%%{DATE}.tar.xz
+Source0: gcc-%{version}-%{DATE}.tar.xz
+%else
+Vendor:  bww bitwise works GmbH
 # GCC uses tags with underscores between version components.
 %{lua:
 rpm.define(string.format("version_underscores %s",
            string.gsub(rpm.expand('%{version}'), '%.', '_')))
 }
-
-%scm_source github https://github.com/bitwiseworks/gcc-os2 gcc-%{version_underscores}-release-os2-b3
-#scm_source git file://D:/Coding/gcc/master e9edfe3
-
+%scm_source github https://github.com/bitwiseworks/gcc-os2 gcc-%{version_underscores}-release-os2-b4
 Source1: gcc335.def
 Source2: gcc432.def
 Source3: gcc433.def
@@ -73,33 +70,39 @@ Source20: gcc490.def
 Source21: gcc491.def
 Source22: gcc492.def
 Source23: fwdstub.s
-
 Source101: ssp.def
 Source102: stdcpp.def
-
+%endif
 %global isl_version 0.16.1
-
 URL: http://gcc.gnu.org
-Vendor:  bww bitwise works GmbH
 
+%if !0%{?os2_version}
+BuildRequires: binutils >= 2.31
+# While gcc doesn't include statically linked binaries, during testing
+# -static is used several times.
+BuildRequires: glibc-static
+BuildRequires: zlib-devel, gettext, dejagnu, bison, flex, sharutils
+BuildRequires: texinfo, texinfo-tex, /usr/bin/pod2man
+BuildRequires: systemtap-sdt-devel >= 1.3
+%else
 # For fixed EMXOMF with new libibetry from binutils 2.33.1, wide char support.
 Requires: libc >= 1:0.1.4
 BuildRequires: libc-devel >= 1:0.1.4
 BuildRequires: binutils >= 2.33.1, make
-
 BuildRequires: zlib-devel, gettext, bison, flex
 BuildRequires: gettext-devel
-# TODO don't have these
-# dejagnu, sharutils
 BuildRequires: texinfo, perl
-# TODO texinfo tex is broken for now
-# texinfo-tex
+# for autogen.sh
+BuildRequires: autoconf269, automake, libtool
+%endif
 BuildRequires: gmp-devel >= 4.1.2-8, mpfr-devel >= 2.2.1, libmpc-devel >= 0.8.1
 BuildRequires: python-devel python
 BuildRequires: gcc gcc-c++
+%if 0%{?os2_version}
 BuildRequires: gcc-wlink
 # Need Libtool with LT_BUILDLEVEL support.
 BuildRequires: libtool >= 2.4.6-4
+%endif
 %if %{build_go}
 BuildRequires: hostname, procps
 %endif
@@ -121,22 +124,23 @@ Requires: libgcc = %{version}-%{release}
 %if %{build_libgomp}
 Requires: libgomp = %{version}-%{release}
 %endif
-# TODO not sure we need this.
-%if 0
+%if !%{build_ada}
+Obsoletes: gcc-gnat < %{version}-%{release}
+%endif
+%if !0%{?os2_version}
 Provides: bundled(libiberty)
 %endif
 Provides: gcc(major) = %{gcc_major}
 
-# Under OS/2, RPM target platform is always i386 for now. But we want it to be
-# be at least i686 for gcc (as build/host/target) to make it use some CPU
-# optimizations (e.g i486/atomicity.h in libstdc++ instead of i386/atomicity.h
-# and similar things). Note that this will also be used as a default value for
-# -mtune and -march options.
+%if 0%{?os2_version}
+# Under OS/2, we want a fixed baseline (minimal) arch for GCC, regardless of the target spec, to be
+# able to build code for different CPUs (at or above the baseline). RPM's own baseline is i386 but
+# we want it to be at least i686 for GCC to use some CPU optimizations (e.g i486/atomicity.h in
+# libstdc++ instead of i386/atomicity.h and similar things). Note that this will also be used as a
+# default value for -mtune and -march options.
 %global gcc_target_cpu i686
-
-# TODO _target_platform is broken (see https://github.com/bitwiseworks/rpm-os2/issues/1),
-# use _host for now which is a regular configure triplet (cpu-vendor-os).
-%global gcc_target_platform %{lua: print((string.gsub(rpm.expand('%{_host}'), '^[%a%d]+', rpm.expand('%{gcc_target_cpu}'))))}
+%global gcc_target_platform %{gcc_target_cpu}-%{_vendor}-%{_target_os}
+%endif
 
 %if %{build_go}
 # Avoid stripping these libraries and binaries.
@@ -165,14 +169,20 @@ You'll need this package in order to compile C code.
 
 %package -n libgcc
 Summary: GCC version %{gcc_major} shared support library
+%if !%{build_ada}
+Obsoletes: libgnat < %{version}-%{release}
+%endif
+%if 0%{?os2_version}
 # Obsolete GCC 4.x package
 Obsoletes: libgcc1 < %{version}-%{release}
 Provides: libgcc1 = %{version}-%{release}
+%endif
 
 %description -n libgcc
 This package contains GCC shared support library which is needed
 e.g. for exception handling support.
 
+%if 0%{?os2_version}
 %package -n libgcc-fwd
 Summary: GCC shared support forwarder library
 Obsoletes: libgcc335 libgcc432 libgcc433 libgcc434 libgcc440 libgcc441
@@ -210,6 +220,7 @@ Requires: libssp = %{version}-%{release}
 %description -n libssp-devel
 This package includes the header files and libraries needed for using
 the GCC stack protector feature.
+%endif
 
 %package c++
 Summary: C++ support for GCC
@@ -226,17 +237,22 @@ including templates and exception handling.
 
 %package -n libstdc++
 Summary: GNU Standard C++ Library
+%if !0%{?os2_version}
+Requires: glibc >= 2.10.90-7
+%else
 Requires: libgcc = %{version}-%{release}
 # Obsolete GCC 4.x packages
 Obsoletes: libstdc++6 < %{version}-%{release}
 Obsoletes: libsupc++6 < %{version}-%{release}
 Provides: libstdc++6 = %{version}-%{release}
 Provides: libsupc++6 = %{version}-%{release}
+%endif
 
 %description -n libstdc++
 The libstdc++ package contains a rewritten standard compliant GCC Standard
 C++ Library.
 
+%if 0%{?os2_version}
 %package -n libstdc++-fwd
 Summary: GCC Standard C++ forwarder library
 Requires: libstdc++ = %{version}-%{release}
@@ -244,6 +260,7 @@ Requires: libstdc++ = %{version}-%{release}
 %description -n libstdc++-fwd
 This package contains GCC Standard C++ forwarder library which is needed
 for C++ support in programs compiled with earlier GCC versions.
+%endif
 
 %package -n libstdc++-devel
 Summary: Header files and libraries for C++ development
@@ -529,6 +546,9 @@ This package contains Leak Sanitizer static runtime library.
 
 %package -n cpp
 Summary: The C Preprocessor
+%if !0%{?os2_version}
+Requires: filesystem >= 3
+%endif
 Provides: /lib/cpp
 Requires: libgcc = %{version}-%{release}
 Requires: libstdc++ = %{version}-%{release}
@@ -661,9 +681,10 @@ resource compiler instead of IBM one.
 %debug_package
 
 %prep
-#setup -q -n gcc-%{version}-%{DATE} -a 1 -a 2
+%if !0%{?os2_version}
+setup -q -n gcc-%{version}-%{DATE} -a 1 -a 2
+%else
 %scm_setup
-
 # Move relevant sources to build subdir to reference them by name instead of SOURCEx
 for src in %{sources}; do
   case $src in
@@ -671,37 +692,51 @@ for src in %{sources}; do
   *) %{__cp} -a $src .;;
   esac
 done
+%endif
 
+%if !0%{?os2_version}
+echo 'Red Hat %{version}-%{gcc_release}' > gcc/DEV-PHASE
+%else
 echo 'OS/2 RPM build %{version}-%{release}' > gcc/DEV-PHASE
+%endif
 
-# TODO not sure if we need this given that we run autoreconf.
-#./contrib/gcc_update --touch
+%if !0%{?os2_version}
+# TODO not sure if we need this on OS/2 given that we run autoreconf.
+./contrib/gcc_update --touch
+%endif
 
 LC_ALL=C sed -i -e 's/\xa0/ /' gcc/doc/options.texi
 
 sed -i -e 's/Common Driver Var(flag_report_bug)/& Init(1)/' gcc/common.opt
 
+%if 0%{?os2_version}
 # This test causes fork failures, because it spawns way too many threads
 rm -f gcc/testsuite/go.test/test/chan/goroutines.go
 
-# Cook all generated stuff (our Git doesn't store it).
+# Use the pinned autoconf version
+# TODO: Use altenv when released
+. %{_alt_prefix}/autoconf269/activate
 autogen.sh
-
-# TODO hack around gcc1.dll BLDLEVEL string (temporary, should go away
-# once https://github.com/bitwiseworks/gcc-os2/issues/9 is done).
-sed -i -e 's/GNU GCC Runtime Version $(gcc_version)-$(RPM_PACKAGE_RELEASE)/$(LT_BUILDLEVEL)@@GNU GCC Runtime/' libgcc/config/i386/t-emx
+%endif
 
 %build
 
+%if !0%{?os2_version}
+# Undo the broken autoconf change in recent Fedora versions
+export CONFIG_SITE=NONE
+
+CC=gcc
+CXX=g++
+%endif
 OPT_FLAGS=`echo %{optflags}|sed -e 's/\(-Wp,\)\?-D_FORTIFY_SOURCE=[12]//g'`
 OPT_FLAGS=`echo $OPT_FLAGS|sed -e 's/-m64//g;s/-m32//g;s/-m31//g'`
 OPT_FLAGS=`echo $OPT_FLAGS|sed -e 's/-mfpmath=sse/-mfpmath=sse -msse2/g'`
 OPT_FLAGS=`echo $OPT_FLAGS|sed -e 's/ -pipe / /g'`
 OPT_FLAGS=`echo $OPT_FLAGS|sed -e 's/-Werror=format-security/-Wformat-security/g'`
-# TODO not sure if we need this
-#ifarch %{ix86}
-#OPT_FLAGS=`echo $OPT_FLAGS|sed -e 's/-march=i.86//g'`
-#endif
+%if !0%{?os2_version}
+# TODO not sure if we need this on OS/2
+OPT_FLAGS=`echo $OPT_FLAGS|sed -e 's/-march=i.86//g'`
+%endif
 OPT_FLAGS=`echo "$OPT_FLAGS" | sed -e 's/[[:blank:]]\+/ /g'`
 case "$OPT_FLAGS" in
   *-fasynchronous-unwind-tables*)
@@ -736,10 +771,12 @@ enablegfortran=,fortran
 %endif
 
 CONFIGURE_OPTS="\
-	--build=%{gcc_target_platform} \
-	--with-sysroot=/@unixroot \
 	--prefix=%{_prefix} --mandir=%{_mandir} --infodir=%{_infodir} \
+%if !0%{?os2_version}
+	--with-bugurl=http://bugzilla.redhat.com/bugzilla \
+%else
 	--with-bugurl=https://github.com/bitwiseworks/gcc-os2/issues \
+%endif
 	--enable-shared --enable-threads --enable-checking=release \
 	--disable-multilib \
 	--with-system-zlib \
@@ -755,36 +792,52 @@ CONFIGURE_OPTS="\
 %if %{attr_ifunc}
 	--enable-gnu-indirect-function \
 %endif
-%if 0
+%if !0%{?os2_version}
 	--enable-cet \
 %endif
 	--with-tune=generic \
+	--build=%{gcc_target_platform} \
+%if 0%{?os2_version}
+	--with-sysroot=/@unixroot \
 	--with-arch=i686 \
 	--with-gnu-as \
 	--disable-libstdcxx-pch \
+%endif
 "
 
+%if 0%{?os2_version}
 # Make sure newly built DLLs are picked up when needed.
-objdir=%{_topdir}/BUILD/%{name}-%{version}/obj-%{gcc_target_platform}
+objdir="$(pwd)"
 export PATH="$objdir/gcc${PATH:+;$PATH}"
 export BEGINLIBPATH="$objdir/gcc${BEGINLIBPATH:+;$BEGINLIBPATH}"
 export LIBPATHSTRICT=T
+%endif
 
-# Note: set LDFLAGS_FOR_TARGET below to make sure target DLLs such
+# OS/2 note: set LDFLAGS_FOR_TARGET below to make sure target DLLs such
 # as libstdc++ will get the right link flags.
 
 CC="$CC" CXX="$CXX" CFLAGS="$OPT_FLAGS" \
 	CXXFLAGS="`echo " $OPT_FLAGS " | sed 's/ -Wall / /g;s/ -fexceptions / /g' \
 		  | sed 's/ -Wformat-security / -Wformat -Wformat-security /'`" \
 	XCFLAGS="$OPT_FLAGS" TCFLAGS="$OPT_FLAGS" \
-	LDFLAGS="-g -Zomf -Zmap -Zargs-wild -Zhigh-mem" \
+%if !0%{?os2_version}
+	../configure --enable-bootstrap \
+%else
+	LDFLAGS="%{build_ldflags} -g -Zmap -Zargs-wild" \
 	LDFLAGS_FOR_TARGET="$LDFLAGS" \
 	../configure --disable-bootstrap \
+%endif
 	--enable-languages=c,c++${enablegfortran}${enablelobjc}${enablelada}${enablelgo}${enableld} \
 	$CONFIGURE_OPTS
 
+%if 0%{?os2_version}
 # Set BUILDLEVEL to be embedded to all DLLs built with Libtool.
 export LT_BUILDLEVEL="@#%{vendor}:%{version}-%{release}#@##1## `LANG=C date +'%%d %%b %%Y %%H:%%M:%%S'`     `uname -n`::::0::"
+# Also inject it into all forwarder .def files
+for def in ../*.def; do
+  sed -i "s/DESCRIPTION [\"']\([^\"']*\)[\"']/DESCRIPTION '$LT_BUILDLEVEL@@\1'/" ${def}
+done
+%endif
 
 # TODO we don't use bootstrap ATM: BOOT_CFLAGS="$OPT_FLAGS" profiledbootstrap
 make %{?_smp_mflags}
@@ -793,7 +846,11 @@ CC="`%{gcc_target_platform}/libstdc++-v3/scripts/testsuite_flags --build-cc`"
 CXX="`%{gcc_target_platform}/libstdc++-v3/scripts/testsuite_flags --build-cxx` `%{gcc_target_platform}/libstdc++-v3/scripts/testsuite_flags --build-includes`"
 
 # Make generated man pages even if Pod::Man is not new enough
+%if !0%{?os2_version}
+perl -p -i -e 's/head3/head2/' ../contrib/texi2pod.pl
+%else
 perl -p -i.bak -e 's/head3/head2/' ../contrib/texi2pod.pl
+%endif
 for i in ../gcc/doc/*.texi; do
   cp -a $i $i.orig; sed 's/ftable/table/' $i.orig > $i
 done
@@ -812,6 +869,13 @@ cd ../..
 cd ..
 mkdir -p rpm.doc/gfortran rpm.doc/objc rpm.doc/gdc rpm.doc/libphobos
 mkdir -p rpm.doc/go rpm.doc/libgo rpm.doc/libquadmath rpm.doc/libitm
+%if !0%{?os2_version}
+mkdir -p rpm.doc/changelogs/{gcc/cp,gcc/ada,gcc/jit,libstdc++-v3,libobjc,libgomp,libcc1,libatomic,libsanitizer}
+
+for i in {gcc,gcc/cp,gcc/ada,gcc/jit,libstdc++-v3,libobjc,libgomp,libcc1,libatomic,libsanitizer}/ChangeLog*; do
+	cp -p $i rpm.doc/changelogs/$i
+done
+%else
 for i in gcc/cp gcc/ada gcc/jit libstdc++-v3 libobjc libgomp libcc1 libatomic libsanitizer; do
 	mkdir -p rpm.doc/changelogs/$i
 done
@@ -819,6 +883,7 @@ done
 for i in gcc gcc/cp gcc/ada gcc/jit libstdc++-v3 libobjc libgomp libcc1 libatomic libsanitizer; do
 	cp -p $i/ChangeLog* rpm.doc/changelogs/$i
 done
+%endif
 
 %if %{build_gfortran}
 (cd gcc/fortran; for i in ChangeLog*; do
@@ -869,14 +934,13 @@ rm -rf %{buildroot}
 
 cd obj-%{gcc_target_platform}
 
-# TODO need?
-## There are some MP bugs in libstdc++ Makefiles
-#make -C %{gcc_target_platform}/libstdc++-v3
-#
-#make prefix=%{buildroot}%{_prefix} mandir=%{buildroot}%{_mandir} \
-#  infodir=%{buildroot}%{_infodir} install
+TARGET_PLATFORM=%{gcc_target_platform}
 
-make DESTDIR=%{buildroot} install
+# There are some MP bugs in libstdc++ Makefiles
+make -C %{gcc_target_platform}/libstdc++-v3
+
+make prefix=%{buildroot}%{_prefix} mandir=%{buildroot}%{_mandir} \
+  infodir=%{buildroot}%{_infodir} install
 
 %if %{build_ada}
 chmod 644 %{buildroot}%{_infodir}/gnat*
@@ -886,19 +950,28 @@ FULLPATH=%{buildroot}%{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}
 FULLEPATH=%{buildroot}%{_prefix}/libexec/gcc/%{gcc_target_platform}/%{gcc_major}
 
 # fix some things
-ln -sf gcc.exe %{buildroot}%{_prefix}/bin/cc.exe
-rm -f %{buildroot}%{_prefix}/lib/cpp.exe
-ln -sf ../bin/cpp.exe %{buildroot}/%{_prefix}/lib/cpp.exe
+ln -sf gcc%{_exeext} %{buildroot}%{_prefix}/bin/cc
+rm -f %{buildroot}%{_prefix}/lib/cpp%{_exeext}
+ln -sf ../bin/cpp%{_exeext} %{buildroot}/%{_prefix}/lib/cpp
 %if %{build_gfortran}
-ln -sf gfortran.exe %{buildroot}%{_prefix}/bin/f95.exe
+ln -sf gfortran%{_exeext} %{buildroot}%{_prefix}/bin/f95
 %endif
 rm -f %{buildroot}%{_infodir}/dir
 gzip -9 %{buildroot}%{_infodir}/*.info*
 %if %{build_ada}
-ln -sf gc.exec %{buildroot}%{_prefix}/bin/gnatgcc.exe
+ln -sf gcc%{_exeext} %{buildroot}%{_prefix}/bin/gnatgcc
 %endif
 %if %{build_gfortran}
 mkdir -p %{buildroot}%{_fmoddir}
+%endif
+%if 0%{?os2_version}
+# Drop .exe extension from symlinks as they are unusable by native OS/2 apps
+for exe in $(find %{buildroot} -type l -name '*.exe'); do
+  mv $exe ${exe%.exe}
+done
+# gcc_target_platform-c++ points to c++ but it's a symlink which we renamed
+rm -f %{buildroot}%{_prefix}/bin/%{gcc_target_platform}-c++
+ln -sf g++%{_exeext} %{buildroot}%{_prefix}/bin/%{gcc_target_platform}-c++
 %endif
 
 %if %{build_go}
@@ -909,7 +982,7 @@ ln -sf /etc/alternatives/gofmt %{buildroot}%{_prefix}/bin/gofmt
 %endif
 
 # TODO need?
-%if 0
+%if !0%{?os2_version}
 for f in `find %{buildroot}%{_prefix}/include/c++/%{gcc_major}/%{gcc_target_platform}/ -name c++config.h`; do
   for i in 1 2 4 8; do
     sed -i -e 's/#define _GLIBCXX_ATOMIC_BUILTINS_'$i' 1/#ifdef __GCC_HAVE_SYNC_COMPARE_AND_SWAP_'$i'\
@@ -1018,10 +1091,9 @@ for d in . $FULLLSUBDIR; do
 done
 %endif
 
-# TODO remove? We provide a complete include-fixed dir on OS/2
-%if 0
 mv $FULLPATH/include-fixed/syslimits.h $FULLPATH/include/syslimits.h
 mv $FULLPATH/include-fixed/limits.h $FULLPATH/include/limits.h
+%if !0%{?os2_version}
 for h in `find $FULLPATH/include -name \*.h`; do
   if grep -q 'It has been auto-edited by fixincludes from' $h; then
     rh=`grep -A2 'It has been auto-edited by fixincludes from' $h | tail -1 | sed 's|^.*"\(.*\)".*$|\1|'`
@@ -1029,11 +1101,11 @@ for h in `find $FULLPATH/include -name \*.h`; do
     rm -f $h
   fi
 done
+%else
+# OS/2 builds don't fix headers, see https://github.com/bitwiseworks/gcc-os2/issues/19 
+rm $FULLPATH/include-fixed/README
+rmdir $FULLPATH/include-fixed
 %endif
-
-# Remove fixed includes belonging to other RPMs
-# TODO better fix fixincludes makefiles
-rm -rf $FULLPATH/include-fixed/os2tk45
 
 cat > %{buildroot}%{_prefix}/bin/c89 <<"EOF"
 #!/bin/sh
@@ -1067,58 +1139,63 @@ cd ..
 
 # Remove binaries we will not be including, so that they don't end up in
 # gcc-debuginfo
+%if !0%{?os2_version}
+rm -f %{buildroot}%{_prefix}/%{_lib}/{libffi*,libiberty.a} || :
+rm -f $FULLEPATH/install-tools/{mkheaders,fixincl}
+rm -f %{buildroot}%{_prefix}/lib/{32,64}/libiberty.a
+%else
 rm -f %{buildroot}%{_prefix}/%{_lib}/libffi* || :
 rm -f %{buildroot}%{_prefix}/%{_lib}/libiberty.a || :
 rm -f $FULLEPATH/install-tools/mkheaders
-rm -f $FULLEPATH/install-tools/fixincl.exe
-# We provide SSP on OS/2
-#rm -f %{buildroot}%{_prefix}/%{_lib}/ssp*
+rm -f $FULLEPATH/install-tools/fixincl%{_exeext}
+%endif
+%if !0%{?os2_version}
+rm -f %{buildroot}%{_prefix}/%{_lib}/ssp*
+%endif
 rm -f %{buildroot}%{_prefix}/%{_lib}/vtv* || :
-rm -f %{buildroot}%{_prefix}/bin/%{gcc_target_platform}-gfortran.exe || :
-rm -f %{buildroot}%{_prefix}/bin/%{gcc_target_platform}-gccgo.exe || :
-rm -f %{buildroot}%{_prefix}/bin/%{gcc_target_platform}-gcj.exe  | :
-rm -f %{buildroot}%{_prefix}/bin/%{gcc_target_platform}-gcc-ar.exe || :
-rm -f %{buildroot}%{_prefix}/bin/%{gcc_target_platform}-gcc-nm.exe || :
-rm -f %{buildroot}%{_prefix}/bin/%{gcc_target_platform}-gcc-ranlib.exe || :
-rm -f %{buildroot}%{_prefix}/bin/%{gcc_target_platform}-gdc.exe || :
+rm -f %{buildroot}%{_prefix}/bin/%{gcc_target_platform}-gfortran || :
+rm -f %{buildroot}%{_prefix}/bin/%{gcc_target_platform}-gccgo || :
+rm -f %{buildroot}%{_prefix}/bin/%{gcc_target_platform}-gcj || :
+rm -f %{buildroot}%{_prefix}/bin/%{gcc_target_platform}-gcc-ar || :
+rm -f %{buildroot}%{_prefix}/bin/%{gcc_target_platform}-gcc-nm || :
+rm -f %{buildroot}%{_prefix}/bin/%{gcc_target_platform}-gcc-ranlib || :
+rm -f %{buildroot}%{_prefix}/bin/%{gcc_target_platform}-gdc || :
 
 rm -f %{buildroot}%{mandir}/man3/ffi* || :
 
+%if 0%{?os2_version}
 # Remove the rest of install-tools as we don't include them either.
 rm -rf $FULLEPATH/install-tools
 rm -rf $FULLPATH/install-tools
+%endif
 
 # Help plugins find out nvra.
 echo gcc-%{version}-%{release}.%{_arch} > $FULLPATH/rpmver
 
+%if 0%{?os2_version}
 # Build gccXXX forwarders
 for bld in 335 432 433 434 435 440 441 442 444 445 446 452 453 454 464 473 474 482 483 490 491 492; do
-  sed -i 's/Forwarder/Forwarder %{version}-%{release}/' gcc${bld}.def
   gcc -s -Zomf -Zmap -Zdll -nostdlib -o gcc${bld}.dll gcc${bld}.def fwdstub.s obj-%{gcc_target_platform}/gcc/libgcc_so_d.a -llibc
   cp -a gcc${bld}.dll %{buildroot}%{_libdir}
 done
 
 # Build ssp forwarder for GCC 4.x
-sed -i 's/Forwarder/Forwarder %{version}-%{release}/' ssp.def
-gcc -s -Zomf -Zmap -Zdll -nostdlib -lend -o ssp.dll ssp.def  obj-%{gcc_target_platform}/%{gcc_target_platform}/libssp/.libs/ssp0_dll.a
+gcc -s -Zomf -Zmap -Zdll -nostdlib -lend -o ssp.dll ssp.def obj-%{gcc_target_platform}/%{gcc_target_platform}/libssp/.libs/ssp0_dll.a
 cp -a ssp.dll %{buildroot}%{_libdir}
 
 # Build stdcpp forwarder for GCC 4.4.x
-sed -i 's/Forwarder/Forwarder %{version}-%{release}/' stdcpp.def
-gcc -s -Zomf -Zmap -Zdll -nostdlib -lend -o stdcpp.dll stdcpp.def  obj-%{gcc_target_platform}/%{gcc_target_platform}/libstdc++-v3/src/.libs/stdc++_dll.a -l%{_libdir}/libc066.dll
+gcc -s -Zomf -Zmap -Zdll -nostdlib -lend -o stdcpp.dll stdcpp.def obj-%{gcc_target_platform}/%{gcc_target_platform}/libstdc++-v3/src/.libs/stdc++_dll.a -l%{_libdir}/libc066.dll
 cp -a stdcpp.dll %{buildroot}%{_libdir}
 
 # Provide .lib versions of static libraries to speed up compilation times.
-for f in `find %{buildroot} -name \*.a`; do
+for f in $(find %{buildroot} -name \*.a); do
   f_lib=${f%.a}.lib
   [ -f $f_lib ] || emxomf $f -o $f_lib
 done
-
-echo dummy for virtual package > gcc-wrc.txt
-echo dummy for virtual package > gcc-wlink.txt
+%endif
 
 # TODO deal with tests later
-%if 0
+%if !0%{?os2_version}
 %check
 cd obj-%{gcc_target_platform}
 
@@ -1153,6 +1230,7 @@ if [ $1 = 0 ]; then
 fi
 %endif
 
+%if 0%{?os2_version}
 %post wrc -e
 if [ "$1" = 1 ] ; then
 #execute only on first install
@@ -1184,27 +1262,30 @@ if [ "$1" = 0 ] ; then
 %cube {DELLINE "SET EMXOMFLD_LINKER="} %%{os2_config_sys} > NUL
 %cube {DELLINE "SET EMXOMFLD_TYPE="} %%{os2_config_sys} > NUL
 fi
+%endif
 
 %files -f %{name}.lang
-%{_prefix}/bin/cc.exe
+%{_prefix}/bin/cc
 %{_prefix}/bin/c89
 %{_prefix}/bin/c99
-%{_prefix}/bin/gcc.exe
-%{_prefix}/bin/gcov.exe
-%{_prefix}/bin/gcov-tool.exe
-%{_prefix}/bin/gcov-dump.exe
-%{_prefix}/bin/gcc-ar.exe
-%{_prefix}/bin/gcc-nm.exe
-%{_prefix}/bin/gcc-ranlib.exe
-%{_prefix}/bin/%{gcc_target_platform}-gcc.exe
-%{_prefix}/bin/%{gcc_target_platform}-gcc-%{gcc_major}.exe
+%{_prefix}/bin/gcc%{_exeext}
+%{_prefix}/bin/gcov%{_exeext}
+%{_prefix}/bin/gcov-tool%{_exeext}
+%{_prefix}/bin/gcov-dump%{_exeext}
+%{_prefix}/bin/gcc-ar%{_exeext}
+%{_prefix}/bin/gcc-nm%{_exeext}
+%{_prefix}/bin/gcc-ranlib%{_exeext}
+%{_prefix}/bin/%{gcc_target_platform}-gcc
+%{_prefix}/bin/%{gcc_target_platform}-gcc-%{gcc_major}
 %{_mandir}/man1/gcc.1*
 %{_mandir}/man1/gcov.1*
 %{_mandir}/man1/gcov-tool.1*
 %{_mandir}/man1/gcov-dump.1*
+%if 0%{?os2_version}
 %{_mandir}/man7/fsf-funding.7*
 %{_mandir}/man7/gfdl.7*
 %{_mandir}/man7/gpl.7*
+%endif
 %{_infodir}/gcc*
 %dir %{_prefix}/lib/gcc
 %dir %{_prefix}/lib/gcc/%{gcc_target_platform}
@@ -1213,20 +1294,34 @@ fi
 %dir %{_prefix}/libexec/gcc/%{gcc_target_platform}
 %dir %{_prefix}/libexec/gcc/%{gcc_target_platform}/%{gcc_major}
 %dir %{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/include
-%{_prefix}/libexec/gcc/%{gcc_target_platform}/%{gcc_major}/lto1.exe
-%{_prefix}/libexec/gcc/%{gcc_target_platform}/%{gcc_major}/lto-wrapper.exe
+%{_prefix}/libexec/gcc/%{gcc_target_platform}/%{gcc_major}/lto1%{_exeext}
+%{_prefix}/libexec/gcc/%{gcc_target_platform}/%{gcc_major}/lto-wrapper%{_exeext}
+%if !0%{?os2_version}
+%{_prefix}/libexec/gcc/%{gcc_target_platform}/%{gcc_major}/liblto_plugin.so*
+%else
 %{_prefix}/libexec/gcc/%{gcc_target_platform}/%{gcc_major}/lto_plu*.dll
 %{_prefix}/libexec/gcc/%{gcc_target_platform}/%{gcc_major}/lto_plu*.a
 %{_prefix}/libexec/gcc/%{gcc_target_platform}/%{gcc_major}/lto_plu*.lib
+%endif
 %{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/rpmver
 %{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/include/stdarg.h
 %{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/include/stdfix.h
 %{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/include/varargs.h
+%if !0%{?os2_version}
+%{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/include/float.h
+%endif
+%{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/include/limits.h
 %{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/include/stdbool.h
 %{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/include/iso646.h
+%{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/include/syslimits.h
 %{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/include/unwind.h
 %if %{build_libgomp}
 %{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/include/omp.h
+%endif
+%if !0%{?os2_version}
+%{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/include/openacc.h
+%{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/include/stdint.h
+%{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/include/stdint-gcc.h
 %endif
 %{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/include/stdalign.h
 %{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/include/stdnoreturn.h
@@ -1310,24 +1405,20 @@ fi
 %{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/include/movdirintrin.h
 %{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/include/waitpkgintrin.h
 %{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/include/cldemoteintrin.h
+%if 0%{?os2_version}
 %{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/include/tgmath.h
+%endif
 %if %{build_libasan}
 %{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/include/sanitizer
 %endif
-%dir %{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/include-fixed
-%{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/include-fixed/limits.h
-%{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/include-fixed/README
-%{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/include-fixed/stddef.h
-%{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/include-fixed/stdio.h
-%{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/include-fixed/stdlib.h
-%{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/include-fixed/syslimits.h
-%{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/include-fixed/unistd.h
-%{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/include-fixed/wchar.h
-%dir %{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/include-fixed/386
-%{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/include-fixed/386/ansi.h
-%dir %{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/include-fixed/sys
-%{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/include-fixed/sys/types.h
-%{_prefix}/libexec/gcc/%{gcc_target_platform}/%{gcc_major}/collect2.exe
+%{_prefix}/libexec/gcc/%{gcc_target_platform}/%{gcc_major}/collect2%{_exeext}
+%if !0%{?os2_version}
+%{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/crt*.o
+%{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/libgcc.a
+%{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/libgcov.a
+%{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/libgcc_eh.a
+%{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/libgcc_s.so
+%else
 %{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/emx*.o
 %{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/libgcc.a
 %{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/libgcc.lib
@@ -1338,6 +1429,7 @@ fi
 %{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/libgcc_so_d.*
 %{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/gcc1.a
 %{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/gcc1.lib
+%endif
 %if %{build_libgomp}
 %{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/libgomp.spec
 %{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/libgomp.a
@@ -1357,26 +1449,37 @@ fi
 %{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/liblsan.so
 %{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/liblsan_preinit.o
 %endif
+%if !0%{?os2_version}
+%{_prefix}/libexec/getconf/default
+%endif
 %doc gcc/README* rpm.doc/changelogs/gcc/ChangeLog*
-%doc README.md ChangeLog.md
+%if 0%{?os2_version}
+%doc README.md CHANGES.md
+%endif
 %{!?_licensedir:%global license %%doc}
 %license gcc/COPYING* COPYING.RUNTIME
 
 %files -n cpp -f cpplib.lang
-%{_prefix}/lib/cpp.exe
-%{_prefix}/bin/cpp.exe
+%{_prefix}/lib/cpp
+%{_prefix}/bin/cpp%{_exeext}
 %{_mandir}/man1/cpp.1*
 %{_infodir}/cpp*
 %dir %{_prefix}/libexec/gcc
 %dir %{_prefix}/libexec/gcc/%{gcc_target_platform}
 %dir %{_prefix}/libexec/gcc/%{gcc_target_platform}/%{gcc_major}
-%{_prefix}/libexec/gcc/%{gcc_target_platform}/%{gcc_major}/cc1.exe
+%{_prefix}/libexec/gcc/%{gcc_target_platform}/%{gcc_major}/cc1%{_exeext}
 
 %files -n libgcc
+%if !0%{?os2_version}
+/%{_lib}/libgcc_s-%{gcc_major}-%{DATE}.so.1
+/%{_lib}/libgcc_s.so.1
+%else
 %{_prefix}/%{_lib}/gcc1.dll
+%endif
 %{!?_licensedir:%global license %%doc}
 %license gcc/COPYING* COPYING.RUNTIME
 
+%if 0%{?os2_version}
 %files -n libgcc-fwd
 %{_prefix}/%{_lib}/gcc???.dll
 
@@ -1397,22 +1500,36 @@ fi
 %{_prefix}/%{_lib}/ssp_nonshared.lib
 %dir %{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}
 %{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/include/ssp
+%endif
 
 %files c++
-%{_prefix}/bin/%{gcc_target_platform}-*++.exe
-%{_prefix}/bin/g++.exe
-%{_prefix}/bin/c++.exe
+%{_prefix}/bin/%{gcc_target_platform}-*++
+%{_prefix}/bin/g++%{_exeext}
+%{_prefix}/bin/c++
 %{_mandir}/man1/g++.1*
-%{_prefix}/lib/supc++.a
-%{_prefix}/lib/supc++.lib
+%if !0%{?os2_version}
+%dir %{_prefix}/lib/gcc
+%dir %{_prefix}/lib/gcc/%{gcc_target_platform}
+%dir %{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}
+%endif
 %dir %{_prefix}/libexec/gcc
 %dir %{_prefix}/libexec/gcc/%{gcc_target_platform}
 %dir %{_prefix}/libexec/gcc/%{gcc_target_platform}/%{gcc_major}
-%{_prefix}/libexec/gcc/%{gcc_target_platform}/%{gcc_major}/cc1plus.exe
+%{_prefix}/libexec/gcc/%{gcc_target_platform}/%{gcc_major}/cc1plus%{_exeext}
+%if !0%{?os2_version}
+%{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/libsupc++.a
+%else
+%{_prefix}/lib/supc++.a
+%{_prefix}/lib/supc++.lib
+%endif
 %doc rpm.doc/changelogs/gcc/cp/ChangeLog*
 
 %files -n libstdc++
+%if !0%{?os2_version}
+%{_prefix}/%{_lib}/libstdc++.so.6*
+%else
 %{_prefix}/%{_lib}/stdcpp6.dll
+%endif
 %if %{enable_gdb}
 %dir %{_datadir}/gdb
 %dir %{_datadir}/gdb/auto-load
@@ -1425,19 +1542,36 @@ fi
 %dir %{_prefix}/share/gcc-%{gcc_major}/python
 %{_prefix}/share/gcc-%{gcc_major}/python/libstdcxx
 
+%if 0%{?os2_version}
 %files -n libstdc++-fwd
 %{_prefix}/%{_lib}/stdcpp.dll
+%endif
 
 %files -n libstdc++-devel
 %dir %{_prefix}/include/c++
 %{_prefix}/include/c++/%{gcc_major}
+%if !0%{?os2_version}
+%dir %{_prefix}/lib/gcc
+%dir %{_prefix}/lib/gcc/%{gcc_target_platform}
+%dir %{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}
+%{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/libstdc++.so
+%else
 %{_prefix}/lib/stdc++*_dll.a
 %{_prefix}/lib/stdc++*_dll.lib
+%endif
 %doc rpm.doc/changelogs/libstdc++-v3/ChangeLog* libstdc++-v3/README*
 
 %files -n libstdc++-static
+%if !0%{?os2_version}
+%dir %{_prefix}/lib/gcc
+%dir %{_prefix}/lib/gcc/%{gcc_target_platform}
+%dir %{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}
+%{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/libstdc++.a
+%{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/libsupc++.a
+%else
 %{_prefix}/lib/stdc++.a
 %{_prefix}/lib/stdc++.lib
+%endif
 
 %if %{build_libstdcxx_docs}
 %files -n libstdc++-docs
@@ -1595,7 +1729,11 @@ fi
 
 %if %{build_libquadmath}
 %files -n libquadmath
+%if !0%{?os2_version}
+%{_prefix}/%{_lib}/libquadmath.so.0*
+%else
 %{_prefix}/%{_lib}/quadmat0.dll
+%endif
 %{_infodir}/libquadmath.info*
 %{!?_licensedir:%global license %%doc}
 %license rpm.doc/libquadmath/COPYING*
@@ -1607,13 +1745,24 @@ fi
 %dir %{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/include
 %{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/include/quadmath.h
 %{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/include/quadmath_weak.h
+%if !0%{?os2_version}
+%{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/libquadmath.so
+%else
 %{_prefix}/lib/quadmath*_dll.a
 %{_prefix}/lib/quadmath*_dll.lib
+%endif
 %doc rpm.doc/libquadmath/ChangeLog*
 
 %files -n libquadmath-static
+%if !0%{?os2_version}
+%dir %{_prefix}/lib/gcc
+%dir %{_prefix}/lib/gcc/%{gcc_target_platform}
+%dir %{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}
+%{_prefix}/lib/gcc/%{gcc_target_platform}/%{gcc_major}/libquadmath.a
+%else
 %{_prefix}/lib/quadmath.a
 %{_prefix}/lib/quadmath.lib
+%endif
 %endif
 
 %if %{build_libitm}
@@ -1797,13 +1946,21 @@ fi
 %endif
 %endif
 
+%if 0%{?os2_version}
 %files wlink
-%doc gcc-wlink.txt
-
 %files wrc
-%doc gcc-wrc.txt
+%endif
 
 %changelog
+* Sun Oct 25 2026 Dmitrii Kuminov <coding@dmik.org> - 9.2.0-6
+- Release version 9.2.0 OS/2 Beta 4 (removes include-fixed hell).
+  (https://github.com/bitwiseworks/gcc-os2/blob/gcc-9_2_0-release-os2-b4/CHANGES.md).
+- Brush up spec file with proper OS/2 ifdefs
+- Rebuild all executables against LIBCx to support mmap enabled in external DLLs
+- Fix BLDLEVEL in GCC DLL and forwarder DLLs
+- Drop .exe extension from symlinks as they are unusable by native OS/2 apps
+- Make virtual wlink and wrc packages not install any files
+
 * Thu Jul 23 2020 Dmitriy Kuminov <coding@dmik.org> - 9.2.0-5
 - Release version 9.2.0 OS/2 Beta 3.
   (https://github.com/bitwiseworks/gcc-os2/blob/gcc-9_2_0-release-os2-b3/ChangeLog.md).
