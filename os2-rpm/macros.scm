@@ -100,13 +100,59 @@ fi\
 unzip -oqq '%SOURCE0'\
 %{nil}
 
+# Rsync
+
+%__scm_source_rsync\
+BuildRequires: coreutils\
+# TODO: once we have it: BuildRequires: rsync\
+%{nil}
+
+%__scm_setup_rev_id_rsync\
+__source_rev_id=$(LANG=C date -u +'%%Y-%%m-%%d-%%H-%%M-%%s')\
+%{__cat} >> %{__scm_info_file}.new <<EOF\
+RevID: $__source_rev_id\
+EOF\
+%{nil}
+
+%__scm_setup_refresh_rsync\
+rsync -rtO --stats --exclude='.git' '%{__source_url}/' source/\
+%{nil}
+
+%__scm_setup_rsync\
+if test -f '%SOURCE0' ; then\
+  unzip -oqq '%SOURCE0'\
+else\
+  %{__scm_setup_refresh_rsync}\
+  zip %{-A:%{-A*}}%{!-A:-rX9} '%SOURCE0' source\
+fi\
+%{nil}
+
+# Local directory
+
+%__scm_source_dir\
+%{!?__scm_source_keep:%{error:%0: dir: __scm_source_keep must be defined}}\
+%global _builddir %{__source_url}\
+%global __scm_source_skip 1\
+%{nil}
+
+%__scm_setup_dir\
+%setup -n . -DT\
+%{nil}
+
 # User-level macros
 
-# Sets parameters for scm_setup macro, arguments: SCM URL [REV]
-# SCM - SCM type (svn, git, github)
-# URL - Repository URL
-# REV - Revision/reference/commit (may be empty for local SVN/Git URLs)
-# NOTE: the __scm_defined was needed for noarch only spec
+#
+# Set parameters for scm_setup macro, arguments:
+#
+#   SCM URL [REV]
+#
+# - SCM: SCM type (svn, git, github, rsync, dir)
+# - URL: Repository URL
+# - REV: Revision/reference/commit (may be empty for local SVN/Git and Rsync/Dir
+#   URLs)
+#
+# NOTE: Must be used exactly once in the spec file in place of the Source: tag.
+#
 %scm_source()\
 %{!?__scm_defined:\
 %global __scm_defined 1\
@@ -115,20 +161,33 @@ unzip -oqq '%SOURCE0'\
 %{!?__source_url:%{?2:%global __source_url %2}}\
 %{!?__source_rev:%{?3:%global __source_rev %3}}\
 %{!?__source_url:%{error:%0: Missing URL}%{quit}}\
-%{expand:%%{!?__scm_source_%1:%%{error:%0: Invalid SCM type: '%{?1}'}%{quit}}}\
-%{expand:%%{!?__scm_setup_%1:%%{error:%0: Missing %%__scm_setup_%1 macro}%{quit}}}\
-%{expand:%%{!?__scm_setup_rev_id_%1:%%{error:%0: Missing %%__scm_setup_rev_id_%1 macro}%{quit}}}\
+%{expand:%%{!?__scm_source_%{__source_scm}:%%{error:%0: Invalid SCM type: '%{__source_scm}'}%{quit}}}\
+%{expand:%%{!?__scm_setup_%{__source_scm}:%%{error:%0: Missing %%__scm_setup_%{__source_scm} macro}%{quit}}}\
+%{expand:%%{__scm_source_%{__source_scm}}}\
+%{!?__scm_source_skip:\
+%{expand:%%{!?__scm_setup_rev_id_%{__source_scm}:%%{error:%0: Missing %%__scm_setup_rev_id_%{__source_scm} macro}%{quit}}}\
 BuildRequires: zip unzip\
 %global __source_dir %{name}\
 Source: %{__source_dir}.zip\
-%{expand:%%{__scm_source_%1}}\
+}\
+%{?__scm_source_keep:\
+%global _fixperms :\
+}\
 }\
 %{nil}
 
-# Performs source setup via SCM using scm_setup values, arguments: [-A OPTS]
-# OPTS - Options for zip (-rx9 by default, currently used only for SVN SCM type)
+#
+# Performs source setup via SCM using scm_setup values, arguments:
+#
+#   [-A OPTS]
+#
+# - OPTS: Options for zip (-rx9 by default, currently used only for the SVN SCM
+#   type)
+#
 %scm_setup(A:)\
 %{!?__scm_defined:%{error:%0: Missing %%scm_source specification}%{quit}}\
+%{!?__scm_source_skip:\
+%{!?__scm_source_keep:\
 %setup -n "%{__source_dir}" -Tc\
 %{__cat} > %{__scm_info_file}.new <<'EOF'\
 SCM: %{__source_scm}\
@@ -150,8 +209,16 @@ if test -f %{__scm_info_file}.new ; then\
   %{__mv} %{__scm_info_file}.new %{__scm_info_file}\
   zip -X '%SOURCE0' %{__scm_info_file}\
 fi\
+}\
+%{?__scm_source_keep:\
+%setup -n "%{__source_dir}" -DT\
+%{expand:%%{?__scm_setup_refresh_%{__source_scm}}}\
+}\
 set -- */\
-test $# -eq 1 && test -d "$1"\
+test $# -eq 1\
+test -d "$1"\
 test "$1" = source/ || %{__mv} "$1" source\
 %setup -n "%{__source_dir}/source" -DT\
+}\
+%{?__scm_source_skip:%{expand:%%{__scm_setup_%{__source_scm}}}}\
 %{nil}

@@ -1,7 +1,7 @@
 Summary: OS/2 specific RPM macros and scripts
 Name: os2-rpm
 Version: 2
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv2+
 Group: Development/System
 Vendor: bww bitwise works GmbH
@@ -89,8 +89,9 @@ done
 # install OS/2 Rexx scripts
 for f in *.exe ; do
   %{__install} -p -m 755 $f %{buildroot}%{_rpmconfigdir_os2}/$f
-  ln -sf %{_rpmconfigdir_os2}/$f %{buildroot}%{_libdir}/rpm/${f%.exe}
+  %{__ln_s} --relative %{buildroot}%{_rpmconfigdir_os2}/$f %{buildroot}%{_libdir}/rpm/${f%.exe}
 done
+
 %{__install} -D -p -m 755 wpi4rpm.exe %{buildroot}%{_bindir}/wpi4rpm.exe
 %{__install} -D -p -m 755 warpin-conflicts.exe %{buildroot}%{_libdir}/rpm/warpin-conflicts.exe
 
@@ -115,7 +116,11 @@ done
 %{_rpmconfigdir_macros_d}/macros.perl-srpm
 
 %changelog
-* Mon Sep 1 2026 Dmitrii Kuminov <coding@dmik.org> 2-1
+* Mon Oct 26 2026 Dmitrii Kuminov <coding@dmik.org> 2-2
+- Add 'rsync' and 'dir' SCM types, fix SCM type validity checks
+- Avoid warnings by making .exe symlinks relative
+
+* Tue Sep 1 2026 Dmitrii Kuminov <coding@dmik.org> 2-1
 - Add _vendor_optflags to /usr/lib/rpm/pc/macros with needed GCC extensions
 - Provide alternative install tree with pinned package versions
 - Properly extend build flags using vendor macros

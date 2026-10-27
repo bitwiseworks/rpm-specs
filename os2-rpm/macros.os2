@@ -22,7 +22,7 @@
 %_vendor_optflags_pentium4 -mno-avx
 %_vendor_optflags -ffile-prefix-map=%{_builddir}=. %{expand:%%{?_vendor_optflags_%{_target_cpu}}} -mstackrealign -fno-common %{?_vendor_optflags_gcc}
 
-# Always add LIBCx DLL
+# Always add LIBCx DLL (see https://github.com/bitwiseworks/rpm-specs/issues/23)
 %_vendor_build_ldflags -Zomf -Zhigh-mem -lcx
 
 # We define standard C and C++ compilers below
