@@ -76,7 +76,7 @@
   rpm.define("__libc_script_launcher_package_version " .. version)
   rpm.define("__libc_script_launcher_package_release " .. release)
   rpm.define("__libc_script_launcher_package_scripts " .. table.concat(scripts, " "))
-  rpm.define("__libc_script_launcher_package_files {" .. table.concat(files, "\n") .. "}")
+  rpm.define("__libc_script_launcher_package_files {" .. table.concat(files, "\\n") .. "}")
 }\
 %package -n %{__libc_script_launcher_package_name}\
 Summary: Executable script launchers for package %{__libc_script_launcher_package_base}\

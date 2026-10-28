@@ -26,7 +26,7 @@ License:        BSD; GPL v2 or later; LGPL v2.1 or later
 Summary:        Standard Shared Libraries
 Group:          System/Libraries
 Version:        %{ver_maj}.1.15
-Release:        1%{?dist}
+Release:        2%{?dist}
 Vendor:         bww bitwise works GmbH
 Url:            https://github.com/bitwiseworks/libc
 
@@ -264,6 +264,9 @@ rm -rf "%{buildroot}"
 
 
 %changelog
+* Wed Oct 28 2026 Dmitrii Kuminov <coding@dmik.org> 1:0.1.15-2
+- libc_script_launcher_package: Fix multiple launchers case
+
 * Sun Oct 25 2026 Dmitrii Kuminov <coding@dmik.org> 1:0.1.15-1
 - Release LIBC Next version 0.1.15
   (https://github.com/bitwiseworks/libc/blob/0.1.15/CHANGES.md).
