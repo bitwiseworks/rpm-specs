@@ -30,7 +30,7 @@ print(string.sub(hash, 0, 16))
 
 Summary: Utilities from the general purpose cryptography library with TLS implementation
 Name: openssl
-Version: 3.4.6
+Version: 3.4.8
 Release: 1%{?dist}
 Epoch: 1
 %if !0%{?os2_version}
@@ -45,7 +45,9 @@ Source10: configuration-prefix.h
 
 Patch0001: 0001-RH-Aarch64-and-ppc64le-use-lib64.patch
 Patch0002: 0002-Add-a-separate-config-file-to-use-for-rpm-installs.patch
+%endif
 Patch0003: 0003-RH-Do-not-install-html-docs.patch
+%if !0%{?os2_version}
 Patch0004: 0004-RH-Override-default-paths-for-the-CA-directory-tree.patch
 Patch0005: 0005-RH-Instructions-to-load-legacy-provider.patch
 Patch0006: 0006-RH-apps-ca-fix-md-option-help-text.patch-DROP.patch
@@ -117,11 +119,7 @@ BuildRequires: /@unixroot/usr/bin/pod2man
 %endif
 BuildRequires: perl(Test::Harness), perl(Test::More), perl(Math::BigInt)
 BuildRequires: perl(Module::Load::Conditional), perl(File::Temp)
-%if !0%{?os2_version}
 BuildRequires: perl(Time::HiRes), perl(Time::Piece), perl(IPC::Cmd), perl(Pod::Html), perl(Digest::SHA)
-%else
-BuildRequires: perl(Time::HiRes), perl(IPC::Cmd), perl(Pod::Html), perl(Digest::SHA)
-%endif
 BuildRequires: perl(FindBin), perl(lib), perl(File::Compare), perl(File::Copy), perl(bigint)
 BuildRequires: git-core
 %if !0%{?os2_version}
@@ -219,6 +217,7 @@ from other formats to the formats used by the OpenSSL toolkit.
 %autosetup -S git -n %{name}-%{version}-beta1
 %else
 %scm_setup
+%patch3 -p1
 %endif
 
 %build
@@ -617,6 +616,9 @@ ln -s /etc/crypto-policies/back-ends/openssl_fips.config $RPM_BUILD_ROOT%{_sysco
 %endif
 
 %changelog
+* Wed Oct 28 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> 1:3.4.8-1
+- Update to version 3.4.8.
+
 * Wed Jul 08 2026 Silvan Scherrer <silvan.scherrer@aroa.ch> 1:3.4.6-1
 - Update to version 3.4.6.
 
