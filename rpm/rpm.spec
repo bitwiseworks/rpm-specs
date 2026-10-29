@@ -33,7 +33,7 @@
 
 %global rpmver 4.15.1
 #global snapver rc1
-%global rel 8
+%global rel 9
 
 %if 0%{?os2_version}
 # rpmlib(RpmVersion) capability provided by this RPM version and required by
@@ -87,7 +87,7 @@ Patch906: rpm-4.7.1-geode-i686.patch
 Patch907: rpm-4.15.x-ldflags.patch
 %else
 Vendor: bww bitwise works GmbH
-%scm_source github http://github.com/bitwiseworks/%{name}-os2 v%{version}-os2-2
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 v%{version}-os2-3
 
 # We build docs from sources
 BuildRequires: doxygen
@@ -479,6 +479,13 @@ done;
     --enable-python \
     --with-crypto=openssl
 %else
+# Force configure to use _prefix-based tools only
+for t in AR:ar AS:as AWK:gawk CC:gcc "CPP:gcc -E" CXX:g++ "LN_S:ln -s" "MKDIR_P:mkdir -p" RANLIB:ranlib; do
+  eval "export ${t%%:*}='%{_bindir}/${t#*:}'"
+done
+# Use configure.ac defaults for all other tools (should be already _prefix-based)
+export MYPATH=""
+# Use configure macro as it should be more accurate on OS/2
 %configure \
     --enable-shared --disable-static \
     %{!?with_int_bdb: --with-external-db} \
@@ -567,17 +574,28 @@ rm ${RPM_BUILD_ROOT}%{rpmhome}/fileattrs/elf.attr
 # Remove systemd plugin manpage
 rm -f ${RPM_BUILD_ROOT}%{_mandir}/man8/rpm-plugin-systemd-inhibit.8*
 
-# Replace OS/2 paths with /@unixroot and /@system_drive
-sed -i \
-  -e 's#[^a-zA-Z][a-zA-Z]:/ecs/#/@system_drive/ecs/#gi' \
-  -e 's#[^a-zA-Z][a-zA-Z]:/tcpip/bin/#/@system_drive/tcpip/bin/#gi' \
-  ${RPM_BUILD_ROOT}%{rpmhome}/macros
-
-# Check there are no paths starting with drive letter or having usr/local
-! grep -q \
-  -e '[^a-zA-Z][a-zA-Z]:/' \
-  -e '/usr/local' \
-  ${RPM_BUILD_ROOT}%{rpmhome}/macros
+# Check that literal paths in macros are /@unixroot- or /@system_drive- or
+# /dev-based, ignoring comments, URLs and macro-relative paths. Report each
+# offending line once, with its original line number.
+gawk '
+  /^[[:space:]]*#/ { next }
+  {
+    invalid = /(^|[^[:alnum:]_])[[:alpha:]]:[\/\\]/ ||
+              /\/(usr\/local|opt)(\/|[[:space:]:;"\047)]|$)/
+    rest = $0
+    while (!invalid && match(rest, /(^|[[:space:]:;"\047(<>=|&])\/[[:alnum:]_@][^[:space:]:;"\047()<>|&]*/)) {
+      path = substr(rest, RSTART, RLENGTH)
+      sub(/^[^\/]*\//, "/", path)
+      invalid = path !~ /^\/(@(unixroot|system_drive)|dev)(\/|$)/
+      rest = substr(rest, RSTART + RLENGTH)
+    }
+    if (invalid) {
+      print FNR ":" $0
+      failed = 1
+    }
+  }
+  END { exit failed }
+' ${RPM_BUILD_ROOT}%{rpmhome}/macros
 %endif
 
 %if !0%{?os2_version}
@@ -607,7 +625,7 @@ export BEGINLIBPATH="%{_builddir}/%{buildsubdir}/rpmio/.libs;%{_builddir}/%{buil
 %if %{without int_bdb}
 for dbutil in dump load recover stat upgrade verify
 do
-    ln -s %{_bindir}/db_${dbutil}%{_exeext} $RPM_BUILD_ROOT/%{rpmhome}/rpmdb_${dbutil}
+    ln -s --relative $RPM_BUILD_ROOT/%{_bindir}/db_${dbutil}%{_exeext} $RPM_BUILD_ROOT/%{rpmhome}/rpmdb_${dbutil}
 done
 %endif
 
@@ -657,8 +675,8 @@ make check || (cat tests/rpmtests.log; exit 0)
 %{_bindir}/rpm2cpio%{_exeext}
 %{_bindir}/rpmdb%{_exeext}
 %{_bindir}/rpmkeys%{_exeext}
-%{_bindir}/rpmquery
-%{_bindir}/rpmverify
+%{_bindir}/rpmquery%{_exeext}
+%{_bindir}/rpmverify%{_exeext}
 
 %{_mandir}/man8/rpm.8*
 %{_mandir}/man8/rpmdb.8*
@@ -828,6 +846,13 @@ rm -f %{_var}/.rpm.lock 2>/dev/null || :
 %endif
 
 %changelog
+* Wed Oct 28 2026 Dmitrii Kuminov <coding@dmik.org> 4.15.1-9
+- Build from tag v4.15.1-os2-3
+- Replace rpm binary symlinks with copies of rpm.exe
+- Force configure to use _prefix-based tools only
+- Check that /usr/lib/rpm/macros desn't contain illegal literal paths
+- Avoid warnings by making .exe symlinks relative
+
 * Mon Oct 26 2026 Dmitrii Kuminov <coding@dmik.org> 4.15.1-8
 - Build from tag v4.15.1-os2-2 (fix --root support)
 
