@@ -15,7 +15,7 @@
  * properties of the object to create and has the following format (note
  * that the whole specification string must be taken in double quotes on
  * the CMD.EXE's command line if it contains spaces or special characters such
- * as angle bracets):
+ * as angle brackets):
  *
  *   CLASSNAME|TITLE|LOCATION[|SETUP[|OPTION]]
  *
@@ -41,7 +41,7 @@
  * deleted only when its counter becomes zero.
  *
  * /deleteall deletes all objects created for a given package at once (in
- * the order opposite to creation). /recreateall recreataes all object
+ * the order opposite to creation). /recreateall recreates all object
  * created for a given package which is useful if the package objects were
  * accidentially deleted (w/o removing the package itself).
  *
@@ -51,13 +51,16 @@
  * cause this expansion by enclosing the respective part of the string in double
  * parenthesis. Note that double parenthesis may not be nested.
  *
- * Author: Dmitry A. Kuminov
+ * Author: Dmitri Kuminov
+ *
+ * Version: Next
+ * - Fix file I/O error handling and brush up error messages.
  *
  * Version: 1.1 - 2017-02-09
  * - Fix object deletion (wrong hash map indexing).
  *
  * Version: 1.0 - 2010-11-08
- * - Inital release.
+ * - Initial release.
  */
 
 trace off
@@ -102,9 +105,27 @@ return Main()
 ------------------------------------------------------------------------------*/
 
 /**
+ * Writes an error message to the console.
+ *
+ * @param aMsg  Error message.
+ * @return      1
+ */
+Error: procedure expose (Globals)
+    parse arg aStr
+    say 'wps-object: ERROR: 'aStr
+    return 1
+
+/**
+ * Calls Error and exits with its return value.
+ */
+ErrorExit: procedure expose (Globals)
+    parse arg aStr
+    exit Error(aStr)
+
+/**
  * Just do the job.
  *
- * @param aArgs Comand line arguments.
+ * @param aArgs Command line arguments.
  * @return      0 on success, error code on failure.
  */
 Main: procedure expose (Globals)
@@ -117,16 +138,12 @@ Main: procedure expose (Globals)
         when (cmd == '/DELETE') then cmd = 'D'
         when (cmd == '/RECREATEALL') then cmd = 'RA'
         when (cmd == '/DELETEALL') then cmd = 'DA'
-        otherwise do
-            say 'ERROR: wps-object: Invalid command "'G.Args.1'".'
-            return 1
-        end
+        otherwise
+            call ErrorExit 'Invalid command "'G.Args.1'"'
     end
 
-    if (G.Args.0 < 2) then do
-        say 'ERROR: wps-object: Missing package name.'
-        return 1
-    end
+    if (G.Args.0 < 2) then
+        call ErrorExit 'Missing package name'
     pkg = G.Args.2
 
     readStdIn = 0
@@ -135,10 +152,8 @@ Main: procedure expose (Globals)
         readStdIn = 1
     end
     else if (cmd == 'C' | cmd == 'D') then do
-        if (G.Args.0 < 3) then do
-            say 'ERROR: wps-object: Missing object ID.'
-            return 1
-        end
+        if (G.Args.0 < 3) then
+            call ErrorExit 'Missing object ID'
         id = G.Args.3
 
         if (cmd == 'C') then do
@@ -146,21 +161,17 @@ Main: procedure expose (Globals)
             /* if this is a combined form, split it */
             if (pos(':', id) > 0) then parse var id id':'spec
             else if (G.Args.0 >= 4) then spec = G.Args.4
-            if (spec == '') then do
-                say 'ERROR: wps-object: Missing object specification.'
-                return 1
-            end
+            if (spec == '') then
+                call ErrorExit 'Missing object specification'
         end
 
-        if (verify(id, G.InvalidObjectIDChars, 'M') > 0) then do
-            say 'ERROR: wps-object: Object ID "'id'" contains invalid characters.'
-            return 1
-        end
+        if (verify(id, G.InvalidObjectIDChars, 'M') > 0) then
+            call ErrorExit 'Object ID "'id'": Invalid characters'
     end
 
     ux = value('UNIXROOT',,'OS2ENVIRONMENT')
     if (ux == '') then do
-        say 'ERROR: wps-object: UNIXROOT environment variable is not set.'
+        say 'ERROR: wps-object: UNIXROOT environment variable is not set'
         return 1
     end
 
@@ -172,8 +183,7 @@ Main: procedure expose (Globals)
         G.ObjectRefs = charin(G.ObjectRefsFile, 1, chars(G.ObjectRefsFile))
         if (\FileOk(G.ObjectRefsFile)) then do
             rc = FileErrorCode(G.ObjectRefsFile)
-            say 'ERROR: wps-object: Could not read "'G.ObjectRefsFile'" (rc='rc').'
-            return rc
+            call ErrorExit ''G.ObjectRefsFile': Read error 'rc
         end
         call charout G.ObjectRefsFile
     end
@@ -187,16 +197,12 @@ Main: procedure expose (Globals)
             str = linein(pkgFile)
             if (\FileOk(pkgFile)) then do
                 rc = FileErrorCode(pkgFile)
-                say 'ERROR: wps-object: Could not read "'pkgFile'" (rc='rc').'
-                return rc
+                call ErrorExit ''pkgFile': Read error 'rc
             end
             parse var str s1':'s2 /* id:spec */
             if (s1 == '' | verify(s1, G.InvalidObjectIDChars, 'M') > 0 |,
-                s2 == '') then do
-                rc = -1
-                say 'ERROR: wps-object: Line #'i 'in file "'pkgFile'" is invalid.'
-                return rc
-            end
+                s2 == '') then
+                call ErrorExit ''pkgFile':'i': Invalid Object ID "'s1'" or SPEC'
             G.PackageObjects.i = str
             G.PackageObjects.i.!id = s1
             G.PackageObjects.!map.s1 = i
@@ -247,7 +253,7 @@ Main: procedure expose (Globals)
             rc = charout(refsFileTmp, G.ObjectRefs)
             if (rc \= 0 | \FileOk(refsFileTmp)) then do
                 rc = FileErrorCode(refsFileTmp)
-                say 'ERROR: wps-object: Could not write to "'refsFileTmp'" (rc='rc').'
+                call Error ''refsFileTmp': Write error 'rc
             end
             else do
                 call lineout refsFileTmp
@@ -263,9 +269,8 @@ Main: procedure expose (Globals)
     if (G.PackageObjects.!modified) then do
         if (G.PackageObjects.0 = G.PackageObjects.!removed) then do
             rc = SysFileDelete(pkgFile)
-            if (rc \= 0) then do
-                say 'ERROR: wps-object: Could not delete "'pkgFile'".'
-            end
+            if (rc \= 0) then
+                call Error 'Failed to delete 'pkgFile': Error 'rc
         end
         else do
             rc = EnsureFileDir(pkgFile)
@@ -276,7 +281,7 @@ Main: procedure expose (Globals)
                     rc = lineout(pkgFileTmp, G.PackageObjects.i)
                     if (rc \= 0 | \FileOk(pkgFileTmp)) then do
                         rc = FileErrorCode(pkgFileTmp)
-                        say 'ERROR: wps-object: Could not write to "'pkgFileTmp'" (rc='rc').'
+                        call Error ''pkgFileTmp': Write error 'rc
                         leave
                     end
                 end
@@ -308,14 +313,10 @@ CreateObject: procedure expose (Globals)
     aSpec = ExpandUnixRoot(aSpec)
 
     parse var aSpec class'|'title'|'location'|'setup'|'option
-    if (class == '' | title == '' | location == '') then do
-        say 'ERROR: wps-object: Specification "'aSpec'" is invalid.'
-        return 1
-    end
-    if (pos('OBJECTID=', setup) > 0) then do
-        say 'ERROR: wps-object: Specification string must not contain OBJECTID.'
-        return 1
-    end
+    if (class == '' | title == '' | location == '') then
+        return Error('<'aID'>: Invalid specification "'aSpec'"')
+    if (pos('OBJECTID=', setup) > 0) then
+        return Error('<'aID'>: OBJECTID in setup string "'setup'"')
 
     if (setup \== '') then setup = setup';'
     setup = setup'OBJECTID=<'aID'>'
@@ -324,8 +325,8 @@ CreateObject: procedure expose (Globals)
 
     rc = SysCreateObject(class, title, location, setup, option)
     if (rc \== 1) then do
-        say 'ERROR: wps-object: Could not create an object with ID <'aID'> and',
-            'specification "'aSpec'".'
+        say 'ERROR: wps-object: Failed to create object <'aID'> with',
+            'specification "'aSpec'"'
         return 1
     end
 
@@ -372,7 +373,7 @@ CreateObject: procedure expose (Globals)
             end
         end
         if (\ok) then do
-            say 'ERROR: wps-object: Object reference file "'G.ObjectRefsFile'" is invalid near object ID <'aID'>.'
+            call Error ''G.ObjectRefsFile': Errors near object <'aID'>'
             G.PackageObjects.!modified = 0
         end
     end
@@ -431,7 +432,7 @@ DeleteObject: procedure expose (Globals)
         end
     end
     if (\ok) then do
-        say 'ERROR: wps-object: Object reference file "'G.ObjectRefsFile'" is invalid near object ID <'aID'>.'
+        call Error ''G.ObjectRefsFile': Errors near object <'aID'>'
         G.PackageObjects.!modified = 0
     end
 
@@ -485,10 +486,8 @@ EnsureFileDir: procedure expose (Globals)
 
     dir = FixDir(filespec('D', aFile)||filespec('P', aFile))
     rc = MakeDir(dir)
-    if (rc \= 0) then do
-        say 'ERROR: wps-object: Could not make directory "'dir'" (rc='rc').'
-        return rc
-    end
+    if (rc \= 0) then
+        return Error('Failed to create directory 'dir': Error 'rc)
 
     return 0
 
@@ -507,25 +506,18 @@ SafeRename: procedure expose (Globals)
 
     dirFrom = FixDir(filespec('D', aFileFrom)||filespec('P', aFileFrom))
     dirTo = FixDir(filespec('D', aFileTo)||filespec('P', aFileTo))
-    if (translate(dirFrom) \== translate(dirTo)) then do
-        say 'ERROR: wps-object: "'aFileFrom'" and "'aFileTo'" must reside in the same',
-            'directory.'
-        return -1
-    end
+    if (translate(dirFrom) \== translate(dirTo)) then
+        return Error(''aFileFrom' and 'aFileTo' are in different directories')
 
     if (FileExists(aFileTo)) then do
         rc = SysFileDelete(aFileTo)
-        if (rc \= 0) then do
-            say 'ERROR: wps-object: Could not delete "'aFileTo'" (rc='rc').'
-            return rc
-        end
+        if (rc \= 0) then
+            return Error('Failed to delete 'aFileTo': Error 'rc)
     end
 
     address 'cmd' 'rename 'aFileFrom filespec('N', aFileTo)
-    if (rc \= 0) then do
-        say 'ERROR: wps-object: Could not rename "'aFileFrom'" to "'aFileTo'" (rc='rc').'
-        return rc
-    end
+    if (rc \= 0) then
+        return Error('Failed to rename 'aFileFrom' to 'aFileTo': Error 'rc)
 
     return 0
 
@@ -589,21 +581,21 @@ FileExists: procedure expose (Globals)
     return (GetAbsFilePath(file) \= '')
 
 /**
- *  Returns 1 if the specified file status is other than READY or NOTREADY.
+ *  Returns 1 if the specified file status is READY or NOTREADY.
  */
 FileOk: procedure expose (Globals)
     parse arg aFile
-    status = stream(file, 'S')
-    return (status \= 'READY' & status \= 'NOTREADY')
+    status = stream(aFile, 'S')
+    return (status = 'READY' | status = 'NOTREADY')
 
 /**
  * Returns the error code of the specified file or -1 if the error code is
  * not available. Should only be called if FileOk() returns false.
  */
 FileErrorCode: procedure expose (Globals)
-    parse arg file
-    parse value stream(file, 'D') with .':'rc
-    if (datatype(rc) \= 'W') then rc = -1
+    parse arg aFile
+    parse value stream(aFile, 'D') with .':'rc
+    if (\datatype(rc, 'W')) then rc = -1
     return rc
 
 /**
