@@ -55,6 +55,7 @@
  *
  * Version: Next
  * - Fix file I/O error handling and brush up error messages.
+ * - Skip WPS object creation if CONFIG.SYS UNIXROOT mismatches environment.
  *
  * Version: 1.1 - 2017-02-09
  * - Fix object deletion (wrong hash map indexing).
@@ -85,6 +86,8 @@ G.UndoCreateID = ''
 
 G.InvalidObjectIDChars = '<>,;:|'
 
+G.SkipWPS = 0
+
 /*------------------------------------------------------------------------------
  startup + main + termination
 ------------------------------------------------------------------------------*/
@@ -103,6 +106,17 @@ return Main()
 /*------------------------------------------------------------------------------
  functions
 ------------------------------------------------------------------------------*/
+
+/**
+ * Writes a warning message to the console.
+ *
+ * @param aMsg  Warning message.
+ * @return      0
+ */
+Warning: procedure expose (Globals)
+    parse arg aStr
+    say 'wps-object: WARNING: 'aStr
+    return 0
 
 /**
  * Writes an error message to the console.
@@ -169,11 +183,39 @@ Main: procedure expose (Globals)
             call ErrorExit 'Object ID "'id'": Invalid characters'
     end
 
-    ux = value('UNIXROOT',,'OS2ENVIRONMENT')
-    if (ux == '') then do
-        say 'ERROR: wps-object: UNIXROOT environment variable is not set'
-        return 1
+    configUx = ''
+    configSys = SysBootDrive()'\CONFIG.SYS'
+    if (FileExists(configSys)) then do
+        do while lines(configSys)
+            configLine = strip(translate(linein(configSys), ' ', '09'x))
+            if (\FileOk(configSys)) then do
+                rc = FileErrorCode(configSys)
+                call lineout configSys
+                call ErrorExit ''configSys': Read error 'rc
+            end
+            parse var configLine s1 s2
+            if (translate(s1) \== 'SET') then iterate
+            parse var s2 var '=' val
+            if (strip(translate(var)) \== 'UNIXROOT') then iterate
+            configUx = FixDir(strip(val), 1)
+        end
+        call lineout configSys
     end
+
+    ux = value('UNIXROOT',,'OS2ENVIRONMENT')
+    if (ux == '') then
+        call ErrorExit 'UNIXROOT environment variable is not set or empty'
+    ux = FixDir(strip(ux), 1)
+
+    /* Don't create WPS objects if UNIXROOT in the environment and in CONFIG.SYS
+     * disagree (e.g. to safely use --installroot with yum) */
+    if (\G.SkipWPS) then do
+        G.SkipWPS = (configUx == '' | translate(configUx) \== translate(ux))
+        if (G.SkipWPS) then
+            call Warning 'UNIXROOT in 'configSys' does not match environment'
+    end
+    if (G.SkipWPS) then
+        call Warning 'Skipping WPS object creation'
 
     G.ObjectRefsFile = FixDir(ux'/var/cache/rpm/wps/objects')
     G.PackageDir = FixDir(ux'/var/cache/rpm/wps/packages')
@@ -293,7 +335,7 @@ Main: procedure expose (Globals)
         end
     end
 
-    if (rc \= 0 & G.UndoCreateID \== '') then do
+    if (rc \= 0 & G.UndoCreateID \== '' & \G.SkipWPS) then do
         call SysDestroyObject '<'G.UndoCreateID'>'
     end
 
@@ -323,11 +365,10 @@ CreateObject: procedure expose (Globals)
 
     if (option == '') then option = 'U' /* Update by default */
 
-    rc = SysCreateObject(class, title, location, setup, option)
-    if (rc \== 1) then do
-        say 'ERROR: wps-object: Failed to create object <'aID'> with',
-            'specification "'aSpec'"'
-        return 1
+    if (\G.SkipWPS) then do
+        rc = SysCreateObject(class, title, location, setup, option)
+        if (rc \== 1) then
+            return Error('Failed to create object <'aID'> with specification "'aSpec'"')
     end
 
     ok = 1
@@ -423,7 +464,7 @@ DeleteObject: procedure expose (Globals)
                 if (refcnt > 0) then do
                     G.ObjectRefs = insert('<'aID'>'refcnt, G.ObjectRefs, i - 1)
                 end
-                else do
+                else if (\G.SkipWPS) then do
                     call SysDestroyObject '<'aID'>'
                 end
                 G.ObjectRefs.!modified = 1
