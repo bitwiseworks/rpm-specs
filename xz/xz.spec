@@ -116,7 +116,7 @@ commands that deal with the older LZMA format.
 %autosetup -p1
 %else
 %scm_setup
-autogen.sh --no-po4a
+./autogen.sh --no-po4a
 cp /@unixroot/usr/share/aclocal/po.m4 m4
 cp /@unixroot/usr/share/aclocal/iconv.m4 m4 
 %endif

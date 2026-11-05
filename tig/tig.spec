@@ -38,7 +38,7 @@ Using it as a pager, it will display input from stdin and colorize it.
 %prep
 %scm_setup
 # Generate configure & friends
-autogen.sh
+./autogen.sh
 
 %build
 export LDFLAGS="-Zomf -Zmap -Zhigh-mem -Zargs-wild -Zargs-resp"

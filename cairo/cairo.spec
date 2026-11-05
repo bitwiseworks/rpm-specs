@@ -100,7 +100,7 @@ needed for developing software which uses the cairo Gobject library.
 %scm_setup
 
 # Generate confuigure and friends
-NOCONFIGURE=1 autogen.sh
+NOCONFIGURE=1 ./autogen.sh
 
 %build
 # We can't add Toolkit includes in _INCS (it will casuse then to be searched

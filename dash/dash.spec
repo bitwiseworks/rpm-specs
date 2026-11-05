@@ -42,7 +42,7 @@ Virtual package that installs DASH as the system default POSIX shell.
 %scm_setup
 
 # Generate configure and friends
-autogen.sh
+./autogen.sh
 
 %build
 

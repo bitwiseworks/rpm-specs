@@ -32,7 +32,7 @@ Development library for pixman.
 %scm_setup
 
 # Generate confuigure and friends
-NOCONFIGURE=1 autogen.sh
+NOCONFIGURE=1 ./autogen.sh
 
 %build
 export LDFLAGS="-Zhigh-mem"

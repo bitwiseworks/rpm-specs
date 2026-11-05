@@ -77,7 +77,7 @@ Epson, HP and compatible printers.
 touch %{_builddir}/%{buildsubdir}/doc/developer/html-stamp
 
 export NOCONFIGURE=1
-autogen.sh
+./autogen.sh
 
 export LDFLAGS=" -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 export LIBS="-lcx"

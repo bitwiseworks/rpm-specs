@@ -90,7 +90,7 @@ export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp -lcx"
 export LIBS="-lcx"
 
 %if !0%{?os2_version}
-autogen.sh
+./autogen.sh
 %else
 autoreconf -fvi -I m4
 %endif

@@ -155,7 +155,7 @@ export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 export LIBS="-lpthread -lcx"
 export VENDOR="%{vendor}"
 export NOCONFIGURE=1
-autogen.sh
+./autogen.sh
 export BEGINLIBPATH="%{_builddir}/%{buildsubdir}/glib/.libs;%{_builddir}/%{buildsubdir}/gobject/.libs;%{_builddir}/%{buildsubdir}/gio/.libs;%{_builddir}/%{buildsubdir}/gthread/.libs;%{_builddir}/%{buildsubdir}/gmodule/.libs"
 %configure \
            --with-python=%{__python3} \

@@ -143,7 +143,7 @@ export LIBS="-lcx"
 
 # Build IJS
 cd ijs
-autogen.sh
+./autogen.sh
 %configure --enable-shared --disable-static
 make
 cd ..

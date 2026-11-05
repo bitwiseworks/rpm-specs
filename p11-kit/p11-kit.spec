@@ -102,7 +102,7 @@ gpgv2 --keyring %{SOURCE2} %{SOURCE1} %{SOURCE0}
 %else
 %scm_setup
 export NOCONFIGURE=1
-autogen.sh
+./autogen.sh
 %endif
 
 %build

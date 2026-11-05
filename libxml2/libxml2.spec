@@ -112,7 +112,7 @@ for m in %{SOURCE10}; do
 done
 
 export NOCONFIGURE=1
-autogen.sh
+./autogen.sh
 %endif
 find doc -type f -executable -print -exec chmod 0644 {} ';'
 

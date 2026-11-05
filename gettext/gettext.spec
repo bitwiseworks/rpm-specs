@@ -237,7 +237,7 @@ Substitutes the values of environment variables.
 autoreconf
 %else
 %scm_setup
-autogen.sh --skip-gnulib
+./autogen.sh --skip-gnulib
 %endif
 
 # Defeat libtextstyle attempt to bundle libxml2.  The comments

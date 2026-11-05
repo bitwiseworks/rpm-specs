@@ -321,7 +321,7 @@ echo target is %{binutils_target}
 # Use the pinned autoconf version
 # TODO: Use altenv when released
 . %{_alt_prefix}/autoconf269/activate
-autogen.sh
+./autogen.sh
 %endif
 
 %if %{build_using_clang}

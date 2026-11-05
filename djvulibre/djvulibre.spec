@@ -122,7 +122,7 @@ export LT_BUILDLEVEL="@#%{vendor}:%{version}-%{release}#@##1## `LANG=C date +'%%
 export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
 export LIBS="-lcx"
 export NOCONFIGURE=1
-autogen.sh
+./autogen.sh
 
 %configure --enable-shared --disable-static --disable-desktopfiles
 %endif

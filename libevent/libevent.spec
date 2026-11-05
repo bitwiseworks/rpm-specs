@@ -51,7 +51,7 @@ This package contains the development documentation for %{name}.
 
 %prep
 %scm_setup
-autogen.sh
+./autogen.sh
 
 %build
 export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"

@@ -156,7 +156,7 @@ autoreconf -iv
 %scm_setup
 
 # make sure configure is updated to properly support OS/2
-bootstrap
+./bootstrap
 %endif
 
 

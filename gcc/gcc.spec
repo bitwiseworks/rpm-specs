@@ -716,7 +716,7 @@ rm -f gcc/testsuite/go.test/test/chan/goroutines.go
 # Use the pinned autoconf version
 # TODO: Use altenv when released
 . %{_alt_prefix}/autoconf269/activate
-autogen.sh
+./autogen.sh
 %endif
 
 %build

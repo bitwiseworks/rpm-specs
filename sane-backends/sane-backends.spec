@@ -238,7 +238,7 @@ access image acquisition devices available on the local host.
 %scm_setup
 # create a .tarball-version file
 echo %{version} >.tarball-version
-sh autogen.sh
+sh ./autogen.sh
 %endif
 
 %build

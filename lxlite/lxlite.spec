@@ -34,7 +34,7 @@ This package provides some tools from the lxLite package
 
 %build
 cd src
-make.cmd
+./make.cmd
 cd ..
 
 

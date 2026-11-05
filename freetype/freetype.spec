@@ -70,7 +70,7 @@ FreeType.
 %prep
 %scm_setup
 %setup -T -D -b 1
-autogen.sh
+./autogen.sh
 
 %build
 rm -f config.mk 

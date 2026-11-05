@@ -56,7 +56,7 @@ Development files for LittleCMS.
 %scm_setup
 export NOCONFIGURE=1
 libtoolize -fc
-autogen.sh
+./autogen.sh
 %endif
 
 
