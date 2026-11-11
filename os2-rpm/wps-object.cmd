@@ -3,47 +3,65 @@
 /*
  * Creates or deletes a WPS object on behalf of an RPM package.
  *
- * Usage: wps-object /create PACKAGE OBJECTID SPECIFICATION
- *        wps-object /create PACKAGE OBJECTID:SPECIFICATION
- *        wps-object /create PACKAGE < FILE
- *        wps-object /delete PACKAGE OBJECTID
- *        wps-object /recreateall PACKAGE
- *        wps-object /deleteall PACKAGE
+ * Usage: wps-object /create PACKAGE[:EVR] OBJECTID SPECIFICATION
+ *        wps-object /create PACKAGE[:EVR] OBJECTID:SPECIFICATION
+ *        wps-object /create PACKAGE[:EVR] < FILE
+ *        wps-object /delete PACKAGE[:EVR] OBJECTID
+ *        wps-object /delete PACKAGE[:EVR] < FILE
+ *        wps-object /recreateall PACKAGE[:EVR]
+ *        wps-object /deleteall PACKAGE[:EVR]
  *
- * PACKAGE is a name of the RPM package. OBJECTID is an object identifier
- * (w/o angle brackets). SPECIFICATION is a string that describes the
- * properties of the object to create and has the following format (note
- * that the whole specification string must be taken in double quotes on
- * the CMD.EXE's command line if it contains spaces or special characters such
- * as angle brackets):
+ * PACKAGE is a name of the RPM package. EVR is an [epoch:]version[-release] or
+ * [epoch@]version[-release] of the package. A missing EVR indicates a legacy
+ * package without EVR information (new-style RPM packages always supply EVR).
+ * See also the COMPATIBILITY NOTE below.
+ *
+ * OBJECTID is an object identifier (w/o angle brackets). SPECIFICATION is a
+ * string that describes the properties of the object to create and has the
+ * following format (note that the whole specification string must be taken in
+ * double quotes on the CMD.EXE's command line if it contains spaces or special
+ * characters such as angle brackets):
  *
  *   CLASSNAME|TITLE|LOCATION[|SETUP[|OPTION]]
  *
- * Each component of this format string directly corresponds to the
- * respective argument of the SysCreateObject REXX function. Refer to
- * to the REXX reference manual for details. Note that when OPTION is not
- * specified, U (update) mode is used by default.
+ * Each component of this format string directly corresponds to the respective
+ * argument of the SysCreateObject REXX function. Refer to to the REXX reference
+ * manual for details. Note that when OPTION is not specified, U (update) mode
+ * is used by default.
  *
- * FILE is a text file used to create multiple objects at once: each line
- * in this file is an object ID followed by the specification (as described
- * above), like this:
+ * FILE is a text file used to create multiple objects at once: each line in
+ * this file is an object ID followed by the specification (as described above),
+ * like this:
  *
  *   OBJECTID:SPECIFICATION
  *
- * This indirect FILE form is preferred and even required if one of the
- * object parameters contains a double forward slash (e.g. 'http://foo')
- * because otherwise the Classic REXX interpreter will treat it as a start of
- * the comment block and fail.
+ * This indirect FILE form is preferred and even required if one of the object
+ * parameters contains a double forward slash (e.g. 'http://foo') because
+ * otherwise the Classic REXX interpreter will treat it as a start of the
+ * comment block and fail.
  *
- * Note that /create and /delete commands maintain a global reference
- * counter for each object (shared by all packages): /create increases
- * this counter by 1, /delete decreases it by 1. The object is actually
- * deleted only when its counter becomes zero.
+ * /create and /delete commands maintain a global reference counter for each
+ * object (shared by all packages): /create increases this counter by 1, /delete
+ * decreases it by 1. The object is actually deleted only when its counter
+ * becomes zero. Note that if there are repeated /create object calls for a
+ * package with the same EVR, the object reference counter is increased only
+ * once, and it will be decreased only after the matching number of /delete
+ * calls for the same EVR. This allows objects to survive reinstalling the same
+ * version of a package.
  *
- * /deleteall deletes all objects created for a given package at once (in
- * the order opposite to creation). /recreateall recreates all object
- * created for a given package which is useful if the package objects were
- * accidentially deleted (w/o removing the package itself).
+ * Note that /delete < FILE performs object deletion in reverse order (the last
+ * line is processed first) to account for ordered creation in /create < FILE
+ * commands.
+ *
+ * /deleteall deletes all objects created for a given package and EVR at once
+ * (in the order opposite to creation). If an object has repeated EVR entries
+ * for the package, only the first entry is deleted.
+ *
+ * /recreateall recreates all objects created for a given package and EVR which
+ * is useful if the package objects were accidentally deleted without removing
+ * the package itself. If an object has repeated EVR entries for the package,
+ * only the last entry is recreated. Note that /recreateall never changes global
+ * object reference counters.
  *
  * Some object parameters (the LOCATION string or parts of the SETUP string such
  * as EXENAME) require valid OS/2 path strings as values, with back slashes
@@ -51,12 +69,26 @@
  * cause this expansion by enclosing the respective part of the string in double
  * parenthesis. Note that double parenthesis may not be nested.
  *
- * Author: Dmitrii Kuminov
+ * COMPATIBILITY NOTE. Packages without EVR are still supported, but /deleteall
+ * should not be used for them in upgrade or downgrade scenarios. If the object
+ * set of a version being installed differs from the object set of a version
+ * being removed, wps-object doesn't know which object entry belongs to which
+ * version, and /deleteall may delete all objects added by the installed
+ * version but missing in the removed version. In such cases, either save the
+ * removed version's object set first and call /delete for all of them manually
+ * after all /create calls for the installed package, or call /deleteall
+ * *before* making any such /create calls.
+ *
+ * Author: Dmitrii Kuminov <coding@dmik.org>
  *
  * Version: Next
  * - Fix file I/O error handling and brush up error messages.
  * - Skip WPS object creation if CONFIG.SYS UNIXROOT mismatches environment.
  * - Add logging to /var/log/wps-object.log.
+ * - Migrate state from /var/cache/rpm/wps to /var/lib/rpm-wps.
+ * - Support /delete < FILE command.
+ * - Make /create < FILE and /delete < FILE process all entries on errors.
+ * - Add package EVR support to properly handle upgrades and downgrades.
  *
  * Version: 1.1 - 2017-02-09
  * - Fix object deletion (wrong hash map indexing).
@@ -70,13 +102,16 @@ numeric digits 12
 '@echo off'
 
 /*------------------------------------------------------------------------------
- globals
+globals
 ------------------------------------------------------------------------------*/
 
 /* all globals to be exposed in procedures */
 Globals = 'G. Opt. Static.'
 
 G.LogFile = '/var/log/wps-object.log'
+G.StateDir = '/var/lib/rpm-wps'
+
+G.PackageName = ''
 
 G.ObjectRefs = ''
 G.ObjectRefs.!modified = 0
@@ -87,12 +122,14 @@ G.PackageObjects.!removed = 0
 
 G.UndoCreateID = ''
 
-G.InvalidObjectIDChars = '<>,;:|'
+G.InvalidObjectIDChars = '<>,;:| '
+G.ValidPkgEVRChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._+~^-@'
 
+G.UX = ''
 G.SkipWPS = 0
 
 /*------------------------------------------------------------------------------
- startup + main + termination
+startup + main + termination
 ------------------------------------------------------------------------------*/
 
 /* init system REXX library */
@@ -107,7 +144,7 @@ call TokenizeString aArgs, 'G.Args'
 return Main()
 
 /*------------------------------------------------------------------------------
- functions
+functions
 ------------------------------------------------------------------------------*/
 
 /**
@@ -161,29 +198,28 @@ Main: procedure expose (Globals)
 
     if (G.Args.0 < 2) then
         call ErrorExit 'Missing package name'
+
     pkg = G.Args.2
 
     readStdIn = 0
 
-    if (cmd == 'C' & G.Args.0 < 3) then do
-        readStdIn = 1
-    end
-    else if (cmd == 'C' | cmd == 'D') then do
-        if (G.Args.0 < 3) then
-            call ErrorExit 'Missing object ID'
-        id = G.Args.3
-
-        if (cmd == 'C') then do
-            spec = ''
-            /* if this is a combined form, split it */
-            if (pos(':', id) > 0) then parse var id id':'spec
-            else if (G.Args.0 >= 4) then spec = G.Args.4
-            if (spec == '') then
-                call ErrorExit 'Missing object specification'
+    if (cmd == 'C' | cmd == 'D') then do
+        if (G.Args.0 < 3) then do
+            readStdIn = 1
         end
-
-        if (verify(id, G.InvalidObjectIDChars, 'M') > 0) then
-            call ErrorExit 'Object ID "'id'": Invalid characters'
+        else do
+            objID = G.Args.3
+            if (cmd == 'C') then do
+                objSpec = ''
+                /* if this is a combined form, split it */
+                if (pos(':', objID) > 0) then parse var objID objID':'objSpec
+                else if (G.Args.0 >= 4) then objSpec = G.Args.4
+                if (objSpec == '') then
+                    call ErrorExit 'Missing object specification'
+            end
+            if (objID = '' | verify(objID, G.InvalidObjectIDChars, 'M') > 0) then
+                call ErrorExit 'Object ID "'objID'": Invalid characters'
+        end
     end
 
     configUx = ''
@@ -200,30 +236,32 @@ Main: procedure expose (Globals)
             if (translate(s1) \== 'SET') then iterate
             parse var s2 var '=' val
             if (strip(translate(var)) \== 'UNIXROOT') then iterate
-            configUx = FixDir(strip(val), 1)
+            configUx = FixPath(strip(val), 1)
         end
         call lineout configSys
     end
 
-    ux = value('UNIXROOT',,'OS2ENVIRONMENT')
-    if (ux == '') then
+    G.UX = value('UNIXROOT',,'OS2ENVIRONMENT')
+    if (G.UX == '') then
         call ErrorExit 'UNIXROOT environment variable is not set or empty'
-    ux = FixDir(strip(ux), 1)
+
+    G.UX = FixPath(strip(G.UX), 1)
 
     /* Don't create WPS objects if UNIXROOT in the environment and in CONFIG.SYS
      * disagree (e.g. to safely use --installroot with yum) */
     if (\G.SkipWPS) then do
-        G.SkipWPS = (configUx == '' | translate(configUx) \== translate(ux))
+        G.SkipWPS = (configUx == '' | translate(configUx) \== translate(G.UX))
         if (G.SkipWPS) then
             call Warning 'UNIXROOT in 'configSys' does not match environment'
     end
     if (G.SkipWPS) then
         call Warning 'Skipping WPS object creation'
 
-    G.LogFile = FixDir(ux || G.LogFile)
+    G.LogFile = G.UX || FixPath(G.LogFile)
 
-    G.ObjectRefsFile = FixDir(ux'/var/cache/rpm/wps/objects')
-    G.PackageDir = FixDir(ux'/var/cache/rpm/wps/packages')
+    G.StateDir = FixPath(G.StateDir)
+    G.ObjectRefsFile = G.UX || G.StateDir || '\objects'
+    G.PackageDir = G.UX || G.StateDir || '\packages'
 
     /* Read object refs */
     if (FileExists(G.ObjectRefsFile)) then do
@@ -234,6 +272,14 @@ Main: procedure expose (Globals)
         end
         call charout G.ObjectRefsFile
     end
+
+    parse var pkg pkg':'pkgEvr
+    pkgEvr = translate(pkgEvr, '@', ':')
+    if (pkgEvr \== '' & verify(pkgEvr, G.ValidPkgEVRChars) > 0) then do
+        call ErrorExit 'Invalid package EVR "'pkgEvr'"'
+    end
+
+    G.PackageName = pkg
 
     /* Read package object list */
     pkgFile = G.PackageDir'\'pkg
@@ -246,51 +292,88 @@ Main: procedure expose (Globals)
                 rc = FileErrorCode(pkgFile)
                 call ErrorExit ''pkgFile': Read error 'rc
             end
-            parse var str s1':'s2 /* id:spec */
-            if (s1 == '' | verify(s1, G.InvalidObjectIDChars, 'M') > 0 |,
-                s2 == '') then
-                call ErrorExit ''pkgFile':'i': Invalid Object ID "'s1'" or SPEC'
-            G.PackageObjects.i = str
-            G.PackageObjects.i.!id = s1
-            G.PackageObjects.!map.s1 = i
+            parse var str evr'>'id':'spec
+            if (evr \== '' & verify(evr, G.ValidPkgEVRChars) > 0) then
+                call ErrorExit ''pkgFile':'i': Invalid package EVR "'evr'"'
+            if (id == '' | verify(id, G.InvalidObjectIDChars, 'M') > 0 |,
+                spec == '') then
+                call ErrorExit ''pkgFile':'i': Invalid Object ID "'id'" or SPEC'
+            key = evr'>'id
+            G.PackageObjects.i = spec
+            G.PackageObjects.i.!evr = evr
+            G.PackageObjects.i.!id = id
+            /* Package reinstall will use the same EVR, account for it */
+            if (symbol('G.PackageObjects.!map.key') == 'VAR') then
+                G.PackageObjects.!map.key = G.PackageObjects.!map.key i
+            else
+                G.PackageObjects.!map.key = i
         end
         G.PackageObjects.0 = i
         call lineout pkgFile
     end
 
-    if (cmd == 'C') then do
+    errors = 0
+    rc = 0
+
+    if (cmd == 'C' | cmd == 'D') then do
         if (readStdIn) then do
-            rc = 0
+            ids = ''
             do while lines()
+                rc = 0
                 str = linein()
                 if (strip(str) == '') then iterate
                 parse var str id':'spec
-                rc = CreateObject(id, spec)
-                if (rc \= 0) then leave
+                if (id == '' | verify(id, G.InvalidObjectIDChars, 'M') > 0) then
+                    rc = Error('Object ID "'id'": Invalid characters')
+                else if (cmd == 'C') then
+                    rc = CreateObject(pkgEvr, id, spec)
+                else
+                    ids = id' 'ids
+                if (rc \= 0) then
+                    errors = errors + 1
+            end
+            /* Delete the objects in reverse order */
+            if (cmd == 'D') then do i = 1 to words(ids)
+                rc = DeleteObject(pkgEvr, word(ids, i))
+                if (rc \= 0) then
+                    errors = errors + 1
             end
         end
         else do
-            rc = CreateObject(id, spec)
+            if (cmd == 'C') then
+                rc = CreateObject(pkgEvr, objID, objSpec)
+            else
+                rc = DeleteObject(pkgEvr, objID)
+            if (rc \= 0) then
+                errors = errors + 1
         end
     end
-    else if (cmd == 'D') then do
-        rc = DeleteObject(id)
-    end
     else if (cmd == 'RA') then do
-        rc = 0
         do i = 1 to G.PackageObjects.0
-            parse var G.PackageObjects.i id':'spec
-            rc = CreateObject(id, spec)
-            if (rc \= 0) then leave
+            if G.PackageObjects.i.!evr \== pkgEvr then iterate
+            /* only recreate the last of multiple EVR entries */
+            key = G.PackageObjects.i.!evr'>'G.PackageObjects.i.!id
+            entries = G.PackageObjects.!map.key
+            if (word(entries, words(entries)) \== i) then iterate
+            rc = CreateObject(pkgEvr, G.PackageObjects.i.!id, G.PackageObjects.i, 1)
+            if (rc \= 0) then
+                errors = errors + 1
         end
     end
     else if (cmd == 'DA') then do
-        rc = 0
         do i = G.PackageObjects.0 to 1 by -1
-            rc = DeleteObject(G.PackageObjects.i.!id)
-            if (rc \= 0) then leave
+            if G.PackageObjects.i.!evr \== pkgEvr then iterate
+            /* only delete the first of multiple EVR entries */
+            key = G.PackageObjects.i.!evr'>'G.PackageObjects.i.!id
+            if (word(G.PackageObjects.!map.key, 1) \== i) then iterate
+            rc = DeleteObject(pkgEvr, G.PackageObjects.i.!id)
+            if (rc \= 0) then
+                errors = errors + 1
         end
     end
+
+    /* Note: save object/package states even on failures as the batch mode could
+     * successfully create or delete some objects */
 
     /* save object refs */
     if (G.ObjectRefs.!modified) then do
@@ -325,7 +408,8 @@ Main: procedure expose (Globals)
                 pkgFileTmp = SysTempFileName(pkgFile'.?????.tmp')
                 do i = 1 to G.PackageObjects.0
                     if (G.PackageObjects.i == '') then iterate /* skip removed */
-                    rc = lineout(pkgFileTmp, G.PackageObjects.i)
+                    key = G.PackageObjects.i.!evr'>'G.PackageObjects.i.!id
+                    rc = lineout(pkgFileTmp, key':'G.PackageObjects.i)
                     if (rc \= 0 | \FileOk(pkgFileTmp)) then do
                         rc = FileErrorCode(pkgFileTmp)
                         call Error ''pkgFileTmp': Write error 'rc
@@ -345,7 +429,7 @@ Main: procedure expose (Globals)
         call Log 'DELETE 'pkg':'pkgEvr' 'G.UndoCreateID' = 'rc2
     end
 
-    return rc
+    return (rc \= 0) | (errors \= 0)
 
 /**
  * Writes a line to the log file.
@@ -360,13 +444,15 @@ Log: procedure expose (Globals)
 /**
  * Creates a WPS object.
  *
- * @param aID   Object ID.
- * @param aSpec Object specification string.
- * @return      0 on success, error code on failure.
+ * @param aEVR      Package EVR.
+ * @param aID       Object ID.
+ * @param aSpec     Object specification string.
+ * @param aNoRefs   1 to skip adjusting reference counters.
+ * @return          0 on success, error code on failure.
  */
 CreateObject: procedure expose (Globals)
 
-    parse arg aID, aSpec
+    parse arg aEVR, aID, aSpec, aNoRefs
 
     aSpec = ExpandUnixRoot(aSpec)
 
@@ -389,36 +475,48 @@ CreateObject: procedure expose (Globals)
         else mode = 'UPDATE'
         call Log mode' 'G.PackageName':'aEVR' 'aID':'aSpec'|'option' = 'rc
         if (rc \== 1) then
+            /* Assume the object is not there, return before referencing */
             return Error('Failed to create object <'aID'> with specification "'aSpec'"')
     end
 
+    if (aNoRefs == 1) then
+        return 0
+
+    key = aEVR'>'aID
     ok = 1
 
     /* check if there is an object with this id for this package */
-    if (symbol('G.PackageObjects.!map.aID') == 'VAR') then do
-        /* update it */
-        i = G.PackageObjects.!map.aID
-        G.PackageObjects.i = aID':'aSpec
+    if (symbol('G.PackageObjects.!map.key') == 'VAR') then do
+        /* yes, e.g. same EVR during reinstall, add another entry */
+        i = G.PackageObjects.0 + 1
+        G.PackageObjects.i = aSpec
+        G.PackageObjects.i.!evr = aEVR
+        G.PackageObjects.i.!id = aID
+        G.PackageObjects.!map.key = G.PackageObjects.!map.key i
+        G.PackageObjects.0 = i
         G.PackageObjects.!modified = 1
     end
     else do
-        /* add a new */
+        /* add a new package reference */
         i = G.PackageObjects.0 + 1
-        G.PackageObjects.i = aID':'aSpec
+        G.PackageObjects.i = aSpec
+        G.PackageObjects.i.!evr = aEVR
         G.PackageObjects.i.!id = aID
-        G.PackageObjects.!map.aID = i
+        G.PackageObjects.!map.key = i
         G.PackageObjects.0 = i
         G.PackageObjects.!modified = 1
 
-        /* increase the refcount */
+        /* increase the object refcount */
         i = objIndex
         if (i == 0) then do
+            /* new object */
             G.ObjectRefs = G.ObjectRefs'<'aID'>1'
             G.ObjectRefs.!modified = 1
             /* mark as a candidate for undoing creation on failure */
             G.UndoCreateID = aID
         end
         else do
+            /* existing object */
             ok = 0
             j = i + length(aId) + 2
             if (j <= length(G.ObjectRefs)) then do
@@ -445,28 +543,45 @@ CreateObject: procedure expose (Globals)
 /**
  * Deletes a WPS object.
  *
+ * @param aEVR  Package EVR.
  * @param aID   Object ID.
  * @return      0 on success, error code on failure.
  */
 DeleteObject: procedure expose (Globals)
 
-    parse arg aID
+    parse arg aEVR, aID
+
+    key = aEVR'>'aID
 
     /* check if there is an object with this id for this package */
-    if (symbol('G.PackageObjects.!map.aID') \== 'VAR') then do
+    if (symbol('G.PackageObjects.!map.key') \== 'VAR') then do
         /* nothing to do */
         return 0
     end
 
+    /* check if there are multiple entries, e.g. same EVR during reinstall */
+    multiple = words(G.PackageObjects.!map.key) > 1
+
     /* mark as removed */
-    i = G.PackageObjects.!map.aID
+    if (multiple) then do
+        /* remove the first entry */
+        i = word(G.PackageObjects.!map.key, 1)
+        G.PackageObjects.!map.key = subword(G.PackageObjects.!map.key, 2)
+    end
+    else do
+        i = G.PackageObjects.!map.key
+        drop G.PackageObjects.!map.key
+    end
     G.PackageObjects.i = ''
     G.PackageObjects.!removed = G.PackageObjects.!removed + 1
     G.PackageObjects.!modified = 1
 
+    if (multiple) then
+        return 0 /* object is still in use, nothing to do */
+
     ok = 1
 
-    /* decrease the refcount */
+    /* decrease the object refcount */
     i = pos('<'aID'>', G.ObjectRefs)
     if (i == 0) then do
         /* there must be an object with this ID... */
@@ -488,6 +603,9 @@ DeleteObject: procedure expose (Globals)
                 else if (\G.SkipWPS) then do
                     rc = SysDestroyObject('<'aID'>')
                     call Log 'DELETE 'G.PackageName':'aEVR' 'aID' = 'rc
+                    if (rc \== 1) then
+                        /* Assume the object is not there, go on to dereference */
+                        call Warning 'Failed to delete object <'aID'>'
                 end
                 G.ObjectRefs.!modified = 1
                 ok = 1
@@ -495,7 +613,7 @@ DeleteObject: procedure expose (Globals)
         end
     end
     if (\ok) then do
-        call Error ''G.ObjectRefsFile': Errors near object <'aID'>'
+        call Error G.ObjectRefsFile': Errors near object <'aID'>'
         G.PackageObjects.!modified = 0
     end
 
@@ -528,8 +646,7 @@ ExpandUnixRoot: procedure expose (Globals)
         j = pos('))', aString, i + 2)
         if (j <= 0) then leave
         str = substr(aString, i + 2, j - i - 2)
-        str = Replace(str, '/@unixroot', value('UNIXROOT',,'OS2ENVIRONMENT'))
-        str = translate(str, '\', '/')
+        str = FixPath(Replace(str, '/@unixroot', G.UX))
         aString = delstr(aString, i, j - i + 2)
         aString = insert(str, aString, i - 1)
         i = i + length(str)
@@ -547,7 +664,7 @@ EnsureFileDir: procedure expose (Globals)
 
     parse arg aFile
 
-    dir = FixDir(filespec('D', aFile)||filespec('P', aFile))
+    dir = FixPath(filespec('D', aFile)||filespec('P', aFile))
     rc = MakeDir(dir)
     if (rc \= 0) then
         return Error('Failed to create directory 'dir': Error 'rc)
@@ -567,8 +684,8 @@ SafeRename: procedure expose (Globals)
 
     parse arg aFileFrom, aFileTo
 
-    dirFrom = FixDir(filespec('D', aFileFrom)||filespec('P', aFileFrom))
-    dirTo = FixDir(filespec('D', aFileTo)||filespec('P', aFileTo))
+    dirFrom = FixPath(filespec('D', aFileFrom)||filespec('P', aFileFrom))
+    dirTo = FixPath(filespec('D', aFileTo)||filespec('P', aFileTo))
     if (translate(dirFrom) \== translate(dirTo)) then
         return Error(''aFileFrom' and 'aFileTo' are in different directories')
 
@@ -617,24 +734,24 @@ MakeDir: procedure expose (Globals)
     return 0
 
 /**
- *  Fixes the directory path by a) converting all slashes to back
+ *  Fixes the file or directory path by a) converting all slashes to back
  *  slashes and b) ensuring that the trailing slash is present if
- *  the directory is the root directory, and absent otherwise.
+ *  the path is the root directory, and absent otherwise.
  *
- *  @param dir      the directory path
+ *  @param path     the file or directory path
  *  @param noslash
  *      optional argument. If 1, the path returned will not have a
  *      trailing slash anyway. Useful for concatenating it with a
  *      file name.
  */
-FixDir: procedure expose (Globals)
-    parse arg dir, noslash
+FixPath: procedure expose (Globals)
+    parse arg path, noslash
     noslash = (noslash = 1)
-    dir = translate(dir, '\', '/')
-    if (right(dir, 1) == '\' &,
-        (noslash | \(length(dir) == 3 & (substr(dir, 2, 1) == ':')))) then
-        dir = substr(dir, 1, length(dir) - 1)
-    return dir
+    path = translate(path, '\', '/')
+    if (right(path, 1) == '\' &,
+        (noslash | \(length(path) == 3 & (substr(path, 2, 1) == ':')))) then
+        path = substr(path, 1, length(path) - 1)
+    return path
 
 /**
  *  Returns 1 if the specified file exists and 0 otherwise.
@@ -658,7 +775,7 @@ FileOk: procedure expose (Globals)
 FileErrorCode: procedure expose (Globals)
     parse arg aFile
     parse value stream(aFile, 'D') with .':'rc
-    if (\datatype(rc, 'W')) then rc = -1
+    if (\datatype(rc, 'W') | rc == 0) then rc = -1
     return rc
 
 /**
@@ -668,7 +785,7 @@ FileErrorCode: procedure expose (Globals)
 GetAbsFilePath: procedure expose (Globals)
     parse arg file
     if (file \= '') then do
-        file = stream(FixDir(file), 'C', 'QUERY EXISTS')
+        file = stream(FixPath(file), 'C', 'QUERY EXISTS')
     end
     return file
 
