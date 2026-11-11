@@ -51,11 +51,12 @@
  * cause this expansion by enclosing the respective part of the string in double
  * parenthesis. Note that double parenthesis may not be nested.
  *
- * Author: Dmitri Kuminov
+ * Author: Dmitrii Kuminov
  *
  * Version: Next
  * - Fix file I/O error handling and brush up error messages.
  * - Skip WPS object creation if CONFIG.SYS UNIXROOT mismatches environment.
+ * - Add logging to /var/log/wps-object.log.
  *
  * Version: 1.1 - 2017-02-09
  * - Fix object deletion (wrong hash map indexing).
@@ -74,6 +75,8 @@ numeric digits 12
 
 /* all globals to be exposed in procedures */
 Globals = 'G. Opt. Static.'
+
+G.LogFile = '/var/log/wps-object.log'
 
 G.ObjectRefs = ''
 G.ObjectRefs.!modified = 0
@@ -217,6 +220,8 @@ Main: procedure expose (Globals)
     if (G.SkipWPS) then
         call Warning 'Skipping WPS object creation'
 
+    G.LogFile = FixDir(ux || G.LogFile)
+
     G.ObjectRefsFile = FixDir(ux'/var/cache/rpm/wps/objects')
     G.PackageDir = FixDir(ux'/var/cache/rpm/wps/packages')
 
@@ -336,10 +341,21 @@ Main: procedure expose (Globals)
     end
 
     if (rc \= 0 & G.UndoCreateID \== '' & \G.SkipWPS) then do
-        call SysDestroyObject '<'G.UndoCreateID'>'
+        rc2 = SysDestroyObject('<'G.UndoCreateID'>')
+        call Log 'DELETE 'pkg':'pkgEvr' 'G.UndoCreateID' = 'rc2
     end
 
     return rc
+
+/**
+ * Writes a line to the log file.
+ *
+ * @param aLine Line to write.
+ * @return      0 on success, 1 on failure.
+ */
+Log: procedure expose (Globals)
+    parse arg aLine
+    return lineout(G.LogFile, date()' 'time()' 'aLine)
 
 /**
  * Creates a WPS object.
@@ -365,8 +381,13 @@ CreateObject: procedure expose (Globals)
 
     if (option == '') then option = 'U' /* Update by default */
 
+    objIndex = pos('<'aID'>', G.ObjectRefs)
+
     if (\G.SkipWPS) then do
         rc = SysCreateObject(class, title, location, setup, option)
+        if (objIndex == 0) then mode = 'CREATE'
+        else mode = 'UPDATE'
+        call Log mode' 'G.PackageName':'aEVR' 'aID':'aSpec'|'option' = 'rc
         if (rc \== 1) then
             return Error('Failed to create object <'aID'> with specification "'aSpec'"')
     end
@@ -390,7 +411,7 @@ CreateObject: procedure expose (Globals)
         G.PackageObjects.!modified = 1
 
         /* increase the refcount */
-        i = pos('<'aID'>', G.ObjectRefs)
+        i = objIndex
         if (i == 0) then do
             G.ObjectRefs = G.ObjectRefs'<'aID'>1'
             G.ObjectRefs.!modified = 1
@@ -465,7 +486,8 @@ DeleteObject: procedure expose (Globals)
                     G.ObjectRefs = insert('<'aID'>'refcnt, G.ObjectRefs, i - 1)
                 end
                 else if (\G.SkipWPS) then do
-                    call SysDestroyObject '<'aID'>'
+                    rc = SysDestroyObject('<'aID'>')
+                    call Log 'DELETE 'G.PackageName':'aEVR' 'aID' = 'rc
                 end
                 G.ObjectRefs.!modified = 1
                 ok = 1
