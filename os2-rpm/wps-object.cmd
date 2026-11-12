@@ -504,8 +504,8 @@ CreateObject: procedure expose (Globals)
         end
     end
 
-    if (setup \== '') then setup = setup';'
-    setup = setup'OBJECTID=<'aID'>'
+    if (setup \== '') then setup = ';'setup
+    setup = 'OBJECTID=<'aID'>'setup
 
     if (option == '') then option = 'U' /* Update by default */
 
@@ -529,8 +529,8 @@ CreateObject: procedure expose (Globals)
         rc = SysCreateObject(class, title, location, setup, option)
         if (objIndex == 0) then mode = 'CREATE'
         else mode = 'UPDATE'
-        call Log mode' 'G.PackageName':'aEVR' 'aID':'aSpec'|'option' = 'rc
-        if (rc \== 1) then
+        call Log mode' 'G.PackageName':'aEVR class'|'title'|'location'|'setup'|'option' = 'rc
+        if (rc \= 1) then
             /* Assume the object is not there, return before referencing */
             return Error('Failed to create object <'aID'> with specification "'aSpec'"')
     end
