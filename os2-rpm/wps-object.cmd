@@ -8,8 +8,9 @@
  *        wps-object /create PACKAGE[:EVR] < FILE
  *        wps-object /delete PACKAGE[:EVR] OBJECTID
  *        wps-object /delete PACKAGE[:EVR] < FILE
- *        wps-object /recreateall PACKAGE[:EVR]
  *        wps-object /deleteall PACKAGE[:EVR]
+ *        wps-object /recreateall PACKAGE[:EVR]
+ *        wps-object /setdata NAME SETUP
  *
  * PACKAGE is a name of the RPM package. EVR is an [epoch:]version[-release] or
  * [epoch@]version[-release] of the package. A missing EVR indicates a legacy
@@ -63,6 +64,12 @@
  * only the last entry is recreated. Note that /recreateall never changes global
  * object reference counters.
  *
+ * /setdata is a service command that applies a SETUP string to an existing WPS
+ * object or a file. NAME is either an object ID in angle brackets or a full
+ * path to a file. This command is intended for configuring WPS parameters for
+ * regular files and should not be used on objects associated with packages
+ * because the new configuration is not stored in wps-object state files.
+ * 
  * Some object parameters (the LOCATION string or parts of the SETUP string such
  * as EXENAME) require valid OS/2 path strings as values, with back slashes
  * instead of forward slashes and @unixroot expanded to a full path. You may
@@ -103,6 +110,7 @@
  * - Make /create < FILE and /delete < FILE process all entries on errors.
  * - Add package EVR support to properly handle upgrades and downgrades.
  * - Support setting .LONGNAME for WPShadow on regular files.
+ * - Add /setdata command.
  *
  * Version: 1.1 - 2017-02-09
  * - Fix object deletion (wrong hash map indexing).
@@ -204,35 +212,43 @@ Main: procedure expose (Globals)
     select
         when (cmd == '/CREATE') then cmd = 'C'
         when (cmd == '/DELETE') then cmd = 'D'
-        when (cmd == '/RECREATEALL') then cmd = 'RA'
         when (cmd == '/DELETEALL') then cmd = 'DA'
+        when (cmd == '/RECREATEALL') then cmd = 'RA'
+        when (cmd == '/SETDATA') then cmd = 'SD'
         otherwise
             call ErrorExit 'Invalid command "'G.Args.1'"'
     end
 
-    if (G.Args.0 < 2) then
-        call ErrorExit 'Missing package name'
-
-    pkg = G.Args.2
-
-    readStdIn = 0
-
-    if (cmd == 'C' | cmd == 'D') then do
-        if (G.Args.0 < 3) then do
-            readStdIn = 1
-        end
-        else do
-            objID = G.Args.3
-            if (cmd == 'C') then do
-                objSpec = ''
-                /* if this is a combined form, split it */
-                if (pos(':', objID) > 0) then parse var objID objID':'objSpec
-                else if (G.Args.0 >= 4) then objSpec = G.Args.4
-                if (objSpec == '') then
-                    call ErrorExit 'Missing object specification'
+    if (cmd == 'SD') then do
+        if (G.Args.0 < 2) then
+            call ErrorExit 'Missing object name'
+        if (G.Args.0 < 3) then
+            call ErrorExit 'Missing object setup string'
+        name = G.Args.2
+        setup = G.Args.3
+    end
+    else do
+        if (G.Args.0 < 2) then
+            call ErrorExit 'Missing package name'
+        pkg = G.Args.2
+        readStdIn = 0
+        if (cmd == 'C' | cmd == 'D') then do
+            if (G.Args.0 < 3) then do
+                readStdIn = 1
             end
-            if (objID = '' | verify(objID, G.InvalidObjectIDChars, 'M') > 0) then
-                call ErrorExit 'Object ID "'objID'": Invalid characters'
+            else do
+                objID = G.Args.3
+                if (cmd == 'C') then do
+                    objSpec = ''
+                    /* if this is a combined form, split it */
+                    if (pos(':', objID) > 0) then parse var objID objID':'objSpec
+                    else if (G.Args.0 >= 4) then objSpec = G.Args.4
+                    if (objSpec == '') then
+                        call ErrorExit 'Missing object specification'
+                end
+                if (objID = '' | verify(objID, G.InvalidObjectIDChars, 'M') > 0) then
+                    call ErrorExit 'Object ID "'objID'": Invalid characters'
+            end
         end
     end
 
@@ -269,9 +285,22 @@ Main: procedure expose (Globals)
             call Warning 'UNIXROOT in 'configSys' does not match environment'
     end
     if (G.SkipWPS) then
-        call Warning 'Skipping WPS object creation'
+        call Warning 'Skipping WPS object modification'
 
     G.LogFile = G.UX || FixPath(G.LogFile)
+
+    if (cmd == 'SD') then do
+        if (\G.SkipWPS) then do
+            if (left(name, 1) \== '<') then
+                name = ExpandUnixRoot(name)
+            setup = ExpandUnixRoot(setup)
+            rc = SysSetObjectData(name, setup)
+            call Log 'SETDATA 'name setup' = 'rc
+            if (rc \= 1) then
+                call ErrorExit 'Failed to set data for 'name
+        end
+        exit 0
+    end
 
     G.StateDir = FixPath(G.StateDir)
     G.ObjectRefsFile = G.UX || G.StateDir || '\objects'
@@ -282,7 +311,7 @@ Main: procedure expose (Globals)
         G.ObjectRefs = charin(G.ObjectRefsFile, 1, chars(G.ObjectRefsFile))
         if (\FileOk(G.ObjectRefsFile)) then do
             rc = FileErrorCode(G.ObjectRefsFile)
-            call ErrorExit ''G.ObjectRefsFile': Read error 'rc
+            call ErrorExit G.ObjectRefsFile': Read error 'rc
         end
         call charout G.ObjectRefsFile
     end
