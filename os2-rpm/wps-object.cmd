@@ -69,6 +69,19 @@
  * cause this expansion by enclosing the respective part of the string in double
  * parenthesis. Note that double parenthesis may not be nested.
  *
+ * The WPShadow CLASSNAME is treated specially. If SHADOWID in SETUP is a
+ * regular file (not something in <>) and TITLE starts with '!', the value after
+ * '!' is set as a .LONGNAME EA attribute of the target file after creating the
+ * shadow object. This allows regular file shadows to appear under different
+ * names in WPS folders. Changing .LONGNAME is necessary because the WPS itself
+ * ignores WPShadow TITLE when creating shadows (and setting TITLE in SETUP will
+ * cause the file to be renamed on disk which is unwanted). Note that .LONGNAME
+ * belongs to the file itself, so all its WPS shadows will get the new title
+ * once it is set. To avoid changing .LONGNAME, use '?' as TITLE. To remove
+ * .LONGNAME, use '!'. Both forms pass the last component of the path as TITLE
+ * to the WPS. Ordinary TITLE values are passed as is and leave .LONGNAME
+ * untouched.
+ *
  * COMPATIBILITY NOTE. Packages without EVR are still supported, but /deleteall
  * should not be used for them in upgrade or downgrade scenarios. If the object
  * set of a version being installed differs from the object set of a version
@@ -89,6 +102,7 @@
  * - Support /delete < FILE command.
  * - Make /create < FILE and /delete < FILE process all entries on errors.
  * - Add package EVR support to properly handle upgrades and downgrades.
+ * - Support setting .LONGNAME for WPShadow on regular files.
  *
  * Version: 1.1 - 2017-02-09
  * - Fix object deletion (wrong hash map indexing).
@@ -462,6 +476,34 @@ CreateObject: procedure expose (Globals)
     if (pos('OBJECTID=', setup) > 0) then
         return Error('<'aID'>: OBJECTID in setup string "'setup'"')
 
+    shadowPath = ''
+    longNameEA = 0
+    if (class == 'WPShadow') then do
+        i = pos('SHADOWID=', setup) /* len = 9 */
+        if (i > 1) then if (substr(setup, i - 1, 1) \== ';') then i = 0
+        if (i > 0) then do
+            parse value substr(setup, i + 9) with shadowPath';'_
+            if (left(shadowPath, 1) \== '<') then do
+                shadowPath = FixPath(shadowPath)
+                file = shadowPath
+                i = lastpos('\', file)
+                if (i > 0) then file = substr(file, i + 1)
+                if (file == '') then
+                    file = shadowPath /* root dir (after FixPath) */
+                if (title == '?') then
+                    title = file
+                else if (title == '!') then do
+                    title = file
+                    longNameEA = 2 /* remove */
+                end
+                else if (left(title, 1) == '!') then do
+                    title = substr(title, 2)
+                    longNameEA = 1 /* set */
+                end
+            end
+        end
+    end
+
     if (setup \== '') then setup = setup';'
     setup = setup'OBJECTID=<'aID'>'
 
@@ -470,6 +512,20 @@ CreateObject: procedure expose (Globals)
     objIndex = pos('<'aID'>', G.ObjectRefs)
 
     if (\G.SkipWPS) then do
+        if (longNameEA > 0) then do
+            /* Set .LONGNAME for the WPShadow target before creating the object
+             * so that WPS will pick up the new value right away */
+            ea = '' /* remove */
+            if (longNameEA == 1) then
+                ea = 'FDFF'x || reverse(d2c(length(title), 2)) || title
+            rc = SysPutEA(shadowPath, '.LONGNAME', ea)
+            if (ea == '') then
+                call Log 'LONGNAME RESET 'shadowPath' = 'rc
+            else
+                call Log 'LONGNAME SET 'shadowPath'|'title' = 'rc
+            if (rc \= 0) then
+                call Warning shadowPath': Failed to set .LONGNAME: Error 'rc
+        end
         rc = SysCreateObject(class, title, location, setup, option)
         if (objIndex == 0) then mode = 'CREATE'
         else mode = 'UPDATE'
