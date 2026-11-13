@@ -11,6 +11,8 @@
  *        wps-object /deleteall PACKAGE[:EVR]
  *        wps-object /recreateall PACKAGE[:EVR]
  *        wps-object /setdata NAME SETUP
+ *        wps-object /move SOURCE DESTINATION
+ *        wps-object /destroy NAME
  *
  * PACKAGE is a name of the RPM package. EVR is an [epoch:]version[-release] or
  * [epoch@]version[-release] of the package. A missing EVR indicates a legacy
@@ -69,6 +71,20 @@
  * path to a file. This command is intended for configuring WPS parameters for
  * regular files and should not be used on objects associated with packages
  * because the new configuration is not stored in wps-object state files.
+ *
+ * /move is a service command to move objects to another location. SOURCE and
+ * DESTINATION are either object IDs in angle brackets or full paths to files,
+ * but DESTINATION must be a folder object or a regular directory. This command
+ * is intended for migration, it doesn't change package and object associations
+ * in wps-object state files, and generally should not be used.
+ *
+ * /destroy is a service command to unconditionally destroy WPS objects. NAME is
+ * either an object ID in angle brackets or a full path to a file. This command
+ * is intended for migration, it doesn't change package and object associations
+ * in wps-object state files, and generally should not be used. WARNING:
+ * destroying a folder will also destroy all objects in that folder (unless some
+ * of them has NODELETE=YES in setup which prevents destruction); this action is
+ * NOT recoverable.
  * 
  * Some object parameters (the LOCATION string or parts of the SETUP string such
  * as EXENAME) require valid OS/2 path strings as values, with back slashes
@@ -111,6 +127,7 @@
  * - Add package EVR support to properly handle upgrades and downgrades.
  * - Support setting .LONGNAME for WPShadow on regular files.
  * - Add /setdata command.
+ * - Add /move and /destroy commands.
  *
  * Version: 1.1 - 2017-02-09
  * - Fix object deletion (wrong hash map indexing).
@@ -215,17 +232,27 @@ Main: procedure expose (Globals)
         when (cmd == '/DELETEALL') then cmd = 'DA'
         when (cmd == '/RECREATEALL') then cmd = 'RA'
         when (cmd == '/SETDATA') then cmd = 'SD'
+        when (cmd == '/MOVE') then cmd = 'MV'
+        when (cmd == '/DESTROY') then cmd = 'DT'
         otherwise
             call ErrorExit 'Invalid command "'G.Args.1'"'
     end
 
-    if (cmd == 'SD') then do
+    if (cmd == 'SD' | cmd == 'DT') then do
         if (G.Args.0 < 2) then
             call ErrorExit 'Missing object name'
-        if (G.Args.0 < 3) then
+        if (cmd == 'SD' & G.Args.0 < 3) then
             call ErrorExit 'Missing object setup string'
         name = G.Args.2
         setup = G.Args.3
+    end
+    else if (cmd == 'MV') then do
+        if (G.Args.0 < 2) then
+            call ErrorExit 'Missing source object name'
+        if (G.Args.0 < 3) then
+            call ErrorExit 'Missing destination object name'
+        name = G.Args.2
+        destination = G.Args.3
     end
     else do
         if (G.Args.0 < 2) then
@@ -289,15 +316,36 @@ Main: procedure expose (Globals)
 
     G.LogFile = G.UX || FixPath(G.LogFile)
 
-    if (cmd == 'SD') then do
+    if (cmd == 'SD' | cmd == 'DT') then do
         if (\G.SkipWPS) then do
             if (left(name, 1) \== '<') then
                 name = ExpandUnixRoot(name)
-            setup = ExpandUnixRoot(setup)
-            rc = SysSetObjectData(name, setup)
-            call Log 'SETDATA 'name setup' = 'rc
+            if (cmd == 'SD') then do
+                setup = ExpandUnixRoot(setup)
+                rc = SysSetObjectData(name, setup)
+                call Log 'SETDATA 'name setup' = 'rc
+                if (rc \= 1) then
+                    call ErrorExit 'Failed to set data for 'name
+            end
+            else do
+                rc = SysDestroyObject(name)
+                call Log 'DESTROY 'name' = 'rc
+                if (rc \= 1) then
+                    call ErrorExit 'Failed to destroy 'name
+            end
+        end
+        exit 0
+    end
+    else if (cmd == 'MV') then do
+        if (\G.SkipWPS) then do
+            if (left(name, 1) \== '<') then
+                name = ExpandUnixRoot(name)
+            if (left(destination, 1) \== '<') then
+                destination = ExpandUnixRoot(destination)
+            rc = SysMoveObject(name, destination)
+            call Log 'MOVE 'name' -> 'destination' = 'rc
             if (rc \= 1) then
-                call ErrorExit 'Failed to set data for 'name
+                call ErrorExit 'Failed to move 'name' to 'destination
         end
         exit 0
     end
