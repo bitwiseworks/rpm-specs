@@ -13,7 +13,7 @@
 Summary: The GNU Portable Library Tool
 Name:    libtool
 Version: 2.5.4
-Release: 3%{?dist}
+Release: 4%{?dist}
 
 # To help future rebase, the following licenses were seen in the following files/folders:
 # '*' is anything that was not explicitly listed earlier in the folder
@@ -80,7 +80,7 @@ Patch: libtool-nodocs.patch
 %endif
 %else
 Vendor:  bww bitwise works GmbH
-%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2-2
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2-3
 %endif
 
 # /usr/bin/libtool includes paths within gcc's versioned directories
@@ -101,6 +101,8 @@ BuildRequires: help2man
 BuildRequires: libstdc++-devel, gcc-gfortran
 %else
 BuildRequires: libstdc++-devel
+# For libtool's native wrapper executables
+Requires: %{_bindir}/libc-script-launcher.exe
 %endif
 
 BuildRequires: gcc, gcc-c++
@@ -150,7 +152,7 @@ License:  LGPLv2+
 Static libraries and header files for development with ltdl.
 
 
-%if !0%{?os2_version}
+%if 0%{?os2_version}
 %debug_package
 %endif
 
@@ -163,8 +165,6 @@ autoreconf -v
 %scm_setup
 
 # Make sure configure is updated to properly support OS/2
-# (slashes in PATH are needed for the bootstrap script itself)
-export PATH=`echo $PATH | tr '\\\\' /`
 ./bootstrap --copy --force --skip-git
 
 # Restore .version and ChangeLog as they are not properly regenerated (they need .git)
@@ -176,13 +176,8 @@ mv ChangeLog~ ChangeLog
 %build
 
 %if 0%{?os2_version}
-export CC=gcc
-export CXX=g++
-export F77=gfortran
-export CFLAGS="$RPM_OPT_FLAGS"
-
 # These are for LTDL DLL
-export LDFLAGS="-Zomf -Zmap -Zhigh-mem"
+export LDFLAGS="$LDFLAGS -Zmap"
 %endif
 
 %configure
@@ -250,6 +245,12 @@ rm -f %{buildroot}%{_libdir}/ltdl.a
 
 
 %changelog
+* Thu Nov 26 2026 Dmitrii Kuminov <coding@dmik.org> 2.5.4-4
+- Build from tag 2.5.4-os2-3
+- Require libc-script-launcher for native wrappers
+- Restore debuginfo package accidentally disabled in 2.4.7-1
+- Remove redundant CFLAGS and LDFLAGS values
+
 * Thu Sep 10 2026 Dmitrii Kuminov <coding@dmik.org> 2.5.4-3
 - Use /@unixroot/usr/bin/sh in more places.
 
