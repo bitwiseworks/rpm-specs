@@ -21,7 +21,7 @@
 Summary: RPM package installer/updater/manager
 Name: yum
 Version: 3.4.3
-Release: 16%{?dist}
+Release: 17%{?dist}
 License: GPLv2+
 Group: System Environment/Base
 Vendor: bww bitwise works GmbH
@@ -29,7 +29,7 @@ Vendor: bww bitwise works GmbH
 %if !0%{?os2_version}
 Source0: http://yum.baseurl.org/download/3.4/%{name}-%{version}.tar.gz
 %else
-%scm_source github https://github.com/bitwiseworks/%{name}-os2 v%{version}-os2-2
+%scm_source github https://github.com/bitwiseworks/%{name}-os2 v%{version}-os2-3
 %endif
 
 URL: http://yum.baseurl.org/
@@ -64,6 +64,8 @@ Requires: pygpgme
 %endif
 
 %if 0%{?os2_version}
+# For yum-exe package that installs the launcher
+BuildRequires: rpm_macro(libc_script_launcher_package)
 # Always install the launcher with the main package
 Requires: yum-exe = %{version}-%{release}
 %endif
@@ -93,11 +95,7 @@ Yum is a utility that can check for and automatically download and
 install updated RPM packages. Dependencies are obtained and downloaded
 automatically, prompting the user for permission as necessary.
 
-%debug_package
-
 %if 0%{?os2_version}
-# Create yum-exe that installs the launcher
-BuildRequires: rpm_macro(libc_script_launcher_package)
 %libc_script_launcher_package %{_bindir}/yum
 %endif
 
@@ -326,8 +324,12 @@ exit 0
 %endif
 
 %changelog
+* Fri Nov 27 2026 Dmitrii Kuminov <coding@dmik.org> 3.4.3-17
+- Build from tag v3.4.3-os2-3 (fix lost scritlet output)
+- Remove obsolete debug_package (it's noacrh now)
+
 * Mon Oct 26 2026 Dmitrii Kuminov <coding@dmik.org> 3.4.3-16
-- Build from v3.4.3-os2-2 tag (--installroot, --allow-short-circuit)
+- Build from v3.4.3-os2-2 tag (--installroot, --allow-short-circuited)
 - Add /@unixroot prefixes to paths in yum.conf (needed for --installroot)
 - Add yum-exe package with LIBC-manaed yum launcher
 - Restore BuildArch to noarch (yum.exe is provded by LIBC now)
