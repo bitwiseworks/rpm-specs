@@ -3,14 +3,14 @@
 
 Summary: REXX procedure used to modify a CONFIG.SYS-like ASCII file
 Name: cube
-Version: 3.0
+Version: 3.1
 Release: 1%{?dist}
 License: none
 URL: http://www3.sympatico.ca/gjarviseng/cube/
 Group: System Environment/Shells
 Vendor: bww bitwise works GmbH
 
-%scm_source svn http://svn.netlabs.org/repos/cube/trunk 9
+%scm_source github https://github.com/bitwiseworks/%{name} %{version}
 
 BuildRequires: rexx_exe
 
@@ -39,12 +39,15 @@ rm -rf %{buildroot}
 
 
 %files
-%defattr(-,root,root)
 %doc cube.doc cube.ref
 %{_bindir}/cube.exe
 
 
 %changelog
+* Fri Nov 27 2026 Dmitrii Kuminov <coding@dmik.org> 3.1-1
+- Import SVN repo to GitHub
+- Build from tag 3.1
+
 * Mon Mar 04 2019 Silvan Scherrer <silvan.scherrer@aroa> 3.0-1
 - fixes ticket #2 (courtesy of RLW)
 
