@@ -8,7 +8,7 @@
 Summary: GNU tools and libraries for localized translated messages
 Name: gettext
 Version: 1.0
-Release: 4%{?dist}
+Release: 5%{?dist}
 
 # The following are licensed under LGPLv2+:
 # - libintl and its headers
@@ -29,7 +29,7 @@ URL: https://www.gnu.org/software/gettext/
 Source: https://ftp.gnu.org/pub/gnu/%{name}/%{name}-%{version}.tar.gz
 %else
 Vendor: bww bitwise works GmbH
-%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2-1
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 %{version}-os2-2
 %endif
 Source2: msghack.py
 Source3: msghack.1
@@ -558,6 +558,9 @@ make check LIBUNISTRING=-lunistring
 %{_mandir}/man1/msghack.1*
 
 %changelog
+* Thu Nov 26 2026 Dmitrii Kuminov <coding@dmik.org> 1.0-5
+- Bulid from tag 1.0-os2-2 (%m format specifier fix)
+
 * Thu Sep 24 2026 Dmitrii Kuminov <coding@dmik.org> 1.0-4
 - Rebuild with MMAP support disabled (see #23)
 
