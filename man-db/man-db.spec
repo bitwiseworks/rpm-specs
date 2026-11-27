@@ -1,34 +1,63 @@
-%global cache /@unixroot/var/cache/man
+%if !0%{?os2_version}
+%global cache /var/cache/man
+%else
+%global cache %{_var}/cache/man
+%endif
 %global gnulib_ver 20140202
+
+%if !0%{?os2_version}
+%global use_cron 1
+%global use_systemd 1
+%global systemdtmpfilesdir /usr/lib/tmpfiles.d
+%else
 %global use_cron 0
-%global systemdtmpfilesdir /@unixroot/usr/lib/tmpfiles.d
+%global use_systemd 0
+%global systemdtmpfilesdir %{_usr}/lib/tmpfiles.d
+%endif
 
 Summary: Tools for searching and reading man pages
 Name: man-db
 Version: 2.7.6.1
-Release: 3%{?dist}
+Release: 4%{?dist}
 # GPLv2+ .. man-db
 # GPLv3+ .. gnulib
 License: GPLv2+ and GPLv3+
 Group: System Environment/Base
 URL: http://www.nongnu.org/man-db/
 
+%if !0%{?os2_version}
+Source0: http://download.savannah.gnu.org/releases/%{name}/%{name}-%{version}.tar.xz
+Source1: man-db.crondaily
+Source2: man-db.sysconfig
+Patch0: man-db-2.7.6.1-change-owner-of-man-cache.patch
+
+# http://lists.nongnu.org/archive/html/man-db-devel/2017-01/msg00013.html
+Patch1: man-db-2.7.6.1-fix-override-dir-handling.patch
+%else
 Vendor: bww bitwise works GmbH
-%scm_source github https://github.com/bitwiseworks/%{name}-os2 %{version}-os2-2
-#scm_source git file://e:/Trees/man-db/git master-os2
+%scm_source github https://github.com/bitwiseworks/%{name}-os2 %{version}-os2-3
+%endif
 
 Obsoletes: man < 2.0
 Provides: man = %{version}
 Provides: man-pages-reader = %{version}
+%if !0%{?os2_version}
 # FPC exception for gnulib - copylib - https://fedorahosted.org/fpc/ticket/174
-#Provides: bundled(gnulib) = %{gnulib_ver}
+Provides: bundled(gnulib) = %{gnulib_ver}
+%endif
 
 Requires: coreutils, grep, groff-base, gzip, less
 Requires: libiconv-utils
+%if !0%{?os2_version}
+BuildRequires: gdbm-devel, gettext, groff, less, libpipeline-devel, zlib-devel
+%else
 BuildRequires: db4-devel, gettext, groff, less, libpipeline-devel, zlib-devel
-#BuildRequires: gdbm-devel
-BuildRequires: po4a, perl, perl-version
 Requires: db4 >= 4.8.30-8
+Requires: libpipeline >= 1.4.1-2
+BuildRequires: automake, autoconf, gcc
+BuildRequires: os2-rpm >= 3.0
+%endif
+BuildRequires: po4a, perl, perl-version
 
 %description
 The man-db package includes five tools for browsing man-pages:
@@ -52,30 +81,35 @@ BuildArch: noarch
 This package provides periodic update of man-db cache.
 %endif
 
+%if 0%{?os2_version}
 %debug_package
+%endif
 
 %prep
+%if !0%{?os2_version}
+%autosetup -p1
+%else
 %scm_setup
+%endif
 
-# create the changelog
-# is is a bit a nasty hack, but it's needed for now.
-# the date will probably not change, but better check makefile.am
-# the srcdir needs to be adjusted to the current build env
-%define gen_start_date 2013-12-09 00:52
-%define srcdir e:/Trees/man-db/git
-build-aux/gitlog-to-changelog --format='%s%n%n%b%n' \
-    --since="%{gen_start_date}" --srcdir=%{srcdir} > cl-t
-rm -f ChangeLog
-mv cl-t ChangeLog
-
+%if 0%{?os2_version}
+# Create a dummy ChangeLog with a GitHub link
+echo "Please visit %{__source_url}/commits/%{__source_rev}" > ChangeLog
 autoreconf -fvi
+%endif
 
 %build
-export LDFLAGS="-Zhigh-mem -Zomf -Zargs-wild -Zargs-resp"
+%if 0%{?os2_version}
+# Raise stack to 8 MB to avoid SYS3171 (https://github.com/bitwiseworks/man-db-os2/issues/4)
+#  -Zstack 8192
+export LDFLAGS="$LDFLAGS -Zargs-wild -Zargs-resp"
 export LIBS="-lcx"
 export VENDOR="%{vendor}"
-
+%endif
 %configure \
+%if 0%{?os2_version}
+    --enable-inprocess-manpages \
+%endif    
     --with-systemdtmpfilesdir=%{systemdtmpfilesdir} \
     --with-sections="1 1p 8 2 3 3p 4 5 6 7 9 0p n l p o 1x 2x 3x 4x 5x 6x 7x 8x" \
     --disable-setuid --enable-cache-owner=root \
@@ -84,7 +118,7 @@ export VENDOR="%{vendor}"
 make CC="%{__cc} %{optflags}" %{?_smp_mflags} V=1
 
 %check
-#make check
+make check
 
 %install
 make install DESTDIR=$RPM_BUILD_ROOT prefix=%{_prefix} INSTALL='install -p'
@@ -97,8 +131,9 @@ rm $RPM_BUILD_ROOT%{_datadir}/man/man1/zsoelim.1
 
 # remove libtool archives
 rm $RPM_BUILD_ROOT%{_libdir}/*.la
-# remove archives
+%if 0%{?os2_version}
 rm $RPM_BUILD_ROOT%{_libdir}/*.a
+%endif
 
 # install cache directory
 install -d -m 0755  $RPM_BUILD_ROOT/%{cache}
@@ -113,24 +148,31 @@ mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig
 install -D -p -m 0644 %{SOURCE2} $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/man-db
 %endif
 
+%if %{use_systemd}
 # config for tmpfiles.d
-#install -D -p -m 0644 init/systemd/man-db.conf $RPM_BUILD_ROOT%{systemdtmpfilesdir}/.
-rm -rf $RPM_BUILD_ROOT%{systemdtmpfilesdir}
+install -D -p -m 0644 init/systemd/man-db.conf $RPM_BUILD_ROOT%{systemdtmpfilesdir}/.
 
 # man-db-cache-update.service
-#install -D -p -m 0644 %{SOURCE3} $RPM_BUILD_ROOT%{_unitdir}/man-db-cache-update.service
+install -D -p -m 0644 %{SOURCE3} $RPM_BUILD_ROOT%{_unitdir}/man-db-cache-update.service
+%else
+rm -rf $RPM_BUILD_ROOT%{systemdtmpfilesdir}
+%endif
 
 %find_lang %{name}
-#find_lang %{name}-gnulib
+%if !0%{?os2_version}
+find_lang %{name}-gnulib
+%endif
 
 # stop and disable timer from previous builds
 %pre
-#if [ -e /usr/lib/systemd/system/mandb.timer ]; then
-#  if test -d /run/systemd; then
-#	systemctl stop man-db.timer
-#	systemctl -q disable man-db.timer
-#  fi
-#fi
+%if !0%{?os2_version}
+if [ -e /usr/lib/systemd/system/mandb.timer ]; then
+  if test -d /run/systemd; then
+	systemctl stop man-db.timer
+	systemctl -q disable man-db.timer
+  fi
+fi
+%endif
 
 # clear the old cache
 %post
@@ -138,14 +180,17 @@ rm -rf $RPM_BUILD_ROOT%{systemdtmpfilesdir}
 
 # update cache
 %transfiletriggerin -- %{_mandir}
-MAN_NO_LOCALE_WARNING=1 /@unixroot/usr/bin/mandb -q
+MAN_NO_LOCALE_WARNING=1 %{_bindir}/mandb -q
 
 # update cache
 %transfiletriggerpostun -- %{_mandir}
-MAN_NO_LOCALE_WARNING=1 /@unixroot/usr/bin/mandb -q
+MAN_NO_LOCALE_WARNING=1 %{_bindir}/mandb -q
 
+%if !0%{?os2_version}
+%files -f %{name}.lang -f %{name}-gnulib.lang
+%else
 %files -f %{name}.lang
-# -f %{name}-gnulib.lang
+%endif
 %{!?_licensedir:%global license %%doc}
 %license docs/COPYING
 %doc README man-db-manual.txt man-db-manual.ps ChangeLog NEWS
@@ -153,20 +198,22 @@ MAN_NO_LOCALE_WARNING=1 /@unixroot/usr/bin/mandb -q
 %if %{use_cron}
 %config(noreplace) %{_sysconfdir}/sysconfig/man-db
 %endif
-#%config(noreplace) %{systemdtmpfilesdir}/man-db.conf
-%{_sbindir}/accessdb.exe
-%{_bindir}/man.exe
-%{_bindir}/whatis.exe
+%if %{use_systemd}
+%config(noreplace) %{systemdtmpfilesdir}/man-db.conf
+%endif
+%{_sbindir}/accessdb%{_exeext}
+%{_bindir}/man%{_exeext}
+%{_bindir}/whatis%{_exeext}
 %{_bindir}/apropos
-%{_bindir}/manpath.exe
-%{_bindir}/lexgrog.exe
-%{_bindir}/catman.exe
-%{_bindir}/mandb.exe
-%{_libdir}/*.dll
+%{_bindir}/manpath%{_exeext}
+%{_bindir}/lexgrog%{_exeext}
+%{_bindir}/catman%{_exeext}
+%{_bindir}/mandb%{_exeext}
+%{_libdir}/*%{_shlibext}
 %dir %{_libexecdir}/man-db
-%{_libexecdir}/man-db/globbing.exe
-%{_libexecdir}/man-db/manconv.exe
-%{_libexecdir}/man-db/zsoelim.exe
+%{_libexecdir}/man-db/globbing%{_exeext}
+%{_libexecdir}/man-db/manconv%{_exeext}
+%{_libexecdir}/man-db/zsoelim%{_exeext}
 %attr(2755,root,man) %verify(not mtime) %dir %{cache}
 # documentation and translation
 %{_mandir}/man1/apropos.1*
@@ -193,6 +240,17 @@ MAN_NO_LOCALE_WARNING=1 /@unixroot/usr/bin/mandb -q
 %lang(zh_CN)   %{_datadir}/man/zh_CN/man*/*
 
 %changelog
+* Thu Nov 26 2026 Dmitrii Kuminov <coding@dmik.org> - 2.7.6.1-4
+- Build from tag 2.7.6.1-os2-3
+- Resync with Fedora spec @ af41171 (2.7.6.1-5)
+- Add proper OS/2 ifdefs for changed parts where appropriate
+- Replace ChangeLog with a link to GitHub
+- BuildRequire Automake and Autoconf for autoreconf
+- BuildRequire os2-rpm >= 3.0 for various addons (also drags in newer rpm)
+- Raise stack to 8 MB to avoid SYS3171
+- Require libpipeline >= 1.4.1-2 for O_BINARY fixes
+- Enable check (tests)
+
 * Wed Dec 05 2018 Silvan Scherrer <silvan.scherrer@aroa.ch> - 2.7.6.1-3
 - add a require for at least db4 4.8.30-8 (ticket #322)
 
