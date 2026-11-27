@@ -28,12 +28,12 @@
 %if !0%{?os2_version}
 %define rpmhome /usr/lib/rpm
 %else
-%define rpmhome %{_libdir}/rpm
+%define rpmhome %{_usr}/lib/rpm
 %endif
 
 %global rpmver 4.15.1
 #global snapver rc1
-%global rel 9
+%global rel 10
 
 %if 0%{?os2_version}
 # rpmlib(RpmVersion) capability provided by this RPM version and required by
@@ -87,7 +87,7 @@ Patch906: rpm-4.7.1-geode-i686.patch
 Patch907: rpm-4.15.x-ldflags.patch
 %else
 Vendor: bww bitwise works GmbH
-%scm_source github http://github.com/bitwiseworks/%{name}-os2 v%{version}-os2-3
+%scm_source github http://github.com/bitwiseworks/%{name}-os2 v%{version}-os2-4
 
 # We build docs from sources
 BuildRequires: doxygen
@@ -846,6 +846,9 @@ rm -f %{_var}/.rpm.lock 2>/dev/null || :
 %endif
 
 %changelog
+* Fri Nov 27 2026 Dmitrii Kuminov <coding@dmik.org> 4.15.1-10
+- Build from tag v4.15.1-os2-4 (package-context addon, _shlibext family macros)
+
 * Wed Oct 28 2026 Dmitrii Kuminov <coding@dmik.org> 4.15.1-9
 - Build from tag v4.15.1-os2-3
 - Replace rpm binary symlinks with copies of rpm.exe
